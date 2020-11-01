@@ -455,66 +455,6 @@ public class PrivilegePoExample {
             return (Criteria) this;
         }
 
-        public Criteria andBitIndexIsNull() {
-            addCriterion("bit_index is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andBitIndexIsNotNull() {
-            addCriterion("bit_index is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andBitIndexEqualTo(Byte value) {
-            addCriterion("bit_index =", value, "bitIndex");
-            return (Criteria) this;
-        }
-
-        public Criteria andBitIndexNotEqualTo(Byte value) {
-            addCriterion("bit_index <>", value, "bitIndex");
-            return (Criteria) this;
-        }
-
-        public Criteria andBitIndexGreaterThan(Byte value) {
-            addCriterion("bit_index >", value, "bitIndex");
-            return (Criteria) this;
-        }
-
-        public Criteria andBitIndexGreaterThanOrEqualTo(Byte value) {
-            addCriterion("bit_index >=", value, "bitIndex");
-            return (Criteria) this;
-        }
-
-        public Criteria andBitIndexLessThan(Byte value) {
-            addCriterion("bit_index <", value, "bitIndex");
-            return (Criteria) this;
-        }
-
-        public Criteria andBitIndexLessThanOrEqualTo(Byte value) {
-            addCriterion("bit_index <=", value, "bitIndex");
-            return (Criteria) this;
-        }
-
-        public Criteria andBitIndexIn(List<Byte> values) {
-            addCriterion("bit_index in", values, "bitIndex");
-            return (Criteria) this;
-        }
-
-        public Criteria andBitIndexNotIn(List<Byte> values) {
-            addCriterion("bit_index not in", values, "bitIndex");
-            return (Criteria) this;
-        }
-
-        public Criteria andBitIndexBetween(Byte value1, Byte value2) {
-            addCriterion("bit_index between", value1, value2, "bitIndex");
-            return (Criteria) this;
-        }
-
-        public Criteria andBitIndexNotBetween(Byte value1, Byte value2) {
-            addCriterion("bit_index not between", value1, value2, "bitIndex");
-            return (Criteria) this;
-        }
-
         public Criteria andSignatureIsNull() {
             addCriterion("signature is null");
             return (Criteria) this;
