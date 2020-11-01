@@ -66,7 +66,7 @@
 
     <!-- 日志输出级别 -->
     <logger name="cn.edu.xmu.privilege" level = "INFO"/>
-    <root level="DEBUG">
+    <root level="ERROR">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
     </root>
