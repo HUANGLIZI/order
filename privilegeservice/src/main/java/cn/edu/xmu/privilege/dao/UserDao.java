@@ -67,12 +67,12 @@ public class UserDao {
         List<String> proxyUserKey = new ArrayList<>(userProxyPos.size());
         for (UserProxyPo po: userProxyPos){
             if (!redisTemplate.hasKey("u_"+po.getUserBId())) {
-                loadUserPriv(po.getUserBId());
+                loadSingleUserPriv(po.getUserBId());
             }
             proxyUserKey.add("u_"+po.getUserBId());
         }
         if (!redisTemplate.hasKey(key)) {
-            loadUserPriv(id);
+            loadSingleUserPriv(id);
         }
         redisTemplate.opsForSet().unionAndStore(key, proxyUserKey, aKey);
     }
