@@ -49,7 +49,6 @@ public class PrivilegeDao implements InitializingBean {
             signature.append("-");
             signature.append(po.getRequestType());
             String key = signature.toString();
-
             signature.append("-");
             signature.append(po.getId());
             String newSignature = SHA256.getSHA256(signature.toString());
@@ -59,11 +58,14 @@ public class PrivilegeDao implements InitializingBean {
                 newPo.setSignature(newSignature);
                 newPo.setGmtModified(LocalDateTime.now());
                 poMapper.updateByPrimaryKeySelective(newPo);
-            }else if (po.getSignature() != newSignature){
-                continue;
+            }else {
+                if (po.getSignature().equals(newSignature)) {
+                    logger.info("afterPropertiesSet: key = " + key + " po = " + po);
+                    cache.put(key, po.getId());
+                }else{
+                    logger.error("afterPropertiesSet: Wrong Signature id =" + po.getId());
+                }
             }
-            logger.info("afterPropertiesSet: key = "+key+" po = "+po);
-            cache.put(key, po.getId());
         }
     }
 
