@@ -2,8 +2,11 @@ package cn.edu.xmu.privilege.dao;
 
 import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.privilege.mapper.PrivilegeMapper;
+import cn.edu.xmu.privilege.mapper.PrivilegePoMapper;
 import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.po.PrivilegePo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,11 +24,16 @@ import java.util.Map;
 @Repository
 public class PrivilegeDao implements InitializingBean {
 
+    private  static  final Logger logger = LoggerFactory.getLogger(Privilege.class);
+
     @Value("${prvilegeservice.initialization}")
     private Boolean initialization;
 
     @Autowired
     private PrivilegeMapper mapper;
+
+    @Autowired
+    private PrivilegePoMapper poMapper;
 
     private Map<String, Long> cache = null;
 
@@ -35,9 +43,8 @@ public class PrivilegeDao implements InitializingBean {
         if (null == cache){
             cache = new HashMap<>(privilegePos.size());
         }
-        StringBuffer signature = new StringBuffer();
         for (PrivilegePo po : privilegePos){
-
+            StringBuffer signature = new StringBuffer();
             signature.append(po.getUrl());
             signature.append("-");
             signature.append(po.getRequestType());
@@ -51,10 +58,11 @@ public class PrivilegeDao implements InitializingBean {
                 newPo.setId(po.getId());
                 newPo.setSignature(newSignature);
                 newPo.setGmtModified(LocalDateTime.now());
-                mapper.updateByPrimaryKeySelective(newPo);
+                poMapper.updateByPrimaryKeySelective(newPo);
             }else if (po.getSignature() != newSignature){
                 continue;
             }
+            logger.info("afterPropertiesSet: key = "+key+" po = "+po);
             cache.put(key, po.getId());
         }
     }
@@ -69,6 +77,7 @@ public class PrivilegeDao implements InitializingBean {
         StringBuffer key = new StringBuffer(url);
         key.append("-");
         key.append(requestType.getCode());
+        logger.info("getPrivIdByKey: key = "+key.toString());
         return this.cache.get(key.toString());
     }
 

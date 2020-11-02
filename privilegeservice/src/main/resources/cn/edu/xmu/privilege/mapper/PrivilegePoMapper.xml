@@ -47,6 +47,7 @@
       </foreach>
     </where>
   </sql>
+
   <sql id="Base_Column_List">
     <!--
       WARNING - @mbg.generated

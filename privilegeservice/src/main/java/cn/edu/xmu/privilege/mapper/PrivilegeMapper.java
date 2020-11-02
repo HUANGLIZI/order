@@ -9,7 +9,7 @@ import java.util.List;
  * @author Ming Qiu
  **/
 
-public interface PrivilegeMapper extends PrivilegePoMapper {
+public interface PrivilegeMapper{
     /**
      * 返回所有权限数据
      * @return
