@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.text.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -86,7 +88,6 @@ public class Common {
                 VoObject data = returnObject.getData();
                 if (data != null){
                     Object voObj = data.createVo();
-                    logger.info("getRetObject: voObj =" + voObj);
                     return ResponseUtil.ok(voObj);
                 }else{
                     return ResponseUtil.ok();
@@ -95,6 +96,33 @@ public class Common {
                 return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
         }
     }
+
+    /**
+     * 处理返回对象
+     * @param returnObject 返回的对象
+     * @return
+     */
+    public static Object getListRetObject(ReturnObject<List> returnObject) {
+        ResponseCode code = returnObject.getCode();
+        switch (code){
+            case OK:
+                List objs = returnObject.getData();
+                if (objs != null){
+                    List<Object> ret = new ArrayList<>(objs.size());
+                    for (Object data : objs) {
+                        if (data instanceof VoObject) {
+                            ret.add(((VoObject)data).createVo());
+                        }
+                    }
+                    return ResponseUtil.ok(ret);
+                }else{
+                    return ResponseUtil.ok();
+                }
+            default:
+                return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+        }
+    }
+
 
     public static Object getNullRetObj(ReturnObject<Object> returnObject, HttpServletResponse httpServletResponse) {
         ResponseCode code = returnObject.getCode();

@@ -10,6 +10,13 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 
 import java.util.*;
 
+/**
+ * JWT工具
+ * @author Ming Qiu
+ * @date created in 2019/11/11
+ *      modifiedBy Ming Qiu
+ *         增加departId 到createToken
+ */
 public class JwtHelper {
     // 秘钥
     static final String SECRET = "Role-Privilege-Token";
@@ -22,8 +29,32 @@ public class JwtHelper {
     // Request中的变量名
     public static final String LOGIN_TOKEN_KEY = "authorization";
 
+    public class UserAndDepart{
+        private Long userId;
+        private Long departId;
 
-    public String createToken(Integer userId) {
+        public UserAndDepart(long userId, long departId){
+            this.userId = userId;
+            this.departId = departId;
+        }
+
+        public Long getUserId() {
+            return userId;
+        }
+
+        public Long getDepartId() {
+            return departId;
+        }
+    }
+
+
+    /**
+     * 创建用户Token
+     * @param userId 用户id
+     * @param departId 部门id
+     * @return token
+     */
+    public String createToken(Long userId, Long departId) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(SECRET);
             Map<String, Object> map = new HashMap<String, Object>();
@@ -37,6 +68,7 @@ public class JwtHelper {
                     .withHeader(map)
                     // 设置 载荷 Payload
                     .withClaim("userId", userId)
+                    .withClaim("departId", departId)
                     .withIssuer(ISSUSER)
                     .withSubject(SUBJECT)
                     .withAudience(AUDIENCE)
@@ -53,7 +85,16 @@ public class JwtHelper {
         return null;
     }
 
-    public Integer verifyTokenAndGetUserId(String token) {
+    /**
+     * 获得UserId和DepartId
+     * @param token
+     * @return UserAndDepart
+     *    modifiedBy Ming Qiu 2020/11/3 23:09
+     */
+    public UserAndDepart verifyTokenAndGetClaims(String token) {
+        if (token == null || token.isEmpty()) {
+            return null;
+        }
         try {
             Algorithm algorithm = Algorithm.HMAC256(SECRET);
             JWTVerifier verifier = JWT.require(algorithm)
@@ -61,13 +102,13 @@ public class JwtHelper {
                     .build();
             DecodedJWT jwt = verifier.verify(token);
             Map<String, Claim> claims = jwt.getClaims();
-            Claim claim = claims.get("userId");
-            return claim.asInt();
+            Claim claimUserId = claims.get("userId");
+            Claim claimDepartId = claims.get("departId");
+            return new UserAndDepart(claimUserId.asLong(), claimDepartId.asLong());
         } catch (JWTVerificationException exception) {
 //			exception.printStackTrace();
         }
-
-        return 0;
+        return null;
     }
 
     public Date getAfterDate(Date date, int year, int month, int day, int hour, int minute, int second) {
@@ -97,18 +138,5 @@ public class JwtHelper {
             cal.add(Calendar.SECOND, second);
         }
         return cal.getTime();
-    }
-
-    public Integer getUserId(String token) {
-
-        if (token == null || token.isEmpty()) {
-            return null;
-        }
-
-        Integer userId = this.verifyTokenAndGetUserId(token);
-        if (userId == null || userId == 0) {
-            return null;
-        }
-        return userId;
     }
 }
