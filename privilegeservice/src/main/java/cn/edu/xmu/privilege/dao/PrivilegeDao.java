@@ -5,6 +5,7 @@ import cn.edu.xmu.privilege.mapper.PrivilegeMapper;
 import cn.edu.xmu.privilege.mapper.PrivilegePoMapper;
 import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.po.PrivilegePo;
+import cn.edu.xmu.privilege.model.po.PrivilegePoExample;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -39,7 +40,10 @@ public class PrivilegeDao implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        List<PrivilegePo> privilegePos =  mapper.selectAll();
+        PrivilegePoExample example = new PrivilegePoExample();
+        PrivilegePoExample.Criteria criteria = example.createCriteria();
+        List<PrivilegePo> privilegePos = poMapper.selectByExample(example);
+//        List<PrivilegePo> privilegePos =  mapper.selectAll();
         if (null == cache){
             cache = new HashMap<>(privilegePos.size());
         }
