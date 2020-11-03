@@ -20,7 +20,7 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     initialization-mode: always
     schema: classpath:schema.sql
-    data: classpath:data.sql
+    data: classpath:testdata.sql
     druid:
       #初始化时建立物理连接的个数
       initial-size: 3
@@ -67,7 +67,7 @@ mybatis:
 
 prvilegeservice:
   #是否对数据库中的未初始化的数据初始化
-  initialization: false
+  initialization: true
 
   user:
     # user的权限字在Redis中失效秒数

@@ -33,7 +33,11 @@ CREATE TABLE `auth_new_user` (
   `depart_id` bigint DEFAULT NULL,
   `gmt_create` datetime DEFAULT NULL,
   `password` varchar(128) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `auth_new_user_user_name_uindex` (`user_name`),
+  UNIQUE KEY `auth_new_user_mobile_uindex` (`mobile`),
+  UNIQUE KEY `auth_new_user_email_uindex` (`email`),
+  UNIQUE KEY `auth_new_user_open_id_uindex` (`open_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -53,7 +57,7 @@ CREATE TABLE `auth_privilege` (
   `gmt_create` datetime DEFAULT NULL,
   `gmt_modified` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -66,12 +70,14 @@ DROP TABLE IF EXISTS `auth_role`;
 CREATE TABLE `auth_role` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL COMMENT '角色名称',
-  `created_by` bigint NOT NULL COMMENT '创建者',
+  `creator_id` bigint NOT NULL COMMENT '创建者',
   `describe` varchar(500) DEFAULT NULL COMMENT '角色描述',
   `gmt_create` datetime NOT NULL COMMENT '创建时间',
   `gmt_modified` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=87 DEFAULT CHARSET=utf8 COMMENT='角色表';
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `auth_role_name_uindex` (`name`),
+  KEY `auth_role_creator_id_index` (`creator_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8 COMMENT='角色表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -85,11 +91,13 @@ CREATE TABLE `auth_role_privilege` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `role_id` bigint DEFAULT NULL,
   `privilege_id` bigint DEFAULT NULL,
-  `created_by` bigint DEFAULT NULL,
+  `creator_id` bigint DEFAULT NULL,
   `gmt_create` datetime DEFAULT NULL,
   `signature` varchar(256) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`id`),
+  KEY `auth_role_privilege_role_id_index` (`role_id`),
+  KEY `auth_role_privilege_creator_id_index` (`creator_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -117,8 +125,14 @@ CREATE TABLE `auth_user` (
   `gmt_create` datetime NOT NULL,
   `gmt_modified` datetime DEFAULT NULL,
   `signature` varchar(500) DEFAULT NULL COMMENT '对user_name,password,mobile,email,open_id,depart_id签名',
+  `creator_id` bigint DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `auth_user_open_id_uindex` (`open_id`)
+  UNIQUE KEY `auth_user_user_name_uindex` (`user_name`),
+  UNIQUE KEY `auth_user_open_id_uindex` (`open_id`),
+  UNIQUE KEY `auth_user_mobile_uindex` (`mobile`),
+  UNIQUE KEY `auth_user_email_uindex` (`email`),
+  KEY `auth_user_depart_id_index` (`depart_id`),
+  KEY `auth_user_creator_id_index` (`creator_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=17330 DEFAULT CHARSET=utf8 COMMENT='用户';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -137,8 +151,10 @@ CREATE TABLE `auth_user_proxy` (
   `end_date` datetime DEFAULT NULL,
   `gmt_create` datetime DEFAULT NULL,
   `signature` varchar(256) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `valid` tinyint NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`),
+  KEY `auth_user_proxy_user_a_id_valid_index` (`user_a_id`,`valid`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -152,10 +168,13 @@ CREATE TABLE `auth_user_role` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `role_id` bigint DEFAULT NULL,
   `user_id` bigint DEFAULT NULL,
-  `created_by` bigint DEFAULT NULL,
+  `creator_id` bigint DEFAULT NULL,
   `signature` varchar(256) DEFAULT NULL,
   `gmt_create` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `auth_user_role_role_id_index` (`role_id`),
+  KEY `auth_user_role_creator_id_index` (`creator_id`),
+  KEY `auth_user_role_user_id_index` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=90 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -168,4 +187,4 @@ CREATE TABLE `auth_user_role` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-11-02 12:55:09
+-- Dump completed on 2020-11-03 19:02:35

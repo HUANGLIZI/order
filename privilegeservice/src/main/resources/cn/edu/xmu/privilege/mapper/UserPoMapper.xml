@@ -23,6 +23,7 @@
     <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
     <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
     <result column="signature" jdbcType="VARCHAR" property="signature" />
+    <result column="creator_id" jdbcType="BIGINT" property="creatorId" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--
@@ -64,7 +65,7 @@
     -->
     id, user_name, password, mobile, mobile_verified, email, email_verified, name, avatar, 
     last_login_time, last_login_ip, open_id, state, depart_id, gmt_create, gmt_modified, 
-    signature
+    signature, creator_id
   </sql>
   <select id="selectByExample" parameterType="cn.edu.xmu.privilege.model.po.UserPoExample" resultMap="BaseResultMap">
     <!--
@@ -116,13 +117,13 @@
       name, avatar, last_login_time, 
       last_login_ip, open_id, state, 
       depart_id, gmt_create, gmt_modified, 
-      signature)
+      signature, creator_id)
     values (#{userName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{mobile,jdbcType=VARCHAR}, 
       #{mobileVerified,jdbcType=TINYINT}, #{email,jdbcType=VARCHAR}, #{emailVerified,jdbcType=TINYINT}, 
       #{name,jdbcType=VARCHAR}, #{avatar,jdbcType=VARCHAR}, #{lastLoginTime,jdbcType=TIMESTAMP}, 
       #{lastLoginIp,jdbcType=VARCHAR}, #{openId,jdbcType=VARCHAR}, #{state,jdbcType=TINYINT}, 
       #{departId,jdbcType=BIGINT}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, 
-      #{signature,jdbcType=VARCHAR})
+      #{signature,jdbcType=VARCHAR}, #{creatorId,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="cn.edu.xmu.privilege.model.po.UserPo">
     <!--
@@ -182,6 +183,9 @@
       <if test="signature != null">
         signature,
       </if>
+      <if test="creatorId != null">
+        creator_id,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="userName != null">
@@ -231,6 +235,9 @@
       </if>
       <if test="signature != null">
         #{signature,jdbcType=VARCHAR},
+      </if>
+      <if test="creatorId != null">
+        #{creatorId,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -289,6 +296,9 @@
       <if test="signature != null">
         signature = #{signature,jdbcType=VARCHAR},
       </if>
+      <if test="creatorId != null">
+        creator_id = #{creatorId,jdbcType=BIGINT},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -313,7 +323,8 @@
       depart_id = #{departId,jdbcType=BIGINT},
       gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
       gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
-      signature = #{signature,jdbcType=VARCHAR}
+      signature = #{signature,jdbcType=VARCHAR},
+      creator_id = #{creatorId,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

@@ -325,63 +325,63 @@ public class RolePoExample {
             return (Criteria) this;
         }
 
-        public Criteria andCreatedByIsNull() {
-            addCriterion("created_by is null");
+        public Criteria andCreatorIdIsNull() {
+            addCriterion("creator_id is null");
             return (Criteria) this;
         }
 
-        public Criteria andCreatedByIsNotNull() {
-            addCriterion("created_by is not null");
+        public Criteria andCreatorIdIsNotNull() {
+            addCriterion("creator_id is not null");
             return (Criteria) this;
         }
 
-        public Criteria andCreatedByEqualTo(Long value) {
-            addCriterion("created_by =", value, "createdBy");
+        public Criteria andCreatorIdEqualTo(Long value) {
+            addCriterion("creator_id =", value, "creatorId");
             return (Criteria) this;
         }
 
-        public Criteria andCreatedByNotEqualTo(Long value) {
-            addCriterion("created_by <>", value, "createdBy");
+        public Criteria andCreatorIdNotEqualTo(Long value) {
+            addCriterion("creator_id <>", value, "creatorId");
             return (Criteria) this;
         }
 
-        public Criteria andCreatedByGreaterThan(Long value) {
-            addCriterion("created_by >", value, "createdBy");
+        public Criteria andCreatorIdGreaterThan(Long value) {
+            addCriterion("creator_id >", value, "creatorId");
             return (Criteria) this;
         }
 
-        public Criteria andCreatedByGreaterThanOrEqualTo(Long value) {
-            addCriterion("created_by >=", value, "createdBy");
+        public Criteria andCreatorIdGreaterThanOrEqualTo(Long value) {
+            addCriterion("creator_id >=", value, "creatorId");
             return (Criteria) this;
         }
 
-        public Criteria andCreatedByLessThan(Long value) {
-            addCriterion("created_by <", value, "createdBy");
+        public Criteria andCreatorIdLessThan(Long value) {
+            addCriterion("creator_id <", value, "creatorId");
             return (Criteria) this;
         }
 
-        public Criteria andCreatedByLessThanOrEqualTo(Long value) {
-            addCriterion("created_by <=", value, "createdBy");
+        public Criteria andCreatorIdLessThanOrEqualTo(Long value) {
+            addCriterion("creator_id <=", value, "creatorId");
             return (Criteria) this;
         }
 
-        public Criteria andCreatedByIn(List<Long> values) {
-            addCriterion("created_by in", values, "createdBy");
+        public Criteria andCreatorIdIn(List<Long> values) {
+            addCriterion("creator_id in", values, "creatorId");
             return (Criteria) this;
         }
 
-        public Criteria andCreatedByNotIn(List<Long> values) {
-            addCriterion("created_by not in", values, "createdBy");
+        public Criteria andCreatorIdNotIn(List<Long> values) {
+            addCriterion("creator_id not in", values, "creatorId");
             return (Criteria) this;
         }
 
-        public Criteria andCreatedByBetween(Long value1, Long value2) {
-            addCriterion("created_by between", value1, value2, "createdBy");
+        public Criteria andCreatorIdBetween(Long value1, Long value2) {
+            addCriterion("creator_id between", value1, value2, "creatorId");
             return (Criteria) this;
         }
 
-        public Criteria andCreatedByNotBetween(Long value1, Long value2) {
-            addCriterion("created_by not between", value1, value2, "createdBy");
+        public Criteria andCreatorIdNotBetween(Long value1, Long value2) {
+            addCriterion("creator_id not between", value1, value2, "creatorId");
             return (Criteria) this;
         }
 

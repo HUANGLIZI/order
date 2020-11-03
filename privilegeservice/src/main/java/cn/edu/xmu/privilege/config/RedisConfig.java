@@ -18,6 +18,7 @@ import java.io.Serializable;
 
 /**
  * @author Ming Qiu
+ * @date Created in 2020/11/3 11:48
  **/
 @Configuration
 public class RedisConfig  {
