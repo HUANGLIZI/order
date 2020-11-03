@@ -26,6 +26,9 @@ public class PrivilegeDao implements InitializingBean {
 
     private  static  final Logger logger = LoggerFactory.getLogger(Privilege.class);
 
+    /**
+     * 是否初始化，生成signature和加密
+     */
     @Value("${prvilegeservice.initialization}")
     private Boolean initialization;
 
@@ -37,6 +40,14 @@ public class PrivilegeDao implements InitializingBean {
 
     private Map<String, Long> cache = null;
 
+    /**
+     * 将权限载入到本地缓存中
+     * 如果未初始化，则初始话数据中的数据
+     * @throws Exception
+     * createdBy: Ming Qiu 2020-11-01 23:44
+     * modifiedBy: Ming Qiu 2020-11-03 11:44
+     *            将签名的认证改到Privilege对象中去完成
+     */
     @Override
     public void afterPropertiesSet() throws Exception {
         List<PrivilegePo> privilegePos =  mapper.selectAll();
@@ -44,26 +55,19 @@ public class PrivilegeDao implements InitializingBean {
             cache = new HashMap<>(privilegePos.size());
         }
         for (PrivilegePo po : privilegePos){
-            StringBuffer signature = new StringBuffer();
-            signature.append(po.getUrl());
-            signature.append("-");
-            signature.append(po.getRequestType());
-            String key = signature.toString();
-            signature.append("-");
-            signature.append(po.getId());
-            String newSignature = SHA256.getSHA256(signature.toString());
+            Privilege priv = new Privilege(po);
             if (null == po.getSignature() && initialization){
                 PrivilegePo newPo = new PrivilegePo();
                 newPo.setId(po.getId());
-                newPo.setSignature(newSignature);
+                newPo.setSignature(priv.getCacuSignature());
                 newPo.setGmtModified(LocalDateTime.now());
                 poMapper.updateByPrimaryKeySelective(newPo);
             }else {
-                if (po.getSignature().equals(newSignature)) {
-                    logger.info("afterPropertiesSet: key = " + key + " po = " + po);
-                    cache.put(key, po.getId());
+                if (priv.authetic()) {
+                    logger.debug("afterPropertiesSet: key = " + priv.getKey() + " p = " + priv);
+                    cache.put(priv.getKey(), priv.getId());
                 }else{
-                    logger.error("afterPropertiesSet: Wrong Signature id =" + po.getId());
+                    logger.error("afterPropertiesSet: Wrong Signature(auth_privilege): id = " + priv.getId());
                 }
             }
         }
@@ -73,7 +77,8 @@ public class PrivilegeDao implements InitializingBean {
      * 以url和RequestType获得缓存的Privilege id
      * @param url: 访问链接
      * @param requestType: 访问类型
-     * @return id
+     * @return id Privilege id
+     * createdBy: Ming Qiu 2020-11-01 23:44
      */
     public Long getPrivIdByKey(String url, Privilege.RequestType requestType){
         StringBuffer key = new StringBuffer(url);

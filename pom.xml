@@ -183,6 +183,9 @@
                     <encoding>
                         ${project.reporting.outputEncoding}
                     </encoding>
+                    <excludePackageNames>
+                        cn.edu.xmu.privilege.model.po:cn.edu.xmu.privilege.mapper
+                    </excludePackageNames>
                 </configuration>
                 <reportSets>
                     <reportSet><!-- by default, id = "default" -->

@@ -1,5 +1,6 @@
 package cn.edu.xmu.privilege.model.bo;
 
+import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.model.po.PrivilegePo;
 import lombok.Data;
 
@@ -7,14 +8,21 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author Ming Qiu
+ * @date Created in 2020/11/3 11:48
+ **/
 @Data
 public class Privilege {
 
+    /**
+     * 请求类型
+     */
     public enum RequestType {
-        GET(0,"GET"),
-        POST(1,"POST"),
-        PUT(2,"PUT"),
-        DELETE(3,"DELETE");
+        GET(0, "GET"),
+        POST(1, "POST"),
+        PUT(2, "PUT"),
+        DELETE(3, "DELETE");
 
         private static final Map<Integer, RequestType> typeMap;
 
@@ -29,19 +37,21 @@ public class Privilege {
         private String description;
 
         RequestType(int code, String description) {
-            this.code=code;
-            this.description=description;
+            this.code = code;
+            this.description = description;
         }
 
-        public static RequestType getStatusByCode(Integer code){
+        public static RequestType getTypeByCode(Integer code) {
             return typeMap.get(code);
         }
 
-        public Integer getCode(){
+        public Integer getCode() {
             return code;
         }
 
-        public String getDescription() {return description;}
+        public String getDescription() {
+            return description;
+        }
 
     }
 
@@ -53,18 +63,48 @@ public class Privilege {
 
     private RequestType requestType;
 
-    private Byte bitIndex;
+    private String signature;
 
     private LocalDateTime gmtCreate;
 
     private LocalDateTime gmtModified;
 
     /**
+     * privilege的key
+     */
+    private String key;
+
+    /**
+     * 计算出的签名
+     */
+    private String cacuSignature;
+
+    /**
      * 构造函数
+     *
      * @param po 用PO构造
      */
-    public Privilege(PrivilegePo po){
+    public Privilege(PrivilegePo po) {
+        this.id = po.getId();
+        this.name = po.getName();
+        this.url = po.getUrl();
+        this.signature = po.getSignature();
+        this.gmtCreate = po.getGmtCreate();
+        this.gmtModified = po.getGmtModified();
+        this.requestType = RequestType.getTypeByCode(po.getRequestType().intValue());
 
+        StringBuilder signature = StringUtil.concatString("-", po.getUrl(), po.getRequestType().toString());
+        this.key = signature.toString();
+        signature.append("-");
+        signature.append(po.getId());
+        this.cacuSignature = SHA256.getSHA256(signature.toString());
+    }
 
+    /**
+     * 对象未篡改
+     * @return
+     */
+    public Boolean authetic() {
+        return this.cacuSignature.equals(this.signature);
     }
 }
