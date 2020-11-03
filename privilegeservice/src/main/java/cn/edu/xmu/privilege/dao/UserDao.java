@@ -38,6 +38,9 @@ public class UserDao {
     @Value("${prvilegeservice.user.expiretime}")
     private long timeout;
 
+    @Value("${prvilegeservice.randomtime}")
+    private int randomTime;
+
     @Autowired
     private UserRolePoMapper userRolePoMapper;
 
@@ -71,6 +74,7 @@ public class UserDao {
             }
         }
         redisTemplate.opsForSet().unionAndStore(roleKeys, key);
+        redisTemplate.expire(key, this.timeout + new Random().nextInt(randomTime), TimeUnit.SECONDS);
     }
 
     /**
@@ -85,6 +89,7 @@ public class UserDao {
         UserRolePoExample.Criteria criteria = example.createCriteria();
         criteria.andUserIdEqualTo(id);
         List<UserRolePo> userRolePoList = userRolePoMapper.selectByExample(example);
+        logger.debug("getRoleIdByUserId: userId = "+ id + "roleNum = "+ userRolePoList.size());
         List<Long> retIds = new ArrayList<>(userRolePoList.size());
         for (UserRolePo po : userRolePoList) {
             StringBuilder signature = StringUtil.concatString("-",
@@ -121,19 +126,20 @@ public class UserDao {
         String aKey = "up_" + id;
 
         List<Long> proxyIds = this.getProxyIdsByUserId(id);
-
         List<String> proxyUserKey = new ArrayList<>(proxyIds.size());
         for (Long proxyId : proxyIds) {
             if (!redisTemplate.hasKey("u_" + proxyId)) {
+                logger.debug("loadUserPriv: loading proxy user. proxId = "+ proxyId);
                 loadSingleUserPriv(proxyId);
             }
             proxyUserKey.add("u_" + proxyId);
         }
         if (!redisTemplate.hasKey(key)) {
+            logger.debug("loadUserPriv: loading user. id = "+ id);
             loadSingleUserPriv(id);
         }
         redisTemplate.opsForSet().unionAndStore(key, proxyUserKey, aKey);
-        redisTemplate.expire(aKey, this.timeout, TimeUnit.SECONDS);
+        redisTemplate.expire(aKey, this.timeout + new Random().nextInt(randomTime), TimeUnit.SECONDS);
     }
 
     /**
@@ -182,6 +188,7 @@ public class UserDao {
             }
 
             if (null != newPo) {
+                logger.debug("getProxyIdsByUserId: writing back.. po =" + newPo);
                 userProxyPoMapper.updateByPrimaryKeySelective(newPo);
             }
         }

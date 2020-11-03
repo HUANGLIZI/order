@@ -68,7 +68,8 @@ mybatis:
 prvilegeservice:
   #是否对数据库中的未初始化的数据初始化
   initialization: true
-
+  #随机雪崩时间（秒）
+  randomtime: 300
   user:
     # user的权限字在Redis中失效秒数
     expiretime: 600

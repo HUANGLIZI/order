@@ -24,10 +24,9 @@ public class RoleDaoTest {
     private RedisTemplate<String, String> redisTemplate;
 
     @Test
-    public void loadRolePriv(){
+    public void loadRolePriv1(){
 
         roleDao.loadRolePriv(Long.valueOf(23));
-
 
         String key = "r_23";
         assertTrue(redisTemplate.hasKey(key));
@@ -37,13 +36,25 @@ public class RoleDaoTest {
         assertTrue(redisTemplate.opsForSet().isMember(key,"5"));
         assertFalse(redisTemplate.opsForSet().isMember(key,"1"));
         assertEquals(16, redisTemplate.opsForSet().size(key));
-
     }
 
     @Test
-    public void loadRolePriv1(){
+    public void loadRolePriv2(){
         roleDao.loadRolePriv(Long.valueOf(80));
         assertFalse(redisTemplate.hasKey("r_80"));
+    }
+
+    @Test
+    public void loadRolePriv3(){
+
+        roleDao.loadRolePriv(Long.valueOf(84));
+
+        String key = "r_84";
+        assertTrue(redisTemplate.hasKey(key));
+        assertTrue(redisTemplate.opsForSet().isMember(key,"14"));
+        assertFalse(redisTemplate.opsForSet().isMember(key,"2"));
+        assertEquals(1, redisTemplate.opsForSet().size(key));
+
     }
 
 }

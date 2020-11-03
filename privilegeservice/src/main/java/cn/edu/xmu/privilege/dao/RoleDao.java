@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,6 +39,9 @@ public class RoleDao {
 
     @Value("${prvilegeservice.role.expiretime}")
     private long timeout;
+
+    @Value("${prvilegeservice.randomtime}")
+    private int randomTime;
 
     @Autowired
     private RolePoMapper roleMapper;
@@ -66,7 +70,7 @@ public class RoleDao {
         for (Long pId : privIds) {
             redisTemplate.opsForSet().add(key, pId.toString());
         }
-        redisTemplate.expire(key, this.timeout, TimeUnit.SECONDS);
+        redisTemplate.expire(key, this.timeout + new Random().nextInt(randomTime), TimeUnit.SECONDS);
     }
 
     /**
@@ -90,6 +94,7 @@ public class RoleDao {
                 RolePrivilegePo newPo = new RolePrivilegePo();
                 newPo.setId(po.getId());
                 newPo.setSignature(newSignature);
+                logger.debug("getPrivIdsByRoleId: writing signature.  po =" + newPo);
                 rolePrivilegePoMapper.updateByPrimaryKeySelective(newPo);
             }
 
