@@ -39,16 +39,6 @@ public class PrivilegeControllerTest {
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 
-    @Test
-    public void login() throws  Exception{
-
-    }
-
-    @Test
-    public void logout() throws  Exception{
-
-    }
-
     /*@Test
     public void changePriv() throws Exception{
         PrivilegeVo vo = new PrivilegeVo();

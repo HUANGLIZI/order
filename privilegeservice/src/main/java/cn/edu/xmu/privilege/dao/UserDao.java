@@ -2,7 +2,6 @@ package cn.edu.xmu.privilege.dao;
 
 import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.ooad.util.StringUtil;
-import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
 import cn.edu.xmu.privilege.model.bo.User;
@@ -51,19 +50,6 @@ public class UserDao {
 
     @Autowired
     private RoleDao roleDao;
-
-    @Autowired
-    private UserPoMapper userPoMapper;
-
-    public User getUserByName(String userName)
-    {
-        UserPoExample example = new UserPoExample();
-        UserPoExample.Criteria criteria = example.createCriteria();
-        criteria.andUserNameEqualTo(userName);
-        List<UserPo> users = userPoMapper.selectByExample(example);
-
-        return new User(users.get(0));
-    }
 
     /**
      * 计算User自己的权限，load到Redis
