@@ -1,5 +1,7 @@
 package cn.edu.xmu.privilege.util;
 
+import cn.edu.xmu.ooad.util.ResponseCode;
+import cn.edu.xmu.ooad.util.ReturnObject;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -13,13 +15,13 @@ public class ImgHelper {
      * @param path          文件保存路径
      * @return 返回文件名
      */
-    public static String saveImg(MultipartFile multipartFile, String path) throws IOException {
+    public static ReturnObject saveImg(MultipartFile multipartFile, String path) throws IOException {
         File file = new File(path);
         if(file.exists()&&!file.canWrite())
-            return "没有写入文件的权限";
+            return new ReturnObject(ResponseCode.FILE_NO_WRITE_PERMISSION);
         else if (!file.exists()) {
             if(!file.mkdirs()){
-                return "没有写入文件的权限";
+                return new ReturnObject(ResponseCode.FILE_NO_WRITE_PERMISSION);
             }
         }
         FileInputStream fileInputStream = (FileInputStream) multipartFile.getInputStream();
@@ -35,7 +37,7 @@ public class ImgHelper {
         bos.flush();
         bos.close();
 
-        return fileName;
+        return new ReturnObject(fileName);
     }
 
     /**

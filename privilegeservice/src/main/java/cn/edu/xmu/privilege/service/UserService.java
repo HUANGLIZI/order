@@ -68,23 +68,23 @@ public class UserService {
 
         try{
             if(user.getAvatar()==null){
-                String fileName = ImgHelper.saveImg(multipartFile,imgLocation);
-                if(fileName.equals("没有写入文件的权限")){
-                    logger.debug("没有写入文件的权限");
+                ReturnObject object = ImgHelper.saveImg(multipartFile,imgLocation);
+                if(object.getErrmsg().equals(ResponseCode.FILE_NO_WRITE_PERMISSION.getMessage())){
+                    logger.debug(object.getErrmsg());
                     throw new IOException();
                 }
-                user.setAvatar(fileName);
+                user.setAvatar(object.getData().toString());
                 userDao.updateUserAvatar(user);
             }
             else{
                 String oldFilename = user.getAvatar();
                 ImgHelper.deleteImg(oldFilename,imgLocation);
-                String fileName = ImgHelper.saveImg(multipartFile,imgLocation);
-                if(fileName.equals("没有写入文件的权限")){
-                    logger.debug("没有写入文件的权限");
+                ReturnObject object = ImgHelper.saveImg(multipartFile,imgLocation);
+                if(object.getErrmsg().equals(ResponseCode.FILE_NO_WRITE_PERMISSION.getMessage())){
+                    logger.debug(object.getErrmsg());
                     throw new IOException();
                 }
-                user.setAvatar(fileName);
+                user.setAvatar(object.getData().toString());
                 userDao.updateUserAvatar(user);
             }
         }

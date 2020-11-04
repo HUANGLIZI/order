@@ -19,7 +19,7 @@ public enum ResponseCode {
     //所有路径带id的API都可能返回此错误
     RESOURCE_ID_NOTEXIST(504,"操作的资源id不存在"),
     RESOURCE_ID_OUTSCOPE(505,"操作的资源id不是自己的对象"),
-
+    FILE_NO_WRITE_PERMISSION(506,"该目录文件夹没有写入的权限"),
     //--------------------------------------------
 
 
