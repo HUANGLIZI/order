@@ -1,13 +1,12 @@
 package cn.edu.xmu.privilege.service;
 
-import cn.edu.xmu.ooad.model.VoObject;
-import cn.edu.xmu.ooad.util.ImgHelper;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.privilege.dao.UserDao;
-import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
+import cn.edu.xmu.privilege.util.ImgHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,7 @@ public class UserService {
     /**
      * @author 24320182203218
      **/
-    @Value("${prvilegeservice.imglocation}")
+    @Value("${prvilegeservice.imgloaction}")
     private String imgLocation;
 
     @Autowired
@@ -68,26 +67,32 @@ public class UserService {
         User user = userDao.getUserById(id);
 
         try{
-            String fileName = ImgHelper.saveImg(multipartFile,imgLocation,id);
             if(user.getAvatar()==null){
+                String fileName = ImgHelper.saveImg(multipartFile,imgLocation);
+                if(fileName.equals("没有写入文件权限")){
+                    logger.debug("没有写入文件权限");
+                    throw new IOException();
+                }
                 user.setAvatar(fileName);
                 userDao.updateUserAvatar(user);
             }
             else{
                 String oldFilename = user.getAvatar();
-                //已经有相同文件则直接返回
-                if(oldFilename.equals(fileName))
-                    return new ReturnObject();
                 ImgHelper.deleteImg(oldFilename,imgLocation);
+                String fileName = ImgHelper.saveImg(multipartFile,imgLocation);
+                if(fileName.equals("没有写入文件权限")){
+                    logger.debug("没有写入文件权限");
+                    throw new IOException();
+                }
                 user.setAvatar(fileName);
                 userDao.updateUserAvatar(user);
             }
         }
         catch (IOException e){
             e.printStackTrace();
-            //暂无错误码
-            return new ReturnObject();
+            return new ReturnObject(ResponseCode.OK,"上传失败");
         }
+
         return new ReturnObject();
     }
 }

@@ -88,7 +88,7 @@ public class PrivilegeController {
     })
     @PostMapping("/adminusers/{id}/uploadImg")
     public Object uploadImg(@PathVariable("id") Integer id, @RequestParam("img") MultipartFile multipartFile){
-        logger.debug("uploadImg: id = "+ id +" img" + multipartFile);
+        logger.debug("uploadImg: id = "+ id +" img" + multipartFile.getOriginalFilename());
         return userService.uploadImg(id,multipartFile);
     }
 }
