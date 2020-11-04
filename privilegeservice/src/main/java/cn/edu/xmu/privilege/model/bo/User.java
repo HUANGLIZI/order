@@ -69,11 +69,11 @@ public class User {
 
     private String mobile;
 
-    private Boolean mobileVerified;
+    private Boolean mobileVerified = false;
 
     private String email;
 
-    private Boolean emailVerified;
+    private Boolean emailVerified = false;
 
     private String name;
 
@@ -85,7 +85,7 @@ public class User {
 
     private String openId;
 
-    private State state;
+    private State state = State.NEW;
 
     private Long departId;
 
@@ -108,15 +108,22 @@ public class User {
         this.userName = po.getUserName();
         this.password = po.getPassword();
         this.mobile = AES.decrypt(po.getMobile(),AESPASS);
-        this.mobileVerified = po.getMobileVerified() == 1?true:false;
+        if (null != po.getMobileVerified()) {
+            this.mobileVerified = po.getMobileVerified() == 1;
+        }
         this.email = AES.decrypt(po.getEmail(),AESPASS);
-        this.emailVerified = po.getEmailVerified() == 1? true:false;
+
+        if (null != po.getEmailVerified()) {
+            this.emailVerified = po.getEmailVerified() == 1;
+        }
         this.name = AES.decrypt(po.getName(),AESPASS);
         this.avatar = po.getAvatar();
         this.lastLoginTime = po.getLastLoginTime();
         this.lastLoginIp = po.getLastLoginIp();
         this.openId = po.getOpenId();
-        this.state = State.getTypeByCode(po.getState().intValue());
+        if (null != po.getState()) {
+            this.state = State.getTypeByCode(po.getState().intValue());
+        }
         this.departId = po.getDepartId();
         this.creatorId = po.getCreatorId();
         this.gmtCreate = po.getGmtCreate();
