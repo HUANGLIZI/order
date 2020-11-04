@@ -1,10 +1,15 @@
 package cn.edu.xmu.privilege.dao;
 
+import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.ooad.util.StringUtil;
+import cn.edu.xmu.privilege.mapper.RolePoMapper;
+import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
+import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.bo.User;
+import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.po.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,11 +51,81 @@ public class UserDao {
     private UserProxyPoMapper userProxyPoMapper;
 
     @Autowired
+    private UserPoMapper userPoMapper;
+
+    @Autowired
+    private RolePoMapper rolePoMapper;
+
+    @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
     @Autowired
     private RoleDao roleDao;
 
+    /**
+     * 获取用户的角色信息
+     * @author Xianwei Wang
+     * */
+    public ReturnObject<List> getUserRoles(Long id){
+        UserRolePoExample example = new UserRolePoExample();
+        UserRolePoExample.Criteria criteria = example.createCriteria();
+
+        criteria.andUserIdEqualTo(id);
+
+        List<UserRolePo> userRolePoList = userRolePoMapper.selectByExample(example);
+        logger.debug("getUserRoles: userId = "+ id + "roleNum = "+ userRolePoList.size());
+
+        List<UserRole> retUserRoleList = new ArrayList<>(userRolePoList.size());
+
+        for (UserRolePo po : userRolePoList) {
+            StringBuilder signature = StringUtil.concatString("-",
+                    po.getUserId().toString(), po.getRoleId().toString(), po.getCreatorId().toString());
+            String newSignature = SHA256.getSHA256(signature.toString());
+            if (null == po.getSignature() && initialization) {
+                UserRolePo newPo = new UserRolePo();
+                newPo.setId(po.getId());
+                newPo.setSignature(newSignature);
+                userRolePoMapper.updateByPrimaryKeySelective(newPo);
+            }
+
+            if (newSignature.equals(po.getSignature()) || initialization) {
+                User user = getUserById(po.getUserId());
+                User creator = getUserById(po.getCreatorId());
+                Role role = new Role(rolePoMapper.selectByPrimaryKey(po.getRoleId()));
+
+                retUserRoleList.add(new UserRole(po, user, role, creator));
+                logger.debug("getRoleIdByUserId: userId = " + po.getUserId() + " roleId = " + po.getRoleId());
+            } else {
+                logger.error("getUserRoles: Wrong Signature(auth_user_role): id =" + po.getId());
+            }
+        }
+        return new ReturnObject<>(retUserRoleList);
+    }
+
+    /***
+     * 根据id查找用户
+     * @param id 用户id
+     * @return
+     */
+    private User getUserById(Long id){
+        UserPo userPo = userPoMapper.selectByPrimaryKey(id);
+        if (userPo.getSignature() == null && initialization){
+            User user = new User(userPo);
+            UserPo newUserPo = new UserPo();
+            newUserPo.setId(id);
+            newUserPo.setSignature(user.getCacuSignature());
+            userPoMapper.updateByPrimaryKeySelective(newUserPo);
+
+            return user;
+        }
+        User user = new User(userPo);
+        if (! user.authetic()){
+            logger.error("getUser: Wrong Signature(auth_user): id =" + id);
+            return null;
+        }
+        return user;
+
+    }
     /**
      * 计算User自己的权限，load到Redis
      *

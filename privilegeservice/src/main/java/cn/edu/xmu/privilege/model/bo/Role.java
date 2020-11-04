@@ -1,5 +1,6 @@
 package cn.edu.xmu.privilege.model.bo;
 
+import cn.edu.xmu.privilege.model.po.RolePo;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -18,4 +19,18 @@ public class Role {
     private String describe;
     private LocalDateTime gmtCreate;
     private LocalDateTime gmtModified;
+
+    public Role()
+    {
+
+    }
+    public Role(RolePo rolePo){
+        this.id = rolePo.getId();
+        this.name = rolePo.getName();
+        this.creatorId = rolePo.getCreatorId();
+        this.describe = rolePo.getRoleDescribe();
+        this.gmtCreate = rolePo.getGmtCreate();
+        this.gmtModified = rolePo.getGmtModified();
+
+    }
 }

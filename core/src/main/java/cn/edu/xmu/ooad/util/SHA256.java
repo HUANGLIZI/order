@@ -14,6 +14,10 @@ public class SHA256 {
      * @return
      */
     public static String getSHA256(String str) {
+        if (str == null){
+            return null;
+        }
+
         MessageDigest messageDigest;
         String encodestr = "";
         try {

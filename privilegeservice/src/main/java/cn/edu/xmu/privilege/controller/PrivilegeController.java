@@ -30,6 +30,17 @@ public class PrivilegeController {
     @Autowired
     private UserService userService;
 
+
+    /**
+     * 获得自己的角色信息
+     * */
+    @GetMapping("/adminusers/self/roles")
+    public Object getUserSelfRole(@RequestParam Long id){
+        ReturnObject<List> returnObject =  userService.getSelfUserRoles(id);
+        return Common.getListRetObject(returnObject);
+    }
+
+
     /**
      * 获得所有权限
      * @return Object

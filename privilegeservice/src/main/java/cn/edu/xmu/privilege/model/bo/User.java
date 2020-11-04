@@ -107,11 +107,17 @@ public class User {
         this.id = po.getId();
         this.userName = po.getUserName();
         this.password = po.getPassword();
-        this.mobile = AES.decrypt(po.getMobile(),AESPASS);
+        this.mobile = po.getMobile();
         this.mobileVerified = po.getMobileVerified() == 1?true:false;
-        this.email = AES.decrypt(po.getEmail(),AESPASS);
+        String newemail = po.getEmail();
+        if (newemail != null){
+            this.email = AES.decrypt(newemail,AESPASS);
+        }
+
         this.emailVerified = po.getEmailVerified() == 1? true:false;
-        this.name = AES.decrypt(po.getName(),AESPASS);
+        this.name = po.getName();
+        this.emailVerified = po.getEmailVerified() == 1? true:false;
+
         this.avatar = po.getAvatar();
         this.lastLoginTime = po.getLastLoginTime();
         this.lastLoginIp = po.getLastLoginIp();

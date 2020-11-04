@@ -71,7 +71,7 @@ CREATE TABLE `auth_role` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL COMMENT '角色名称',
   `creator_id` bigint NOT NULL COMMENT '创建者',
-  `describe` varchar(500) DEFAULT NULL COMMENT '角色描述',
+  `role_describe` varchar(500) DEFAULT NULL COMMENT '角色描述',
   `gmt_create` datetime NOT NULL COMMENT '创建时间',
   `gmt_modified` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`),

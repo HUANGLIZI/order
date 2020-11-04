@@ -2,9 +2,12 @@ package cn.edu.xmu.privilege.controller;
 
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
+import cn.edu.xmu.privilege.dao.UserDao;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +31,17 @@ public class PrivilegeControllerTest {
     @Autowired
     private MockMvc mvc;
 
+    private static final Logger logger = LoggerFactory.getLogger(UserDao.class);
+
+    @Test
+    public void getSelfUserRoleTest() throws Exception {
+        String responseString = this.mvc.perform(get("/adminusers/self/roles?id=46"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        logger.debug(responseString);
+
+    }
     @Test
     public void getAllPriv() throws Exception{
         String responseString = this.mvc.perform(get("/privilege/privileges"))
