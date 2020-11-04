@@ -41,7 +41,8 @@ public class PrivilegeControllerTest {
     }
 
 /*    @Test
-    public void changePriv() throws Exception{
+    @Audit
+    public void changePriv(@LoginUser Long userId, @Depart Long departId) throws Exception{
         PrivilegeVo vo = new PrivilegeVo();
         vo.setName("车市");
         String json = "{\"name\":\"车市\"}";
