@@ -20,8 +20,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
- * 权限控制器
- * @author Ming Qiu
+ * 角色控制器
+ * @author Weice Wang
  **/
 @Api(value = "权限服务", tags = "privilege")
 @RestController /*Restful的Controller对象*/
@@ -39,6 +39,7 @@ public class RoleController {
     private HttpServletResponse httpServletResponse;
 
     /**
+     * 分页查询所有角色
      * @param token
      * @param page
      * @param pageSize
@@ -55,6 +56,7 @@ public class RoleController {
     })
     @GetMapping("roles")
     public Object selectAllRoles(@RequestHeader(value = "authorization") String token, @RequestParam Integer page, @RequestParam Integer pageSize) {
+        //根据token获取用户id
         JwtHelper jwtHelper = new JwtHelper();
         Long userId = jwtHelper.verifyTokenAndGetClaims(token).getUserId();
         ReturnObject<List> returnObject = roleService.selectAllRoles(page, pageSize);
@@ -62,6 +64,7 @@ public class RoleController {
     }
 
     /**
+     * 新增一个角色
      * @param token
      * @param vo
      * @param bindingResult
@@ -77,10 +80,12 @@ public class RoleController {
     })
     @PostMapping("roles")
     public Object insertRole(@RequestHeader(value = "authorization") String token, @Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
+        //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
+        //根据token获取用户id
         JwtHelper jwtHelper = new JwtHelper();
         Long userId = jwtHelper.verifyTokenAndGetClaims(token).getUserId();
         ReturnObject<VoObject> retObject = roleService.insertRole(userId, vo);
@@ -89,6 +94,7 @@ public class RoleController {
     }
 
     /**
+     * 删除角色，同时级联删除用户角色表与角色权限表
      * @param token
      * @param id
      * @return Object
@@ -108,6 +114,7 @@ public class RoleController {
     }
 
     /**
+     * 修改角色信息
      * @param token
      * @param id
      * @param vo
@@ -125,10 +132,12 @@ public class RoleController {
     })
     @PutMapping("roles/{id}")
     public Object updateRole(@RequestHeader(value = "authorization") String token, @PathVariable("id") Long id, @Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
+        //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
+        //根据token获取用户id
         JwtHelper jwtHelper = new JwtHelper();
         Long userId = jwtHelper.verifyTokenAndGetClaims(token).getUserId();
         ReturnObject<Object> retObject = roleService.updateRole(userId, id, vo);

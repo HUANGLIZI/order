@@ -8,29 +8,30 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@ApiModel(description = "商品对象")
+@ApiModel(description = "角色视图对象")
 public class RoleRetVo {
-    @ApiModelProperty(value = "角色名")
+    @ApiModelProperty(value = "角色id")
     private Long id;
 
-    @ApiModelProperty(value = "角色名")
+    @ApiModelProperty(value = "角色名称")
     private String name;
 
-    @ApiModelProperty(value = "角色名")
+    @ApiModelProperty(value = "角色描述")
     private String desc;
 
-    @ApiModelProperty(value = "角色名")
+    @ApiModelProperty(value = "创建者")
     private Long createdBy;
 
-    @ApiModelProperty(value = "角色名")
+    @ApiModelProperty(value = "创建时间")
     private LocalDateTime gmtCreate;
 
-    @ApiModelProperty(value = "角色名")
+    @ApiModelProperty(value = "修改时间")
     private LocalDateTime gmtModified;
 
     /**
-     * 构造函数，由Goods对象创建Vo
+     * 用Role对象建立Vo对象
      * @param role role
+     * @return RoleRetVo
      */
     public RoleRetVo(Role role) {
         this.id = role.getId();

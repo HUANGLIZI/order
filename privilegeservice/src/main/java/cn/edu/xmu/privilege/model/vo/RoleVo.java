@@ -11,14 +11,15 @@ import javax.validation.constraints.NotBlank;
 @ApiModel(description = "角色视图对象")
 public class RoleVo {
     @NotBlank(message = "角色名不能为空")
-    @ApiModelProperty(value = "角色名")
+    @ApiModelProperty(value = "角色名称")
     private String name;
 
-    @ApiModelProperty(value = "角色名")
+    @ApiModelProperty(value = "角色描述")
     private String descr;
 
     /**
-     * @return
+     * 构造函数
+     * @return Role
      */
     public Role createRole() {
         Role role = new Role();

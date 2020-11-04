@@ -76,7 +76,7 @@ public class RoleDaoTest {
     }
 
     /**
-     *
+     *新建token
      */
     @Test
     public void createToken() {
@@ -86,7 +86,7 @@ public class RoleDaoTest {
     }
 
     /**
-     *
+     *查询角色 成功
      */
     @Test
     public void selectRoleTest() {
@@ -109,7 +109,7 @@ public class RoleDaoTest {
     }
 
     /**
-     *
+     *插入角色 成功
      */
     @Test
     public void insertRoleTest1() {
@@ -138,7 +138,7 @@ public class RoleDaoTest {
     }
 
     /**
-     *
+     *插入角色 角色名已存在
      */
     @Test
     public void insertRoleTest2() {
@@ -167,7 +167,7 @@ public class RoleDaoTest {
     }
 
     /**
-     *
+     *插入角色 角色名为空
      */
     @Test
     public void insertRoleTest3() {
@@ -196,7 +196,7 @@ public class RoleDaoTest {
     }
 
     /**
-     *
+     *修改角色 成功
      */
     @Test
     public void updateRoleTest1() {
@@ -225,7 +225,7 @@ public class RoleDaoTest {
     }
 
     /**
-     *
+     *修改角色 角色名为空
      */
     @Test
     public void updateRoleTest2() {
@@ -254,7 +254,7 @@ public class RoleDaoTest {
     }
 
     /**
-     *
+     *修改角色 id不存在
      */
     @Test
     public void updateRoleTest3() {
@@ -283,7 +283,7 @@ public class RoleDaoTest {
     }
 
     /**
-     *
+     *修改角色 角色名重复
      */
     @Test
     public void updateRoleTest4() {
@@ -312,7 +312,7 @@ public class RoleDaoTest {
     }
 
     /**
-     *
+     *删除角色 成功
      */
     @Test
     public void deleteRoleTest1() {
@@ -338,7 +338,7 @@ public class RoleDaoTest {
     }
 
     /**
-     *
+     *删除角色 id不存在
      */
     @Test
     public void deleteRoleTest2() {

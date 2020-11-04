@@ -18,9 +18,10 @@ public class RoleService {
     RoleDao roleDao;
 
     /**
+     * 分页查询所有角色
      * @param pageNum
      * @param pageSize
-     * @return
+     * @return ReturnObject<List>
      */
     public ReturnObject<List> selectAllRoles(Integer pageNum, Integer pageSize) {
         ReturnObject<List> returnObject = roleDao.selectAllRole(pageNum, pageSize);
@@ -28,9 +29,10 @@ public class RoleService {
     }
 
     /**
+     * 新增角色
      * @param userId
      * @param vo
-     * @return
+     * @return ReturnObject<VoObject>
      */
     public ReturnObject<VoObject> insertRole(Long userId, RoleVo vo) {
         Role role = vo.createRole();
@@ -47,18 +49,20 @@ public class RoleService {
     }
 
     /**
+     * 删除角色
      * @param id
-     * @return
+     * @return ReturnObject<Object>
      */
     public ReturnObject<Object> deleteRole(Long id) {
         return roleDao.deleteRole(id);
     }
 
     /**
+     * 修改角色
      * @param userId
      * @param id
      * @param vo
-     * @return
+     * @return ReturnObject<Object>
      */
     public ReturnObject<Object> updateRole(Long userId, Long id, RoleVo vo) {
         Role role = vo.createRole();

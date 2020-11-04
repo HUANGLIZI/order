@@ -27,9 +27,9 @@ public class Role implements VoObject, Serializable {
     }
 
     /**
-     * 构造函数
-     *
+     * 构造函数     *
      * @param po 用PO构造
+     * @return Role
      */
     public Role(RolePo po) {
         this.id = po.getId();
@@ -41,7 +41,8 @@ public class Role implements VoObject, Serializable {
     }
 
     /**
-     * @return
+     * 生成RoleRetVo对象作为返回前端
+     * @return Object
      */
     @Override
     public Object createVo() {
@@ -50,7 +51,6 @@ public class Role implements VoObject, Serializable {
 
     /**
      * 用vo对象创建更新po对象
-     *
      * @param vo vo对象
      * @return po对象
      */
@@ -66,7 +66,8 @@ public class Role implements VoObject, Serializable {
     }
 
     /**
-     * @return
+     * 用bo对象创建更新po对象
+     * @return RolePo
      */
     public RolePo gotRolePo() {
         RolePo po = new RolePo();
