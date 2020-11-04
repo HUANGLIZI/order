@@ -5,6 +5,8 @@ import cn.edu.xmu.ooad.util.StringUtil;
 import cn.edu.xmu.privilege.mapper.RolePoMapper;
 import cn.edu.xmu.privilege.mapper.RolePrivilegePoMapper;
 import cn.edu.xmu.privilege.model.bo.Privilege;
+import cn.edu.xmu.privilege.model.bo.Role;
+import cn.edu.xmu.privilege.model.po.RolePo;
 import cn.edu.xmu.privilege.model.po.RolePrivilegePo;
 import cn.edu.xmu.privilege.model.po.RolePrivilegePoExample;
 import org.slf4j.Logger;
@@ -55,6 +57,24 @@ public class RoleDao implements InitializingBean {
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
+
+    /**
+     * Role通过自己的id找到对应的privIds, 根据privDao获取权限
+     *
+     * @param id roleID
+     * @return List<Privilege>
+     * 将获取用户所有权限
+     */
+    public List<Privilege> findPrivsByRoleId(Long id) {
+        List<Long> privIds = this.getPrivIdsByRoleId(id);
+        List<Privilege> privileges = new ArrayList<>();
+        for(Long privId: privIds) {
+            Privilege po = this.privDao.findPriv(privId);
+            logger.debug("getPriv:  po = " + po);
+            privileges.add(po);
+        }
+        return privileges;
+    }
 
     /**
      * 将一个角色的所有权限id载入到Redis

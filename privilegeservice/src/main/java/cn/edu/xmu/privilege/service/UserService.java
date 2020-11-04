@@ -3,6 +3,7 @@ package cn.edu.xmu.privilege.service;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
+import cn.edu.xmu.privilege.dao.UserDao;
 import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import org.slf4j.Logger;
@@ -23,12 +24,23 @@ public class UserService {
     @Autowired
     private PrivilegeDao privilegeDao;
 
+    @Autowired
+    private UserDao userDao;
     /**
      * 查询所有权限
      * @return 权限列表
      */
     public ReturnObject<List> findAllPrivs(){
         ReturnObject<List>  ret = new ReturnObject<>(privilegeDao.findAllPrivs());
+        return ret;
+    }
+
+    /**
+     * 根据用户Id查询他的所有权限
+     * @return 权限列表
+     */
+    public ReturnObject<List> findPrivsByUserId(Long id){
+        ReturnObject<List>  ret = new ReturnObject<>(userDao.findPrivsByUserId(id));
         return ret;
     }
 

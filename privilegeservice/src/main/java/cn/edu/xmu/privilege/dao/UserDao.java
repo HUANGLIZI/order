@@ -6,8 +6,11 @@ import cn.edu.xmu.ooad.util.StringUtil;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
+import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.po.*;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -57,6 +60,23 @@ public class UserDao implements InitializingBean {
     @Autowired
     private RoleDao roleDao;
 
+    /**
+     * User通过自己的id找到对应的roleIds,根据roleDao返回角色对应的权限
+     *
+     * @param id userID
+     * @return List<Privilege>
+     * 将获取用户所有权限
+     */
+
+    public List<Privilege> findPrivsByUserId(Long id) {
+        List<Long> roleIds = this.getRoleIdByUserId(id);
+        List<Privilege> privileges = new ArrayList<>();
+        for(Long roleId: roleIds) {
+            List<Privilege> rolePriv = roleDao.findPrivsByRoleId(roleId);
+            privileges.addAll(rolePriv);
+        }
+        return privileges;
+    }
     /**
      * 计算User自己的权限，load到Redis
      *
