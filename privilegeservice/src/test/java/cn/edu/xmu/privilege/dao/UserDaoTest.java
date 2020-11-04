@@ -143,4 +143,25 @@ public class UserDaoTest {
         assertEquals(6, redisTemplate.opsForSet().size(key3));
 
     }
+
+    @Test
+    public void loadUserPriv5(){
+
+        userDao.loadUserPriv(Long.valueOf(59));
+
+        String key1 = "u_59";
+        String key3 = "up_59";
+
+        assertTrue(redisTemplate.hasKey(key1));
+        assertTrue(redisTemplate.opsForSet().isMember(key1,"0"));
+        assertFalse(redisTemplate.opsForSet().isMember(key1,"16"));
+        assertEquals(1, redisTemplate.opsForSet().size(key1));
+
+        assertTrue(redisTemplate.hasKey(key3));
+        assertTrue(redisTemplate.opsForSet().isMember(key3,"0"));
+        assertFalse(redisTemplate.opsForSet().isMember(key3,"16"));
+        assertEquals(1, redisTemplate.opsForSet().size(key3));
+
+
+    }
 }
