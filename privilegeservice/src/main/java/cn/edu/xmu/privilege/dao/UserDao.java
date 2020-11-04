@@ -73,7 +73,10 @@ public class UserDao implements InitializingBean{
      * @author Xianwei Wang
      * */
     public ReturnObject<VoObject> revokeRole(Long id){
-        userRolePoMapper.deleteByPrimaryKey(id);
+        int state = userRolePoMapper.deleteByPrimaryKey(id);
+        if (state == 0){
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
         return new ReturnObject<>();
     }
 
@@ -142,7 +145,9 @@ public class UserDao implements InitializingBean{
                     po.getUserId().toString(), po.getRoleId().toString(), po.getCreatorId().toString());
             String newSignature = SHA256.getSHA256(signature.toString());
 
+            //验证签名是否正确
             if (newSignature.equals(po.getSignature())) {
+                //查询用户，创建者，角色的详细信息
                 User user = getUserById(po.getUserId());
                 User creator = getUserById(po.getCreatorId());
                 Role role = new Role(rolePoMapper.selectByPrimaryKey(po.getRoleId()));
