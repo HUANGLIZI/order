@@ -1,12 +1,11 @@
 package cn.edu.xmu.privilege.controller;
 
 import cn.edu.xmu.ooad.model.VoObject;
-import cn.edu.xmu.ooad.util.Common;
-import cn.edu.xmu.ooad.util.ResponseUtil;
-import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
+import cn.edu.xmu.privilege.service.AuthenticationService;
 import cn.edu.xmu.privilege.service.UserService;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -15,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 /**

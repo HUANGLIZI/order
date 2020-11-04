@@ -57,6 +57,19 @@ public class UserDao implements InitializingBean {
     @Autowired
     private RoleDao roleDao;
 
+    @Autowired
+    private UserPoMapper userPoMapper;
+
+    public User getUserByName(String userName)
+    {
+        UserPoExample example = new UserPoExample();
+        UserPoExample.Criteria criteria = example.createCriteria();
+        criteria.andUserNameEqualTo(userName);
+        List<UserPo> users = userPoMapper.selectByExample(example);
+
+        return new User(users.get(0));
+    }
+
     /**
      * 计算User自己的权限，load到Redis
      *
