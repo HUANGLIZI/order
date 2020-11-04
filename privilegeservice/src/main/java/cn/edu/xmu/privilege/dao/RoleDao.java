@@ -4,9 +4,7 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.ooad.util.StringUtil;
-import cn.edu.xmu.privilege.mapper.RolePoMapper;
-import cn.edu.xmu.privilege.mapper.RolePrivilegePoMapper;
-import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
+import cn.edu.xmu.privilege.mapper.*;
 import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.po.*;
 import com.github.pagehelper.PageHelper;
@@ -51,7 +49,13 @@ public class RoleDao implements InitializingBean {
     private RolePoMapper roleMapper;
 
     @Autowired
+    private UserPoMapper userMapper;
+
+    @Autowired
     private UserRolePoMapper userRolePoMapper;
+
+    @Autowired
+    private UserProxyPoMapper userProxyPoMapper;
 
     @Autowired
     private RolePrivilegePoMapper rolePrivilegePoMapper;
@@ -177,10 +181,12 @@ public class RoleDao implements InitializingBean {
                 //修改成功
                 logger.debug("updateRole: update role = " + rolePo.toString());
                 retObj = new ReturnObject<>();
+                //
+                loadRolePriv(rolePo.getId());
             }
         }
         catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             //若有重复的角色名则修改失败
             logger.debug("updateRole: have same role name = " + rolePo.getName());
             retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
@@ -211,6 +217,8 @@ public class RoleDao implements InitializingBean {
             for (RolePrivilegePo rolePrivilegePo : rolePrivilegePos) {
                 rolePrivilegePoMapper.deleteByPrimaryKey(rolePrivilegePo.getId());
             }
+            //
+            redisTemplate.delete("r_" + id);
             //删除用户角色表
             UserRolePoExample exampleUR = new UserRolePoExample();
             UserRolePoExample.Criteria criteriaUR = exampleUR.createCriteria();
@@ -219,9 +227,20 @@ public class RoleDao implements InitializingBean {
             logger.debug("deleteRole: delete user-role num = " + userRolePos.size());
             for (UserRolePo userRolePo : userRolePos) {
                 userRolePoMapper.deleteByPrimaryKey(userRolePo.getId());
+                //
+                redisTemplate.delete("u_" + userRolePo.getUserId());
+                //查询当前所有有效的被代理用户
+                UserProxyPoExample example = new UserProxyPoExample();
+                UserProxyPoExample.Criteria criteria = example.createCriteria();
+                criteria.andUserBIdEqualTo(userRolePo.getUserId());
+                List<UserProxyPo> userProxyPos = userProxyPoMapper.selectByExample(example);
+                for(UserProxyPo userProxyPo : userProxyPos){
+                    redisTemplate.delete("u_" + userProxyPo.getUserBId());
+                }
             }
             retObj = new ReturnObject<>();
         }
+
         return retObj;
     }
 
