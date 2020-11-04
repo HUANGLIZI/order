@@ -75,4 +75,182 @@ public class PrivilegeControllerTest {
                 .andReturn().getResponse().getContentAsString();
         return responseString;
     }
+
+    /* auth009 测试用例 */
+
+    @Test
+    public void modifyUserNoExceptions() throws Exception {
+        String contentJson = "{\n" +
+                "    \"name\": \"张小绿\",\n" +
+                "    \"email\": \"han@han-li.cn\",\n" +
+                "    \"mobile\": \"13906008040\"\n" +
+                "}";
+
+        String responseString = this.mvc.perform(
+                put("/privilege/adminusers/59").contentType("application/json;charset=UTF-8").content(contentJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    @Test
+    public void modifyUserDuplicateEmail() throws Exception {
+        String contentJson = "{\n" +
+                "    \"name\": \"祝大米\",\n" +
+                "    \"email\": \"han@han-li.cn\",\n" +
+                "    \"mobile\": \"112452463123\"\n" +
+                "}";
+
+        this.mvc.perform(
+                put("/privilege/adminusers/58").contentType("application/json;charset=UTF-8").content(contentJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        contentJson = "{\n" +
+                "    \"name\": \"叶小朵\",\n" +
+                "    \"email\": \"han@han-li.cn\",\n" +
+                "    \"mobile\": \"13807710771\"\n" +
+                "}";
+
+        String responseString = this.mvc.perform(
+                put("/privilege/adminusers/55").contentType("application/json;charset=UTF-8").content(contentJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\":732,\"errmsg\":\"邮箱已被注册\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    @Test
+    public void modifyUserDuplicateTel() throws Exception {
+        String contentJson = "{\n" +
+                "    \"name\": \"猪小花\",\n" +
+                "    \"email\": \"jajaja@han-li.cn\",\n" +
+                "    \"mobile\": \"13906008040\"\n" +
+                "}";
+
+        this.mvc.perform(
+                put("/privilege/adminusers/58").contentType("application/json;charset=UTF-8").content(contentJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        contentJson = "{\n" +
+                "    \"name\": \"李大力\",\n" +
+                "    \"email\": \"kakaka@han-li.cn\",\n" +
+                "    \"mobile\": \"13906008040\"\n" +
+                "}";
+
+        String responseString = this.mvc.perform(
+                put("/privilege/adminusers/55").contentType("application/json;charset=UTF-8").content(contentJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\":733,\"errmsg\":\"电话已被注册\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    @Test
+    public void modifyNilUser() throws Exception {
+        String contentJson = "{\n" +
+                "    \"name\": \"李大力\",\n" +
+                "    \"email\": \"ooad@han-li.cn\",\n" +
+                "    \"mobile\": \"12345678\"\n" +
+                "}";
+
+        String responseString = this.mvc.perform(
+                put("/privilege/adminusers/99").contentType("application/json;charset=UTF-8").content(contentJson))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    @Test
+    public void deleteUser() throws Exception {
+
+        String responseString = this.mvc.perform(
+                delete("/privilege/adminusers/58"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    @Test
+    public void deleteNilUser() throws Exception {
+
+        String responseString = this.mvc.perform(
+                delete("/privilege/adminusers/120"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    @Test
+    public void forbidUser() throws Exception {
+
+        String responseString = this.mvc.perform(
+                put("/privilege/adminusers/59/forbid"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    @Test
+    public void forbidNilUser() throws Exception {
+
+        String responseString = this.mvc.perform(
+                put("/privilege/adminusers/90/forbid"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    @Test
+    public void releaseUser() throws Exception {
+
+        String responseString = this.mvc.perform(
+                put("/privilege/adminusers/59/release"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    @Test
+    public void releaseNilUser() throws Exception {
+
+        String responseString = this.mvc.perform(
+                put("/privilege/adminusers/321/release"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    /* auth009 测试用例结束 */
 }
