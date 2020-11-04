@@ -8,6 +8,10 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
+/**
+ * 角色对象
+ * @author Xianwei Wang
+ **/
 @Data
 @ApiModel(description = "角色视图对象")
 public class RoleVo {

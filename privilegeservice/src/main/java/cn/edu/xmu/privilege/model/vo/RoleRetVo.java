@@ -1,12 +1,18 @@
 package cn.edu.xmu.privilege.model.vo;
 
 import cn.edu.xmu.privilege.model.bo.Role;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 角色返回对象
+ * @author Xianwei Wang
+ **/
 @Data
+@ApiModel
 public class RoleRetVo {
 
     @ApiModelProperty(name = "id")

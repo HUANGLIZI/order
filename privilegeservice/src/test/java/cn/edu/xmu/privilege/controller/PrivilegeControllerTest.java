@@ -10,6 +10,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
@@ -57,7 +58,9 @@ public class PrivilegeControllerTest {
      */
     @Test
     public void assignRoleTest() throws Exception {
-        String responseString = this.mvc.perform(post("/privilege/adminusers/47/roles/84").header("token", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjoxLCJleHAiOjE2MDQ0ODE3NDYsInVzZXJJZCI6NDcsImlhdCI6MTYwNDQ3NDU0Nn0.Xffiw88lOWXW0In0XB2rx6xnelJg7nw5tbYzBgvB7_Y"))
+        JwtHelper jwtHelper = new JwtHelper();
+        String token = jwtHelper.createToken(new Long(47), new Long(1));
+        String responseString = this.mvc.perform(post("/privilege/adminusers/47/roles/84").header("token", token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
