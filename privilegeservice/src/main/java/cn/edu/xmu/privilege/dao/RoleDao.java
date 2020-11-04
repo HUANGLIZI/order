@@ -265,7 +265,7 @@ public class RoleDao implements InitializingBean {
             }
         }
         catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             //若有重复的角色名则修改失败
             logger.debug("updateRole: have same role name = " + rolePo.getName());
             retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
