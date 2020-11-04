@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -74,4 +75,20 @@ public class PrivilegeController {
         return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
     }
 
+    /**
+     * @author 24320182203218
+     **/
+    @ApiOperation(value = "用户上传图片",  produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value ="用户id" ,required = true),
+            @ApiImplicitParam(paramType = "formData", dataType = "file", name = "img", value ="文件", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @PostMapping("/adminusers/{id}/uploadImg")
+    public Object uploadImg(@PathVariable("id") Integer id, @RequestParam("img") MultipartFile multipartFile){
+        logger.debug("uploadImg: id = "+ id +" img" + multipartFile);
+        return userService.uploadImg(id,multipartFile);
+    }
 }

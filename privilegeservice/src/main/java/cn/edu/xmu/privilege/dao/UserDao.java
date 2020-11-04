@@ -1,6 +1,7 @@
 package cn.edu.xmu.privilege.dao;
 
 import cn.edu.xmu.ooad.util.AES;
+import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.ooad.util.StringUtil;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
@@ -253,5 +254,38 @@ public class UserDao implements InitializingBean {
             userRolePoMapper.updateByPrimaryKeySelective(newPo);
         }
 
+    }
+
+    /**
+     * 获得用户
+     *
+     * @param id userID
+     * @return User
+     * createdBy 3218 2020/11/4 15:48
+     * modifiedBy 3218 2020/11/4 15:48
+     */
+
+    public User getUserById(long id){
+        User user = new User(userMapper.selectByPrimaryKey(id));
+        if(user == null)
+            System.out.println("user null");
+        return user;
+    }
+
+
+    /**
+     * 更新用户图片
+     *
+     * @param user
+     * @return User
+     * createdBy 3218 2020/11/4 15:55
+     * modifiedBy 3218 2020/11/4 15:55
+     */
+    public ReturnObject updateUserAvatar(User user){
+        UserPo newUserPo = new UserPo();
+        newUserPo.setId(user.getId());
+        newUserPo.setAvatar(user.getAvatar());
+        userMapper.updateByPrimaryKeySelective(newUserPo);
+        return new ReturnObject();
     }
 }
