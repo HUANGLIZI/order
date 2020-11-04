@@ -55,10 +55,7 @@ public class RoleController {
             @ApiResponse(code = 0, message = "成功"),
     })
     @GetMapping("roles")
-    public Object selectAllRoles(@RequestHeader(value = "authorization") String token, @RequestParam Integer page, @RequestParam Integer pageSize) {
-        //根据token获取用户id
-        JwtHelper jwtHelper = new JwtHelper();
-        Long userId = jwtHelper.verifyTokenAndGetClaims(token).getUserId();
+    public Object selectAllRoles(@RequestParam Integer page, @RequestParam Integer pageSize) {
         ReturnObject<List> returnObject = roleService.selectAllRoles(page, pageSize);
         return Common.getListRetObject(returnObject);
     }
@@ -79,15 +76,14 @@ public class RoleController {
             @ApiResponse(code = 0, message = "成功"),
     })
     @PostMapping("roles")
-    public Object insertRole(@RequestHeader(value = "authorization") String token, @Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
+    public Object insertRole(@Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
-        //根据token获取用户id
-        JwtHelper jwtHelper = new JwtHelper();
-        Long userId = jwtHelper.verifyTokenAndGetClaims(token).getUserId();
+        //由AOP解析token获取userId
+        Long userId = 1L;
         ReturnObject<VoObject> retObject = roleService.insertRole(userId, vo);
         httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return Common.getRetObject(retObject);
@@ -108,7 +104,7 @@ public class RoleController {
             @ApiResponse(code = 0, message = "成功"),
     })
     @DeleteMapping("roles/{id}")
-    public Object deleteRole(@RequestHeader(value = "authorization") String token, @PathVariable("id") Long id) {
+    public Object deleteRole(@PathVariable("id") Long id) {
         ReturnObject<Object> returnObject = roleService.deleteRole(id);
         return Common.getNullRetObj(returnObject, httpServletResponse);
     }
@@ -131,15 +127,14 @@ public class RoleController {
             @ApiResponse(code = 0, message = "成功"),
     })
     @PutMapping("roles/{id}")
-    public Object updateRole(@RequestHeader(value = "authorization") String token, @PathVariable("id") Long id, @Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
+    public Object updateRole(@PathVariable("id") Long id, @Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
-        //根据token获取用户id
-        JwtHelper jwtHelper = new JwtHelper();
-        Long userId = jwtHelper.verifyTokenAndGetClaims(token).getUserId();
+        //由AOP解析token获取userId
+        Long userId = 1L;
         ReturnObject<Object> retObject = roleService.updateRole(userId, id, vo);
         return Common.getNullRetObj(retObject, httpServletResponse);
     }
