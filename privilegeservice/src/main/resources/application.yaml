@@ -65,6 +65,10 @@ mybatis:
     #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
 
+loginconfig:
+    #是否允许重复登录
+    multiply: false
+
 prvilegeservice:
   #是否对数据库中的未初始化的数据初始化
   initialization: false

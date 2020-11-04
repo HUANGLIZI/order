@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import javax.print.attribute.standard.DateTimeAtCompleted;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -69,6 +70,15 @@ public class UserDao implements InitializingBean {
 
         if (users.isEmpty()) return null;
         else return new User(users.get(0));
+    }
+
+    public Boolean setLoginIPAndPosition(Long userId, String IPAddr, LocalDateTime date)
+    {
+        UserPo userPo = new UserPo();
+        userPo.setLastLoginIp(IPAddr);
+        userPo.setLastLoginTime(date);
+        if(userPoMapper.updateByPrimaryKeySelective(userPo)==1) return true;
+        else return false;
     }
 
     /**
