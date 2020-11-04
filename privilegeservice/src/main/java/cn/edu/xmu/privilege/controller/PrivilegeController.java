@@ -11,6 +11,7 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotBlank;
@@ -30,8 +31,8 @@ public class PrivilegeController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private JwtHelper jwtHelper;
+//    @Autowired
+    private JwtHelper jwtHelper = new JwtHelper();
 
     @Autowired
     private AuthenticationService authService;
@@ -76,11 +77,10 @@ public class PrivilegeController {
     }
 
     @PostMapping("privileges/login")
-    public Object login(@NotBlank(message = "必须输入用户名")@RequestBody String username,
-                        @NotBlank(message = "必须输入密码")@RequestBody String password){
-        String jwt = authService.Login(username,password);
+    public Object login(@Validated @RequestBody LoginVo loginVo){
+        ReturnObject<String> jwt = authService.Login(loginVo.getUserName(),loginVo.getPassword());
 
-        if(jwt == null){
+        if(jwt.getData() == null){
             return ResponseUtil.fail(ResponseCode.AUTH_INVALID_ACCOUNT,"用户名或密码错误");
         }else{
             return ResponseUtil.ok(jwt);
@@ -90,10 +90,9 @@ public class PrivilegeController {
     @GetMapping("privileges/logout")
     public Object logout(@NotBlank(message = "JWT令牌不存在，无需注销")@RequestHeader String authorization){
         JwtHelper.UserAndDepart user = jwtHelper.verifyTokenAndGetClaims(authorization);
-        Boolean success = authService.Logout(user.getUserId());
+        ReturnObject<Boolean> success = authService.Logout(user.getUserId());
 
-        if (success)return ResponseUtil.ok();
+        if (success.getData())return ResponseUtil.ok();
         else return ResponseUtil.fail(ResponseCode.AUTH_ID_NOTEXIST);
     }
-
 }
