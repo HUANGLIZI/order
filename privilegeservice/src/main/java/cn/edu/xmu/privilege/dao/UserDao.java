@@ -76,6 +76,10 @@ public class UserDao implements InitializingBean {
      * @author Xianwei Wang
      * */
     public ReturnObject<VoObject> revokeRole(Long id){
+        UserRolePo userRolePo = userRolePoMapper.selectByPrimaryKey(id);
+        String key = "u_" + userRolePo.getUserId();
+        redisTemplate.delete(key);
+
         int state = userRolePoMapper.deleteByPrimaryKey(id);
         if (state == 0){
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
@@ -120,8 +124,13 @@ public class UserDao implements InitializingBean {
         criteria.andRoleIdEqualTo(roleid);
 
         //若未拥有，则插入数据
-        if (userRolePoMapper.selectByExample(example).isEmpty())
+        if (userRolePoMapper.selectByExample(example).isEmpty()){
+            String key = "u_" + userid;
+            redisTemplate.delete(key);
+
             userRolePoMapper.insert(userRolePo);
+        }
+
 
         return new ReturnObject<>(new UserRole(userRolePo, user, new Role(rolePo), create));
 
