@@ -50,9 +50,9 @@ public class  Swagger2Configuration {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 //页面标题
-                .title("商品模块")
+                .title("权限模块")
                 //描述
-                .description("商品模块 Restful API接口")
+                .description("权限模块 Restful API接口")
                 //创建人
                 .contact(new Contact("Ming Qiu", "http://software.xmu.edu.cn", "mingqiu@xmu.edu.cn"))
                 //版本号

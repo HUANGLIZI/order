@@ -74,8 +74,12 @@ public class RoleDao implements InitializingBean {
     public void loadRolePriv(Long id) {
         List<Long> privIds = this.getPrivIdsByRoleId(id);
         String key = "r_" + id;
-        for (Long pId : privIds) {
-            redisTemplate.opsForSet().add(key, pId.toString());
+        if (privIds.size() == 0){
+            redisTemplate.opsForSet().add(key,"0");
+        } else {
+            for (Long pId : privIds) {
+                redisTemplate.opsForSet().add(key, pId.toString());
+            }
         }
         redisTemplate.expire(key, this.timeout + new Random().nextInt(randomTime), TimeUnit.SECONDS);
     }

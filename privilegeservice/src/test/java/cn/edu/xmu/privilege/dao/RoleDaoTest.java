@@ -53,7 +53,9 @@ public class RoleDaoTest {
     @Test
     public void loadRolePriv2(){
         roleDao.loadRolePriv(Long.valueOf(80));
-        assertFalse(redisTemplate.hasKey("r_80"));
+        assertTrue(redisTemplate.hasKey("r_80"));
+        assertTrue(redisTemplate.opsForSet().isMember("r_80","0"));
+        assertEquals(1, redisTemplate.opsForSet().size("r_80"));
     }
 
     private static final Logger logger = LoggerFactory.getLogger(RoleDaoTest.class);

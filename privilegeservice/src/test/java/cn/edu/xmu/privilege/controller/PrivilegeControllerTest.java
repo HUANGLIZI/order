@@ -40,7 +40,7 @@ public class PrivilegeControllerTest {
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 
-    /*@Test
+/*    @Test
     public void changePriv() throws Exception{
         PrivilegeVo vo = new PrivilegeVo();
         vo.setName("车市");
@@ -68,7 +68,7 @@ public class PrivilegeControllerTest {
         loginVo.setUserName(userName);
         loginVo.setPassword(password);
         String jsonString = JacksonUtil.toJson(loginVo);
-        String responseString = this.mvc.perform(post("/privilege/login").contentType("application/json;charset=UTF-8").content(jsonString))
+        String responseString = this.mvc.perform(post("/privilege/adminusers/login").contentType("application/json;charset=UTF-8").content(jsonString))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
