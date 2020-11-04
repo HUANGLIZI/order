@@ -165,28 +165,24 @@ public class RoleDao implements InitializingBean {
      */
     public ReturnObject<Role> insertRole(Role role) {
         RolePo rolePo = role.gotRolePo();
-        //判断是否有相同的角色名
-        RolePoExample example = new RolePoExample();
-        RolePoExample.Criteria criteria = example.createCriteria();
-        criteria.andNameEqualTo(rolePo.getName());
-        List<RolePo> rolePosByName = roleMapper.selectByExample(example);
         ReturnObject<Role> retObj = null;
-        if (rolePosByName.size() > 0) {
-            //若有重复的角色名则新增失败
-            logger.info("insertRole: have same role name = " + rolePo.getName());
-            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
-        } else {
+        try{
             int ret = roleMapper.insertSelective(rolePo);
             if (ret == 0) {
-                //插入失败
-                logger.info("insertRole: id not exist = " + rolePo.getId());
+                //修改失败
+                logger.info("updateRole: id not exist = " + rolePo.getId());
                 retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             } else {
-                //插入成功
-                logger.info("insertRole: insert role = " + rolePo.toString());
-                role.setId(rolePo.getId());
-                retObj = new ReturnObject<>(role);
+                //修改成功
+                logger.info("updateRole: update role = " + rolePo.toString());
+                retObj = new ReturnObject<>();
             }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            //若有重复的角色名则修改失败
+            logger.info("updateRole: have same role name = " + rolePo.getName());
+            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
         }
         return retObj;
     }
@@ -235,17 +231,8 @@ public class RoleDao implements InitializingBean {
      */
     public ReturnObject<Role> updateRole(Role role) {
         RolePo rolePo = role.gotRolePo();
-        //判断是否有相同的角色名
-        RolePoExample example = new RolePoExample();
-        RolePoExample.Criteria criteria = example.createCriteria();
-        criteria.andNameEqualTo(rolePo.getName());
-        List<RolePo> rolePosByName = roleMapper.selectByExample(example);
         ReturnObject<Role> retObj = null;
-        if (rolePosByName.size() > 0) {
-            //若有重复的角色名则修改失败
-            logger.info("updateRole: have same role name = " + rolePo.getName());
-            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
-        } else {
+        try{
             int ret = roleMapper.updateByPrimaryKeySelective(rolePo);
             if (ret == 0) {
                 //修改失败
@@ -256,6 +243,12 @@ public class RoleDao implements InitializingBean {
                 logger.info("updateRole: update role = " + rolePo.toString());
                 retObj = new ReturnObject<>();
             }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            //若有重复的角色名则修改失败
+            logger.info("updateRole: have same role name = " + rolePo.getName());
+            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
         }
         return retObj;
     }
