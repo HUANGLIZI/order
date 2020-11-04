@@ -69,15 +69,19 @@ public class UserDao implements InitializingBean {
     private void loadSingleUserPriv(Long id) {
         List<Long> roleIds = this.getRoleIdByUserId(id);
         String key = "u_" + id;
-        Set<String> roleKeys = new HashSet<>(roleIds.size());
-        for (Long roleId : roleIds) {
-            String roleKey = "r_" + roleId;
-            roleKeys.add(roleKey);
-            if (!redisTemplate.hasKey(roleKey)) {
-                roleDao.loadRolePriv(roleId);
+        if (roleIds.size() == 0){
+            redisTemplate.opsForSet().add(key);
+        } else {
+            Set<String> roleKeys = new HashSet<>(roleIds.size());
+            for (Long roleId : roleIds) {
+                String roleKey = "r_" + roleId;
+                roleKeys.add(roleKey);
+                if (!redisTemplate.hasKey(roleKey)) {
+                    roleDao.loadRolePriv(roleId);
+                }
             }
+            redisTemplate.opsForSet().unionAndStore(roleKeys, key);
         }
-        redisTemplate.opsForSet().unionAndStore(roleKeys, key);
         redisTemplate.expire(key, this.timeout + new Random().nextInt(randomTime), TimeUnit.SECONDS);
     }
 
