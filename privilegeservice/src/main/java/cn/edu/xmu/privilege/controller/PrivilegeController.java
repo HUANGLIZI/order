@@ -1,5 +1,8 @@
 package cn.edu.xmu.privilege.controller;
 
+import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.annotation.Depart;
+import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseUtil;
@@ -77,9 +80,11 @@ public class PrivilegeController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
+    @Audit
     @PutMapping("privileges/{id}")
-    public Object changePriv(@PathVariable Long id, @RequestBody PrivilegeVo vo){
+    public Object changePriv(@PathVariable Long id, @RequestBody PrivilegeVo vo, @LoginUser Long userId, @Depart Long departId){
         logger.debug("changePriv: id = "+ id +" vo" + vo);
+        logger.debug("getAllPrivs: userId = " + userId +" departId = "+departId);
         ReturnObject returnObject =  userService.changePriv(id, vo);
         return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
     }

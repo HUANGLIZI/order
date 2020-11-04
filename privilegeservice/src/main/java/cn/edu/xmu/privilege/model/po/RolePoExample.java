@@ -386,72 +386,72 @@ public class RolePoExample {
         }
 
         public Criteria andDescrIsNull() {
-            addCriterion("`descr` is null");
+            addCriterion("descr is null");
             return (Criteria) this;
         }
 
         public Criteria andDescrIsNotNull() {
-            addCriterion("`descr` is not null");
+            addCriterion("descr is not null");
             return (Criteria) this;
         }
 
         public Criteria andDescrEqualTo(String value) {
-            addCriterion("`descr` =", value, "descr");
+            addCriterion("descr =", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrNotEqualTo(String value) {
-            addCriterion("`descr` <>", value, "descr");
+            addCriterion("descr <>", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrGreaterThan(String value) {
-            addCriterion("`descr` >", value, "descr");
+            addCriterion("descr >", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrGreaterThanOrEqualTo(String value) {
-            addCriterion("`descr` >=", value, "descr");
+            addCriterion("descr >=", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrLessThan(String value) {
-            addCriterion("`descr` <", value, "descr");
+            addCriterion("descr <", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrLessThanOrEqualTo(String value) {
-            addCriterion("`descr` <=", value, "descr");
+            addCriterion("descr <=", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrLike(String value) {
-            addCriterion("`descr` like", value, "descr");
+            addCriterion("descr like", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrNotLike(String value) {
-            addCriterion("`descr` not like", value, "descr");
+            addCriterion("descr not like", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrIn(List<String> values) {
-            addCriterion("`descr` in", values, "descr");
+            addCriterion("descr in", values, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrNotIn(List<String> values) {
-            addCriterion("`descr` not in", values, "descr");
+            addCriterion("descr not in", values, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrBetween(String value1, String value2) {
-            addCriterion("`descr` between", value1, value2, "descr");
+            addCriterion("descr between", value1, value2, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrNotBetween(String value1, String value2) {
-            addCriterion("`descr` not between", value1, value2, "descr");
+            addCriterion("descr not between", value1, value2, "descr");
             return (Criteria) this;
         }
 
