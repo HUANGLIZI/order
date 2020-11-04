@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  **/
 @Data
 @ApiModel(description = "管理员用户信息视图对象")
-public class UserVo {
+public class UserEditVo {
 
     private String name;
 

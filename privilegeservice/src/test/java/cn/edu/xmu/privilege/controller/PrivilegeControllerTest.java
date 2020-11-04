@@ -99,7 +99,7 @@ public class PrivilegeControllerTest {
                 "}";
 
         String responseString = this.mvc.perform(
-                put("/privilege/adminusers/59").contentType("application/json;charset=UTF-8").content(contentJson))
+                put("/adminusers/59").contentType("application/json;charset=UTF-8").content(contentJson))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -127,7 +127,7 @@ public class PrivilegeControllerTest {
                 "}";
 
         this.mvc.perform(
-                put("/privilege/adminusers/58").contentType("application/json;charset=UTF-8").content(contentJson))
+                put("/adminusers/58").contentType("application/json;charset=UTF-8").content(contentJson))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -139,7 +139,7 @@ public class PrivilegeControllerTest {
                 "}";
 
         String responseString = this.mvc.perform(
-                put("/privilege/adminusers/55").contentType("application/json;charset=UTF-8").content(contentJson))
+                put("/adminusers/55").contentType("application/json;charset=UTF-8").content(contentJson))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -161,7 +161,7 @@ public class PrivilegeControllerTest {
                 "}";
 
         this.mvc.perform(
-                put("/privilege/adminusers/58").contentType("application/json;charset=UTF-8").content(contentJson))
+                put("/adminusers/58").contentType("application/json;charset=UTF-8").content(contentJson))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -173,7 +173,7 @@ public class PrivilegeControllerTest {
                 "}";
 
         String responseString = this.mvc.perform(
-                put("/privilege/adminusers/55").contentType("application/json;charset=UTF-8").content(contentJson))
+                put("/adminusers/55").contentType("application/json;charset=UTF-8").content(contentJson))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -195,12 +195,45 @@ public class PrivilegeControllerTest {
                 "}";
 
         String responseString = this.mvc.perform(
-                put("/privilege/adminusers/99").contentType("application/json;charset=UTF-8").content(contentJson))
+                put("/adminusers/99").contentType("application/json;charset=UTF-8").content(contentJson))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
 
         String expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    /**
+     * 测试更新用户资料 (用户已被删除)
+     * @throws Exception Assert 或 HTTP 错误
+     */
+    @Test
+    public void modifyDeletedUser() throws Exception {
+        // 逻辑删除
+        String responseString = this.mvc.perform(
+                delete("/adminusers/58"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+
+        // 测试硬更新
+        String contentJson = "{\n" +
+                "    \"name\": \"李大力\",\n" +
+                "    \"email\": \"ooad@han-li.cn\",\n" +
+                "    \"mobile\": \"12345678\"\n" +
+                "}";
+
+        responseString = this.mvc.perform(
+                put("/adminusers/58").contentType("application/json;charset=UTF-8").content(contentJson))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 
@@ -212,7 +245,7 @@ public class PrivilegeControllerTest {
     public void deleteUser() throws Exception {
 
         String responseString = this.mvc.perform(
-                delete("/privilege/adminusers/58"))
+                delete("/adminusers/58"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -233,12 +266,39 @@ public class PrivilegeControllerTest {
     public void deleteNilUser() throws Exception {
 
         String responseString = this.mvc.perform(
-                delete("/privilege/adminusers/120"))
+                delete("/adminusers/120"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
 
         String expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    /**
+     * 测试删除用户 (用户已被删除过)
+     * @throws Exception Assert 或 HTTP 错误
+     */
+    @Test
+    public void deleteDeletedUser() throws Exception {
+        // 逻辑删除
+        String responseString = this.mvc.perform(
+                delete("/adminusers/55"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+
+        // 测试还能否被删除
+        responseString = this.mvc.perform(
+                delete("/adminusers/55"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 
@@ -250,7 +310,7 @@ public class PrivilegeControllerTest {
     public void forbidUser() throws Exception {
 
         String responseString = this.mvc.perform(
-                put("/privilege/adminusers/59/forbid"))
+                put("/adminusers/59/forbid"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -271,12 +331,39 @@ public class PrivilegeControllerTest {
     public void forbidNilUser() throws Exception {
 
         String responseString = this.mvc.perform(
-                put("/privilege/adminusers/90/forbid"))
+                put("/adminusers/90/forbid"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
 
         String expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    /**
+     * 测试封禁用户 (查无此用户)
+     * @throws Exception Assert 或 HTTP 错误
+     */
+    @Test
+    public void forbidDeletedUser() throws Exception {
+        // 逻辑删除
+        String responseString = this.mvc.perform(
+                delete("/adminusers/48"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+
+        // 测试硬更改
+        responseString = this.mvc.perform(
+                put("/adminusers/48/forbid"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 
@@ -288,7 +375,7 @@ public class PrivilegeControllerTest {
     public void releaseUser() throws Exception {
 
         String responseString = this.mvc.perform(
-                put("/privilege/adminusers/59/release"))
+                put("/adminusers/59/release"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -309,12 +396,39 @@ public class PrivilegeControllerTest {
     public void releaseNilUser() throws Exception {
 
         String responseString = this.mvc.perform(
-                put("/privilege/adminusers/321/release"))
+                put("/adminusers/321/release"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
 
         String expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    /**
+     * 测试解封用户 (已被删除的用户)
+     * @throws Exception Assert 或 HTTP 错误
+     */
+    @Test
+    public void releaseDeletedUser() throws Exception {
+        // 逻辑删除
+        String responseString = this.mvc.perform(
+                delete("/adminusers/46"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+
+        // 测试硬解封
+        responseString = this.mvc.perform(
+                put("/adminusers/46/release"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 

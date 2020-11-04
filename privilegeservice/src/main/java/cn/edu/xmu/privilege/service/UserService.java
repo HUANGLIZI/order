@@ -1,12 +1,10 @@
 package cn.edu.xmu.privilege.service;
 
-import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.privilege.dao.UserDao;
-import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
-import cn.edu.xmu.privilege.model.vo.UserVo;
+import cn.edu.xmu.privilege.model.vo.UserEditVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,12 +45,12 @@ public class UserService {
     }
 
     /**
-     * 根据 ID 和 UserVo 修改任意用户信息
+     * 根据 ID 和 UserEditVo 修改任意用户信息
      * @param id 用户 id
-     * @param vo UserVo 对象
+     * @param vo UserEditVo 对象
      * @return 返回对象 ReturnObject
      */
-    public ReturnObject<Object> modifyUserInfo(Long id, UserVo vo) {
+    public ReturnObject<Object> modifyUserInfo(Long id, UserEditVo vo) {
         return userDao.modifyUserByVo(id, vo);
     }
 

@@ -6,7 +6,7 @@ import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.po.*;
-import cn.edu.xmu.privilege.model.vo.UserVo;
+import cn.edu.xmu.privilege.model.vo.UserEditVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -259,19 +259,28 @@ public class UserDao implements InitializingBean {
 
     /**
      * 根据 id 修改用户信息
-     * @param userVo 传入的 User 对象
+     * @param userEditVo 传入的 User 对象
      * @return 返回对象 ReturnObj
      */
-    public ReturnObject<Object> modifyUserByVo(Long id, UserVo userVo) {
+    public ReturnObject<Object> modifyUserByVo(Long id, UserEditVo userEditVo) {
         // 查询密码等资料以计算新签名
         UserPo orig = userMapper.selectByPrimaryKey(id);
-        if (orig == null) {
+        // 不修改已被逻辑废弃的账户
+        if (orig == null || (orig.getState() != null && User.State.getTypeByCode(orig.getState().intValue()) == User.State.DELETE)) {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
 
         // 构造 User 对象以计算签名
         User user = new User(orig);
-        UserPo po = user.createUpdatePo(userVo);
+        UserPo po = user.createUpdatePo(userEditVo);
+
+        // 将更改的联系方式 (如发生变化) 的已验证字段改为 false
+        if (userEditVo.getEmail() != null && !userEditVo.getEmail().equals(user.getEmail())) {
+            po.setEmailVerified((byte) 0);
+        }
+        if (userEditVo.getMobile() != null && !userEditVo.getMobile().equals(user.getMobile())) {
+            po.setMobileVerified((byte) 0);
+        }
 
         // 更新数据库
         ReturnObject<Object> retObj;
@@ -346,7 +355,8 @@ public class UserDao implements InitializingBean {
     private UserPo createUserStateModPo(Long id, User.State state) {
         // 查询密码等资料以计算新签名
         UserPo orig = userMapper.selectByPrimaryKey(id);
-        if (orig == null) {
+        // 不修改已被逻辑废弃的账户的状态
+        if (orig == null || (orig.getState() != null && User.State.getTypeByCode(orig.getState().intValue()) == User.State.DELETE)) {
             return null;
         }
 
@@ -354,7 +364,7 @@ public class UserDao implements InitializingBean {
         User user = new User(orig);
         user.setState(state);
         // 构造一个全为 null 的 vo 因为其他字段都不用更新
-        UserVo vo = new UserVo();
+        UserEditVo vo = new UserEditVo();
 
         return user.createUpdatePo(vo);
     }

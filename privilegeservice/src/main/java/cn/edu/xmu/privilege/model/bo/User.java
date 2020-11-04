@@ -4,12 +4,11 @@ import cn.edu.xmu.ooad.util.AES;
 import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.ooad.util.StringUtil;
 import cn.edu.xmu.privilege.model.po.UserPo;
-import cn.edu.xmu.privilege.model.vo.UserVo;
+import cn.edu.xmu.privilege.model.vo.UserEditVo;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -146,11 +145,11 @@ public class User {
     }
 
     /**
-     * 用 User Vo 对象创建 用来更新 User 的 Po 对象
+     * 用 UserEditVo 对象创建 用来更新 User 的 Po 对象
      * @param vo vo 对象
      * @return po 对象
      */
-    public UserPo createUpdatePo(UserVo vo) {
+    public UserPo createUpdatePo(UserEditVo vo) {
         String nameEnc = vo.getName() == null ? null : AES.encrypt(vo.getName(), User.AESPASS);
         String mobEnc = vo.getMobile() == null ? null : AES.encrypt(vo.getMobile(), User.AESPASS);
         String emlEnc = vo.getEmail() == null ? null : AES.encrypt(vo.getEmail(), User.AESPASS);
@@ -169,7 +168,7 @@ public class User {
 
         // 签名：user_name,password,mobile,email,open_id,state,depart_id,creator
         StringBuilder signature = StringUtil.concatString("-",
-                nameEnc == null ? AES.encrypt(this.name, User.AESPASS) : nameEnc,
+                this.getUserName(),
                 this.getPassword(),
                 mobEnc == null ? AES.encrypt(this.mobile, User.AESPASS) : mobEnc,
                 emlEnc == null ? AES.encrypt(this.email, User.AESPASS) : emlEnc,
