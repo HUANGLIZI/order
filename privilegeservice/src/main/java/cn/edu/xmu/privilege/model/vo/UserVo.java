@@ -24,21 +24,4 @@ public class UserVo {
 
     private String email;
 
-    /**
-     * 由 Vo 对象创建新的 User Po 对象
-     * @return User Po 对象
-     */
-    public UserPo createUserPo(Long id) {
-        UserPo po = new UserPo();
-        po.setId(id);
-        po.setName(this.name == null ? null : AES.encrypt(this.name, User.AESPASS));
-        po.setAvatar(this.avatar);
-        po.setMobile(this.mobile == null ? null : AES.encrypt(this.mobile, User.AESPASS));
-        po.setEmail(this.email == null ? null : AES.encrypt(this.email, User.AESPASS));
-
-        po.setGmtCreate(null);
-        po.setGmtModified(LocalDateTime.now());
-
-        return po;
-    }
 }

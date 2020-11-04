@@ -79,7 +79,7 @@ public class PrivilegeController {
     }
 
     /**
-     * 修改任意用户信息
+     * auth009: 修改任意用户信息
      * @param id: 用户 id
      * @return Object
      */
@@ -106,7 +106,7 @@ public class PrivilegeController {
     }
 
     /**
-     * 删除任意用户
+     * auth009: 删除任意用户
      * @param id: 用户 id
      * @return Object
      */
@@ -131,7 +131,7 @@ public class PrivilegeController {
     }
 
     /**
-     * 禁止用户登录
+     * auth009: 禁止用户登录
      * @param id: 用户 id
      * @return Object
      */
@@ -156,7 +156,7 @@ public class PrivilegeController {
     }
 
     /**
-     * 恢复用户
+     * auth009: 恢复用户
      * @param id: 用户 id
      * @return Object
      */

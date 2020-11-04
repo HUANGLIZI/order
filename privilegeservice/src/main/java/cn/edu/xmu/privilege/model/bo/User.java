@@ -4,6 +4,7 @@ import cn.edu.xmu.ooad.util.AES;
 import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.ooad.util.StringUtil;
 import cn.edu.xmu.privilege.model.po.UserPo;
+import cn.edu.xmu.privilege.model.vo.UserVo;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -142,5 +143,41 @@ public class User {
      */
     public Boolean authetic() {
         return this.cacuSignature.equals(this.signature);
+    }
+
+    /**
+     * 用 User Vo 对象创建 用来更新 User 的 Po 对象
+     * @param vo vo 对象
+     * @return po 对象
+     */
+    public UserPo createUpdatePo(UserVo vo) {
+        String nameEnc = vo.getName() == null ? null : AES.encrypt(vo.getName(), User.AESPASS);
+        String mobEnc = vo.getMobile() == null ? null : AES.encrypt(vo.getMobile(), User.AESPASS);
+        String emlEnc = vo.getEmail() == null ? null : AES.encrypt(vo.getEmail(), User.AESPASS);
+        Byte state = (byte) this.state.code;
+
+        UserPo po = new UserPo();
+        po.setId(id);
+        po.setName(nameEnc);
+        po.setAvatar(vo.getAvatar());
+        po.setMobile(mobEnc);
+        po.setEmail(emlEnc);
+        po.setState(state);
+
+        po.setGmtCreate(null);
+        po.setGmtModified(LocalDateTime.now());
+
+        // 签名：user_name,password,mobile,email,open_id,state,depart_id,creator
+        StringBuilder signature = StringUtil.concatString("-",
+                nameEnc == null ? AES.encrypt(this.name, User.AESPASS) : nameEnc,
+                this.getPassword(),
+                mobEnc == null ? AES.encrypt(this.mobile, User.AESPASS) : mobEnc,
+                emlEnc == null ? AES.encrypt(this.email, User.AESPASS) : emlEnc,
+                this.getOpenId(),
+                state.toString(),
+                this.getDepartId().toString(),
+                this.getCreatorId().toString());
+        po.setSignature(SHA256.getSHA256(signature.toString()));
+        return po;
     }
 }

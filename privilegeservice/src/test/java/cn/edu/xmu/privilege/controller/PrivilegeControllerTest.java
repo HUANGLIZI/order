@@ -1,8 +1,12 @@
 package cn.edu.xmu.privilege.controller;
 
 import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.util.AES;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
+import cn.edu.xmu.privilege.mapper.UserPoMapper;
+import cn.edu.xmu.privilege.model.bo.User;
+import cn.edu.xmu.privilege.model.po.UserPo;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import org.junit.jupiter.api.Test;
@@ -12,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -78,6 +83,13 @@ public class PrivilegeControllerTest {
 
     /* auth009 测试用例 */
 
+    @Autowired
+    private UserPoMapper userPoMapper;
+
+    /**
+     * 测试更新用户资料
+     * @throws Exception Assert 或 HTTP 错误
+     */
     @Test
     public void modifyUserNoExceptions() throws Exception {
         String contentJson = "{\n" +
@@ -94,8 +106,18 @@ public class PrivilegeControllerTest {
 
         String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
+
+        // 测试有关数据是否有真的改变
+        UserPo updatedPo = userPoMapper.selectByPrimaryKey(59L);
+        Assert.state(AES.decrypt(updatedPo.getName(), User.AESPASS).equals("张小绿"), "用户名不相等！");
+        Assert.state(AES.decrypt(updatedPo.getEmail(), User.AESPASS).equals("han@han-li.cn"), "Email 不相等！");
+        Assert.state(AES.decrypt(updatedPo.getMobile(), User.AESPASS).equals("13906008040"), "电讯号码不相等！");
     }
 
+    /**
+     * 测试更新用户资料 (Email 重复)
+     * @throws Exception Assert 或 HTTP 错误
+     */
     @Test
     public void modifyUserDuplicateEmail() throws Exception {
         String contentJson = "{\n" +
@@ -126,6 +148,10 @@ public class PrivilegeControllerTest {
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 
+    /**
+     * 测试更新用户资料 (电话重复)
+     * @throws Exception Assert 或 HTTP 错误
+     */
     @Test
     public void modifyUserDuplicateTel() throws Exception {
         String contentJson = "{\n" +
@@ -156,6 +182,10 @@ public class PrivilegeControllerTest {
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 
+    /**
+     * 测试更新用户资料 (查无此用户)
+     * @throws Exception Assert 或 HTTP 错误
+     */
     @Test
     public void modifyNilUser() throws Exception {
         String contentJson = "{\n" +
@@ -174,6 +204,10 @@ public class PrivilegeControllerTest {
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 
+    /**
+     * 测试 (逻辑) 删除用户
+     * @throws Exception Assert 或 HTTP 错误
+     */
     @Test
     public void deleteUser() throws Exception {
 
@@ -185,8 +219,16 @@ public class PrivilegeControllerTest {
 
         String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
+
+        // 测试有关数据是否有真的删除
+        UserPo updatedPo = userPoMapper.selectByPrimaryKey(58L);
+        Assert.state(updatedPo.getState() == (byte) User.State.DELETE.getCode().intValue(), "这个用户并未被删除！");
     }
 
+    /**
+     * 测试删除用户 (查无此用户)
+     * @throws Exception Assert 或 HTTP 错误
+     */
     @Test
     public void deleteNilUser() throws Exception {
 
@@ -200,6 +242,10 @@ public class PrivilegeControllerTest {
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 
+    /**
+     * 测试封禁用户
+     * @throws Exception Assert 或 HTTP 错误
+     */
     @Test
     public void forbidUser() throws Exception {
 
@@ -211,8 +257,16 @@ public class PrivilegeControllerTest {
 
         String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
+
+        // 测试有关用户是否有真的被解封
+        UserPo updatedPo = userPoMapper.selectByPrimaryKey(59L);
+        Assert.state(updatedPo.getState() == (byte) User.State.FORBID.getCode().intValue(), "这个用户并未被封禁！");
     }
 
+    /**
+     * 测试封禁用户 (查无此用户)
+     * @throws Exception Assert 或 HTTP 错误
+     */
     @Test
     public void forbidNilUser() throws Exception {
 
@@ -226,6 +280,10 @@ public class PrivilegeControllerTest {
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 
+    /**
+     * 测试解封用户
+     * @throws Exception Assert 或 HTTP 错误
+     */
     @Test
     public void releaseUser() throws Exception {
 
@@ -237,8 +295,16 @@ public class PrivilegeControllerTest {
 
         String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
+
+        // 测试有关用户是否有真的被解封
+        UserPo updatedPo = userPoMapper.selectByPrimaryKey(59L);
+        Assert.state(updatedPo.getState() == (byte) User.State.NORM.getCode().intValue(), "这个用户并未被解禁！");
     }
 
+    /**
+     * 测试解封用户 (查无此用户)
+     * @throws Exception Assert 或 HTTP 错误
+     */
     @Test
     public void releaseNilUser() throws Exception {
 
