@@ -213,8 +213,8 @@ public class UserDao implements InitializingBean {
             newPo.setName(AES.encrypt(po.getName(), User.AESPASS));
             newPo.setId(po.getId());
 
-            StringBuilder signature = StringUtil.concatString("-", po.getUserName(), po.getPassword(),
-                    po.getMobile(),po.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
+            StringBuilder signature = StringUtil.concatString("-", po.getUserName(), newPo.getPassword(),
+                    newPo.getMobile(),newPo.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
                     po.getCreatorId().toString());
             newPo.setSignature(SHA256.getSHA256(signature.toString()));
 
