@@ -267,8 +267,6 @@ public class UserDao implements InitializingBean {
 
     public User getUserById(long id){
         User user = new User(userMapper.selectByPrimaryKey(id));
-        if(user == null)
-            System.out.println("user null");
         return user;
     }
 
