@@ -40,7 +40,6 @@ public class RoleController {
 
     /**
      * 分页查询所有角色
-     * @param token
      * @param page
      * @param pageSize
      * @return Object
@@ -62,7 +61,6 @@ public class RoleController {
 
     /**
      * 新增一个角色
-     * @param token
      * @param vo
      * @param bindingResult
      * @return Object
@@ -91,7 +89,6 @@ public class RoleController {
 
     /**
      * 删除角色，同时级联删除用户角色表与角色权限表
-     * @param token
      * @param id
      * @return Object
      */
@@ -111,7 +108,6 @@ public class RoleController {
 
     /**
      * 修改角色信息
-     * @param token
      * @param id
      * @param vo
      * @param bindingResult
