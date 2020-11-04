@@ -153,14 +153,14 @@ public class UserDaoTest {
         String key3 = "up_59";
 
         assertTrue(redisTemplate.hasKey(key1));
-        assertFalse(redisTemplate.opsForSet().isMember(key1,"14"));
+        assertTrue(redisTemplate.opsForSet().isMember(key1,"0"));
         assertFalse(redisTemplate.opsForSet().isMember(key1,"16"));
-        assertEquals(0, redisTemplate.opsForSet().size(key1));
+        assertEquals(1, redisTemplate.opsForSet().size(key1));
 
         assertTrue(redisTemplate.hasKey(key3));
-        assertFalse(redisTemplate.opsForSet().isMember(key3,"14"));
+        assertTrue(redisTemplate.opsForSet().isMember(key3,"0"));
         assertFalse(redisTemplate.opsForSet().isMember(key3,"16"));
-        assertEquals(0, redisTemplate.opsForSet().size(key3));
+        assertEquals(1, redisTemplate.opsForSet().size(key3));
 
 
     }

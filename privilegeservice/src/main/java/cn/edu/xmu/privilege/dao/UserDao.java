@@ -70,7 +70,7 @@ public class UserDao implements InitializingBean {
         List<Long> roleIds = this.getRoleIdByUserId(id);
         String key = "u_" + id;
         if (roleIds.size() == 0){
-            redisTemplate.opsForSet().add(key);
+            redisTemplate.opsForSet().add(key, "0");
         } else {
             Set<String> roleKeys = new HashSet<>(roleIds.size());
             for (Long roleId : roleIds) {
