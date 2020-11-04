@@ -17,7 +17,10 @@ public class RoleVo {
     @ApiModelProperty(value = "角色名")
     private String descr;
 
-    public Role createRole(){
+    /**
+     * @return
+     */
+    public Role createRole() {
         Role role = new Role();
         role.setDescribe(this.descr);
         role.setName(this.name);

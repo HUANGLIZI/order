@@ -9,7 +9,6 @@ import cn.edu.xmu.privilege.mapper.RolePrivilegePoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
 import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.po.*;
-import cn.edu.xmu.privilege.model.vo.RoleRetVo;
 import com.github.pagehelper.PageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,90 +108,6 @@ public class RoleDao implements InitializingBean {
         return retIds;
     }
 
-    public ReturnObject<List> selectAllRole(Integer pageNum,Integer pageSize){
-        RolePoExample example = new RolePoExample();
-        RolePoExample.Criteria criteria = example.createCriteria();
-        PageHelper.startPage(pageNum,pageSize);
-        List<RolePo> rolePos = roleMapper.selectByExample(example);
-        List<Role> roles = new ArrayList<>(rolePos.size());
-        for (RolePo rolePoItem : rolePos) {
-            Role item = new Role(rolePoItem);
-            roles.add(item);
-        }
-        return new ReturnObject<>(roles);
-    }
-
-    public ReturnObject<Role> insertRole(Role role){
-        RolePo rolePo = role.gotRolePo();
-        RolePoExample example = new RolePoExample();
-        RolePoExample.Criteria criteria = example.createCriteria();
-        criteria.andNameEqualTo(rolePo.getName());
-        List<RolePo> rolePosByName = roleMapper.selectByExample(example);
-        ReturnObject<Role> retObj = null;
-        if(rolePosByName.size() > 0){
-            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
-        }
-        else{
-            int ret = roleMapper.insertSelective(rolePo);
-            if (ret == 0) {
-                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-            } else {
-                role.setId(rolePo.getId());
-                retObj = new ReturnObject<>(role);
-            }
-        }
-        return retObj;
-    }
-
-    public ReturnObject<Object> deleteRole(Long id) {
-        ReturnObject<Object> retObj = null;
-        int ret = roleMapper.deleteByPrimaryKey(id);
-        if (ret == 0) {
-            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        } else {
-            //        redisUtil.del("g_"+id);
-            RolePrivilegePoExample exampleRP = new RolePrivilegePoExample();
-            RolePrivilegePoExample.Criteria criteriaRP = exampleRP.createCriteria();
-            criteriaRP.andRoleIdEqualTo(id);
-            List<RolePrivilegePo> rolePrivilegePos = rolePrivilegePoMapper.selectByExample(exampleRP);
-            for(RolePrivilegePo rolePrivilegePo : rolePrivilegePos){
-                rolePrivilegePoMapper.deleteByPrimaryKey(rolePrivilegePo.getId());
-            }
-
-            UserRolePoExample exampleUR = new UserRolePoExample();
-            UserRolePoExample.Criteria criteriaUR = exampleUR.createCriteria();
-            criteriaUR.andRoleIdEqualTo(id);
-            List<UserRolePo> userRolePos = userRolePoMapper.selectByExample(exampleUR);
-            for(UserRolePo userRolePo : userRolePos){
-                userRolePoMapper.deleteByPrimaryKey(userRolePo.getId());
-            }
-            retObj = new ReturnObject<>();
-        }
-        return retObj;
-    }
-
-    public ReturnObject<Role> updateRole(Role role){
-        RolePo rolePo = role.gotRolePo();
-        RolePoExample example = new RolePoExample();
-        RolePoExample.Criteria criteria = example.createCriteria();
-        criteria.andNameEqualTo(rolePo.getName());
-        List<RolePo> rolePosByName = roleMapper.selectByExample(example);
-        ReturnObject<Role> retObj = null;
-        if(rolePosByName.size() > 0){
-            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
-        }
-        else{
-            int ret = roleMapper.updateByPrimaryKeySelective(rolePo);
-//        redisUtil.del("g_"+goods.getId());
-            if (ret == 0){
-                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-            } else {
-                retObj = new ReturnObject<>();
-            }
-        }
-        return retObj;
-    }
-    
     @Override
     public void afterPropertiesSet() throws Exception {
 
@@ -215,5 +130,113 @@ public class RoleDao implements InitializingBean {
             rolePrivilegePoMapper.updateByPrimaryKeySelective(newPo);
         }
 
+    }
+
+    /**
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    public ReturnObject<List> selectAllRole(Integer pageNum, Integer pageSize) {
+        RolePoExample example = new RolePoExample();
+        RolePoExample.Criteria criteria = example.createCriteria();
+        PageHelper.startPage(pageNum, pageSize);
+        List<RolePo> rolePos = roleMapper.selectByExample(example);
+        List<Role> roles = new ArrayList<>(rolePos.size());
+        logger.info("selectAllRoles: total roles num = " + rolePos.size());
+        for (RolePo rolePoItem : rolePos) {
+            Role item = new Role(rolePoItem);
+            roles.add(item);
+        }
+        return new ReturnObject<>(roles);
+    }
+
+    /**
+     * @param role
+     * @return
+     */
+    public ReturnObject<Role> insertRole(Role role) {
+        RolePo rolePo = role.gotRolePo();
+        RolePoExample example = new RolePoExample();
+        RolePoExample.Criteria criteria = example.createCriteria();
+        criteria.andNameEqualTo(rolePo.getName());
+        List<RolePo> rolePosByName = roleMapper.selectByExample(example);
+        ReturnObject<Role> retObj = null;
+        if (rolePosByName.size() > 0) {
+            logger.info("insertRole: have same role name = " + rolePo.getName());
+            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
+        } else {
+            int ret = roleMapper.insertSelective(rolePo);
+            if (ret == 0) {
+                logger.info("insertRole: id not exist = " + rolePo.getId());
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            } else {
+                logger.info("insertRole: insert role = " + rolePo.toString());
+                role.setId(rolePo.getId());
+                retObj = new ReturnObject<>(role);
+            }
+        }
+        return retObj;
+    }
+
+    /**
+     * @param id
+     * @return
+     */
+    public ReturnObject<Object> deleteRole(Long id) {
+        ReturnObject<Object> retObj = null;
+        int ret = roleMapper.deleteByPrimaryKey(id);
+        if (ret == 0) {
+            logger.info("deleteRole: id not exist = " + id);
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        } else {
+            logger.info("deleteRole: delete role id = " + id);
+            RolePrivilegePoExample exampleRP = new RolePrivilegePoExample();
+            RolePrivilegePoExample.Criteria criteriaRP = exampleRP.createCriteria();
+            criteriaRP.andRoleIdEqualTo(id);
+            List<RolePrivilegePo> rolePrivilegePos = rolePrivilegePoMapper.selectByExample(exampleRP);
+            logger.info("deleteRole: delete role-privilege num = " + rolePrivilegePos.size());
+            for (RolePrivilegePo rolePrivilegePo : rolePrivilegePos) {
+                rolePrivilegePoMapper.deleteByPrimaryKey(rolePrivilegePo.getId());
+            }
+
+            UserRolePoExample exampleUR = new UserRolePoExample();
+            UserRolePoExample.Criteria criteriaUR = exampleUR.createCriteria();
+            criteriaUR.andRoleIdEqualTo(id);
+            List<UserRolePo> userRolePos = userRolePoMapper.selectByExample(exampleUR);
+            logger.info("deleteRole: delete user-role num = " + userRolePos.size());
+            for (UserRolePo userRolePo : userRolePos) {
+                userRolePoMapper.deleteByPrimaryKey(userRolePo.getId());
+            }
+            retObj = new ReturnObject<>();
+        }
+        return retObj;
+    }
+
+    /**
+     * @param role
+     * @return
+     */
+    public ReturnObject<Role> updateRole(Role role) {
+        RolePo rolePo = role.gotRolePo();
+        RolePoExample example = new RolePoExample();
+        RolePoExample.Criteria criteria = example.createCriteria();
+        criteria.andNameEqualTo(rolePo.getName());
+        List<RolePo> rolePosByName = roleMapper.selectByExample(example);
+        ReturnObject<Role> retObj = null;
+        if (rolePosByName.size() > 0) {
+            logger.info("updateRole: have same role name = " + rolePo.getName());
+            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
+        } else {
+            int ret = roleMapper.updateByPrimaryKeySelective(rolePo);
+            if (ret == 0) {
+                logger.info("updateRole: id not exist = " + rolePo.getId());
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            } else {
+                logger.info("updateRole: update role = " + rolePo.toString());
+                retObj = new ReturnObject<>();
+            }
+        }
+        return retObj;
     }
 }

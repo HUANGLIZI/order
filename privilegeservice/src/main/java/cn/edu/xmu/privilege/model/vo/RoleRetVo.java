@@ -27,6 +27,7 @@ public class RoleRetVo {
 
     @ApiModelProperty(value = "角色名")
     private LocalDateTime gmtModified;
+
     /**
      * 构造函数，由Goods对象创建Vo
      * @param role role

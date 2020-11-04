@@ -35,7 +35,7 @@ import java.util.List;
  **/
 @Api(value = "权限服务", tags = "privilege")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "/", produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/privilege", produces = "application/json;charset=UTF-8")
 public class PrivilegeController {
     private  static  final Logger logger = LoggerFactory.getLogger(PrivilegeController.class);
 

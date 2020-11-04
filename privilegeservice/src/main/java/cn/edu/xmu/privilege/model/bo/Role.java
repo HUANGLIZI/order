@@ -40,6 +40,9 @@ public class Role implements VoObject, Serializable {
         this.gmtModified = po.getGmtModified();
     }
 
+    /**
+     * @return
+     */
     @Override
     public Object createVo() {
         return new RoleRetVo(this);
@@ -47,6 +50,7 @@ public class Role implements VoObject, Serializable {
 
     /**
      * 用vo对象创建更新po对象
+     *
      * @param vo vo对象
      * @return po对象
      */
@@ -61,7 +65,10 @@ public class Role implements VoObject, Serializable {
         return po;
     }
 
-    public RolePo gotRolePo(){
+    /**
+     * @return
+     */
+    public RolePo gotRolePo() {
         RolePo po = new RolePo();
         po.setId(this.getId());
         po.setName(this.getName());
