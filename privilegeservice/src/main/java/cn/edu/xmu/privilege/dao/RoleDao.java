@@ -217,7 +217,7 @@ public class RoleDao implements InitializingBean {
             for (RolePrivilegePo rolePrivilegePo : rolePrivilegePos) {
                 rolePrivilegePoMapper.deleteByPrimaryKey(rolePrivilegePo.getId());
             }
-            //
+            //删除缓存中角色权限信息
             redisTemplate.delete("r_" + id);
             //删除用户角色表
             UserRolePoExample exampleUR = new UserRolePoExample();
@@ -227,15 +227,16 @@ public class RoleDao implements InitializingBean {
             logger.debug("deleteRole: delete user-role num = " + userRolePos.size());
             for (UserRolePo userRolePo : userRolePos) {
                 userRolePoMapper.deleteByPrimaryKey(userRolePo.getId());
-                //
+                //删除缓存中具有删除角色的用户权限
                 redisTemplate.delete("u_" + userRolePo.getUserId());
-                //查询当前所有有效的被代理用户
+                //查询当前所有有效的代理具有删除角色用户的代理用户
                 UserProxyPoExample example = new UserProxyPoExample();
                 UserProxyPoExample.Criteria criteria = example.createCriteria();
                 criteria.andUserBIdEqualTo(userRolePo.getUserId());
                 List<UserProxyPo> userProxyPos = userProxyPoMapper.selectByExample(example);
                 for(UserProxyPo userProxyPo : userProxyPos){
-                    redisTemplate.delete("u_" + userProxyPo.getUserBId());
+                    //删除缓存中代理了具有删除角色的用户的代理用户
+                    redisTemplate.delete("u_" + userProxyPo.getUserAId());
                 }
             }
             retObj = new ReturnObject<>();
