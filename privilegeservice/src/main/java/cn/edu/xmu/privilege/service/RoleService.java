@@ -20,19 +20,9 @@ public class RoleService {
     @Autowired
     RoleDao roleDao;
 
-    public ReturnObject<List<RoleRetVo>> selectAllRoles(Integer pageNum, Integer pageSize) {
-        ReturnObject<List<Role>> returnObject = roleDao.selectAllRole(pageNum,pageSize);
-        ReturnObject<List<RoleRetVo>> retObject = null;
-        List<RoleRetVo> roleRetVos = new ArrayList<>(returnObject.getData().size());
-        if (returnObject.getCode().equals(ResponseCode.OK)) {
-            for(Role role : returnObject.getData()){
-                roleRetVos.add(role.createVo());
-            }
-            retObject = new ReturnObject<>(roleRetVos);
-        }else{
-            retObject = new ReturnObject<>(returnObject.getCode(), returnObject.getErrmsg());
-        }
-        return retObject;
+    public ReturnObject<List> selectAllRoles(Integer pageNum, Integer pageSize) {
+        ReturnObject<List> returnObject = roleDao.selectAllRole(pageNum,pageSize);
+        return returnObject;
     }
 
     public ReturnObject<VoObject> insertRole(RoleVo vo){

@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
 
 @Data
 @ApiModel(description = "角色视图对象")
@@ -16,11 +15,11 @@ public class RoleVo {
     private String name;
 
     @ApiModelProperty(value = "角色名")
-    private String desc;
+    private String descr;
 
     public Role createRole(){
         Role role = new Role();
-        role.setDescribe(this.desc);
+        role.setDescribe(this.descr);
         role.setName(this.name);
         return role;
     }

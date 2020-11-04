@@ -3,6 +3,7 @@ package cn.edu.xmu.privilege.model.bo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.privilege.model.po.RolePo;
 import cn.edu.xmu.privilege.model.vo.RoleRetVo;
+import cn.edu.xmu.privilege.model.vo.RoleVo;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -15,86 +16,59 @@ import java.time.LocalDateTime;
  **/
 @Data
 public class Role implements VoObject, Serializable {
-    /**
-     * 代理对象
-     */
-    private RolePo rolePo;
+    private Long id;
+    private String name;
+    private Long creatorId;
+    private String describe;
+    private LocalDateTime gmtCreate;
+    private LocalDateTime gmtModified;
 
-    /**
-     * 构造函数
-     */
     public Role() {
-        this.rolePo = new RolePo();
     }
 
     /**
      * 构造函数
+     *
+     * @param po 用PO构造
      */
-    public Role(RolePo rolePo) {
-        this.rolePo = rolePo;
+    public Role(RolePo po) {
+        this.id = po.getId();
+        this.name = po.getName();
+        this.creatorId = po.getCreatorId();
+        this.describe = po.getDescr();
+        this.gmtCreate = po.getGmtCreate();
+        this.gmtModified = po.getGmtModified();
     }
 
-    /**
-     * 由Goods对象创建Vo对象
-     */
     @Override
-    public RoleRetVo createVo(){
+    public Object createVo() {
         return new RoleRetVo(this);
     }
 
     /**
-     * 获得内部的代理对象
-     * @return GoodsPo对象
+     * 用vo对象创建更新po对象
+     * @param vo vo对象
+     * @return po对象
      */
+    public RolePo createUpdatePo(RoleVo vo){
+        RolePo po = new RolePo();
+        po.setId(this.getId());
+        po.setName(vo.getName());
+        po.setCreatorId(null);
+        po.setDescr(vo.getDescr());
+        po.setGmtCreate(null);
+        po.setGmtModified(LocalDateTime.now());
+        return po;
+    }
+
     public RolePo gotRolePo(){
-        return this.rolePo;
-    }
-
-    public Long getId() {
-        return this.rolePo.getId();
-    }
-
-    public void setId(Long id) {
-        this.rolePo.setId(id);
-    }
-
-    public String getName() {
-        return this.rolePo.getName();
-    }
-
-    public void setName(String name) {
-        this.rolePo.setName(name == null ? null : name.trim());
-    }
-
-    public String getDescribe() {
-        return this.rolePo.getDescribe();
-    }
-
-    public void setDescribe(String describe) {
-        this.rolePo.setDescribe(describe == null ? null : describe.trim());
-    }
-
-    public Long getCreatorId() {
-        return this.rolePo.getCreatorId();
-    }
-
-    public void setCreatorId(Long creatorId) {
-        this.rolePo.setCreatorId(creatorId);
-    }
-
-    public LocalDateTime getGmtCreate() {
-        return this.rolePo.getGmtCreate();
-    }
-
-    public void setGmtCreate(LocalDateTime gmtCreate) {
-        this.rolePo.setGmtCreate(gmtCreate);
-    }
-
-    public LocalDateTime getGmtModified() {
-        return this.rolePo.getGmtModified();
-    }
-
-    public void setGmtModified(LocalDateTime gmtModified) {
-        this.rolePo.setGmtModified(gmtModified);
+        RolePo po = new RolePo();
+        po.setId(this.getId());
+        po.setName(this.getName());
+        po.setCreatorId(this.getCreatorId());
+        po.setDescr(this.getDescribe());
+        po.setGmtCreate(this.getGmtCreate());
+        po.setGmtModified(this.getGmtModified());
+        return po;
     }
 }
