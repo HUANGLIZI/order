@@ -2,7 +2,6 @@ package cn.edu.xmu.privilege.controller;
 
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
-import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.vo.RoleVo;
 import cn.edu.xmu.privilege.service.RoleService;
@@ -55,6 +54,7 @@ public class RoleController {
     })
     @GetMapping("roles")
     public Object selectAllRoles(@RequestParam Integer page, @RequestParam Integer pageSize) {
+        logger.info("select all roles");
         ReturnObject<List> returnObject = roleService.selectAllRoles(page, pageSize);
         return Common.getListRetObject(returnObject);
     }
@@ -75,9 +75,11 @@ public class RoleController {
     })
     @PostMapping("roles")
     public Object insertRole(@Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
+        logger.info("insert role");
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
+            logger.info("validate fail");
             return returnObject;
         }
         //由AOP解析token获取userId
@@ -102,6 +104,7 @@ public class RoleController {
     })
     @DeleteMapping("roles/{id}")
     public Object deleteRole(@PathVariable("id") Long id) {
+        logger.info("delete role");
         ReturnObject<Object> returnObject = roleService.deleteRole(id);
         return Common.getNullRetObj(returnObject, httpServletResponse);
     }
@@ -124,6 +127,7 @@ public class RoleController {
     })
     @PutMapping("roles/{id}")
     public Object updateRole(@PathVariable("id") Long id, @Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
+        logger.info("update role");
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {

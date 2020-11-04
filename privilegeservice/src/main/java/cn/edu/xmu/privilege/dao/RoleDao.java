@@ -147,10 +147,11 @@ public class RoleDao implements InitializingBean {
         RolePoExample.Criteria criteria = example.createCriteria();
         //分页查询
         PageHelper.startPage(pageNum, pageSize);
+        logger.debug("page = " + pageNum + "pageSize = " + pageSize);
         //不加限定条件查询所有
         List<RolePo> rolePos = roleMapper.selectByExample(example);
         List<Role> roles = new ArrayList<>(rolePos.size());
-        logger.info("selectAllRoles: total roles num = " + rolePos.size());
+        logger.debug("selectAllRoles: total roles num = " + rolePos.size());
         for (RolePo rolePoItem : rolePos) {
             Role item = new Role(rolePoItem);
             roles.add(item);
@@ -170,18 +171,18 @@ public class RoleDao implements InitializingBean {
             int ret = roleMapper.insertSelective(rolePo);
             if (ret == 0) {
                 //修改失败
-                logger.info("updateRole: id not exist = " + rolePo.getId());
+                logger.debug("updateRole: id not exist = " + rolePo.getId());
                 retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             } else {
                 //修改成功
-                logger.info("updateRole: update role = " + rolePo.toString());
+                logger.debug("updateRole: update role = " + rolePo.toString());
                 retObj = new ReturnObject<>();
             }
         }
         catch (Exception e) {
             e.printStackTrace();
             //若有重复的角色名则修改失败
-            logger.info("updateRole: have same role name = " + rolePo.getName());
+            logger.debug("updateRole: have same role name = " + rolePo.getName());
             retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
         }
         return retObj;
@@ -197,16 +198,16 @@ public class RoleDao implements InitializingBean {
         int ret = roleMapper.deleteByPrimaryKey(id);
         if (ret == 0) {
             //删除角色表
-            logger.info("deleteRole: id not exist = " + id);
+            logger.debug("deleteRole: id not exist = " + id);
             retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         } else {
             //删除角色权限表
-            logger.info("deleteRole: delete role id = " + id);
+            logger.debug("deleteRole: delete role id = " + id);
             RolePrivilegePoExample exampleRP = new RolePrivilegePoExample();
             RolePrivilegePoExample.Criteria criteriaRP = exampleRP.createCriteria();
             criteriaRP.andRoleIdEqualTo(id);
             List<RolePrivilegePo> rolePrivilegePos = rolePrivilegePoMapper.selectByExample(exampleRP);
-            logger.info("deleteRole: delete role-privilege num = " + rolePrivilegePos.size());
+            logger.debug("deleteRole: delete role-privilege num = " + rolePrivilegePos.size());
             for (RolePrivilegePo rolePrivilegePo : rolePrivilegePos) {
                 rolePrivilegePoMapper.deleteByPrimaryKey(rolePrivilegePo.getId());
             }
@@ -215,7 +216,7 @@ public class RoleDao implements InitializingBean {
             UserRolePoExample.Criteria criteriaUR = exampleUR.createCriteria();
             criteriaUR.andRoleIdEqualTo(id);
             List<UserRolePo> userRolePos = userRolePoMapper.selectByExample(exampleUR);
-            logger.info("deleteRole: delete user-role num = " + userRolePos.size());
+            logger.debug("deleteRole: delete user-role num = " + userRolePos.size());
             for (UserRolePo userRolePo : userRolePos) {
                 userRolePoMapper.deleteByPrimaryKey(userRolePo.getId());
             }
@@ -236,18 +237,18 @@ public class RoleDao implements InitializingBean {
             int ret = roleMapper.updateByPrimaryKeySelective(rolePo);
             if (ret == 0) {
                 //修改失败
-                logger.info("updateRole: id not exist = " + rolePo.getId());
+                logger.debug("updateRole: id not exist = " + rolePo.getId());
                 retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             } else {
                 //修改成功
-                logger.info("updateRole: update role = " + rolePo.toString());
+                logger.debug("updateRole: update role = " + rolePo.toString());
                 retObj = new ReturnObject<>();
             }
         }
         catch (Exception e) {
             e.printStackTrace();
             //若有重复的角色名则修改失败
-            logger.info("updateRole: have same role name = " + rolePo.getName());
+            logger.debug("updateRole: have same role name = " + rolePo.getName());
             retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
         }
         return retObj;
