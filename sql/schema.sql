@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.21, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.22, for Linux (x86_64)
 --
 -- Host: 127.0.0.1    Database: oomall
 -- ------------------------------------------------------
--- Server version	8.0.21
+-- Server version	8.0.22
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,72 +16,167 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Dumping data for table `auth_new_user`
+-- Table structure for table `auth_new_user`
 --
 
-LOCK TABLES `auth_new_user` WRITE;
-/*!40000 ALTER TABLE `auth_new_user` DISABLE KEYS */;
-/*!40000 ALTER TABLE `auth_new_user` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `auth_new_user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_new_user` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(32) DEFAULT NULL,
+  `mobile` varchar(128) DEFAULT NULL,
+  `email` varchar(128) DEFAULT NULL,
+  `name` varchar(32) DEFAULT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
+  `open_id` varchar(128) DEFAULT NULL,
+  `depart_id` bigint DEFAULT NULL,
+  `gmt_create` datetime DEFAULT NULL,
+  `password` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `auth_new_user_user_name_uindex` (`user_name`),
+  UNIQUE KEY `auth_new_user_mobile_uindex` (`mobile`),
+  UNIQUE KEY `auth_new_user_email_uindex` (`email`),
+  UNIQUE KEY `auth_new_user_open_id_uindex` (`open_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `auth_privilege`
+-- Table structure for table `auth_privilege`
 --
 
-LOCK TABLES `auth_privilege` WRITE;
-/*!40000 ALTER TABLE `auth_privilege` DISABLE KEYS */;
-INSERT INTO `auth_privilege` VALUES (2,'查看任意用户信息','/adminusers/{id}',0,2,NULL,'2020-11-01 09:52:20',NULL),(3,'修改任意用户信息','/adminusers/{id}',2,3,NULL,'2020-11-01 09:53:03',NULL),(4,'删除用户','/adminusers/{id}',3,4,NULL,'2020-11-01 09:53:36',NULL),(5,'恢复用户','/adminusers/{id}/release',2,5,NULL,'2020-11-01 09:59:24',NULL),(6,'禁止用户登录','/adminusers/{id}/forbid',2,6,NULL,'2020-11-01 10:02:32',NULL),(7,'赋予用户角色','/adminusers/{id}/roles/{id}',1,7,NULL,'2020-11-01 10:02:35',NULL),(8,'取消用户角色','/adminusers/{id}/roles/{id}',3,8,NULL,'2020-11-01 10:03:16',NULL),(9,'新增角色','/roles',1,9,NULL,'2020-11-01 10:04:09',NULL),(10,'删除角色','/roles/{id}',3,10,NULL,'2020-11-01 10:04:42',NULL),(11,'修改角色信息','/roles/{id}',2,11,NULL,'2020-11-01 10:05:20',NULL),(12,'给角色增加权限','/roles/{id}/privileges/{id}',1,12,NULL,'2020-11-01 10:06:03',NULL),(13,'取消角色权限','/roles/{id}/privileges/{id}',3,13,NULL,'2020-11-01 10:06:43',NULL),(14,'修改权限信息','/privileges/{id}',2,14,NULL,'2020-11-01 10:08:18',NULL);
-/*!40000 ALTER TABLE `auth_privilege` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `auth_privilege`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_privilege` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `name` varchar(64) DEFAULT NULL,
+  `url` varchar(512) DEFAULT NULL,
+  `request_type` tinyint DEFAULT NULL,
+  `signature` varchar(256) DEFAULT NULL,
+  `gmt_create` datetime DEFAULT NULL,
+  `gmt_modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `auth_role`
+-- Table structure for table `auth_role`
 --
 
-LOCK TABLES `auth_role` WRITE;
-/*!40000 ALTER TABLE `auth_role` DISABLE KEYS */;
-INSERT INTO `auth_role` VALUES (23,'管理员',1,NULL,'2020-11-01 09:48:24','2020-11-01 09:48:24'),(80,'财务',1,NULL,'2020-11-01 09:48:24','2020-11-01 09:48:24'),(81,'客服',1,NULL,'2020-11-01 09:48:24','2020-11-01 09:48:24'),(82,'运营部',1,NULL,'2020-11-01 09:48:24','2020-11-01 09:48:24'),(83,'产品部',1,NULL,'2020-11-01 09:48:24','2020-11-01 09:48:24'),(84,'文案',1,NULL,'2020-11-01 09:48:24','2020-11-01 09:48:24'),(85,'总经办',1,NULL,'2020-11-01 09:48:24','2020-11-01 09:48:24'),(86,'库管',1,NULL,'2020-11-01 09:48:24','2020-11-01 09:48:24');
-/*!40000 ALTER TABLE `auth_role` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `auth_role`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_role` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `name` varchar(64) NOT NULL COMMENT '角色名称',
+  `creator_id` bigint NOT NULL COMMENT '创建者',
+  `descr` varchar(500) DEFAULT NULL COMMENT '角色描述',
+  `gmt_create` datetime NOT NULL COMMENT '创建时间',
+  `gmt_modified` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `auth_role_name_uindex` (`name`),
+  KEY `auth_role_creator_id_index` (`creator_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8 COMMENT='角色表';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `auth_role_privilege`
+-- Table structure for table `auth_role_privilege`
 --
 
-LOCK TABLES `auth_role_privilege` WRITE;
-/*!40000 ALTER TABLE `auth_role_privilege` DISABLE KEYS */;
-INSERT INTO `auth_role_privilege` VALUES (1,23,2,1,'2020-11-01 10:11:21',NULL),(2,23,3,1,'2020-11-01 10:11:53',NULL),(3,23,4,1,'2020-11-01 10:12:15',NULL),(4,23,5,1,'2020-11-01 10:12:15',NULL),(5,23,6,1,'2020-11-01 10:12:15',NULL),(6,23,7,1,'2020-11-01 10:12:15',NULL),(7,23,8,1,'2020-11-01 10:12:15',NULL),(8,23,9,1,'2020-11-01 10:12:15',NULL),(9,23,10,1,'2020-11-01 10:12:15',NULL),(10,23,11,1,'2020-11-01 10:12:15',NULL),(11,23,12,1,'2020-11-01 10:12:15',NULL),(12,23,13,1,'2020-11-01 10:12:15',NULL),(13,23,14,1,'2020-11-01 10:12:15',NULL),(14,80,9,1,'2020-11-01 10:12:15',NULL),(15,80,10,1,'2020-11-01 10:12:15',NULL),(16,80,11,1,'2020-11-01 10:12:15',NULL),(17,80,12,1,'2020-11-01 10:12:15',NULL),(18,80,13,1,'2020-11-01 10:12:15',NULL),(19,80,14,1,'2020-11-01 10:12:15',NULL);
-/*!40000 ALTER TABLE `auth_role_privilege` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `auth_role_privilege`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_role_privilege` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `role_id` bigint DEFAULT NULL,
+  `privilege_id` bigint DEFAULT NULL,
+  `creator_id` bigint DEFAULT NULL,
+  `gmt_create` datetime DEFAULT NULL,
+  `signature` varchar(256) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `auth_role_privilege_role_id_index` (`role_id`),
+  KEY `auth_role_privilege_creator_id_index` (`creator_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `auth_user`
+-- Table structure for table `auth_user`
 --
 
-LOCK TABLES `auth_user` WRITE;
-/*!40000 ALTER TABLE `auth_user` DISABLE KEYS */;
-INSERT INTO `auth_user` VALUES (1,'13088admin','123456','6411686886',1,NULL,0,'B自如',NULL,'2020-11-01 09:48:24','182.86.203.201',NULL,0,0,'2020-11-01 09:48:24','2020-11-01 09:48:24',NULL),(46,'8131600001','123456','1423368508',1,NULL,0,'余自如',NULL,'2020-11-01 09:48:24','111.73.169.226',NULL,0,0,'2020-11-01 09:48:24','2020-11-01 09:48:24',NULL),(47,'2721900002','123456','9339790619',1,NULL,0,'郭自如',NULL,'2020-11-01 09:48:24','111.73.172.255',NULL,0,0,'2020-11-01 09:48:24','2020-11-01 09:48:24',NULL),(48,'8532600003','123456','4644246255',1,NULL,0,'胡自如',NULL,'2020-11-01 09:48:24','182.86.207.170',NULL,0,0,'2020-11-01 09:48:24','2020-11-01 09:48:24',NULL),(49,'7623000006','123456','4182436926',1,NULL,0,'雷自如',NULL,'2020-11-01 09:48:24','111.73.172.255',NULL,0,0,'2020-11-01 09:48:24','2020-11-01 09:48:24',NULL),(50,'8043300005','123456','7669382562',1,NULL,0,'陈自如',NULL,'2020-11-01 09:48:24','111.73.169.94',NULL,0,0,'2020-11-01 09:48:24','2020-11-01 09:48:24',NULL),(51,'4216700007','123456','8075690623',1,NULL,0,'朱自如',NULL,'2020-11-01 09:48:24','59.63.23.162',NULL,0,0,'2020-11-01 09:48:24','2020-11-01 09:48:24',NULL),(52,'7728110000','123456','4413858026',1,NULL,0,'刘自如',NULL,'2020-11-01 09:48:24','59.46.161.186',NULL,0,0,'2020-11-01 09:48:24','2020-11-01 09:48:24',NULL),(53,'8884810086','123456','1182786886',1,NULL,0,'金自如',NULL,'2020-11-01 09:48:24','120.35.68.104',NULL,0,0,'2020-11-01 09:48:24','2020-11-01 09:48:24',NULL),(54,'9259200008','123456','2747990621',1,NULL,0,'陈自如',NULL,'2020-11-01 09:48:24','',NULL,0,0,'2020-11-01 09:48:24','2020-11-01 09:48:24',NULL),(55,'5961900008','123456','1565883966',1,NULL,0,'陈自如',NULL,'2020-11-01 09:48:24','111.73.169.58',NULL,0,0,'2020-11-01 09:48:24','2020-11-01 09:48:24',NULL),(57,'9943200016','123456','5018890619',1,NULL,0,'运自如',NULL,'2020-11-01 09:48:24','111.73.175.84',NULL,0,0,'2020-11-01 09:48:24','2020-11-01 09:48:24',NULL),(58,'5264500009','123456','1266290623',1,NULL,0,'发自如',NULL,'2020-11-01 09:48:24','111.73.133.9',NULL,0,0,'2020-11-01 09:48:24','2020-11-01 09:48:24',NULL),(59,'537300010','123456','8888011111',1,NULL,0,'销自如',NULL,'2020-11-01 09:48:24','111.73.172.255',NULL,0,0,'2020-11-01 09:48:24','2020-11-01 09:48:24',NULL);
-/*!40000 ALTER TABLE `auth_user` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `auth_user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_user` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(32) NOT NULL COMMENT '用户名',
+  `password` varchar(128) NOT NULL,
+  `mobile` varchar(128) DEFAULT NULL,
+  `mobile_verified` tinyint DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `email_verified` tinyint DEFAULT NULL,
+  `name` varchar(128) DEFAULT NULL COMMENT 'y用户真实姓名',
+  `avatar` varchar(255) DEFAULT NULL COMMENT '头像',
+  `last_login_time` datetime DEFAULT NULL,
+  `last_login_ip` varchar(63) DEFAULT NULL,
+  `open_id` varchar(128) DEFAULT NULL COMMENT '用于第三方登录',
+  `state` tinyint DEFAULT NULL COMMENT '用户状态',
+  `depart_id` bigint DEFAULT NULL COMMENT '用户部门，0 平台',
+  `gmt_create` datetime NOT NULL,
+  `gmt_modified` datetime DEFAULT NULL,
+  `signature` varchar(500) DEFAULT NULL COMMENT '对user_name,password,mobile,email,open_id,depart_id签名',
+  `creator_id` bigint DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `auth_user_user_name_uindex` (`user_name`),
+  UNIQUE KEY `auth_user_open_id_uindex` (`open_id`),
+  UNIQUE KEY `auth_user_mobile_uindex` (`mobile`),
+  UNIQUE KEY `auth_user_email_uindex` (`email`),
+  KEY `auth_user_depart_id_index` (`depart_id`),
+  KEY `auth_user_creator_id_index` (`creator_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=17330 DEFAULT CHARSET=utf8 COMMENT='用户';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `auth_user_proxy`
+-- Table structure for table `auth_user_proxy`
 --
 
-LOCK TABLES `auth_user_proxy` WRITE;
-/*!40000 ALTER TABLE `auth_user_proxy` DISABLE KEYS */;
-/*!40000 ALTER TABLE `auth_user_proxy` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `auth_user_proxy`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_user_proxy` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_a_id` bigint DEFAULT NULL,
+  `user_b_id` bigint DEFAULT NULL,
+  `begin_date` datetime DEFAULT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `gmt_create` datetime DEFAULT NULL,
+  `signature` varchar(256) DEFAULT NULL,
+  `valid` tinyint NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`),
+  KEY `auth_user_proxy_user_a_id_valid_index` (`user_a_id`,`valid`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `auth_user_role`
+-- Table structure for table `auth_user_role`
 --
 
-LOCK TABLES `auth_user_role` WRITE;
-/*!40000 ALTER TABLE `auth_user_role` DISABLE KEYS */;
-INSERT INTO `auth_user_role` VALUES (76,23,1,1,NULL,'2020-11-01 09:48:24'),(77,84,46,1,NULL,'2020-11-01 09:48:24'),(78,82,47,1,NULL,'2020-11-01 09:48:24'),(79,80,48,1,NULL,'2020-11-01 09:48:24'),(80,80,49,1,NULL,'2020-11-01 09:48:24'),(81,83,50,1,NULL,'2020-11-01 09:48:24'),(82,85,51,1,NULL,'2020-11-01 09:48:24'),(83,81,52,1,NULL,'2020-11-01 09:48:24'),(84,23,53,1,NULL,'2020-11-01 09:48:24'),(85,86,54,1,NULL,'2020-11-01 09:48:24'),(86,86,55,1,NULL,'2020-11-01 09:48:24'),(87,23,57,1,NULL,'2020-11-01 09:48:24'),(88,23,58,1,NULL,'2020-11-01 09:48:24'),(89,81,59,1,NULL,'2020-11-01 09:48:24');
-/*!40000 ALTER TABLE `auth_user_role` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `auth_user_role`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_user_role` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `role_id` bigint DEFAULT NULL,
+  `user_id` bigint DEFAULT NULL,
+  `creator_id` bigint DEFAULT NULL,
+  `signature` varchar(256) DEFAULT NULL,
+  `gmt_create` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `auth_user_role_role_id_index` (`role_id`),
+  KEY `auth_user_role_creator_id_index` (`creator_id`),
+  KEY `auth_user_role_user_id_index` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=91 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -92,4 +187,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-11-01 14:24:25
+-- Dump completed on 2020-11-04 13:07:09
