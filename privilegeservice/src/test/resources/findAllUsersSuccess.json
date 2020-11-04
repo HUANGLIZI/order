@@ -1,0 +1,48 @@
+{
+  "errno": 0,
+  "data": [
+    {
+      "id": 1,
+      "userName": "13088admin",
+      "mobile": "6411686886",
+      "name": "超级管理员",
+      "email": null,
+      "avatar": null,
+      "lastLoginTime": "2020-11-01T09:48:24",
+      "lastLoginIp": "182.86.203.201",
+      "status": 0,
+      "depart_id": 0,
+      "gmtCreate": "2020-11-01T09:48:24",
+      "gmtModified": "2020-11-01T09:48:24"
+    },
+    {
+      "id": 46,
+      "userName": "8131600001",
+      "mobile": "1423368508",
+      "name": "查看",
+      "email": null,
+      "avatar": null,
+      "lastLoginTime": "2020-11-01T09:48:24",
+      "lastLoginIp": "111.73.169.226",
+      "status": 0,
+      "depart_id": 0,
+      "gmtCreate": "2020-11-01T09:48:24",
+      "gmtModified": "2020-11-01T09:48:24"
+    },
+    {
+      "id": 47,
+      "userName": "2721900002",
+      "mobile": "9339790619",
+      "name": "角色",
+      "email": null,
+      "avatar": null,
+      "lastLoginTime": "2020-11-01T09:48:24",
+      "lastLoginIp": "111.73.172.255",
+      "status": 0,
+      "depart_id": 0,
+      "gmtCreate": "2020-11-01T09:48:24",
+      "gmtModified": "2020-11-01T09:48:24"
+    }
+  ],
+  "errmsg": "成功"
+}

@@ -1,9 +1,11 @@
 package cn.edu.xmu.privilege.model.bo;
 
+import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.AES;
 import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.ooad.util.StringUtil;
 import cn.edu.xmu.privilege.model.po.UserPo;
+import cn.edu.xmu.privilege.model.vo.UserRetVo;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -18,7 +20,7 @@ import java.util.Map;
  * @date Created in 2020/11/3 20:10
  **/
 @Data
-public class User {
+public class User implements VoObject {
 
     public static String AESPASS = "OOAD2020-11-01";
 
@@ -130,11 +132,38 @@ public class User {
         this.gmtModified = po.getGmtModified();
         this.signature = po.getSignature();
 
+
         StringBuilder signature = StringUtil.concatString("-", po.getUserName(), po.getPassword(),
                 po.getMobile(),po.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
                 po.getCreatorId().toString());
         this.cacuSignature = SHA256.getSHA256(signature.toString());
     }
+
+
+    /**
+     * Create return Vo object
+     * @author XQChen
+     * @return
+     */
+    @Override
+    public UserRetVo createVo() {
+        UserRetVo userRetVo = new UserRetVo();
+        userRetVo.setId(id);
+        userRetVo.setUserName(userName);
+        userRetVo.setMobile(mobile);
+        userRetVo.setName(name);
+        userRetVo.setEmail(email);
+        userRetVo.setAvatar(avatar);
+        userRetVo.setLastLoginTime(lastLoginTime.toString());
+        userRetVo.setLastLoginIp(lastLoginIp);
+        userRetVo.setStatus(state.getCode().byteValue());
+        userRetVo.setDepart_id(departId);
+        userRetVo.setGmtCreate(gmtCreate.toString());
+        userRetVo.setGmtModified(gmtModified.toString());
+
+        return userRetVo;
+    }
+
 
     /**
      * 对象未篡改

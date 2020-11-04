@@ -1,6 +1,8 @@
 package cn.edu.xmu.privilege.dao;
 
 import cn.edu.xmu.ooad.util.AES;
+import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.ooad.util.StringUtil;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
@@ -8,6 +10,15 @@ import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.po.*;
+import cn.edu.xmu.privilege.model.po.*;
+import cn.edu.xmu.privilege.service.UserService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import cn.edu.xmu.privilege.model.po.UserProxyPo;
+import cn.edu.xmu.privilege.model.po.UserProxyPoExample;
+import cn.edu.xmu.privilege.model.po.UserRolePo;
+import cn.edu.xmu.privilege.model.po.UserRolePoExample;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -27,6 +38,9 @@ import java.util.concurrent.TimeUnit;
  **/
 @Repository
 public class UserDao implements InitializingBean {
+
+    @Autowired
+    private UserPoMapper userPoMapper;
 
     private static final Logger logger = LoggerFactory.getLogger(UserDao.class);
 
@@ -253,5 +267,35 @@ public class UserDao implements InitializingBean {
             userRolePoMapper.updateByPrimaryKeySelective(newPo);
         }
 
+    }
+
+    public UserPo findUserById(Long Id) {
+        UserPoExample example = new UserPoExample();
+        UserPoExample.Criteria criteria = example.createCriteria();
+        criteria.andIdEqualTo(Id);
+
+        logger.info("findUserById: Id =" + Id);
+        List<UserPo> userPos = userPoMapper.selectByExample(example);
+
+        UserPo userPo = null;
+
+        Integer size = userPos.size();
+        logger.info("findUserById: getUsers = " + userPos + " size = " + size);
+        if(size == 1)
+            userPo = userPos.get(0);
+
+
+        return userPo;
+    }
+
+    public List<UserPo> findAllUsers() {
+        UserPoExample example = new UserPoExample();
+
+        List<UserPo> userPos = userPoMapper.selectByExample(example);
+
+        logger.info("findUserById: retUsers = "+userPos);
+
+
+        return userPos;
     }
 }
