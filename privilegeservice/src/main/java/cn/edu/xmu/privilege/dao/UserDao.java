@@ -6,6 +6,7 @@ import cn.edu.xmu.privilege.mapper.RolePoMapper;
 import cn.edu.xmu.ooad.util.AES;
 import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.ooad.util.StringUtil;
+import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
@@ -13,11 +14,13 @@ import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.po.*;
+import cn.edu.xmu.privilege.model.vo.UserVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -400,6 +403,162 @@ public class UserDao implements InitializingBean {
             userRolePoMapper.updateByPrimaryKeySelective(newPo);
         }
 
+    }
+
+    /**
+     * 根据 id 修改用户信息
+     * @param userVo 传入的 User 对象
+     * @return 返回对象 ReturnObj
+     */
+    public ReturnObject<Object> modifyUserByVo(Long id, UserVo userVo) {
+        // 查询密码等资料以计算新签名
+        UserPo orig = userMapper.selectByPrimaryKey(id);
+        if (orig == null) {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        UserPo po = userVo.createUserPo(id);
+
+        // 如果没有改动有关字段，需要从 orig 中获取以计算签名
+        String name = po.getName() == null ? orig.getName() : po.getName();
+        String mobile = po.getMobile() == null ? orig.getMobile() : po.getMobile();
+        String email = po.getEmail() == null ? orig.getEmail() : po.getEmail();
+
+        // 签名：user_name,password,mobile,email,open_id,state,depart_id,creator
+        StringBuilder signature = StringUtil.concatString("-", name, orig.getPassword(),
+                mobile, email, orig.getOpenId(), orig.getState().toString(), orig.getDepartId().toString(),
+                orig.getCreatorId().toString());
+        po.setSignature(SHA256.getSHA256(signature.toString()));
+
+        // 更新字段
+        ReturnObject<Object> retObj;
+        int ret;
+        try {
+            ret = userMapper.updateByPrimaryKeySelective(po);
+        } catch (DataAccessException e) {
+            // 如果发生 Exception，判断是邮箱还是啥重复错误
+            if (e.getMessage().contains("auth_user.auth_user_mobile_uindex")) {
+                retObj = new ReturnObject<>(ResponseCode.MOBILE_REGISTERED);
+            } else if (e.getMessage().contains("auth_user.auth_user_email_uindex")) {
+                retObj = new ReturnObject<>(ResponseCode.EMAIL_REGISTERED);
+            } else {
+                // 其他情况属未知错误
+                retObj = new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            }
+            return retObj;
+        }
+        // 检查更新有否成功
+        if (ret == 0) {
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        } else {
+            retObj = new ReturnObject<>();
+        }
+        return retObj;
+    }
+
+    /**
+     * (物理) 删除用户
+     * @param id 用户 id
+     * @return 返回对象 ReturnObj
+     */
+    public ReturnObject<Object> physicallyDeleteUser(Long id) {
+        ReturnObject<Object> retObj;
+        int ret = userMapper.deleteByPrimaryKey(id);
+        if (ret == 0) {
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        } else {
+            retObj = new ReturnObject<>();
+        }
+        return retObj;
+    }
+
+    /**
+     * (逻辑) 删除用户
+     * @param id 用户 id
+     * @return 返回对象 ReturnObj
+     */
+    public ReturnObject<Object> logicallyDeleteUser(Long id) {
+        UserPo po = createUserStateModPo(id, (byte) User.State.DELETE.getCode().intValue());
+        if (po == null) {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        ReturnObject<Object> retObj;
+        int ret = userMapper.updateByPrimaryKeySelective(po);
+        if (ret == 0) {
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        } else {
+            retObj = new ReturnObject<>();
+        }
+        return retObj;
+    }
+
+
+    /**
+     * 创建可改变目标用户状态的 Po
+     * @param id 用户 id
+     * @param state 用户目标状态
+     * @return UserPo 对象
+     */
+    private UserPo createUserStateModPo(Long id, byte state) {
+        UserPo origPo = userMapper.selectByPrimaryKey(id);
+        if (origPo == null) {
+            return null;
+        }
+        UserPo po = new UserPo();
+        po.setState(state);
+        po.setId(id);
+
+        // 签名：user_name,password,mobile,email,open_id,state,depart_id,creator
+        StringBuilder signature = StringUtil.concatString("-", origPo.getName(),
+                origPo.getPassword(), origPo.getMobile(), origPo.getEmail(),
+                origPo.getOpenId(),
+                po.getState().toString(),
+                origPo.getDepartId().toString(),
+                origPo.getCreatorId().toString());
+        po.setSignature(SHA256.getSHA256(signature.toString()));
+        return po;
+    }
+
+    /**
+     * 禁止用户登录
+     * @param id 用户 id
+     * @return 返回对象 ReturnObj
+     */
+    public ReturnObject<Object> forbidUser(Long id) {
+        UserPo po = createUserStateModPo(id, (byte) (byte) User.State.FORBID.getCode().intValue());
+        if (po == null) {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        ReturnObject<Object> retObj;
+        int ret = userMapper.updateByPrimaryKeySelective(po);
+        if (ret == 0) {
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        } else {
+            retObj = new ReturnObject<>();
+        }
+        return retObj;
+    }
+
+    /**
+     * 解禁用户登录
+     * @param id 用户 id
+     * @return 返回对象 ReturnObj
+     */
+    public ReturnObject<Object> releaseUser(Long id) {
+        UserPo po = createUserStateModPo(id, (byte) (byte) User.State.NORM.getCode().intValue());
+        if (po == null) {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        ReturnObject<Object> retObj;
+        int ret = userMapper.updateByPrimaryKeySelective(po);
+        if (ret == 0) {
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        } else {
+            retObj = new ReturnObject<>();
+        }
+        return retObj;
     }
 }
 
