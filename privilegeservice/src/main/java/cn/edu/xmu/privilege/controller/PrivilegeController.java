@@ -5,26 +5,19 @@ import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.privilege.model.bo.Role;
-import cn.edu.xmu.privilege.model.vo.RoleVo;
-import cn.edu.xmu.privilege.service.RoleService;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
+import cn.edu.xmu.privilege.model.vo.UserVo;
 import cn.edu.xmu.privilege.service.UserService;
-import com.mysql.cj.conf.PropertyKey;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,16 +31,11 @@ import java.util.List;
 @RestController /*Restful的Controller对象*/
 @RequestMapping(value = "/privilege", produces = "application/json;charset=UTF-8")
 public class PrivilegeController {
+
     private  static  final Logger logger = LoggerFactory.getLogger(PrivilegeController.class);
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    RoleService roleService;
-
-    @Autowired
-    private HttpServletResponse httpServletResponse;
 
     /**
      * 获得所有权限
