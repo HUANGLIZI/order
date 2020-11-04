@@ -106,7 +106,7 @@ public class User {
     public User(UserPo po){
         this.id = po.getId();
         this.userName = po.getUserName();
-        this.password = po.getPassword();
+        this.password =po.getPassword();
         this.mobile = AES.decrypt(po.getMobile(),AESPASS);
         if (null != po.getMobileVerified()) {
             this.mobileVerified = po.getMobileVerified() == 1;
@@ -116,7 +116,7 @@ public class User {
         if (null != po.getEmailVerified()) {
             this.emailVerified = po.getEmailVerified() == 1;
         }
-        this.name = AES.decrypt(po.getName(),AESPASS);
+        this.name = AES.decrypt(po.getName(), AESPASS);
         this.avatar = po.getAvatar();
         this.lastLoginTime = po.getLastLoginTime();
         this.lastLoginIp = po.getLastLoginIp();
