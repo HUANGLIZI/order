@@ -16,7 +16,6 @@
 
     <modules>
         <module>privilegeservice</module>
-        <module>privilegeaop</module>
         <module>privilegegateway</module>
         <module>core</module>
     </modules>
