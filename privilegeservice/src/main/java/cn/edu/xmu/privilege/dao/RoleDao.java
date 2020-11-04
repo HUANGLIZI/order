@@ -69,7 +69,7 @@ public class RoleDao implements InitializingBean {
         List<Long> privIds = this.getPrivIdsByRoleId(id);
         String key = "r_" + id;
         if (privIds.size() == 0){
-            redisTemplate.opsForSet().add(key);
+            redisTemplate.opsForSet().add(key,"0");
         } else {
             for (Long pId : privIds) {
                 redisTemplate.opsForSet().add(key, pId.toString());
