@@ -23,6 +23,10 @@ public class AES {
      * @return 密文
      */
     public static String encrypt(String content, String password) {
+        if (null == content){
+            return null;
+        }
+
         try {
             SecretKeySpec key = getSecretKey(password);
             // 创建密码器
@@ -60,6 +64,10 @@ public class AES {
      * @return 明文
      */
     public static String decrypt(String content, String password) {
+        if (content == null){
+            return null;
+        }
+
         try {
             // 创建AES的Key生产者
             SecretKeySpec key = getSecretKey(password);

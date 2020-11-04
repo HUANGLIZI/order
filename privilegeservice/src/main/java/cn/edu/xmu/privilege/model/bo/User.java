@@ -20,7 +20,7 @@ import java.util.Map;
 @Data
 public class User {
 
-    private static String AESPASS = "OOAD2020-11-01";
+    public static String AESPASS = "OOAD2020-11-01";
 
     /**
      * 后台用户状态
