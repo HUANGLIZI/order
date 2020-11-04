@@ -1,5 +1,6 @@
 package cn.edu.xmu.privilege.service;
 
+import cn.edu.xmu.ooad.util.AES;
 import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -26,12 +27,15 @@ public class AuthenticationService {
         ReturnObject<String> retObj = null;
         User user = userDao.getUserByName(username);
 
-        if(user.getPassword().equals(password)){
+        // 短路，阻止用户名不存在的用户登录
+        if(user != null && password.equals(AES.decrypt(user.getPassword(), User.AESPASS))){
             String jwt = jwtHelper.createToken(user.getId(),user.getDepartId());
+            userDao.loadUserPriv(user.getId());
             retObj = new ReturnObject<>(jwt);
         } else {
             retObj = new ReturnObject<>(ResponseCode.AUTH_INVALID_ACCOUNT, "用户名或密码错误");
         }
+
         return retObj;
     }
 

@@ -67,7 +67,8 @@ public class UserDao implements InitializingBean {
         criteria.andUserNameEqualTo(userName);
         List<UserPo> users = userPoMapper.selectByExample(example);
 
-        return new User(users.get(0));
+        if (users.isEmpty()) return null;
+        else return new User(users.get(0));
     }
 
     /**

@@ -15,8 +15,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * @author Ming Qiu
@@ -42,11 +41,67 @@ public class PrivilegeControllerTest {
     }
 
     @Test
-    public void login() throws  Exception{
-        String requireJson = "{\"userName\":\"13088admin\",\"password\":\"123456\"}";
-        ResultActions res = this.mvc.perform(post("/privilege/privileges/login").contentType("application/json;charset=UTF-8").content(requireJson));
-        String responseString = res
+    public void login() throws Exception{
+        String requireJson = null;
+        String responseString = null;
+        ResultActions res = null;
+
+        //region 正常用户登录
+        requireJson = "{\"userName\":\"13088admin\",\"password\":\"123456\"}";
+        res = this.mvc.perform(post("/privilege/privileges/login")
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson));
+        responseString = res.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.errno").value(0))
+                .andExpect(jsonPath("$.errmsg").value("成功"))
+                .andExpect(jsonPath("$.data").isString())
                 .andReturn().getResponse().getContentAsString();
+        //endregion
+
+        //region 密码错误的用户登录
+        requireJson = "{\"userName\":\"13088admin\",\"password\":\"000000\"}";
+        res = this.mvc.perform(post("/privilege/privileges/login")
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson));
+        responseString = res.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.errno").value(700))
+                .andExpect(jsonPath("$.errmsg").value("用户名或密码错误"))
+                .andExpect(jsonPath("$.data").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+        //endregion
+
+        //region 用户名错误的用户登录
+        requireJson = "{\"userName\":\"NotExist\",\"password\":\"123456\"}";
+        res = this.mvc.perform(post("/privilege/privileges/login")
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson));
+        responseString = res.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.errno").value(700))
+                .andExpect(jsonPath("$.errmsg").value("用户名或密码错误"))
+                .andExpect(jsonPath("$.data").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+        //endregion
+
+        //region 没有输入用户名的用户登录
+        requireJson = "{\"password\":\"123456\"}";
+        res = this.mvc.perform(post("/privilege/privileges/login")
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson));
+        responseString = res.andExpect(status().isBadRequest())
+//                .andExpect(content().contentType("application/json;charset=UTF-8"))
+//                .andExpect(jsonPath("$.errno").value(700))
+//                .andExpect(jsonPath("$.errmsg").value("用户名或密码错误"))
+//                .andExpect(jsonPath("$.data").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+        //endregion
+
+        //region 没有输入密码的用户登录
+        requireJson = "{\"userName\":\"NotExist\",\"password\":\"123456\"}";
+        //endregion
+        /* 用户重复登录 */
     }
 
     @Test

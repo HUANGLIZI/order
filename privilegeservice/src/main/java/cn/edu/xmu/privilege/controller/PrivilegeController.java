@@ -88,7 +88,7 @@ public class PrivilegeController {
         if(jwt.getData() == null){
             return ResponseUtil.fail(ResponseCode.AUTH_INVALID_ACCOUNT,"用户名或密码错误");
         }else{
-            return ResponseUtil.ok(jwt);
+            return ResponseUtil.ok(jwt.getData());
         }
     }
 
