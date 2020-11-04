@@ -58,9 +58,8 @@ public class PrivilegeControllerTest {
      */
     @Test
     public void assignRoleTest() throws Exception {
-        JwtHelper jwtHelper = new JwtHelper();
-        String token = jwtHelper.createToken(new Long(47), new Long(1));
-        String responseString = this.mvc.perform(post("/privilege/adminusers/47/roles/84").header("token", token))
+
+        String responseString = this.mvc.perform(post("/privilege/adminusers/47/roles/84?createid=47"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -95,9 +94,8 @@ public class PrivilegeControllerTest {
      */
     @Test
     public void getSelfUserRoleTest() throws Exception {
-        JwtHelper jwtHelper = new JwtHelper();
-        String token = jwtHelper.createToken(new Long(47), new Long(1));
-        String responseString = this.mvc.perform(get("/privilege/adminusers/self/roles").header("token", token))
+
+        String responseString = this.mvc.perform(get("/privilege/adminusers/self/roles?id=47"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();

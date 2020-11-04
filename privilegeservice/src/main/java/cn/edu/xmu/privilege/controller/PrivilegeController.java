@@ -68,9 +68,7 @@ public class PrivilegeController {
             @ApiResponse(code = 504, message = "操作id不存在")
     })
     @PostMapping("/adminusers/{userid}/roles/{roleid}")
-    public Object assignRole(@RequestHeader(value="token") String token, @PathVariable Long userid, @PathVariable Long roleid){
-        JwtHelper jwtHelper = new JwtHelper();
-        Long createid = jwtHelper.verifyTokenAndGetClaims(token).getUserId();
+    public Object assignRole(@RequestParam(name = "createid") Long createid, @PathVariable Long userid, @PathVariable Long roleid){
 
         ReturnObject<VoObject> returnObject =  userService.assignRole(createid, userid, roleid);
         return Common.getRetObject(returnObject);
@@ -83,16 +81,14 @@ public class PrivilegeController {
      */
     @ApiOperation(value = "获得自己角色信息")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header")
+            @ApiImplicitParam(name="id", value="用户", required = true, dataType="String", paramType="param")
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
+
     })
     @GetMapping("/adminusers/self/roles")
-    public Object getUserSelfRole(@RequestHeader(value="token") String token){
-        // 解析token获得id
-        JwtHelper jwtHelper = new JwtHelper();
-        Long id = jwtHelper.verifyTokenAndGetClaims(token).getUserId();
+    public Object getUserSelfRole(@RequestParam(name = "id") Long id){
 
         ReturnObject<List> returnObject =  userService.getSelfUserRoles(id);
         return Common.getListRetObject(returnObject);
@@ -105,7 +101,7 @@ public class PrivilegeController {
      */
     @ApiOperation(value = "获得所有人角色信息")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+
             @ApiImplicitParam(name="id", value="用户id", required = true, dataType="Integer", paramType="path")
     })
     @ApiResponses({
