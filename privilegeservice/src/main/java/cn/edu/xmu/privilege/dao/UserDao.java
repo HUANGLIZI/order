@@ -80,6 +80,9 @@ public class UserDao implements InitializingBean {
      * */
     public ReturnObject<VoObject> revokeRole(Long id){
         UserRolePo userRolePo = userRolePoMapper.selectByPrimaryKey(id);
+        if (userRolePo == null){
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
         String key = "u_" + userRolePo.getUserId();
         redisTemplate.delete(key);
 
