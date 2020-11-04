@@ -1,7 +1,9 @@
 package cn.edu.xmu.privilege.controller;
 
+import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
+import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -11,8 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -61,4 +62,16 @@ public class PrivilegeControllerTest {
         JSONAssert.assertEquals(expectedResponse, responseString, true);
 
     }*/
+
+    private String login(String userName, String password) throws Exception{
+        LoginVo loginVo = new LoginVo();
+        loginVo.setUserName(userName);
+        loginVo.setPassword(password);
+        String jsonString = JacksonUtil.toJson(loginVo);
+        String responseString = this.mvc.perform(post("/privilege/login").contentType("application/json;charset=UTF-8").content(jsonString))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        return responseString;
+    }
 }
