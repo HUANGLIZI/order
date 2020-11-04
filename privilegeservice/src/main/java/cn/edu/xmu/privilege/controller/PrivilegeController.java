@@ -5,6 +5,7 @@ import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
+import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import cn.edu.xmu.privilege.service.UserService;
@@ -31,11 +32,59 @@ public class PrivilegeController {
     private UserService userService;
 
 
-    /**
-     * 获得自己的角色信息
-     * */
+    /***
+     * 赋予用户权限
+     * @param userid 用户id
+     * @param roleid 角色id
+     * @return
+     */
+    @ApiOperation(value = "赋予用户权限")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="userid", value="用户id", required = true, dataType="Integer", paramType="path"),
+            @ApiImplicitParam(name="roleid", value="角色id", required = true, dataType="Integer", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @PostMapping("/adminusers/{userid}/roles/{roleid}")
+    public Object assignRole(@PathVariable Long userid, @PathVariable Long roleid){
+        ReturnObject<VoObject> returnObject =  userService.assignRole(new Long(1), userid, roleid);
+        return Common.getRetObject(returnObject);
+    }
+
+    /***
+     * 获得自己角色信息
+     * @return
+     */
+    @ApiOperation(value = "获得自己角色信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
     @GetMapping("/adminusers/self/roles")
     public Object getUserSelfRole(@RequestParam Long id){
+        ReturnObject<List> returnObject =  userService.getSelfUserRoles(id);
+        return Common.getListRetObject(returnObject);
+    }
+
+    /***
+     * 获得所有人角色信息
+     * @param id 用户id
+     * @return
+     */
+    @ApiOperation(value = "获得所有人角色信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="id", value="用户id", required = true, dataType="Integer", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @GetMapping("/adminusers/{id}/roles")
+    public Object getSelfRole(@PathVariable Long id){
         ReturnObject<List> returnObject =  userService.getSelfUserRoles(id);
         return Common.getListRetObject(returnObject);
     }
@@ -81,3 +130,4 @@ public class PrivilegeController {
     }
 
 }
+

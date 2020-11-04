@@ -5,6 +5,7 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.privilege.dao.UserDao;
 import cn.edu.xmu.privilege.model.bo.Privilege;
+import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,19 @@ public class UserService {
 
     @Autowired
     private UserDao userDao;
+
+
+    /**
+     * 赋予用户角色
+     * @param createid 创建者id
+     * @param userid 用户id
+     * @param roleid 角色id
+     * @return UserRole
+     * @author Xianwei Wang
+     * */
+    public ReturnObject<VoObject> assignRole(Long createid, Long userid, Long roleid){
+        return userDao.assignRole(createid, userid, roleid);
+    }
 
     /**
      * 查看用户的角色信息

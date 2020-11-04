@@ -9,7 +9,9 @@ public class UserNameVo{
     private String userName;
 
     public UserNameVo(User user) {
-        this.userName = user.getUserName();
-        this.id = user.getId();
+        if (user != null) {
+            this.userName = user.getUserName();
+            this.id = user.getId();
+        }
     }
 }

@@ -21,9 +21,7 @@ public class UserRole implements VoObject {
     public UserRole(UserRolePo userRolePo, User user, Role role, User creator){
         this.id = userRolePo.getId();
         this.user = user;
-
         this.role = role;
-
         this.creator = creator;
         this.gmtCreate = userRolePo.getGmtCreate();
     }

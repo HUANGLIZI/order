@@ -28,7 +28,7 @@ public class Role {
         this.id = rolePo.getId();
         this.name = rolePo.getName();
         this.creatorId = rolePo.getCreatorId();
-        this.describe = rolePo.getRoleDescribe();
+        this.describe = rolePo.getDescr();
         this.gmtCreate = rolePo.getGmtCreate();
         this.gmtModified = rolePo.getGmtModified();
 

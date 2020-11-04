@@ -20,7 +20,7 @@ import java.util.Map;
 @Data
 public class User {
 
-    private static String AESPASS = "OOAD2020-11-01";
+    public static String AESPASS = "OOAD2020-11-01";
 
     /**
      * 后台用户状态
@@ -106,18 +106,13 @@ public class User {
     public User(UserPo po){
         this.id = po.getId();
         this.userName = po.getUserName();
-        this.password = po.getPassword();
-        this.mobile = po.getMobile();
+        this.password = AES.decrypt(po.getPassword(), AESPASS);
+        this.mobile = AES.decrypt(po.getMobile(), AESPASS);
         this.mobileVerified = po.getMobileVerified() == 1?true:false;
-        String newemail = po.getEmail();
-        if (newemail != null){
-            this.email = AES.decrypt(newemail,AESPASS);
-        }
-
+        this.email = AES.decrypt(po.getEmail(),AESPASS);
         this.emailVerified = po.getEmailVerified() == 1? true:false;
-        this.name = po.getName();
+        this.name = AES.decrypt(po.getName(),AESPASS);
         this.emailVerified = po.getEmailVerified() == 1? true:false;
-
         this.avatar = po.getAvatar();
         this.lastLoginTime = po.getLastLoginTime();
         this.lastLoginIp = po.getLastLoginIp();
@@ -129,8 +124,8 @@ public class User {
         this.gmtModified = po.getGmtModified();
         this.signature = po.getSignature();
 
-        StringBuilder signature = StringUtil.concatString("-", po.getUserName(), po.getPassword(),
-                po.getMobile(),po.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
+        StringBuilder signature = StringUtil.concatString("-", po.getUserName(), this.getPassword(),
+                this.getMobile(),this.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
                 po.getCreatorId().toString());
         this.cacuSignature = SHA256.getSHA256(signature.toString());
     }

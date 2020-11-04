@@ -1,8 +1,7 @@
 package cn.edu.xmu.privilege.dao;
 
-import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.ooad.util.SHA256;
-import cn.edu.xmu.ooad.util.StringUtil;
+import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.RolePoMapper;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
@@ -13,10 +12,15 @@ import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.po.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -28,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  * Modified in 2020/11/3 14:37
  **/
 @Repository
-public class UserDao {
+public class UserDao implements InitializingBean{
 
     private static final Logger logger = LoggerFactory.getLogger(UserDao.class);
 
@@ -51,7 +55,7 @@ public class UserDao {
     private UserProxyPoMapper userProxyPoMapper;
 
     @Autowired
-    private UserPoMapper userPoMapper;
+    private UserPoMapper userMapper;
 
     @Autowired
     private RolePoMapper rolePoMapper;
@@ -62,8 +66,44 @@ public class UserDao {
     @Autowired
     private RoleDao roleDao;
 
+
+    /**
+     * 赋予用户角色
+     * @param createid 创建者id
+     * @param userid 用户id
+     * @param roleid 角色id
+     * @return UserRole
+     * @author Xianwei Wang
+     * */
+    public ReturnObject<VoObject> assignRole(Long createid, Long userid, Long roleid){
+        UserRolePo userRolePo = new UserRolePo();
+        userRolePo.setUserId(userid);
+        userRolePo.setRoleId(roleid);
+
+        User user = getUserById(userid);
+        User create = getUserById(createid);
+        RolePo rolePo = rolePoMapper.selectByPrimaryKey(roleid);
+
+        if (user == null || create == null || rolePo == null){
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        userRolePo.setCreatorId(createid);
+        userRolePo.setGmtCreate(LocalDateTime.now());
+
+        StringBuilder signature = StringUtil.concatString("-",
+                userid.toString(), roleid.toString(), createid.toString());
+        String newSignature = SHA256.getSHA256(signature.toString());
+        userRolePo.setSignature(newSignature);
+        userRolePoMapper.insert(userRolePo);
+
+        return new ReturnObject<>(new UserRole(userRolePo, user, new Role(rolePo), create));
+
+    }
     /**
      * 获取用户的角色信息
+     * @param id 用户id
+     * @return UserRole列表
      * @author Xianwei Wang
      * */
     public ReturnObject<List> getUserRoles(Long id){
@@ -81,14 +121,8 @@ public class UserDao {
             StringBuilder signature = StringUtil.concatString("-",
                     po.getUserId().toString(), po.getRoleId().toString(), po.getCreatorId().toString());
             String newSignature = SHA256.getSHA256(signature.toString());
-            if (null == po.getSignature() && initialization) {
-                UserRolePo newPo = new UserRolePo();
-                newPo.setId(po.getId());
-                newPo.setSignature(newSignature);
-                userRolePoMapper.updateByPrimaryKeySelective(newPo);
-            }
 
-            if (newSignature.equals(po.getSignature()) || initialization) {
+            if (newSignature.equals(po.getSignature())) {
                 User user = getUserById(po.getUserId());
                 User creator = getUserById(po.getCreatorId());
                 Role role = new Role(rolePoMapper.selectByPrimaryKey(po.getRoleId()));
@@ -105,16 +139,20 @@ public class UserDao {
     /***
      * 根据id查找用户
      * @param id 用户id
-     * @return
+     * @return 用户,若签名校验失败返回null
+     * @author Xianwei Wang
      */
     private User getUserById(Long id){
-        UserPo userPo = userPoMapper.selectByPrimaryKey(id);
+        UserPo userPo = userMapper.selectByPrimaryKey(id);
+        if (userPo == null){
+            return null;
+        }
         if (userPo.getSignature() == null && initialization){
             User user = new User(userPo);
             UserPo newUserPo = new UserPo();
             newUserPo.setId(id);
             newUserPo.setSignature(user.getCacuSignature());
-            userPoMapper.updateByPrimaryKeySelective(newUserPo);
+            userMapper.updateByPrimaryKeySelective(newUserPo);
 
             return user;
         }
@@ -126,6 +164,9 @@ public class UserDao {
         return user;
 
     }
+
+
+
     /**
      * 计算User自己的权限，load到Redis
      *
@@ -168,14 +209,9 @@ public class UserDao {
             StringBuilder signature = StringUtil.concatString("-",
                     po.getUserId().toString(), po.getRoleId().toString(), po.getCreatorId().toString());
             String newSignature = SHA256.getSHA256(signature.toString());
-            if (null == po.getSignature() && initialization) {
-                UserRolePo newPo = new UserRolePo();
-                newPo.setId(po.getId());
-                newPo.setSignature(newSignature);
-                userRolePoMapper.updateByPrimaryKeySelective(newPo);
-            }
 
-            if (newSignature.equals(po.getSignature()) || initialization) {
+
+            if (newSignature.equals(po.getSignature())) {
                 retIds.add(po.getRoleId());
                 logger.debug("getRoleIdByUserId: userId = " + po.getUserId() + " roleId = " + po.getRoleId());
             } else {
@@ -236,13 +272,8 @@ public class UserDao {
                     po.getUserBId().toString(), po.getBeginDate().toString(), po.getEndDate().toString(), po.getValid().toString());
             String newSignature = SHA256.getSHA256(signature.toString());
             UserProxyPo newPo = null;
-            if (null == po.getSignature() && initialization) {
-                newPo = new UserProxyPo();
-                newPo.setId(po.getId());
-                newPo.setSignature(newSignature);
-            }
 
-            if (newSignature.equals(po.getSignature()) || initialization) {
+            if (newSignature.equals(po.getSignature())) {
                 if (now.isBefore(po.getEndDate()) && now.isAfter(po.getBeginDate())) {
                     //在有效期内
                     retIds.add(po.getUserBId());
@@ -267,4 +298,67 @@ public class UserDao {
         }
         return retIds;
     }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (! initialization){
+            return;
+        }
+        //初始化user
+        UserPoExample example = new UserPoExample();
+        UserPoExample.Criteria criteria = example.createCriteria();
+        criteria.andSignatureIsNull();
+
+        List<UserPo> userPos = userMapper.selectByExample(example);
+
+        for (UserPo po : userPos){
+            UserPo newPo = new UserPo();
+            newPo.setPassword(AES.encrypt(po.getPassword(), User.AESPASS));
+            newPo.setEmail(AES.encrypt(po.getEmail(), User.AESPASS));
+            newPo.setMobile(AES.encrypt(po.getMobile(), User.AESPASS));
+            newPo.setName(AES.encrypt(po.getName(), User.AESPASS));
+            newPo.setId(po.getId());
+
+            StringBuilder signature = StringUtil.concatString("-", po.getUserName(), po.getPassword(),
+                    po.getMobile(),po.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
+                    po.getCreatorId().toString());
+            newPo.setSignature(SHA256.getSHA256(signature.toString()));
+
+            userMapper.updateByPrimaryKeySelective(newPo);
+        }
+
+        //初始化UserProxy
+        UserProxyPoExample example1 = new UserProxyPoExample();
+        UserProxyPoExample.Criteria criteria1 = example1.createCriteria();
+        criteria1.andSignatureIsNull();
+        List<UserProxyPo> userProxyPos = userProxyPoMapper.selectByExample(example1);
+
+        for (UserProxyPo po : userProxyPos) {
+            UserProxyPo newPo = new UserProxyPo();
+            newPo.setId(po.getId());
+            StringBuilder signature = StringUtil.concatString("-", po.getUserAId().toString(),
+                    po.getUserBId().toString(), po.getBeginDate().toString(), po.getEndDate().toString(), po.getValid().toString());
+            String newSignature = SHA256.getSHA256(signature.toString());
+            newPo.setSignature(newSignature);
+            userProxyPoMapper.updateByPrimaryKeySelective(newPo);
+        }
+
+        //初始化UserRole
+        UserRolePoExample example3 = new UserRolePoExample();
+        UserRolePoExample.Criteria criteria3 = example3.createCriteria();
+        criteria3.andSignatureIsNull();
+        List<UserRolePo> userRolePoList = userRolePoMapper.selectByExample(example3);
+        for (UserRolePo po : userRolePoList) {
+            StringBuilder signature = StringUtil.concatString("-",
+                    po.getUserId().toString(), po.getRoleId().toString(), po.getCreatorId().toString());
+            String newSignature = SHA256.getSHA256(signature.toString());
+
+            UserRolePo newPo = new UserRolePo();
+            newPo.setId(po.getId());
+            newPo.setSignature(newSignature);
+            userRolePoMapper.updateByPrimaryKeySelective(newPo);
+        }
+
+    }
 }
+
