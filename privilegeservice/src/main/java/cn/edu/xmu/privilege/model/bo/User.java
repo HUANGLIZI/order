@@ -130,8 +130,8 @@ public class User {
         this.gmtModified = po.getGmtModified();
         this.signature = po.getSignature();
 
-        StringBuilder signature = StringUtil.concatString("-", po.getUserName(), this.getPassword(),
-                this.getMobile(),this.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
+        StringBuilder signature = StringUtil.concatString("-", po.getUserName(), po.getPassword(),
+                po.getMobile(),po.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
                 po.getCreatorId().toString());
         this.cacuSignature = SHA256.getSHA256(signature.toString());
     }

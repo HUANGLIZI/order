@@ -4,7 +4,7 @@ import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
-import cn.edu.xmu.privilege.dao.UserDao;
+
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ public class PrivilegeControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    private static final Logger logger = LoggerFactory.getLogger(UserDao.class);
+
 
     /**
      * 取消用户角色测试
