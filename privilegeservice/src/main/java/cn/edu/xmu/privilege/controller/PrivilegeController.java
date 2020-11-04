@@ -39,12 +39,13 @@ public class PrivilegeController {
      */
     @ApiOperation(value = "取消用户权限")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+
             @ApiImplicitParam(name="userid", value="用户id", required = true, dataType="Integer", paramType="path")
 
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
     })
     @DeleteMapping("/adminusersrole/{id}")
     public Object revokeRole(@PathVariable Long id){
@@ -59,12 +60,12 @@ public class PrivilegeController {
      */
     @ApiOperation(value = "赋予用户权限")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(name="userid", value="用户id", required = true, dataType="Integer", paramType="path"),
             @ApiImplicitParam(name="roleid", value="角色id", required = true, dataType="Integer", paramType="path")
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
     })
     @PostMapping("/adminusers/{userid}/roles/{roleid}")
     public Object assignRole(@RequestHeader(value="token") String token, @PathVariable Long userid, @PathVariable Long roleid){
