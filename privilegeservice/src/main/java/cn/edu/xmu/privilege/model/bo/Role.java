@@ -36,7 +36,7 @@ public class Role implements VoObject, Serializable {
      * 构造函数
      * @param rolePo po对象
      */
-    public Role(RolePo rolePo){
+    public Role(RolePo rolePo) {
         this.id = rolePo.getId();
         this.name = rolePo.getName();
         this.creatorId = rolePo.getCreatorId();
@@ -44,9 +44,8 @@ public class Role implements VoObject, Serializable {
         this.gmtCreate = rolePo.getGmtCreate();
         this.gmtModified = rolePo.getGmtModified();
 
-    
 
-    
+    }
 
     /**
      * 生成RoleRetVo对象作为返回前端

@@ -21,11 +21,11 @@ public class RoleVo {
     private String name;
 
     @ApiModelProperty(value = "角色名")
-    private String desc;
+    private String descr;
 
     public Role createRole(){
         Role role = new Role();
-        role.setDescribe(this.desc);
+        role.setDescribe(this.descr);
         role.setName(this.name);
         role.setGmtCreate(LocalDateTime.now());
 

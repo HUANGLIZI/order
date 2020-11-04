@@ -14,6 +14,7 @@ import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import cn.edu.xmu.privilege.model.vo.UserVo;
+import cn.edu.xmu.privilege.service.RoleService;
 import cn.edu.xmu.privilege.service.UserService;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
