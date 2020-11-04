@@ -64,7 +64,6 @@ public class PrivilegeDao implements InitializingBean {
                 PrivilegePo newPo = new PrivilegePo();
                 newPo.setId(po.getId());
                 newPo.setSignature(priv.getCacuSignature());
-                newPo.setGmtModified(LocalDateTime.now());
                 poMapper.updateByPrimaryKeySelective(newPo);
             }else {
                 if (priv.authetic()) {
