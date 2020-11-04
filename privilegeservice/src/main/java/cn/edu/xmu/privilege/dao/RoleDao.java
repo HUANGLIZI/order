@@ -174,15 +174,14 @@ public class RoleDao implements InitializingBean {
         try{
             int ret = roleMapper.insertSelective(rolePo);
             if (ret == 0) {
-                //修改失败
+                //插入失败
                 logger.debug("updateRole: id not exist = " + rolePo.getId());
                 retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             } else {
-                //修改成功
+                //插入成功
                 logger.debug("updateRole: update role = " + rolePo.toString());
-                retObj = new ReturnObject<>();
-                //
-                loadRolePriv(rolePo.getId());
+                role.setId(rolePo.getId());
+                retObj = new ReturnObject<>(role);
             }
         }
         catch (Exception e) {
