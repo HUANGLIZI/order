@@ -3,6 +3,9 @@ package cn.edu.xmu.privilege.dao;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.RolePoMapper;
+import cn.edu.xmu.ooad.util.AES;
+import cn.edu.xmu.ooad.util.SHA256;
+import cn.edu.xmu.ooad.util.StringUtil;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
@@ -32,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  * Modified in 2020/11/3 14:37
  **/
 @Repository
-public class UserDao implements InitializingBean{
+public class UserDao implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(UserDao.class);
 
@@ -204,15 +207,19 @@ public class UserDao implements InitializingBean{
     private void loadSingleUserPriv(Long id) {
         List<Long> roleIds = this.getRoleIdByUserId(id);
         String key = "u_" + id;
-        Set<String> roleKeys = new HashSet<>(roleIds.size());
-        for (Long roleId : roleIds) {
-            String roleKey = "r_" + roleId;
-            roleKeys.add(roleKey);
-            if (!redisTemplate.hasKey(roleKey)) {
-                roleDao.loadRolePriv(roleId);
+        if (roleIds.size() == 0){
+            redisTemplate.opsForSet().add(key, "0");
+        } else {
+            Set<String> roleKeys = new HashSet<>(roleIds.size());
+            for (Long roleId : roleIds) {
+                String roleKey = "r_" + roleId;
+                roleKeys.add(roleKey);
+                if (!redisTemplate.hasKey(roleKey)) {
+                    roleDao.loadRolePriv(roleId);
+                }
             }
+            redisTemplate.opsForSet().unionAndStore(roleKeys, key);
         }
-        redisTemplate.opsForSet().unionAndStore(roleKeys, key);
         redisTemplate.expire(key, this.timeout + new Random().nextInt(randomTime), TimeUnit.SECONDS);
     }
 
@@ -344,8 +351,8 @@ public class UserDao implements InitializingBean{
             newPo.setName(AES.encrypt(po.getName(), User.AESPASS));
             newPo.setId(po.getId());
 
-            StringBuilder signature = StringUtil.concatString("-", po.getUserName(), po.getPassword(),
-                    po.getMobile(),po.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
+            StringBuilder signature = StringUtil.concatString("-", po.getUserName(), newPo.getPassword(),
+                    newPo.getMobile(),newPo.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
                     po.getCreatorId().toString());
             newPo.setSignature(SHA256.getSHA256(signature.toString()));
 
