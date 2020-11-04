@@ -1,7 +1,10 @@
 package cn.edu.xmu.privilege.model.bo;
 
+import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.model.po.PrivilegePo;
+import cn.edu.xmu.privilege.model.vo.PrivilegeRetVo;
+import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,7 +16,9 @@ import java.util.Map;
  * @date Created in 2020/11/3 11:48
  **/
 @Data
-public class Privilege {
+public class Privilege implements VoObject{
+
+
 
     /**
      * 请求类型
@@ -106,5 +111,28 @@ public class Privilege {
      */
     public Boolean authetic() {
         return this.cacuSignature.equals(this.signature);
+    }
+
+    @Override
+    public Object createVo() {
+        return new PrivilegeRetVo(this);
+    }
+
+    /**
+     * 用vo对象创建更新po对象
+     * @param vo vo对象
+     * @return po对象
+     */
+    public PrivilegePo createUpdatePo(PrivilegeVo vo){
+        PrivilegePo po = new PrivilegePo();
+        po.setId(this.getId());
+        po.setName(vo.getName());
+        po.setUrl(vo.getUrl());
+        po.setRequestType(vo.getRequestType().byteValue());
+        po.setGmtCreate(null);
+        po.setGmtModified(LocalDateTime.now());
+        StringBuilder signature = StringUtil.concatString("-", po.getUrl(), po.getRequestType().toString(), po.getId().toString());
+        po.setSignature(SHA256.getSHA256(signature.toString()));
+        return po;
     }
 }

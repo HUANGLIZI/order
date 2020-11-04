@@ -13,6 +13,7 @@ import cn.edu.xmu.privilege.model.vo.RoleRetVo;
 import com.github.pagehelper.PageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  * Modified in 2020/11/3 12:16
  **/
 @Repository
-public class RoleDao {
+public class RoleDao implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(RoleDao.class);
 
@@ -42,6 +44,9 @@ public class RoleDao {
 
     @Value("${prvilegeservice.role.expiretime}")
     private long timeout;
+
+    @Value("${prvilegeservice.randomtime}")
+    private int randomTime;
 
     @Autowired
     private RolePoMapper roleMapper;
@@ -73,7 +78,7 @@ public class RoleDao {
         for (Long pId : privIds) {
             redisTemplate.opsForSet().add(key, pId.toString());
         }
-        redisTemplate.expire(key, this.timeout, TimeUnit.SECONDS);
+        redisTemplate.expire(key, this.timeout + new Random().nextInt(randomTime), TimeUnit.SECONDS);
     }
 
     /**
@@ -93,14 +98,8 @@ public class RoleDao {
             StringBuilder signature = StringUtil.concatString("-", po.getRoleId().toString(),
                     po.getPrivilegeId().toString(), po.getCreatorId().toString());
             String newSignature = SHA256.getSHA256(signature.toString());
-            if (initialization && null == po.getSignature()) {
-                RolePrivilegePo newPo = new RolePrivilegePo();
-                newPo.setId(po.getId());
-                newPo.setSignature(newSignature);
-                rolePrivilegePoMapper.updateByPrimaryKeySelective(newPo);
-            }
 
-            if (newSignature.equals(po.getSignature()) || initialization) {
+            if (newSignature.equals(po.getSignature())) {
                 retIds.add(po.getPrivilegeId());
                 logger.debug("getPrivIdsBByRoleId: roleId = " + po.getRoleId() + " privId = " + po.getPrivilegeId());
             } else {
@@ -110,6 +109,7 @@ public class RoleDao {
         return retIds;
     }
 
+<<<<<<< HEAD
     public ReturnObject<List<Role>> selectAllRole(Integer pageNum,Integer pageSize){
         RolePoExample example = new RolePoExample();
         RolePoExample.Criteria criteria = example.createCriteria();
@@ -173,5 +173,29 @@ public class RoleDao {
             retObj = new ReturnObject<>();
         }
         return retObj;
+=======
+    @Override
+    public void afterPropertiesSet() throws Exception {
+
+        if (!initialization){
+            return;
+        }
+
+        RolePrivilegePoExample example = new RolePrivilegePoExample();
+        RolePrivilegePoExample.Criteria criteria = example.createCriteria();
+        criteria.andSignatureIsNull();
+        List<RolePrivilegePo> rolePrivilegePos = rolePrivilegePoMapper.selectByExample(example);
+        List<Long> retIds = new ArrayList<>(rolePrivilegePos.size());
+        for (RolePrivilegePo po : rolePrivilegePos) {
+            StringBuilder signature = StringUtil.concatString("-", po.getRoleId().toString(),
+                    po.getPrivilegeId().toString(), po.getCreatorId().toString());
+            String newSignature = SHA256.getSHA256(signature.toString());
+            RolePrivilegePo newPo = new RolePrivilegePo();
+            newPo.setId(po.getId());
+            newPo.setSignature(newSignature);
+            rolePrivilegePoMapper.updateByPrimaryKeySelective(newPo);
+        }
+
+>>>>>>> 10e8866aab70c05aa47341c6d5990a5b67b27279
     }
 }

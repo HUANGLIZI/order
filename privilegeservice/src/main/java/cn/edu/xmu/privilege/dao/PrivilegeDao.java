@@ -1,11 +1,16 @@
 package cn.edu.xmu.privilege.dao;
 
+import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.privilege.mapper.PrivilegeMapper;
 import cn.edu.xmu.privilege.mapper.PrivilegePoMapper;
 import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.po.PrivilegePo;
 import cn.edu.xmu.privilege.model.po.PrivilegePoExample;
+<<<<<<< HEAD
+=======
+import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
+>>>>>>> 10e8866aab70c05aa47341c6d5990a5b67b27279
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -14,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +31,7 @@ import java.util.Map;
 @Repository
 public class PrivilegeDao implements InitializingBean {
 
-    private  static  final Logger logger = LoggerFactory.getLogger(Privilege.class);
+    private  static  final Logger logger = LoggerFactory.getLogger(PrivilegeDao.class);
 
     /**
      * 是否初始化，生成signature和加密
@@ -90,6 +96,37 @@ public class PrivilegeDao implements InitializingBean {
         key.append(requestType.getCode());
         logger.info("getPrivIdByKey: key = "+key.toString());
         return this.cache.get(key.toString());
+    }
+
+    /**
+     * 查询所有权限
+     * @return 权限列表
+     */
+    public List<Privilege> findAllPrivs(){
+        List<PrivilegePo> privilegePos = mapper.selectAll();
+        List<Privilege> ret = new ArrayList<>(privilegePos.size());
+        for (PrivilegePo po : privilegePos) {
+            Privilege priv = new Privilege(po);
+            if (priv.authetic()) {
+                logger.debug("afterPropertiesSet: key = " + priv.getKey() + " p = " + priv);
+                ret.add(priv);
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * 修改权限
+     * @param id: 权限id
+     * @return ReturnObject
+     */
+    public ReturnObject changePriv(Long id, PrivilegeVo vo){
+        PrivilegePo po = this.poMapper.selectByPrimaryKey(id);
+        logger.debug("changePriv: vo = "+ vo  + " po = "+ po);
+        Privilege privilege = new Privilege(po);
+        PrivilegePo newPo = privilege.createUpdatePo(vo);
+        this.poMapper.updateByPrimaryKeySelective(newPo);
+        return new ReturnObject();
     }
 
 }

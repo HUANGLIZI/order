@@ -1,15 +1,16 @@
 package cn.edu.xmu.privilege.dao;
 
+import cn.edu.xmu.ooad.util.AES;
 import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.ooad.util.StringUtil;
+import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
-import cn.edu.xmu.privilege.model.po.UserProxyPo;
-import cn.edu.xmu.privilege.model.po.UserProxyPoExample;
-import cn.edu.xmu.privilege.model.po.UserRolePo;
-import cn.edu.xmu.privilege.model.po.UserRolePoExample;
+import cn.edu.xmu.privilege.model.bo.User;
+import cn.edu.xmu.privilege.model.po.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  * Modified in 2020/11/3 14:37
  **/
 @Repository
-public class UserDao {
+public class UserDao implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(UserDao.class);
 
@@ -38,11 +39,17 @@ public class UserDao {
     @Value("${prvilegeservice.user.expiretime}")
     private long timeout;
 
+    @Value("${prvilegeservice.randomtime}")
+    private int randomTime;
+
     @Autowired
     private UserRolePoMapper userRolePoMapper;
 
     @Autowired
     private UserProxyPoMapper userProxyPoMapper;
+
+    @Autowired
+    private UserPoMapper userMapper;
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
@@ -71,6 +78,7 @@ public class UserDao {
             }
         }
         redisTemplate.opsForSet().unionAndStore(roleKeys, key);
+        redisTemplate.expire(key, this.timeout + new Random().nextInt(randomTime), TimeUnit.SECONDS);
     }
 
     /**
@@ -85,19 +93,15 @@ public class UserDao {
         UserRolePoExample.Criteria criteria = example.createCriteria();
         criteria.andUserIdEqualTo(id);
         List<UserRolePo> userRolePoList = userRolePoMapper.selectByExample(example);
+        logger.debug("getRoleIdByUserId: userId = "+ id + "roleNum = "+ userRolePoList.size());
         List<Long> retIds = new ArrayList<>(userRolePoList.size());
         for (UserRolePo po : userRolePoList) {
             StringBuilder signature = StringUtil.concatString("-",
                     po.getUserId().toString(), po.getRoleId().toString(), po.getCreatorId().toString());
             String newSignature = SHA256.getSHA256(signature.toString());
-            if (null == po.getSignature() && initialization) {
-                UserRolePo newPo = new UserRolePo();
-                newPo.setId(po.getId());
-                newPo.setSignature(newSignature);
-                userRolePoMapper.updateByPrimaryKeySelective(newPo);
-            }
 
-            if (newSignature.equals(po.getSignature()) || initialization) {
+
+            if (newSignature.equals(po.getSignature())) {
                 retIds.add(po.getRoleId());
                 logger.debug("getRoleIdByUserId: userId = " + po.getUserId() + " roleId = " + po.getRoleId());
             } else {
@@ -121,19 +125,20 @@ public class UserDao {
         String aKey = "up_" + id;
 
         List<Long> proxyIds = this.getProxyIdsByUserId(id);
-
         List<String> proxyUserKey = new ArrayList<>(proxyIds.size());
         for (Long proxyId : proxyIds) {
             if (!redisTemplate.hasKey("u_" + proxyId)) {
+                logger.debug("loadUserPriv: loading proxy user. proxId = "+ proxyId);
                 loadSingleUserPriv(proxyId);
             }
             proxyUserKey.add("u_" + proxyId);
         }
         if (!redisTemplate.hasKey(key)) {
+            logger.debug("loadUserPriv: loading user. id = "+ id);
             loadSingleUserPriv(id);
         }
         redisTemplate.opsForSet().unionAndStore(key, proxyUserKey, aKey);
-        redisTemplate.expire(aKey, this.timeout, TimeUnit.SECONDS);
+        redisTemplate.expire(aKey, this.timeout + new Random().nextInt(randomTime), TimeUnit.SECONDS);
     }
 
     /**
@@ -157,13 +162,8 @@ public class UserDao {
                     po.getUserBId().toString(), po.getBeginDate().toString(), po.getEndDate().toString(), po.getValid().toString());
             String newSignature = SHA256.getSHA256(signature.toString());
             UserProxyPo newPo = null;
-            if (null == po.getSignature() && initialization) {
-                newPo = new UserProxyPo();
-                newPo.setId(po.getId());
-                newPo.setSignature(newSignature);
-            }
 
-            if (newSignature.equals(po.getSignature()) || initialization) {
+            if (newSignature.equals(po.getSignature())) {
                 if (now.isBefore(po.getEndDate()) && now.isAfter(po.getBeginDate())) {
                     //在有效期内
                     retIds.add(po.getUserBId());
@@ -182,9 +182,72 @@ public class UserDao {
             }
 
             if (null != newPo) {
+                logger.debug("getProxyIdsByUserId: writing back.. po =" + newPo);
                 userProxyPoMapper.updateByPrimaryKeySelective(newPo);
             }
         }
         return retIds;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (! initialization){
+            return;
+        }
+        //初始化user
+        UserPoExample example = new UserPoExample();
+        UserPoExample.Criteria criteria = example.createCriteria();
+        criteria.andSignatureIsNull();
+
+        List<UserPo> userPos = userMapper.selectByExample(example);
+
+        for (UserPo po : userPos){
+            UserPo newPo = new UserPo();
+            newPo.setPassword(AES.encrypt(po.getPassword(), User.AESPASS));
+            newPo.setEmail(AES.encrypt(po.getEmail(), User.AESPASS));
+            newPo.setMobile(AES.encrypt(po.getMobile(), User.AESPASS));
+            newPo.setName(AES.encrypt(po.getName(), User.AESPASS));
+            newPo.setId(po.getId());
+
+            StringBuilder signature = StringUtil.concatString("-", po.getUserName(), po.getPassword(),
+                    po.getMobile(),po.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
+                    po.getCreatorId().toString());
+            newPo.setSignature(SHA256.getSHA256(signature.toString()));
+
+            userMapper.updateByPrimaryKeySelective(newPo);
+        }
+
+        //初始化UserProxy
+        UserProxyPoExample example1 = new UserProxyPoExample();
+        UserProxyPoExample.Criteria criteria1 = example1.createCriteria();
+        criteria1.andSignatureIsNull();
+        List<UserProxyPo> userProxyPos = userProxyPoMapper.selectByExample(example1);
+
+        for (UserProxyPo po : userProxyPos) {
+            UserProxyPo newPo = new UserProxyPo();
+            newPo.setId(po.getId());
+            StringBuilder signature = StringUtil.concatString("-", po.getUserAId().toString(),
+                    po.getUserBId().toString(), po.getBeginDate().toString(), po.getEndDate().toString(), po.getValid().toString());
+            String newSignature = SHA256.getSHA256(signature.toString());
+            newPo.setSignature(newSignature);
+            userProxyPoMapper.updateByPrimaryKeySelective(newPo);
+        }
+
+        //初始化UserRole
+        UserRolePoExample example3 = new UserRolePoExample();
+        UserRolePoExample.Criteria criteria3 = example3.createCriteria();
+        criteria3.andSignatureIsNull();
+        List<UserRolePo> userRolePoList = userRolePoMapper.selectByExample(example3);
+        for (UserRolePo po : userRolePoList) {
+            StringBuilder signature = StringUtil.concatString("-",
+                    po.getUserId().toString(), po.getRoleId().toString(), po.getCreatorId().toString());
+            String newSignature = SHA256.getSHA256(signature.toString());
+
+            UserRolePo newPo = new UserRolePo();
+            newPo.setId(po.getId());
+            newPo.setSignature(newSignature);
+            userRolePoMapper.updateByPrimaryKeySelective(newPo);
+        }
+
     }
 }

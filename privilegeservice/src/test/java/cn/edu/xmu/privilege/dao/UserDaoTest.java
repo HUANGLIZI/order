@@ -80,4 +80,67 @@ public class UserDaoTest {
         assertEquals(3, redisTemplate.opsForSet().size(key2));
     }
 
+    @Test
+    public void loadUserPriv3(){
+
+        userDao.loadUserPriv(Long.valueOf(51));
+
+        String key1 = "u_51";
+        String key2 = "up_51";
+
+        assertTrue(redisTemplate.hasKey(key1));
+        assertTrue(redisTemplate.opsForSet().isMember(key1,"14"));
+        assertTrue(redisTemplate.opsForSet().isMember(key1,"9"));
+        assertTrue(redisTemplate.opsForSet().isMember(key1,"10"));
+        assertTrue(redisTemplate.opsForSet().isMember(key1,"11"));
+        assertTrue(redisTemplate.opsForSet().isMember(key1,"12"));
+        assertTrue(redisTemplate.opsForSet().isMember(key1,"13"));
+        assertFalse(redisTemplate.opsForSet().isMember(key1,"16"));
+        assertEquals(6, redisTemplate.opsForSet().size(key1));
+
+        assertTrue(redisTemplate.hasKey(key2));
+        assertTrue(redisTemplate.opsForSet().isMember(key2,"14"));
+        assertTrue(redisTemplate.opsForSet().isMember(key2,"9"));
+        assertTrue(redisTemplate.opsForSet().isMember(key2,"10"));
+        assertTrue(redisTemplate.opsForSet().isMember(key2,"11"));
+        assertTrue(redisTemplate.opsForSet().isMember(key2,"12"));
+        assertTrue(redisTemplate.opsForSet().isMember(key2,"13"));
+        assertFalse(redisTemplate.opsForSet().isMember(key2,"16"));
+        assertEquals(6, redisTemplate.opsForSet().size(key2));
+    }
+
+    @Test
+    public void loadUserPriv4(){
+
+        userDao.loadUserPriv(Long.valueOf(49));
+
+        String key1 = "u_49";
+        String key3 = "up_49";
+        String key2 = "u_47";
+
+        assertTrue(redisTemplate.hasKey(key1));
+        assertTrue(redisTemplate.opsForSet().isMember(key1,"14"));
+        assertFalse(redisTemplate.opsForSet().isMember(key1,"16"));
+        assertEquals(1, redisTemplate.opsForSet().size(key1));
+
+        assertTrue(redisTemplate.hasKey(key2));
+        assertTrue(redisTemplate.opsForSet().isMember(key2,"9"));
+        assertTrue(redisTemplate.opsForSet().isMember(key2,"10"));
+        assertTrue(redisTemplate.opsForSet().isMember(key2,"11"));
+        assertTrue(redisTemplate.opsForSet().isMember(key2,"12"));
+        assertTrue(redisTemplate.opsForSet().isMember(key2,"13"));
+        assertFalse(redisTemplate.opsForSet().isMember(key2,"16"));
+        assertEquals(5, redisTemplate.opsForSet().size(key2));
+
+        assertTrue(redisTemplate.hasKey(key3));
+        assertTrue(redisTemplate.opsForSet().isMember(key3,"14"));
+        assertTrue(redisTemplate.opsForSet().isMember(key3,"9"));
+        assertTrue(redisTemplate.opsForSet().isMember(key3,"10"));
+        assertTrue(redisTemplate.opsForSet().isMember(key3,"11"));
+        assertTrue(redisTemplate.opsForSet().isMember(key3,"12"));
+        assertTrue(redisTemplate.opsForSet().isMember(key3,"13"));
+        assertFalse(redisTemplate.opsForSet().isMember(key3,"16"));
+        assertEquals(6, redisTemplate.opsForSet().size(key3));
+
+    }
 }

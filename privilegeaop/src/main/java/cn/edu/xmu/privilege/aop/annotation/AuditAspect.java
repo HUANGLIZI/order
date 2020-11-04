@@ -27,6 +27,8 @@ import java.util.List;
 /**
  * @auther mingqiu
  * @date 2020/6/26 下午2:16
+ *      modifiedBy Ming Qiu 2020/11/3 22:59
+ *
  */
 @Aspect
 @Component
@@ -53,25 +55,21 @@ public class AuditAspect {
     //配置controller环绕通知,使用在方法aspect()上注册的切入点
     @Around("auditAspect()")
     public Object around(JoinPoint joinPoint){
-        long start = System.currentTimeMillis();
         String operationTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         MethodSignature ms = (MethodSignature) joinPoint.getSignature();
         Method method = ms.getMethod();
         // 获取注解的参数信息
         Audit auditAnno = method.getAnnotation(Audit.class);
-        String operationName = auditAnno.name();
-        boolean login = auditAnno.login();
-        int userType = auditAnno.userType();
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String token = request.getHeader(JwtHelper.LOGIN_TOKEN_KEY);
         String ip = request.getRemoteAddr();
-        Integer userId = new JwtHelper().getUserId(token);
+        JwtHelper.UserAndDepart userAndDepart = new JwtHelper().verifyTokenAndGetClaims(token);
+        Long userId = userAndDepart.getUserId();
+        Long departId = userAndDepart.getDepartId();
 
-        if (login) {
-            if (userId == null) {
-                return ResponseUtil.fail(ResponseCode.AUTH_NEED_LOGIN);
-            }
+        if (userId == null) {
+            return ResponseUtil.fail(ResponseCode.AUTH_NEED_LOGIN);
         }
 
         Object[] args = joinPoint.getArgs();
@@ -87,10 +85,11 @@ public class AuditAspect {
                 //这里判断当前注解是否为LoginUser.class
                 if (annotation.annotationType().equals(LoginUser.class)) {
                     //校验该参数，验证一次退出该注解
-                    if (param instanceof Integer) {
-                        args[i] = userId;
-                        break;
-                    }
+                    args[i] = userId;
+                }
+                if (annotation.annotationType().equals(Depart.class)) {
+                    //校验该参数，验证一次退出该注解
+                    args[i] = departId;
                 }
             }
         }
@@ -99,11 +98,8 @@ public class AuditAspect {
         try {
 
             obj = ((ProceedingJoinPoint) joinPoint).proceed(args);
-            long end = System.currentTimeMillis();
-            logger.info("around " + joinPoint + "\tUse time : " + (end - start) + " ms!");
         } catch (Throwable e) {
-            long end = System.currentTimeMillis();
-                logger.info("around " + joinPoint + "\tUse time : " + (end - start) + " ms with exception : " + e.getMessage());
+
         }
         return obj;
     }
