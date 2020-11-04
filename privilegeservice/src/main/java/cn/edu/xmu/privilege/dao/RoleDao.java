@@ -228,6 +228,7 @@ public class RoleDao implements InitializingBean {
                 userRolePoMapper.deleteByPrimaryKey(userRolePo.getId());
                 //删除缓存中具有删除角色的用户权限
                 redisTemplate.delete("u_" + userRolePo.getUserId());
+                redisTemplate.delete("up_" + userRolePo.getUserId());
                 //查询当前所有有效的代理具有删除角色用户的代理用户
                 UserProxyPoExample example = new UserProxyPoExample();
                 UserProxyPoExample.Criteria criteria = example.createCriteria();
@@ -236,6 +237,7 @@ public class RoleDao implements InitializingBean {
                 for(UserProxyPo userProxyPo : userProxyPos){
                     //删除缓存中代理了具有删除角色的用户的代理用户
                     redisTemplate.delete("u_" + userProxyPo.getUserAId());
+                    redisTemplate.delete("up_" + userProxyPo.getUserAId());
                 }
             }
             retObj = new ReturnObject<>();
