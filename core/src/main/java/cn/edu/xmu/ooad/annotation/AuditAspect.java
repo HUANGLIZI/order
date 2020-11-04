@@ -1,4 +1,4 @@
-package cn.edu.xmu.privilege.aop.annotation;
+package cn.edu.xmu.ooad.annotation;
 
 import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -12,7 +12,6 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -39,7 +38,7 @@ public class AuditAspect {
     private  static  final Logger logger = LoggerFactory.getLogger(AuditAspect. class);
 
     //Controller层切点
-    @Pointcut("@annotation(cn.edu.xmu.privilege.aop.annotation.Audit)")
+    @Pointcut("@annotation(cn.edu.xmu.ooad.annotation.Audit)")
     public void auditAspect() {
     }
 

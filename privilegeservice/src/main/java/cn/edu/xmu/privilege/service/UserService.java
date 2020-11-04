@@ -28,6 +28,16 @@ public class UserService {
     @Autowired
     private UserDao userDao;
 
+    /**
+     * 取消用户角色
+     * @param id 用户角色id
+     * @return ReturnObject<VoObject>
+     * @author Xianwei Wang
+     * */
+    public ReturnObject<VoObject> revokeRole(Long id){
+        return userDao.revokeRole(id);
+
+    }
 
     /**
      * 赋予用户角色

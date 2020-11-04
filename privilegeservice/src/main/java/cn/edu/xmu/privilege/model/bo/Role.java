@@ -20,10 +20,18 @@ public class Role {
     private LocalDateTime gmtCreate;
     private LocalDateTime gmtModified;
 
+    /**
+     * 构造函数
+     */
     public Role()
     {
 
     }
+
+    /**
+     * 构造函数
+     * @param rolePo po对象
+     */
     public Role(RolePo rolePo){
         this.id = rolePo.getId();
         this.name = rolePo.getName();

@@ -66,13 +66,23 @@ public class UserDao implements InitializingBean{
     @Autowired
     private RoleDao roleDao;
 
+    /**
+     * 取消用户角色
+     * @param id 用户角色id
+     * @return ReturnObject<VoObject>
+     * @author Xianwei Wang
+     * */
+    public ReturnObject<VoObject> revokeRole(Long id){
+        userRolePoMapper.deleteByPrimaryKey(id);
+        return new ReturnObject<>();
+    }
 
     /**
      * 赋予用户角色
      * @param createid 创建者id
      * @param userid 用户id
      * @param roleid 角色id
-     * @return UserRole
+     * @return ReturnObject<VoObject>
      * @author Xianwei Wang
      * */
     public ReturnObject<VoObject> assignRole(Long createid, Long userid, Long roleid){
@@ -84,6 +94,7 @@ public class UserDao implements InitializingBean{
         User create = getUserById(createid);
         RolePo rolePo = rolePoMapper.selectByPrimaryKey(roleid);
 
+        //用户id或角色id不存在
         if (user == null || create == null || rolePo == null){
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
@@ -95,7 +106,16 @@ public class UserDao implements InitializingBean{
                 userid.toString(), roleid.toString(), createid.toString());
         String newSignature = SHA256.getSHA256(signature.toString());
         userRolePo.setSignature(newSignature);
-        userRolePoMapper.insert(userRolePo);
+
+        //查询该用户是否已经拥有该角色
+        UserRolePoExample example = new UserRolePoExample();
+        UserRolePoExample.Criteria criteria = example.createCriteria();
+        criteria.andUserIdEqualTo(userid);
+        criteria.andRoleIdEqualTo(roleid);
+
+        //若未拥有，则插入数据
+        if (userRolePoMapper.selectByExample(example).isEmpty())
+            userRolePoMapper.insert(userRolePo);
 
         return new ReturnObject<>(new UserRole(userRolePo, user, new Role(rolePo), create));
 

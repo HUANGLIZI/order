@@ -26,6 +26,8 @@ public class PrivilegeDaoTest {
 
     private static final Logger logger = LoggerFactory.getLogger(PrivilegeDaoTest.class);
 
+
+
     @Test
     public void getUserRoleById(){
         Long id = new Long(46);

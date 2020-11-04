@@ -2,6 +2,7 @@ package cn.edu.xmu.privilege.controller;
 
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
+import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
@@ -31,6 +32,24 @@ public class PrivilegeController {
     @Autowired
     private UserService userService;
 
+    /***
+     * 取消用户权限
+     * @param id 用户id
+     * @return
+     */
+    @ApiOperation(value = "取消用户权限")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="userid", value="用户id", required = true, dataType="Integer", paramType="path")
+
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @DeleteMapping("/adminusersrole/{id}")
+    public Object revokeRole(@PathVariable Long id){
+        return Common.getRetObject(userService.revokeRole(id));
+    }
 
     /***
      * 赋予用户权限
@@ -48,13 +67,17 @@ public class PrivilegeController {
             @ApiResponse(code = 0, message = "成功"),
     })
     @PostMapping("/adminusers/{userid}/roles/{roleid}")
-    public Object assignRole(@PathVariable Long userid, @PathVariable Long roleid){
-        ReturnObject<VoObject> returnObject =  userService.assignRole(new Long(1), userid, roleid);
+    public Object assignRole(@RequestHeader(value="token") String token, @PathVariable Long userid, @PathVariable Long roleid){
+        JwtHelper jwtHelper = new JwtHelper();
+        Long createid = jwtHelper.verifyTokenAndGetClaims(token).getUserId();
+
+        ReturnObject<VoObject> returnObject =  userService.assignRole(createid, userid, roleid);
         return Common.getRetObject(returnObject);
     }
 
     /***
      * 获得自己角色信息
+     * @author Xianwei Wang
      * @return
      */
     @ApiOperation(value = "获得自己角色信息")
@@ -65,7 +88,11 @@ public class PrivilegeController {
             @ApiResponse(code = 0, message = "成功"),
     })
     @GetMapping("/adminusers/self/roles")
-    public Object getUserSelfRole(@RequestParam Long id){
+    public Object getUserSelfRole(@RequestHeader(value="token") String token){
+        // 解析token获得id
+        JwtHelper jwtHelper = new JwtHelper();
+        Long id = jwtHelper.verifyTokenAndGetClaims(token).getUserId();
+
         ReturnObject<List> returnObject =  userService.getSelfUserRoles(id);
         return Common.getListRetObject(returnObject);
     }
