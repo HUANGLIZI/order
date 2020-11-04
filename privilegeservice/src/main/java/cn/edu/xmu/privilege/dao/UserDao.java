@@ -72,9 +72,17 @@ public class UserDao implements InitializingBean {
         else return new User(users.get(0));
     }
 
+    /**
+     *
+     * @param userId 用户ID
+     * @param IPAddr IP地址
+     * @param date 登录时间
+     * @return 是否成功更新
+     */
     public Boolean setLoginIPAndPosition(Long userId, String IPAddr, LocalDateTime date)
     {
         UserPo userPo = new UserPo();
+        userPo.setId(userId);
         userPo.setLastLoginIp(IPAddr);
         userPo.setLastLoginTime(date);
         if(userPoMapper.updateByPrimaryKeySelective(userPo)==1) return true;

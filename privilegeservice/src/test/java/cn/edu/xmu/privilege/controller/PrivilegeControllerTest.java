@@ -53,7 +53,7 @@ public class PrivilegeControllerTest {
         ResultActions res = null;
 
         //region 正常用户登录
-        requireJson = "{\"userName\":\"537300010\",\"password\":\"123456\"}";
+        requireJson = "{\"userName\":\"537300010\",\"password\":\"BCB71451C344BFB09FC0403699098E9E\"}";
         res = this.mvc.perform(post("/privilege/privileges/login")
                 .contentType("application/json;charset=UTF-8")
                 .content(requireJson));
@@ -79,7 +79,7 @@ public class PrivilegeControllerTest {
         //endregion
 
         //region 用户名错误的用户登录
-        requireJson = "{\"userName\":\"NotExist\",\"password\":\"123456\"}";
+        requireJson = "{\"userName\":\"NotExist\",\"password\":\"BCB71451C344BFB09FC0403699098E9E\"}";
         res = this.mvc.perform(post("/privilege/privileges/login")
                 .contentType("application/json;charset=UTF-8")
                 .content(requireJson));
@@ -92,7 +92,7 @@ public class PrivilegeControllerTest {
         //endregion
 
         //region 没有输入用户名的用户登录
-        requireJson = "{\"password\":\"123456\"}";
+        requireJson = "{\"password\":\"BCB71451C344BFB09FC0403699098E9E\"}";
         res = this.mvc.perform(post("/privilege/privileges/login")
                 .contentType("application/json;charset=UTF-8")
                 .content(requireJson));
@@ -116,7 +116,7 @@ public class PrivilegeControllerTest {
         //endregion
 
         //region 用户重复登录
-        requireJson = "{\"userName\":\"537300010\",\"password\":\"123456\"}";
+        requireJson = "{\"userName\":\"537300010\",\"password\":\"BCB71451C344BFB09FC0403699098E9E\"}";
         res = this.mvc.perform(post("/privilege/privileges/login")
                 .contentType("application/json;charset=UTF-8")
                 .content(requireJson));
@@ -129,7 +129,7 @@ public class PrivilegeControllerTest {
         //endregion
 
         //region 当前状态不可登录的用户登录
-        requireJson = "{\"userName\":\"13088admin\",\"password\":\"123456\"}";
+        requireJson = "{\"userName\":\"13088admin\",\"password\":\"BCB71451C344BFB09FC0403699098E9E\"}";
         res = this.mvc.perform(post("/privilege/privileges/login")
                 .contentType("application/json;charset=UTF-8")
                 .content(requireJson));
@@ -152,7 +152,7 @@ public class PrivilegeControllerTest {
         String responseString = null;
         ResultActions res = null;
 
-        requireJson = "{\"userName\":\"537300010\",\"password\":\"123456\"}";
+        requireJson = "{\"userName\":\"537300010\",\"password\":\"BCB71451C344BFB09FC0403699098E9E\"}";
         res = this.mvc.perform(post("/privilege/privileges/login")
                 .contentType("application/json;charset=UTF-8")
                 .content(requireJson));

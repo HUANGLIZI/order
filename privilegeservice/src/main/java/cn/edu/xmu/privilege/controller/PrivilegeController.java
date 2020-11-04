@@ -3,26 +3,21 @@ package cn.edu.xmu.privilege.controller;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
-import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.*;
-import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
-import cn.edu.xmu.privilege.service.AuthenticationService;
 import cn.edu.xmu.privilege.service.UserService;
+import cn.edu.xmu.privilege.util.IpUtil;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotBlank;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -43,9 +38,6 @@ public class PrivilegeController {
 
 //    @Autowired
     private JwtHelper jwtHelper = new JwtHelper();
-
-    @Autowired
-    private AuthenticationService authService;
 
     /**
      * 获得所有权限
@@ -88,6 +80,7 @@ public class PrivilegeController {
         return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
     }
 
+    @ApiOperation(value = "登录")
     @PostMapping("privileges/login")
     public Object login(@Validated @RequestBody LoginVo loginVo, BindingResult bindingResult
             , HttpServletResponse httpServletResponse,HttpServletRequest httpServletRequest){
@@ -98,7 +91,7 @@ public class PrivilegeController {
         }
 
         String ip = IpUtil.getIpAddr(httpServletRequest);
-        ReturnObject<String> jwt = authService.Login(loginVo.getUserName(), loginVo.getPassword(), ip);
+        ReturnObject<String> jwt = userService.Login(loginVo.getUserName(), loginVo.getPassword(), ip);
 
         if(jwt.getData() == null){
             return ResponseUtil.fail(jwt.getCode(), jwt.getErrmsg());
@@ -107,8 +100,10 @@ public class PrivilegeController {
         }
     }
 
+    @ApiOperation(value = "注销")
+    @Audit
     @GetMapping("privileges/logout")
-    public Object logout(@RequestHeader String authorization, HttpServletResponse response){
+    public Object logout(@LoginUser Long userId){
         /* 处理参数校验错误 */
 //        if(authorization == null || authorization.isBlank()){
 //            Object retObj = null;
@@ -120,52 +115,10 @@ public class PrivilegeController {
 //            return retObj;
 //        }
 
-        JwtHelper.UserAndDepart user = jwtHelper.verifyTokenAndGetClaims(authorization);
-        ReturnObject<Boolean> success = authService.Logout(user.getUserId());
+//        JwtHelper.UserAndDepart user = jwtHelper.verifyTokenAndGetClaims(authorization);
+        ReturnObject<Boolean> success = userService.Logout(userId);
 
         if (success.getData() == null) return ResponseUtil.fail(success.getCode(), success.getErrmsg());
         else return ResponseUtil.ok();
-    }
-}
-
-class IpUtil {
-    private static final String UNKNOWN = "unknown";
-    private static final String LOCALHOST = "127.0.0.1";
-    private static final String SEPARATOR = ",";
-
-    public static String getIpAddr(HttpServletRequest request) {
-        System.out.println(request);
-        String ipAddress;
-        try {
-            ipAddress = request.getHeader("x-forwarded-for");
-            if (ipAddress == null || ipAddress.length() == 0 || UNKNOWN.equalsIgnoreCase(ipAddress)) {
-                ipAddress = request.getHeader("Proxy-Client-IP");
-            }
-            if (ipAddress == null || ipAddress.length() == 0 || UNKNOWN.equalsIgnoreCase(ipAddress)) {
-                ipAddress = request.getHeader("WL-Proxy-Client-IP");
-            }
-            if (ipAddress == null || ipAddress.length() == 0 || UNKNOWN.equalsIgnoreCase(ipAddress)) {
-                ipAddress = request.getRemoteAddr();
-                if (LOCALHOST.equals(ipAddress)) {
-                    InetAddress inet = null;
-                    try {
-                        inet = InetAddress.getLocalHost();
-                    } catch (UnknownHostException e) {
-                        e.printStackTrace();
-                    }
-                    ipAddress = inet.getHostAddress();
-                }
-            }
-            // 对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
-            // "***.***.***.***".length()
-            if (ipAddress != null && ipAddress.length() > 15) {
-                if (ipAddress.indexOf(SEPARATOR) > 0) {
-                    ipAddress = ipAddress.substring(0, ipAddress.indexOf(","));
-                }
-            }
-        } catch (Exception e) {
-            ipAddress = "";
-        }
-        return ipAddress;
     }
 }

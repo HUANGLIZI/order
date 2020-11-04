@@ -66,7 +66,7 @@ public class AuditAspect {
         JwtHelper.UserAndDepart userAndDepart = new JwtHelper().verifyTokenAndGetClaims(token);
         Long userId = userAndDepart.getUserId();
         Long departId = userAndDepart.getDepartId();
-
+        logger.debug("position0");
         if (userId == null) {
             return ResponseUtil.fail(ResponseCode.AUTH_NEED_LOGIN);
         }
@@ -80,10 +80,13 @@ public class AuditAspect {
             if (param == null || paramAnn.length == 0) {
                 continue;
             }
+            logger.debug("position1");
             for (Annotation annotation : paramAnn) {
+                logger.debug("position2");
                 //这里判断当前注解是否为LoginUser.class
                 if (annotation.annotationType().equals(LoginUser.class)) {
                     //校验该参数，验证一次退出该注解
+                    logger.debug(userId.toString());
                     args[i] = userId;
                 }
                 if (annotation.annotationType().equals(Depart.class)) {
