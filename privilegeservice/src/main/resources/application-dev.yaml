@@ -16,11 +16,7 @@ spring:
         url-pattern: /druid/*
   redis:
     # Redis服务器地址
-<<<<<<< HEAD
     host: 127.0.0.1
-=======
-    host: 172.16.1.66
->>>>>>> 10e8866aab70c05aa47341c6d5990a5b67b27279
     # Redis服务器连接端口
     port: 6379
     # Redis服务器连接密码

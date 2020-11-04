@@ -109,7 +109,6 @@ public class RoleDao implements InitializingBean {
         return retIds;
     }
 
-<<<<<<< HEAD
     public ReturnObject<List<Role>> selectAllRole(Integer pageNum,Integer pageSize){
         RolePoExample example = new RolePoExample();
         RolePoExample.Criteria criteria = example.createCriteria();
@@ -173,7 +172,8 @@ public class RoleDao implements InitializingBean {
             retObj = new ReturnObject<>();
         }
         return retObj;
-=======
+    }
+    
     @Override
     public void afterPropertiesSet() throws Exception {
 
@@ -196,6 +196,5 @@ public class RoleDao implements InitializingBean {
             rolePrivilegePoMapper.updateByPrimaryKeySelective(newPo);
         }
 
->>>>>>> 10e8866aab70c05aa47341c6d5990a5b67b27279
     }
 }

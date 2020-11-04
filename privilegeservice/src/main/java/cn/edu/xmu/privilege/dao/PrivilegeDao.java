@@ -7,10 +7,7 @@ import cn.edu.xmu.privilege.mapper.PrivilegePoMapper;
 import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.po.PrivilegePo;
 import cn.edu.xmu.privilege.model.po.PrivilegePoExample;
-<<<<<<< HEAD
-=======
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
->>>>>>> 10e8866aab70c05aa47341c6d5990a5b67b27279
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
