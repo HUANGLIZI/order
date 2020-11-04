@@ -5,7 +5,6 @@ import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
-import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.bo.Role;
@@ -14,7 +13,6 @@ import cn.edu.xmu.privilege.service.RoleService;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
-import cn.edu.xmu.privilege.model.vo.UserVo;
 import cn.edu.xmu.privilege.service.UserService;
 import com.mysql.cj.conf.PropertyKey;
 import io.swagger.annotations.*;
@@ -91,8 +89,6 @@ public class PrivilegeController {
         ReturnObject returnObject =  userService.changePriv(id, vo);
         return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
     }
-<<<<<<< HEAD
-=======
 
     /**
      * 修改任意用户信息
@@ -195,5 +191,4 @@ public class PrivilegeController {
         }
         return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
     }
->>>>>>> 5c49245112ed77dbf3cb31e33f39177359c87996
 }
