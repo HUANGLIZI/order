@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -184,10 +185,16 @@ public class RoleDao implements InitializingBean {
                 retObj = new ReturnObject<>(role);
             }
         }
+        catch (DataAccessException e) {
+            //e.printStackTrace();
+            //若有重复的角色名则新增失败
+            logger.debug("updateRole: have same role name = " + rolePo.getName());
+            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
+        }
         catch (Exception e) {
             //e.printStackTrace();
-            //若有重复的角色名则修改失败
-            logger.debug("updateRole: have same role name = " + rolePo.getName());
+            //其他异常
+            logger.debug("other exception : " + e.toString());
             retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
         }
         return retObj;
@@ -266,10 +273,16 @@ public class RoleDao implements InitializingBean {
                 retObj = new ReturnObject<>();
             }
         }
-        catch (Exception e) {
+        catch (DataAccessException e) {
             //e.printStackTrace();
             //若有重复的角色名则修改失败
             logger.debug("updateRole: have same role name = " + rolePo.getName());
+            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
+        }
+        catch (Exception e) {
+            //e.printStackTrace();
+            //其他异常
+            logger.debug("other exception : " + e.toString());
             retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
         }
         return retObj;

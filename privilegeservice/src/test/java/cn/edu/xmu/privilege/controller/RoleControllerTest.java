@@ -63,7 +63,7 @@ public class RoleControllerTest {
         String responseString = null;
         String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDQ0ODIwMzAsInVzZXJJZCI6MSwiaWF0IjoxNjA0NDc0ODMwfQ.f1g65bUbkK8FlyW9ac5WhM9FBT6ILOmGROjuMVJntyE";
         try {
-            responseString = this.mvc.perform(get("/roles?page=1&pageSize=2").header("authorization", token))
+            responseString = this.mvc.perform(get("/privilege/roles?page=1&pageSize=2").header("authorization", token))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -91,7 +91,7 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(post("/roles").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(post("/privilege/roles").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isCreated())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -119,7 +119,7 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(post("/roles").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(post("/privilege/roles").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isCreated())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -147,7 +147,7 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(post("/roles").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(post("/privilege/roles").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isBadRequest())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -175,7 +175,7 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(put("/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(put("/privilege/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -203,7 +203,7 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(put("/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(put("/privilege/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isBadRequest())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -231,7 +231,7 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(put("/roles/0").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(put("/privilege/roles/0").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isNotFound())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -259,7 +259,7 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(put("/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(put("/privilege/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -285,7 +285,7 @@ public class RoleControllerTest {
         String responseString = null;
         //测试删除成功
         try {
-            responseString = this.mvc.perform(delete("/roles/87").header("authorization", token))
+            responseString = this.mvc.perform(delete("/privilege/roles/87").header("authorization", token))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -309,7 +309,7 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(delete("/roles/0").header("authorization", token))
+            responseString = this.mvc.perform(delete("/privilege/roles/0").header("authorization", token))
                     .andExpect(status().isNotFound())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
