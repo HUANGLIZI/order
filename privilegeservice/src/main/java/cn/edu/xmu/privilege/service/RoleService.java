@@ -8,10 +8,18 @@ import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.vo.RoleVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 角色服务类
+ *
+ * @author Weice Wang
+ * @date Created in 2020/11/4 11:48
+ * Modified in 2020/11/4 12:16
+ **/
 @Service
 public class RoleService {
     @Autowired
@@ -34,6 +42,7 @@ public class RoleService {
      * @param vo
      * @return ReturnObject<VoObject>
      */
+    @Transactional
     public ReturnObject<VoObject> insertRole(Long userId, RoleVo vo) {
         Role role = vo.createRole();
         role.setCreatorId(userId);
@@ -53,6 +62,7 @@ public class RoleService {
      * @param id
      * @return ReturnObject<Object>
      */
+    @Transactional
     public ReturnObject<Object> deleteRole(Long id) {
         return roleDao.deleteRole(id);
     }
@@ -64,6 +74,7 @@ public class RoleService {
      * @param vo
      * @return ReturnObject<Object>
      */
+    @Transactional
     public ReturnObject<Object> updateRole(Long userId, Long id, RoleVo vo) {
         Role role = vo.createRole();
         role.setId(id);

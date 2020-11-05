@@ -6,30 +6,31 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
 
 /**
- * 角色对象
- * @author Xianwei Wang
+ * 角色视图
+ * 
+ * @author Weice Wang
+ * @date Created in 2020/11/4 12:48
  **/
 @Data
 @ApiModel(description = "角色视图对象")
 public class RoleVo {
-
     @NotBlank(message = "角色名不能为空")
-    @ApiModelProperty(value = "角色名")
+    @ApiModelProperty(value = "角色名称")
     private String name;
 
-    @ApiModelProperty(value = "角色名")
+    @ApiModelProperty(value = "角色描述")
     private String descr;
 
-    public Role createRole(){
+    /**
+     * 构造函数
+     * @return Role
+     */
+    public Role createRole() {
         Role role = new Role();
         role.setDescribe(this.descr);
         role.setName(this.name);
-        role.setGmtCreate(LocalDateTime.now());
-
-
         return role;
     }
 }

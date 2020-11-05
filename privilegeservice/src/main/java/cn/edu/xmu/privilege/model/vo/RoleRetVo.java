@@ -8,39 +8,43 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 角色返回对象
- * @author Xianwei Wang
+ * 角色返回视图
+ * 
+ * @author Weice Wang
+ * @date Created in 2020/11/4 11:48
  **/
 @Data
-@ApiModel
+@ApiModel(description = "角色视图对象")
 public class RoleRetVo {
-
-    @ApiModelProperty(name = "id")
+    @ApiModelProperty(value = "角色id")
     private Long id;
 
-    @ApiModelProperty(name = "名称")
+    @ApiModelProperty(value = "角色名称")
     private String name;
 
-    @ApiModelProperty(name = "创建者id")
-    private Long creatorId;
-
-    @ApiModelProperty(name = "描述")
+    @ApiModelProperty(value = "角色描述")
     private String desc;
 
-    @ApiModelProperty(name = "gmtCreate")
-    private String gmtCreate;
+    @ApiModelProperty(value = "创建者")
+    private Long createdBy;
 
-    @ApiModelProperty(name = "gmtModified")
-    private String gmtModified;
+    @ApiModelProperty(value = "创建时间")
+    private LocalDateTime gmtCreate;
 
-    public RoleRetVo(Role role){
+    @ApiModelProperty(value = "修改时间")
+    private LocalDateTime gmtModified;
+
+    /**
+     * 用Role对象建立Vo对象
+     * @param role role
+     * @return RoleRetVo
+     */
+    public RoleRetVo(Role role) {
         this.id = role.getId();
         this.name = role.getName();
-        this.creatorId = role.getCreatorId();
         this.desc = role.getDescribe();
-        this.gmtCreate = role.getGmtCreate().toString();
-        if (role.getGmtModified() != null)
-            this.gmtModified = role.getGmtModified().toString();
+        this.createdBy = role.getCreatorId();
+        this.gmtCreate = role.getGmtCreate();
+        this.gmtModified = role.getGmtModified();
     }
-
 }

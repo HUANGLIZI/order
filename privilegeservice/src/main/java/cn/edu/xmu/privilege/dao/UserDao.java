@@ -14,7 +14,7 @@ import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.po.*;
-import cn.edu.xmu.privilege.model.vo.UserVo;
+import cn.edu.xmu.privilege.model.vo.UserEditVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -408,38 +408,41 @@ public class UserDao implements InitializingBean {
 
     }
 
+    /* auth009 */
+
     /**
      * 根据 id 修改用户信息
-     * @param userVo 传入的 User 对象
+     * @param userEditVo 传入的 User 对象
      * @return 返回对象 ReturnObj
      */
-    public ReturnObject<Object> modifyUserByVo(Long id, UserVo userVo) {
+    public ReturnObject<Object> modifyUserByVo(Long id, UserEditVo userEditVo) {
         // 查询密码等资料以计算新签名
         UserPo orig = userMapper.selectByPrimaryKey(id);
-        if (orig == null) {
+        // 不修改已被逻辑废弃的账户
+        if (orig == null || (orig.getState() != null && User.State.getTypeByCode(orig.getState().intValue()) == User.State.DELETE)) {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-        UserPo po = userVo.createUserPo(id);
 
-        // 如果没有改动有关字段，需要从 orig 中获取以计算签名
-        String name = po.getName() == null ? orig.getName() : po.getName();
-        String mobile = po.getMobile() == null ? orig.getMobile() : po.getMobile();
-        String email = po.getEmail() == null ? orig.getEmail() : po.getEmail();
+        // 构造 User 对象以计算签名
+        User user = new User(orig);
+        UserPo po = user.createUpdatePo(userEditVo);
 
-        // 签名：user_name,password,mobile,email,open_id,state,depart_id,creator
-        StringBuilder signature = StringUtil.concatString("-", name, orig.getPassword(),
-                mobile, email, orig.getOpenId(), orig.getState().toString(), orig.getDepartId().toString(),
-                orig.getCreatorId().toString());
-        po.setSignature(SHA256.getSHA256(signature.toString()));
+        // 将更改的联系方式 (如发生变化) 的已验证字段改为 false
+        if (userEditVo.getEmail() != null && !userEditVo.getEmail().equals(user.getEmail())) {
+            po.setEmailVerified((byte) 0);
+        }
+        if (userEditVo.getMobile() != null && !userEditVo.getMobile().equals(user.getMobile())) {
+            po.setMobileVerified((byte) 0);
+        }
 
-        // 更新字段
+        // 更新数据库
         ReturnObject<Object> retObj;
         int ret;
         try {
             ret = userMapper.updateByPrimaryKeySelective(po);
         } catch (DataAccessException e) {
             // 如果发生 Exception，判断是邮箱还是啥重复错误
-            if (e.getMessage().contains("auth_user.auth_user_mobile_uindex")) {
+            if (Objects.requireNonNull(e.getMessage()).contains("auth_user.auth_user_mobile_uindex")) {
                 retObj = new ReturnObject<>(ResponseCode.MOBILE_REGISTERED);
             } else if (e.getMessage().contains("auth_user.auth_user_email_uindex")) {
                 retObj = new ReturnObject<>(ResponseCode.EMAIL_REGISTERED);
@@ -480,7 +483,7 @@ public class UserDao implements InitializingBean {
      * @return 返回对象 ReturnObj
      */
     public ReturnObject<Object> logicallyDeleteUser(Long id) {
-        UserPo po = createUserStateModPo(id, (byte) User.State.DELETE.getCode().intValue());
+        UserPo po = createUserStateModPo(id, User.State.DELETE);
         if (po == null) {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
@@ -502,24 +505,21 @@ public class UserDao implements InitializingBean {
      * @param state 用户目标状态
      * @return UserPo 对象
      */
-    private UserPo createUserStateModPo(Long id, byte state) {
-        UserPo origPo = userMapper.selectByPrimaryKey(id);
-        if (origPo == null) {
+    private UserPo createUserStateModPo(Long id, User.State state) {
+        // 查询密码等资料以计算新签名
+        UserPo orig = userMapper.selectByPrimaryKey(id);
+        // 不修改已被逻辑废弃的账户的状态
+        if (orig == null || (orig.getState() != null && User.State.getTypeByCode(orig.getState().intValue()) == User.State.DELETE)) {
             return null;
         }
-        UserPo po = new UserPo();
-        po.setState(state);
-        po.setId(id);
 
-        // 签名：user_name,password,mobile,email,open_id,state,depart_id,creator
-        StringBuilder signature = StringUtil.concatString("-", origPo.getName(),
-                origPo.getPassword(), origPo.getMobile(), origPo.getEmail(),
-                origPo.getOpenId(),
-                po.getState().toString(),
-                origPo.getDepartId().toString(),
-                origPo.getCreatorId().toString());
-        po.setSignature(SHA256.getSHA256(signature.toString()));
-        return po;
+        // 构造 User 对象以计算签名
+        User user = new User(orig);
+        user.setState(state);
+        // 构造一个全为 null 的 vo 因为其他字段都不用更新
+        UserEditVo vo = new UserEditVo();
+
+        return user.createUpdatePo(vo);
     }
 
     /**
@@ -528,7 +528,7 @@ public class UserDao implements InitializingBean {
      * @return 返回对象 ReturnObj
      */
     public ReturnObject<Object> forbidUser(Long id) {
-        UserPo po = createUserStateModPo(id, (byte) (byte) User.State.FORBID.getCode().intValue());
+        UserPo po = createUserStateModPo(id, User.State.FORBID);
         if (po == null) {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
@@ -549,7 +549,7 @@ public class UserDao implements InitializingBean {
      * @return 返回对象 ReturnObj
      */
     public ReturnObject<Object> releaseUser(Long id) {
-        UserPo po = createUserStateModPo(id, (byte) (byte) User.State.NORM.getCode().intValue());
+        UserPo po = createUserStateModPo(id, User.State.NORM);
         if (po == null) {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
@@ -563,5 +563,7 @@ public class UserDao implements InitializingBean {
         }
         return retObj;
     }
+
+    /* auth009 ends */
 }
 
