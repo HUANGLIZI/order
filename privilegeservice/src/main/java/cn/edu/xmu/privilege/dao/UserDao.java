@@ -5,6 +5,7 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.ooad.util.StringUtil;
+import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
@@ -19,11 +20,13 @@ import cn.edu.xmu.privilege.model.po.UserProxyPo;
 import cn.edu.xmu.privilege.model.po.UserProxyPoExample;
 import cn.edu.xmu.privilege.model.po.UserRolePo;
 import cn.edu.xmu.privilege.model.po.UserRolePoExample;
+import cn.edu.xmu.privilege.model.vo.UserEditVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -227,8 +230,8 @@ public class UserDao implements InitializingBean {
             newPo.setName(AES.encrypt(po.getName(), User.AESPASS));
             newPo.setId(po.getId());
 
-            StringBuilder signature = StringUtil.concatString("-", po.getUserName(), po.getPassword(),
-                    po.getMobile(),po.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
+            StringBuilder signature = StringUtil.concatString("-", po.getUserName(), newPo.getPassword(),
+                    newPo.getMobile(),newPo.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
                     po.getCreatorId().toString());
             newPo.setSignature(SHA256.getSHA256(signature.toString()));
 
@@ -298,4 +301,162 @@ public class UserDao implements InitializingBean {
 
         return userPos;
     }
+
+    /* auth009 */
+
+    /**
+     * 根据 id 修改用户信息
+     * @param userEditVo 传入的 User 对象
+     * @return 返回对象 ReturnObj
+     */
+    public ReturnObject<Object> modifyUserByVo(Long id, UserEditVo userEditVo) {
+        // 查询密码等资料以计算新签名
+        UserPo orig = userMapper.selectByPrimaryKey(id);
+        // 不修改已被逻辑废弃的账户
+        if (orig == null || (orig.getState() != null && User.State.getTypeByCode(orig.getState().intValue()) == User.State.DELETE)) {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        // 构造 User 对象以计算签名
+        User user = new User(orig);
+        UserPo po = user.createUpdatePo(userEditVo);
+
+        // 将更改的联系方式 (如发生变化) 的已验证字段改为 false
+        if (userEditVo.getEmail() != null && !userEditVo.getEmail().equals(user.getEmail())) {
+            po.setEmailVerified((byte) 0);
+        }
+        if (userEditVo.getMobile() != null && !userEditVo.getMobile().equals(user.getMobile())) {
+            po.setMobileVerified((byte) 0);
+        }
+
+        // 更新数据库
+        ReturnObject<Object> retObj;
+        int ret;
+        try {
+            ret = userMapper.updateByPrimaryKeySelective(po);
+        } catch (DataAccessException e) {
+            // 如果发生 Exception，判断是邮箱还是啥重复错误
+            if (Objects.requireNonNull(e.getMessage()).contains("auth_user.auth_user_mobile_uindex")) {
+                retObj = new ReturnObject<>(ResponseCode.MOBILE_REGISTERED);
+            } else if (e.getMessage().contains("auth_user.auth_user_email_uindex")) {
+                retObj = new ReturnObject<>(ResponseCode.EMAIL_REGISTERED);
+            } else {
+                // 其他情况属未知错误
+                retObj = new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            }
+            return retObj;
+        }
+        // 检查更新有否成功
+        if (ret == 0) {
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        } else {
+            retObj = new ReturnObject<>();
+        }
+        return retObj;
+    }
+
+    /**
+     * (物理) 删除用户
+     * @param id 用户 id
+     * @return 返回对象 ReturnObj
+     */
+    public ReturnObject<Object> physicallyDeleteUser(Long id) {
+        ReturnObject<Object> retObj;
+        int ret = userMapper.deleteByPrimaryKey(id);
+        if (ret == 0) {
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        } else {
+            retObj = new ReturnObject<>();
+        }
+        return retObj;
+    }
+
+    /**
+     * (逻辑) 删除用户
+     * @param id 用户 id
+     * @return 返回对象 ReturnObj
+     */
+    public ReturnObject<Object> logicallyDeleteUser(Long id) {
+        UserPo po = createUserStateModPo(id, User.State.DELETE);
+        if (po == null) {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        ReturnObject<Object> retObj;
+        int ret = userMapper.updateByPrimaryKeySelective(po);
+        if (ret == 0) {
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        } else {
+            retObj = new ReturnObject<>();
+        }
+        return retObj;
+    }
+
+
+    /**
+     * 创建可改变目标用户状态的 Po
+     * @param id 用户 id
+     * @param state 用户目标状态
+     * @return UserPo 对象
+     */
+    private UserPo createUserStateModPo(Long id, User.State state) {
+        // 查询密码等资料以计算新签名
+        UserPo orig = userMapper.selectByPrimaryKey(id);
+        // 不修改已被逻辑废弃的账户的状态
+        if (orig == null || (orig.getState() != null && User.State.getTypeByCode(orig.getState().intValue()) == User.State.DELETE)) {
+            return null;
+        }
+
+        // 构造 User 对象以计算签名
+        User user = new User(orig);
+        user.setState(state);
+        // 构造一个全为 null 的 vo 因为其他字段都不用更新
+        UserEditVo vo = new UserEditVo();
+
+        return user.createUpdatePo(vo);
+    }
+
+    /**
+     * 禁止用户登录
+     * @param id 用户 id
+     * @return 返回对象 ReturnObj
+     */
+    public ReturnObject<Object> forbidUser(Long id) {
+        UserPo po = createUserStateModPo(id, User.State.FORBID);
+        if (po == null) {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        ReturnObject<Object> retObj;
+        int ret = userMapper.updateByPrimaryKeySelective(po);
+        if (ret == 0) {
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        } else {
+            retObj = new ReturnObject<>();
+        }
+        return retObj;
+    }
+
+    /**
+     * 解禁用户登录
+     * @param id 用户 id
+     * @return 返回对象 ReturnObj
+     */
+    public ReturnObject<Object> releaseUser(Long id) {
+        UserPo po = createUserStateModPo(id, User.State.NORM);
+        if (po == null) {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        ReturnObject<Object> retObj;
+        int ret = userMapper.updateByPrimaryKeySelective(po);
+        if (ret == 0) {
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        } else {
+            retObj = new ReturnObject<>();
+        }
+        return retObj;
+    }
+
+    /* auth009 ends */
 }
