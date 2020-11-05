@@ -424,6 +424,7 @@ public class UserDao implements InitializingBean {
         UserPo orig = userMapper.selectByPrimaryKey(id);
         // 不修改已被逻辑废弃的账户
         if (orig == null || (orig.getState() != null && User.State.getTypeByCode(orig.getState().intValue()) == User.State.DELETE)) {
+            logger.info("用户不存在或已被删除：id = " + id);
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
 
@@ -447,19 +448,30 @@ public class UserDao implements InitializingBean {
         } catch (DataAccessException e) {
             // 如果发生 Exception，判断是邮箱还是啥重复错误
             if (Objects.requireNonNull(e.getMessage()).contains("auth_user.auth_user_mobile_uindex")) {
+                logger.info("电话重复：" + userEditVo.getMobile());
                 retObj = new ReturnObject<>(ResponseCode.MOBILE_REGISTERED);
             } else if (e.getMessage().contains("auth_user.auth_user_email_uindex")) {
+                logger.info("邮箱重复：" + userEditVo.getEmail());
                 retObj = new ReturnObject<>(ResponseCode.EMAIL_REGISTERED);
             } else {
                 // 其他情况属未知错误
-                retObj = new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+                logger.error("数据库错误：" + e.getMessage());
+                retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
+                        String.format("发生了严重的数据库错误：%s", e.getMessage()));
             }
             return retObj;
+        } catch (Exception e) {
+            // 其他 Exception 即属未知错误
+            logger.error("严重错误：" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
+                    String.format("发生了严重的未知错误：%s", e.getMessage()));
         }
         // 检查更新有否成功
         if (ret == 0) {
+            logger.info("用户不存在或已被删除：id = " + id);
             retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         } else {
+            logger.info("用户 id = " + id + " 的资料已更新");
             retObj = new ReturnObject<>();
         }
         return retObj;
@@ -474,34 +486,14 @@ public class UserDao implements InitializingBean {
         ReturnObject<Object> retObj;
         int ret = userMapper.deleteByPrimaryKey(id);
         if (ret == 0) {
+            logger.info("用户不存在或已被删除：id = " + id);
             retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         } else {
+            logger.info("用户 id = " + id + " 已被永久删除");
             retObj = new ReturnObject<>();
         }
         return retObj;
     }
-
-    /**
-     * (逻辑) 删除用户
-     * @param id 用户 id
-     * @return 返回对象 ReturnObj
-     */
-    public ReturnObject<Object> logicallyDeleteUser(Long id) {
-        UserPo po = createUserStateModPo(id, User.State.DELETE);
-        if (po == null) {
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        }
-
-        ReturnObject<Object> retObj;
-        int ret = userMapper.updateByPrimaryKeySelective(po);
-        if (ret == 0) {
-            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        } else {
-            retObj = new ReturnObject<>();
-        }
-        return retObj;
-    }
-
 
     /**
      * 创建可改变目标用户状态的 Po
@@ -527,43 +519,39 @@ public class UserDao implements InitializingBean {
     }
 
     /**
-     * 禁止用户登录
+     * 改变用户状态
      * @param id 用户 id
+     * @param state 目标状态
      * @return 返回对象 ReturnObj
      */
-    public ReturnObject<Object> forbidUser(Long id) {
-        UserPo po = createUserStateModPo(id, User.State.FORBID);
+    public ReturnObject<Object> changeUserState(Long id, User.State state) {
+        UserPo po = createUserStateModPo(id, state);
         if (po == null) {
+            logger.info("用户不存在或已被删除：id = " + id);
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
 
         ReturnObject<Object> retObj;
-        int ret = userMapper.updateByPrimaryKeySelective(po);
-        if (ret == 0) {
-            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        } else {
-            retObj = new ReturnObject<>();
-        }
-        return retObj;
-    }
-
-    /**
-     * 解禁用户登录
-     * @param id 用户 id
-     * @return 返回对象 ReturnObj
-     */
-    public ReturnObject<Object> releaseUser(Long id) {
-        UserPo po = createUserStateModPo(id, User.State.NORM);
-        if (po == null) {
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        }
-
-        ReturnObject<Object> retObj;
-        int ret = userMapper.updateByPrimaryKeySelective(po);
-        if (ret == 0) {
-            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        } else {
-            retObj = new ReturnObject<>();
+        int ret;
+        try {
+            ret = userMapper.updateByPrimaryKeySelective(po);
+            if (ret == 0) {
+                logger.info("用户不存在或已被删除：id = " + id);
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            } else {
+                logger.info("用户 id = " + id + " 的状态修改为 " + state.getDescription());
+                retObj = new ReturnObject<>();
+            }
+        } catch (DataAccessException e) {
+            // 数据库错误
+            logger.error("数据库错误：" + e.getMessage());
+            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
+                    String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        } catch (Exception e) {
+            // 属未知错误
+            logger.error("严重错误：" + e.getMessage());
+            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
+                    String.format("发生了严重的未知错误：%s", e.getMessage()));
         }
         return retObj;
     }
