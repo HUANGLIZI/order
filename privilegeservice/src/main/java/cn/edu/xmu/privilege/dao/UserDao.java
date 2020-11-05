@@ -8,6 +8,7 @@ import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
+import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.po.*;
 import cn.edu.xmu.privilege.model.vo.UserEditVo;
@@ -268,9 +269,13 @@ public class UserDao implements InitializingBean {
      * modifiedBy 3218 2020/11/4 15:48
      */
 
-    public User getUserById(long id){
-        User user = new User(userMapper.selectByPrimaryKey(id));
-        return user;
+    public ReturnObject<User> getUserById(long id){
+        UserPo userPo= userMapper.selectByPrimaryKey(id);
+        if(userPo==null)
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        User user = new User(userPo);
+        return new ReturnObject<User>(user);
+//        return user;
     }
 
 
@@ -283,11 +288,20 @@ public class UserDao implements InitializingBean {
      * modifiedBy 3218 2020/11/4 15:55
      */
     public ReturnObject updateUserAvatar(User user){
+        ReturnObject returnObject = new ReturnObject();
         UserPo newUserPo = new UserPo();
         newUserPo.setId(user.getId());
         newUserPo.setAvatar(user.getAvatar());
-        userMapper.updateByPrimaryKeySelective(newUserPo);
-        return new ReturnObject();
+        int ret = userMapper.updateByPrimaryKeySelective(newUserPo);
+        if (ret == 0) {
+            logger.debug("updateUserAvatar: update fail. user id: " + user.getId());
+            returnObject = new ReturnObject(ResponseCode.FIELD_NOTVALID);
+        }
+        else {
+            logger.debug("updateUserAvatar: update user success : " + user.toString());
+            returnObject = new ReturnObject();
+        }
+        return returnObject;
     }
 
     /* auth009 */

@@ -4,6 +4,7 @@ import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.util.Common;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
@@ -12,9 +13,13 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.net.http.HttpResponse;
 import java.util.List;
 
 /**
@@ -30,6 +35,9 @@ public class PrivilegeController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private HttpServletResponse httpServletResponse;
 
     /**
      * 获得所有权限
@@ -87,6 +95,7 @@ public class PrivilegeController {
     @PostMapping("/adminusers/{id}/uploadImg")
     public Object uploadImg(@PathVariable("id") Integer id, @RequestParam("img") MultipartFile multipartFile){
         logger.debug("uploadImg: id = "+ id +" img" + multipartFile.getOriginalFilename());
-        return userService.uploadImg(id,multipartFile);
+        ReturnObject returnObject = userService.uploadImg(id,multipartFile);
+        return Common.getNullRetObj(returnObject, httpServletResponse);
     }
 }
