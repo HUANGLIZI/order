@@ -82,6 +82,7 @@ public class PrivilegeController {
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 506, message = "该目录文件夹没有写入的权限"),
     })
     @PostMapping("/adminusers/{id}/uploadImg")
     public Object uploadImg(@PathVariable("id") Integer id, @RequestParam("img") MultipartFile multipartFile){
