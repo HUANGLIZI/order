@@ -129,7 +129,7 @@ public class RoleDao implements InitializingBean {
                 retIds.add(po.getPrivilegeId());
                 logger.debug("getPrivIdsBByRoleId: roleId = " + po.getRoleId() + " privId = " + po.getPrivilegeId());
             } else {
-                logger.error("getPrivIdsBByRoleId: Wrong Signature(auth_role_privilege): id =" + po.getId());
+                logger.info("getPrivIdsBByRoleId: Wrong Signature(auth_role_privilege): id =" + po.getId());
             }
         }
         return retIds;
