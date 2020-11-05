@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 /**
  * AdminUser 控制器
@@ -128,5 +130,23 @@ public class AdminUserController {
                     HttpStatus.NOT_FOUND);
         }
         return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+    }
+    /**
+     * 查询某一用户权限
+     * @return Object
+     * createdBy yuehao 2020/11/04
+     */
+    @ApiOperation(value = "获得某一用户的权限")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @GetMapping("/adminusers/{id}/privileges")
+    public Object getPrivsByUserId(@PathVariable Long id){
+        ReturnObject<List> returnObject =  userService.findPrivsByUserId(id);
+        return Common.getListRetObject(returnObject);
     }
 }

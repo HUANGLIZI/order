@@ -58,6 +58,25 @@ public class UserDao implements InitializingBean {
     private RoleDao roleDao;
 
     /**
+     * User通过自己的id找到对应的roleIds,根据roleDao返回角色对应的权限
+     *
+     * @param id userID
+     * @return List<Privilege>
+     * 将获取用户所有权限
+     */
+
+    public List<Privilege> findPrivsByUserId(Long id) {
+        //getRoleIdByUserId已经进行签名校验
+        List<Long> roleIds = this.getRoleIdByUserId(id);
+        List<Privilege> privileges = new ArrayList<>();
+        for(Long roleId: roleIds) {
+            List<Privilege> rolePriv = roleDao.findPrivsByRoleId(roleId);
+            privileges.addAll(rolePriv);
+        }
+        return privileges;
+    }
+
+    /**
      * 计算User自己的权限，load到Redis
      *
      * @param id userID

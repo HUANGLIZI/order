@@ -25,6 +25,14 @@ public class UserService {
 
     @Autowired
     private UserDao userDao;
+    /**
+     * 根据用户Id查询他的所有权限
+     * @return 权限列表
+     */
+    public ReturnObject<List> findPrivsByUserId(Long id){
+        ReturnObject<List>  ret = new ReturnObject<>(userDao.findPrivsByUserId(id));
+        return ret;
+    }
 
     /**
      * 查询所有权限

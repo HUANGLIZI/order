@@ -67,6 +67,25 @@ public class RoleDao implements InitializingBean {
     private RedisTemplate<String, String> redisTemplate;
 
     /**
+     * Role通过自己的id找到对应的privIds, 根据privDao获取权限
+     *
+     * @param id roleID
+     * @return List<Privilege>
+     * 将获取用户所有权限
+     */
+    public List<Privilege> findPrivsByRoleId(Long id) {
+        //getPrivIdsByRoleId已经进行role的签名校验
+        List<Long> privIds = this.getPrivIdsByRoleId(id);
+        List<Privilege> privileges = new ArrayList<>();
+        for(Long privId: privIds) {
+            Privilege po = this.privDao.findPriv(privId);
+            logger.debug("getPriv:  po = " + po);
+            privileges.add(po);
+        }
+        return privileges;
+    }
+
+    /**
      * 将一个角色的所有权限id载入到Redis
      *
      * @param id 角色id

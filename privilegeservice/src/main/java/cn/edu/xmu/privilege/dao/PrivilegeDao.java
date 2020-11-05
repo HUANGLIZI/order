@@ -103,12 +103,15 @@ public class PrivilegeDao implements InitializingBean {
      */
     public Privilege findPriv(Long id){
         PrivilegePo po = poMapper.selectByPrimaryKey(id);
-        Privilege ret = null;
         Privilege priv = new Privilege(po);
         if (priv.authetic()) {
             logger.debug("afterPropertiesSet: key = " + priv.getKey() + " p = " + priv);
+            return priv;
         }
-        return priv;
+        else {
+            logger.error("findPriv: Wrong Signature(auth_privilege): id =" + po.getId());
+            return null;
+        }
     }
     /**
      * 查询所有权限
