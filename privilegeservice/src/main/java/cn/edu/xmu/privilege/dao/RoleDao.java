@@ -176,26 +176,30 @@ public class RoleDao implements InitializingBean {
             int ret = roleMapper.insertSelective(rolePo);
             if (ret == 0) {
                 //插入失败
-                logger.debug("updateRole: id not exist = " + rolePo.getId());
-                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+                logger.debug("insertRole: insert role fail " + rolePo.toString());
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + rolePo.getName()));
             } else {
                 //插入成功
-                logger.debug("updateRole: update role = " + rolePo.toString());
+                logger.debug("insertRole: insert role = " + rolePo.toString());
                 role.setId(rolePo.getId());
                 retObj = new ReturnObject<>(role);
             }
         }
         catch (DataAccessException e) {
-            //e.printStackTrace();
-            //若有重复的角色名则新增失败
-            logger.debug("updateRole: have same role name = " + rolePo.getName());
-            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
+            if (Objects.requireNonNull(e.getMessage()).contains("auth_user.auth_user_mobile_uindex")) {
+                //若有重复的角色名则新增失败
+                logger.debug("updateRole: have same role name = " + rolePo.getName());
+                retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("用户名重复：" + rolePo.getName()));
+            } else {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }
         }
         catch (Exception e) {
-            //e.printStackTrace();
-            //其他异常
-            logger.debug("other exception : " + e.toString());
-            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
         return retObj;
     }
@@ -265,8 +269,8 @@ public class RoleDao implements InitializingBean {
             int ret = roleMapper.updateByPrimaryKeySelective(rolePo);
             if (ret == 0) {
                 //修改失败
-                logger.debug("updateRole: id not exist = " + rolePo.getId());
-                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+                logger.debug("updateRole: update role fail : " + rolePo.toString());
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("修改失败：" + rolePo.getName()));
             } else {
                 //修改成功
                 logger.debug("updateRole: update role = " + rolePo.toString());
@@ -274,16 +278,20 @@ public class RoleDao implements InitializingBean {
             }
         }
         catch (DataAccessException e) {
-            //e.printStackTrace();
-            //若有重复的角色名则修改失败
-            logger.debug("updateRole: have same role name = " + rolePo.getName());
-            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
+            if (Objects.requireNonNull(e.getMessage()).contains("auth_role.auth_role_name_uindex")) {
+                //若有重复的角色名则新增失败
+                logger.debug("updateRole: have same role name = " + rolePo.getName());
+                retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("用户名重复：" + rolePo.getName()));
+            } else {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }
         }
         catch (Exception e) {
-            //e.printStackTrace();
-            //其他异常
-            logger.debug("other exception : " + e.toString());
-            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
         return retObj;
     }

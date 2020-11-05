@@ -153,8 +153,16 @@ public class Common {
                 return new ResponseEntity(
                         ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
                         HttpStatus.INTERNAL_SERVER_ERROR);
-            default:
+            case OK:
                 // 200: 无错误
+                VoObject data = returnObject.getData();
+                if (data != null){
+                    Object voObj = data.createVo();
+                    return ResponseUtil.ok(voObj);
+                }else{
+                    return ResponseUtil.ok();
+                }
+            default:
                 return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
         }
     }

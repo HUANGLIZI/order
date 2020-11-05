@@ -89,8 +89,8 @@ public class PrivilegeController {
         return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
     }
 
-<<<<<<< HEAD
-    /****auth 008*****/
+    /* auth008 start*/
+    //region
     /**
      * 分页查询所有角色
      * @param page
@@ -123,7 +123,78 @@ public class PrivilegeController {
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(paramType = "body", dataType = "RoleVo", name = "vo", value = "可修改的用户信息", required = true)
-=======
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @PostMapping("roles")
+    public Object insertRole(@Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
+        logger.info("insert role");
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            logger.info("validate fail");
+            return returnObject;
+        }
+        //由AOP解析token获取userId
+        Long userId = 1L;
+        ReturnObject<VoObject> retObject = roleService.insertRole(userId, vo);
+        httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        return Common.decorateReturnObject(retObject);
+    }
+
+    /**
+     * 删除角色，同时级联删除用户角色表与角色权限表
+     * @param id
+     * @return Object
+     */
+    @ApiOperation(value = "auth008： 删除角色", produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "角色id", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @DeleteMapping("roles/{id}")
+    public Object deleteRole(@PathVariable("id") Long id) {
+        logger.info("delete role");
+        ReturnObject<Object> returnObject = roleService.deleteRole(id);
+        return Common.decorateReturnObject(returnObject);
+    }
+
+    /**
+     * 修改角色信息
+     * @param id
+     * @param vo
+     * @param bindingResult
+     * @return Object
+     */
+    @ApiOperation(value = "auth008:修改角色信息", produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "角色id", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "RoleVo", name = "vo", value = "可修改的用户信息", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @PutMapping("roles/{id}")
+    public Object updateRole(@PathVariable("id") Long id, @Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
+        logger.info("update role");
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            return returnObject;
+        }
+        //由AOP解析token获取userId
+        Long userId = 1L;
+        ReturnObject<Object> retObject = roleService.updateRole(userId, id, vo);
+        return Common.decorateReturnObject(retObject);
+    }
+    //endregion
+    /* auth008 end*/
+
     /* auth009 */
 
     /**
@@ -159,38 +230,10 @@ public class PrivilegeController {
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(name="id", required = true, dataType="Integer", paramType="path")
->>>>>>> 70cb8742c4e6e7f73e8adf5e75f3387d20555110
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-<<<<<<< HEAD
-    @PostMapping("roles")
-    public Object insertRole(@Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
-        logger.info("insert role");
-        //校验前端数据
-        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
-        if (null != returnObject) {
-            logger.info("validate fail");
-            return returnObject;
-        }
-        //由AOP解析token获取userId
-        Long userId = 1L;
-        ReturnObject<VoObject> retObject = roleService.insertRole(userId, vo);
-        httpServletResponse.setStatus(HttpStatus.CREATED.value());
-        return Common.getRetObject(retObject);
-    }
-
-    /**
-     * 删除角色，同时级联删除用户角色表与角色权限表
-     * @param id
-     * @return Object
-     */
-    @ApiOperation(value = "auth008： 删除角色", produces = "application/json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "角色id", required = true)
-=======
     @DeleteMapping("adminusers/{id}")
     public Object deleteUser(@PathVariable Long id) {
         if (logger.isDebugEnabled()) {
@@ -209,32 +252,10 @@ public class PrivilegeController {
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(name="id", required = true, dataType="Integer", paramType="path")
->>>>>>> 70cb8742c4e6e7f73e8adf5e75f3387d20555110
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-<<<<<<< HEAD
-    @DeleteMapping("roles/{id}")
-    public Object deleteRole(@PathVariable("id") Long id) {
-        logger.info("delete role");
-        ReturnObject<Object> returnObject = roleService.deleteRole(id);
-        return Common.getNullRetObj(returnObject, httpServletResponse);
-    }
-
-    /**
-     * 修改角色信息
-     * @param id
-     * @param vo
-     * @param bindingResult
-     * @return Object
-     */
-    @ApiOperation(value = "auth008:修改角色信息", produces = "application/json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "角色id", required = true),
-            @ApiImplicitParam(paramType = "body", dataType = "RoleVo", name = "vo", value = "可修改的用户信息", required = true)
-=======
     @PutMapping("adminusers/{id}/forbid")
     public Object forbidUser(@PathVariable Long id) {
         if (logger.isDebugEnabled()) {
@@ -253,26 +274,10 @@ public class PrivilegeController {
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(name="id", required = true, dataType="Integer", paramType="path")
->>>>>>> 70cb8742c4e6e7f73e8adf5e75f3387d20555110
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-<<<<<<< HEAD
-    @PutMapping("roles/{id}")
-    public Object updateRole(@PathVariable("id") Long id, @Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
-        logger.info("update role");
-        //校验前端数据
-        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
-        if (null != returnObject) {
-            return returnObject;
-        }
-        //由AOP解析token获取userId
-        Long userId = 1L;
-        ReturnObject<Object> retObject = roleService.updateRole(userId, id, vo);
-        return Common.getNullRetObj(retObject, httpServletResponse);
-    }
-=======
     @PutMapping("adminusers/{id}/release")
     public Object releaseUser(@PathVariable Long id) {
         if (logger.isDebugEnabled()) {
@@ -283,5 +288,5 @@ public class PrivilegeController {
     }
 
     /* auth009 结束 */
->>>>>>> 70cb8742c4e6e7f73e8adf5e75f3387d20555110
+
 }
