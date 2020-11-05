@@ -83,8 +83,7 @@ public class UserDao implements InitializingBean {
         if (userRolePo == null){
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-        String key = "u_" + userRolePo.getUserId();
-        redisTemplate.delete(key);
+        clearUserPrivCache(userRolePo.getUserId());
 
         int state = userRolePoMapper.deleteByPrimaryKey(id);
         if (state == 0){
@@ -118,10 +117,8 @@ public class UserDao implements InitializingBean {
         userRolePo.setCreatorId(createid);
         userRolePo.setGmtCreate(LocalDateTime.now());
 
-        StringBuilder signature = StringUtil.concatString("-",
-                userid.toString(), roleid.toString(), createid.toString());
-        String newSignature = SHA256.getSHA256(signature.toString());
-        userRolePo.setSignature(newSignature);
+        UserRole userRole = new UserRole(userRolePo, user, new Role(rolePo), create);
+        userRolePo.setSignature(userRole.getCacuSignature());
 
         //查询该用户是否已经拥有该角色
         UserRolePoExample example = new UserRolePoExample();
@@ -131,16 +128,35 @@ public class UserDao implements InitializingBean {
 
         //若未拥有，则插入数据
         if (userRolePoMapper.selectByExample(example).isEmpty()){
-            String key = "u_" + userid;
-            redisTemplate.delete(key);
-
+            clearUserPrivCache(userid);
             userRolePoMapper.insert(userRolePo);
         }
 
-
-        return new ReturnObject<>(new UserRole(userRolePo, user, new Role(rolePo), create));
+        return new ReturnObject<>(userRole);
 
     }
+
+    /**
+     * 使用用户id，清空该用户和被代理对象的redis缓存
+     * @param userid 用户id
+     * @author Xianwei Wang
+     */
+    private void clearUserPrivCache(Long userid){
+        String key = "u_" + userid;
+        redisTemplate.delete(key);
+
+        UserProxyPoExample example = new UserProxyPoExample();
+        UserProxyPoExample.Criteria criteria = example.createCriteria();
+        criteria.andUserBIdEqualTo(userid);
+        List<UserProxyPo> userProxyPoList = userProxyPoMapper.selectByExample(example);
+
+        for (UserProxyPo user:
+             userProxyPoList) {
+            String proxyKey = "up_" + user.getUserAId();
+            redisTemplate.delete(proxyKey);
+        }
+    }
+
     /**
      * 获取用户的角色信息
      * @param id 用户id
@@ -159,18 +175,15 @@ public class UserDao implements InitializingBean {
         List<UserRole> retUserRoleList = new ArrayList<>(userRolePoList.size());
 
         for (UserRolePo po : userRolePoList) {
-            StringBuilder signature = StringUtil.concatString("-",
-                    po.getUserId().toString(), po.getRoleId().toString(), po.getCreatorId().toString());
-            String newSignature = SHA256.getSHA256(signature.toString());
+            User user = getUserById(po.getUserId());
+            User creator = getUserById(po.getCreatorId());
+            Role role = new Role(rolePoMapper.selectByPrimaryKey(po.getRoleId()));
 
-            //验证签名是否正确
-            if (newSignature.equals(po.getSignature())) {
-                //查询用户，创建者，角色的详细信息
-                User user = getUserById(po.getUserId());
-                User creator = getUserById(po.getCreatorId());
-                Role role = new Role(rolePoMapper.selectByPrimaryKey(po.getRoleId()));
+            UserRole userRole = new UserRole(po, user, role, creator);
 
-                retUserRoleList.add(new UserRole(po, user, role, creator));
+            //校验签名
+            if (userRole.authetic()){
+                retUserRoleList.add(userRole);
                 logger.debug("getRoleIdByUserId: userId = " + po.getUserId() + " roleId = " + po.getRoleId());
             } else {
                 logger.error("getUserRoles: Wrong Signature(auth_user_role): id =" + po.getId());
@@ -190,22 +203,13 @@ public class UserDao implements InitializingBean {
         if (userPo == null){
             return null;
         }
-        if (userPo.getSignature() == null && initialization){
-            User user = new User(userPo);
-            UserPo newUserPo = new UserPo();
-            newUserPo.setId(id);
-            newUserPo.setSignature(user.getCacuSignature());
-            userMapper.updateByPrimaryKeySelective(newUserPo);
 
-            return user;
-        }
         User user = new User(userPo);
         if (! user.authetic()){
             logger.error("getUser: Wrong Signature(auth_user): id =" + id);
             return null;
         }
         return user;
-
     }
 
 
