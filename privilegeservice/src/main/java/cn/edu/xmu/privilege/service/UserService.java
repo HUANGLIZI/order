@@ -127,7 +127,7 @@ public class UserService {
             }
         }
         catch (IOException e){
-            e.printStackTrace();
+            logger.debug("uploadImg: io error:" + imgLocation);
         }
 
         return object;
