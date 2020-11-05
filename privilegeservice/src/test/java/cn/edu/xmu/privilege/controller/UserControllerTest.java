@@ -31,7 +31,7 @@ public class UserControllerTest {
 
     @Test
     public void getUserPrivs() throws Exception{
-        String responseString = this.mvc.perform(get("/user/adminusers/1/privileges"))
+        String responseString = this.mvc.perform(get("/adminusers/1/privileges"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();

@@ -144,7 +144,7 @@ public class AdminUserController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    @GetMapping("/adminusers/{id}/privileges")
+    @GetMapping("adminusers/{id}/privileges")
     public Object getPrivsByUserId(@PathVariable Long id){
         ReturnObject<List> returnObject =  userService.findPrivsByUserId(id);
         return Common.getListRetObject(returnObject);
