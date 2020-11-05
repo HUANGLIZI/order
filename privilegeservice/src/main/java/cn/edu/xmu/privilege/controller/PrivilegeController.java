@@ -109,6 +109,16 @@ public class PrivilegeController {
             return o;
         }
 
+        String ip = IpUtil.getIpAddr(httpServletRequest);
+        ReturnObject<String> jwt = userService.Login(loginVo.getUserName(), loginVo.getPassword(), ip);
+
+            if(jwt.getData() == null){
+            return ResponseUtil.fail(jwt.getCode(), jwt.getErrmsg());
+        }else{
+            return ResponseUtil.ok(jwt.getData());
+        }
+    }
+
     /* auth008 start*/
     //region
     /**
@@ -306,20 +316,7 @@ public class PrivilegeController {
         ReturnObject returnObject = userService.releaseUser(id);
         return Common.decorateReturnObject(returnObject);
     }
-
     /* auth009 结束 */
-
-}
-
-        String ip = IpUtil.getIpAddr(httpServletRequest);
-        ReturnObject<String> jwt = userService.Login(loginVo.getUserName(), loginVo.getPassword(), ip);
-
-        if(jwt.getData() == null){
-            return ResponseUtil.fail(jwt.getCode(), jwt.getErrmsg());
-        }else{
-            return ResponseUtil.ok(jwt.getData());
-        }
-    }
 
     @ApiOperation(value = "注销")
     @Audit
