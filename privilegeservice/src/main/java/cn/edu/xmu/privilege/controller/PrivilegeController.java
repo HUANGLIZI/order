@@ -124,7 +124,7 @@ public class PrivilegeController {
     @ApiOperation(value = "获得所有人角色信息")
     @ApiImplicitParams({
 
-            @ApiImplicitParam(name="id", value="用户id", required = true, dataType="Integer", paramType="path")
+            @ApiImplicitParam(name="id", value="用户id", required = true, dataType="int", paramType="path")
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
