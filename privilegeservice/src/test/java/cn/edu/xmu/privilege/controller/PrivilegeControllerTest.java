@@ -1,9 +1,13 @@
 package cn.edu.xmu.privilege.controller;
 
 import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.util.AES;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
+import cn.edu.xmu.privilege.mapper.UserPoMapper;
+import cn.edu.xmu.privilege.model.bo.User;
+import cn.edu.xmu.privilege.model.po.UserPo;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import org.junit.jupiter.api.Test;
@@ -15,6 +19,7 @@ import org.springframework.test.context.event.annotation.BeforeTestMethod;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;

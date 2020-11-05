@@ -54,7 +54,10 @@ public class PrivilegeDao implements InitializingBean {
      */
     @Override
     public void afterPropertiesSet() throws Exception {
-        List<PrivilegePo> privilegePos =  mapper.selectAll();
+        PrivilegePoExample example = new PrivilegePoExample();
+        PrivilegePoExample.Criteria criteria = example.createCriteria();
+        List<PrivilegePo> privilegePos = poMapper.selectByExample(example);
+//        List<PrivilegePo> privilegePos =  mapper.selectAll();
         if (null == cache){
             cache = new HashMap<>(privilegePos.size());
         }
