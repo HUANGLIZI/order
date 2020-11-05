@@ -71,7 +71,7 @@ prvilegeservice:
   #随机雪崩时间（秒）
   randomtime: 300
   #图片存储位置
-  imgloaction: ./img
+  imgloaction: C:\Users\img
   user:
     # user的权限字在Redis中失效秒数
     expiretime: 600

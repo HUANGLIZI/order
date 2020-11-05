@@ -34,10 +34,6 @@ public class UserService {
     private String imgLocation;
 
     @Autowired
-    UserDao userDao;
-
-
-    @Autowired
     private PrivilegeDao privilegeDao;
 
     @Autowired
