@@ -1,9 +1,7 @@
 package cn.edu.xmu.privilege.controller;
 
-import cn.edu.xmu.ooad.annotation.Audit;
-import cn.edu.xmu.ooad.annotation.Depart;
-import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.util.*;
+import cn.edu.xmu.ooad.annotation.*;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseUtil;
@@ -107,16 +105,6 @@ public class PrivilegeController {
     @Audit
     @GetMapping("privileges/logout")
     public Object logout(@LoginUser Long userId){
-        /* 处理参数校验错误 */
-//        if(authorization == null || authorization.isBlank()){
-//            Object retObj = null;
-//            StringBuffer msg = new StringBuffer();
-//            msg.append("请传入JWT令牌;");
-//            logger.info("methodArgumentNotValid: msg = "+ msg.toString());
-//            retObj = ResponseUtil.fail(ResponseCode.FIELD_NOTVALID, msg.toString());
-//            response.setStatus(HttpStatus.BAD_REQUEST.value());
-//            return retObj;
-//        }
 
 //        JwtHelper.UserAndDepart user = jwtHelper.verifyTokenAndGetClaims(authorization);
         ReturnObject<Boolean> success = userService.Logout(userId);

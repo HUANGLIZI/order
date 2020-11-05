@@ -10,15 +10,18 @@ import cn.edu.xmu.privilege.dao.UserDao;
 import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
+import cn.edu.xmu.privilege.model.vo.UserEditVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 用户服务
@@ -78,12 +81,25 @@ public class UserService {
             retObj = new ReturnObject<>(ResponseCode.AUTH_USER_FORBIDDEN, "您的信息被篡改，请联系管理员处理");
             return retObj;
         }
-        if(redisTemplate.hasKey("u_" + user.getId().toString()) && canMultiplyLogin == false){
+        if(redisTemplate.hasKey("up_" + user.getId().toString()) && canMultiplyLogin == false){
             // 用户重复登录处理
+            Set<String> set = redisTemplate.opsForSet().members("up_" + user.getId().toString());
+            /* 找出JWT */
+            String jwt = null;
+            for (String str : set) {
+                if(str.contains(".")){
+                    jwt = str;
+                    break;
+                }
+            }
+
+            /* 将JWT加入需要踢出的集合 */
+            redisTemplate.delete("up_" + user.getId().toString());
+            userDao.banJwt(jwt);
         }
 
         String jwt = jwtHelper.createToken(user.getId(),user.getDepartId());
-        userDao.loadUserPriv(user.getId());
+        userDao.loadUserPriv(user.getId(), jwt);
         userDao.setLoginIPAndPosition(user.getId(),IpAddr, LocalDateTime.now());
         retObj = new ReturnObject<>(jwt);
 
@@ -93,7 +109,7 @@ public class UserService {
     public ReturnObject<Boolean> Logout(Long userId)
     {
         ReturnObject<Boolean> retObj = null;
-        Boolean success = redisTemplate.delete("u_" + userId);
+        Boolean success = redisTemplate.delete("up_" + userId);
         if (success){
             retObj = new ReturnObject<>(true);
         } else {
@@ -101,4 +117,43 @@ public class UserService {
         }
         return retObj;
     }
+
+    /**
+     * 根据 ID 和 UserEditVo 修改任意用户信息
+     * @param id 用户 id
+     * @param vo UserEditVo 对象
+     * @return 返回对象 ReturnObject
+     */
+    public ReturnObject<Object> modifyUserInfo(Long id, UserEditVo vo) {
+        return userDao.modifyUserByVo(id, vo);
+    }
+
+    /**
+     * 根据 id 删除任意用户
+     * @param id 用户 id
+     * @return 返回对象 ReturnObject
+     */
+    public ReturnObject<Object> deleteUser(Long id) {
+        // 注：逻辑删除
+        return userDao.logicallyDeleteUser(id);
+    }
+
+    /**
+     * 根据 id 禁止任意用户登录
+     * @param id 用户 id
+     * @return 返回对象 ReturnObject
+     */
+    public ReturnObject<Object> forbidUser(Long id) {
+        return userDao.forbidUser(id);
+    }
+
+    /**
+     * 解禁任意用户
+     * @param id 用户 id
+     * @return 返回对象 ReturnObject
+     */
+    public ReturnObject<Object> releaseUser(Long id) {
+        return userDao.releaseUser(id);
+    }
+
 }
