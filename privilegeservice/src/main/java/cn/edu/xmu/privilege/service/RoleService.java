@@ -41,6 +41,7 @@ public class RoleService {
      * @param vo
      * @return ReturnObject<VoObject>
      */
+    @Transactional
     public ReturnObject<VoObject> insertRole(Long userId, RoleVo vo) {
         Role role = vo.createRole();
         role.setCreatorId(userId);
@@ -60,6 +61,7 @@ public class RoleService {
      * @param id
      * @return ReturnObject<Object>
      */
+    @Transactional
     public ReturnObject<Object> deleteRole(Long id) {
         return roleDao.deleteRole(id);
     }
@@ -71,6 +73,7 @@ public class RoleService {
      * @param vo
      * @return ReturnObject<Object>
      */
+    @Transactional
     public ReturnObject<Object> updateRole(Long userId, Long id, RoleVo vo) {
         Role role = vo.createRole();
         role.setId(id);
