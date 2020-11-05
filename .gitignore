@@ -1,5 +1,2 @@
-
-.idea/
-target/
-*.iml
-*.log
+.history/*
+.idea/*
