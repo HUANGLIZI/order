@@ -18,7 +18,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,7 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * 角色控制器测试类
  * 
  * @author Weice Wang
- * @date Created in 2020/11/4 9:23
+ * @date Created in 2020/11/5 14:23
+ * Modified in 2020/11/5 14:16
  **/
 @SpringBootTest(classes = PrivilegeServiceApplication.class)   //标识本类是一个SpringBootTest
 @AutoConfigureMockMvc    //配置模拟的MVC，这样可以不启动服务器测试
@@ -63,7 +63,7 @@ public class RoleControllerTest {
         String responseString = null;
         String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDQ0ODIwMzAsInVzZXJJZCI6MSwiaWF0IjoxNjA0NDc0ODMwfQ.f1g65bUbkK8FlyW9ac5WhM9FBT6ILOmGROjuMVJntyE";
         try {
-            responseString = this.mvc.perform(get("/roles?page=1&pageSize=2").header("authorization", token))
+            responseString = this.mvc.perform(get("/privilege/roles?page=1&pageSize=2").header("authorization", token))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -91,14 +91,14 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(post("/roles").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(post("/privilege/roles").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isCreated())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        expectedResponse = "{\"errno\":0,\"data\":{\"id\":88,\"name\":\"test\",\"desc\":\"test\",\"createdBy\":1},\"errmsg\":\"成功\"}";
+        expectedResponse = "{\"errno\":0,\"data\":{\"id\":88,\"name\":\"test\",\"creatorId\":1,\"describe\":\"test\"},\"errmsg\":\"成功\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, false);
         } catch (JSONException e) {
@@ -119,14 +119,14 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(post("/roles").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(post("/privilege/roles").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isCreated())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        expectedResponse = "{\"errno\":736,\"errmsg\":\"角色名已存在\"}";
+        expectedResponse = "{\"errno\":736,\"errmsg\":\"角色名重复：管理员\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, true);
         } catch (JSONException e) {
@@ -147,7 +147,7 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(post("/roles").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(post("/privilege/roles").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isBadRequest())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -175,7 +175,7 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(put("/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(put("/privilege/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -203,7 +203,7 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(put("/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(put("/privilege/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isBadRequest())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -231,14 +231,14 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(put("/roles/0").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(put("/privilege/roles/0").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isNotFound())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        expectedResponse = "{\"errno\":504,\"errmsg\":\"角色id不存在：0\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, true);
         } catch (JSONException e) {
@@ -259,14 +259,14 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(put("/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(put("/privilege/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        expectedResponse = "{\"errno\":736,\"errmsg\":\"角色名已存在\"}";
+        expectedResponse = "{\"errno\":736,\"errmsg\":\"角色名重复：管理员\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, true);
         } catch (JSONException e) {
@@ -285,7 +285,7 @@ public class RoleControllerTest {
         String responseString = null;
         //测试删除成功
         try {
-            responseString = this.mvc.perform(delete("/roles/87").header("authorization", token))
+            responseString = this.mvc.perform(delete("/privilege/roles/87").header("authorization", token))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -309,14 +309,14 @@ public class RoleControllerTest {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(delete("/roles/0").header("authorization", token))
+            responseString = this.mvc.perform(delete("/privilege/roles/0").header("authorization", token))
                     .andExpect(status().isNotFound())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        expectedResponse = "{\"errno\":504,\"errmsg\":\"角色id不存在：0\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, true);
         } catch (JSONException e) {

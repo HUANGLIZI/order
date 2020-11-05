@@ -49,7 +49,7 @@ public class AdminUserControllerTest {
                 "}";
 
         String responseString = this.mvc.perform(
-                put("/adminusers/59").contentType("application/json;charset=UTF-8").content(contentJson))
+                put("/privilege/adminusers/59").contentType("application/json;charset=UTF-8").content(contentJson))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -77,7 +77,7 @@ public class AdminUserControllerTest {
                 "}";
 
         this.mvc.perform(
-                put("/adminusers/58").contentType("application/json;charset=UTF-8").content(contentJson))
+                put("/privilege/adminusers/58").contentType("application/json;charset=UTF-8").content(contentJson))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -89,7 +89,7 @@ public class AdminUserControllerTest {
                 "}";
 
         String responseString = this.mvc.perform(
-                put("/adminusers/55").contentType("application/json;charset=UTF-8").content(contentJson))
+                put("/privilege/adminusers/55").contentType("application/json;charset=UTF-8").content(contentJson))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -111,7 +111,7 @@ public class AdminUserControllerTest {
                 "}";
 
         this.mvc.perform(
-                put("/adminusers/58").contentType("application/json;charset=UTF-8").content(contentJson))
+                put("/privilege/adminusers/58").contentType("application/json;charset=UTF-8").content(contentJson))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -123,7 +123,7 @@ public class AdminUserControllerTest {
                 "}";
 
         String responseString = this.mvc.perform(
-                put("/adminusers/55").contentType("application/json;charset=UTF-8").content(contentJson))
+                put("/privilege/adminusers/55").contentType("application/json;charset=UTF-8").content(contentJson))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -145,7 +145,7 @@ public class AdminUserControllerTest {
                 "}";
 
         String responseString = this.mvc.perform(
-                put("/adminusers/99").contentType("application/json;charset=UTF-8").content(contentJson))
+                put("/privilege/adminusers/99").contentType("application/json;charset=UTF-8").content(contentJson))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -162,7 +162,7 @@ public class AdminUserControllerTest {
     public void modifyDeletedUser() throws Exception {
         // 逻辑删除
         String responseString = this.mvc.perform(
-                delete("/adminusers/58"))
+                delete("/privilege/adminusers/58"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -178,7 +178,7 @@ public class AdminUserControllerTest {
                 "}";
 
         responseString = this.mvc.perform(
-                put("/adminusers/58").contentType("application/json;charset=UTF-8").content(contentJson))
+                put("/privilege/adminusers/58").contentType("application/json;charset=UTF-8").content(contentJson))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -195,7 +195,7 @@ public class AdminUserControllerTest {
     public void deleteUser() throws Exception {
 
         String responseString = this.mvc.perform(
-                delete("/adminusers/58"))
+                delete("/privilege/adminusers/58"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -216,7 +216,7 @@ public class AdminUserControllerTest {
     public void deleteNilUser() throws Exception {
 
         String responseString = this.mvc.perform(
-                delete("/adminusers/120"))
+                delete("/privilege/adminusers/120"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -233,7 +233,7 @@ public class AdminUserControllerTest {
     public void deleteDeletedUser() throws Exception {
         // 逻辑删除
         String responseString = this.mvc.perform(
-                delete("/adminusers/55"))
+                delete("/privilege/adminusers/55"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -243,7 +243,7 @@ public class AdminUserControllerTest {
 
         // 测试还能否被删除
         responseString = this.mvc.perform(
-                delete("/adminusers/55"))
+                delete("/privilege/adminusers/55"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -260,7 +260,7 @@ public class AdminUserControllerTest {
     public void forbidUser() throws Exception {
 
         String responseString = this.mvc.perform(
-                put("/adminusers/59/forbid"))
+                put("/privilege/adminusers/59/forbid"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -281,7 +281,7 @@ public class AdminUserControllerTest {
     public void forbidNilUser() throws Exception {
 
         String responseString = this.mvc.perform(
-                put("/adminusers/90/forbid"))
+                put("/privilege/adminusers/90/forbid"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -298,7 +298,7 @@ public class AdminUserControllerTest {
     public void forbidDeletedUser() throws Exception {
         // 逻辑删除
         String responseString = this.mvc.perform(
-                delete("/adminusers/48"))
+                delete("/privilege/adminusers/48"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -308,7 +308,7 @@ public class AdminUserControllerTest {
 
         // 测试硬更改
         responseString = this.mvc.perform(
-                put("/adminusers/48/forbid"))
+                put("/privilege/adminusers/48/forbid"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -325,7 +325,7 @@ public class AdminUserControllerTest {
     public void releaseUser() throws Exception {
 
         String responseString = this.mvc.perform(
-                put("/adminusers/59/release"))
+                put("/privilege/adminusers/59/release"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -346,7 +346,7 @@ public class AdminUserControllerTest {
     public void releaseNilUser() throws Exception {
 
         String responseString = this.mvc.perform(
-                put("/adminusers/321/release"))
+                put("/privilege/adminusers/321/release"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -363,7 +363,7 @@ public class AdminUserControllerTest {
     public void releaseDeletedUser() throws Exception {
         // 逻辑删除
         String responseString = this.mvc.perform(
-                delete("/adminusers/46"))
+                delete("/privilege/adminusers/46"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -373,7 +373,7 @@ public class AdminUserControllerTest {
 
         // 测试硬解封
         responseString = this.mvc.perform(
-                put("/adminusers/46/release"))
+                put("/privilege/adminusers/46/release"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
