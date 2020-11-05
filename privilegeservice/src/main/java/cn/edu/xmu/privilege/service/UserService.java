@@ -66,9 +66,10 @@ public class UserService {
     public ReturnObject uploadImg(Integer id, MultipartFile multipartFile){
         User user = userDao.getUserById(id);
 
+        ReturnObject object = new ReturnObject(ResponseCode.OK);
         try{
             if(user.getAvatar()==null){
-                ReturnObject object = ImgHelper.saveImg(multipartFile,imgLocation);
+                object = ImgHelper.saveImg(multipartFile,imgLocation);
                 if(object.getErrmsg().equals(ResponseCode.FILE_NO_WRITE_PERMISSION.getMessage())){
                     logger.debug(object.getErrmsg());
                     throw new IOException();
@@ -79,7 +80,7 @@ public class UserService {
             else{
                 String oldFilename = user.getAvatar();
                 ImgHelper.deleteImg(oldFilename,imgLocation);
-                ReturnObject object = ImgHelper.saveImg(multipartFile,imgLocation);
+                object = ImgHelper.saveImg(multipartFile,imgLocation);
                 if(object.getErrmsg().equals(ResponseCode.FILE_NO_WRITE_PERMISSION.getMessage())){
                     logger.debug(object.getErrmsg());
                     throw new IOException();
@@ -90,9 +91,8 @@ public class UserService {
         }
         catch (IOException e){
             e.printStackTrace();
-            return new ReturnObject(ResponseCode.OK,"上传失败");
         }
 
-        return new ReturnObject();
+        return object;
     }
 }

@@ -13,7 +13,7 @@ public class ImgHelper {
      *
      * @param multipartFile
      * @param path          文件保存路径
-     * @return 返回文件名
+     * @return
      */
     public static ReturnObject saveImg(MultipartFile multipartFile, String path) throws IOException {
         File file = new File(path);
