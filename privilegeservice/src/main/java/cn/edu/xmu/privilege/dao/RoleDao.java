@@ -1,12 +1,13 @@
 package cn.edu.xmu.privilege.dao;
 
+import cn.edu.xmu.ooad.util.ResponseCode;
+import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.ooad.util.StringUtil;
-import cn.edu.xmu.privilege.mapper.RolePoMapper;
-import cn.edu.xmu.privilege.mapper.RolePrivilegePoMapper;
-import cn.edu.xmu.privilege.model.bo.Privilege;
-import cn.edu.xmu.privilege.model.po.RolePrivilegePo;
-import cn.edu.xmu.privilege.model.po.RolePrivilegePoExample;
+import cn.edu.xmu.privilege.mapper.*;
+import cn.edu.xmu.privilege.model.bo.Role;
+import cn.edu.xmu.privilege.model.po.*;
+import com.github.pagehelper.PageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -23,9 +24,9 @@ import java.util.concurrent.TimeUnit;
 /**
  * 角色访问类
  *
- * @author Ming Qiu
- * @date Created in 2020/11/1 11:48
- * Modified in 2020/11/3 12:16
+ * @author Weice Wang
+ * @date Created in 2020/11/4 11:48
+ * Modified in 2020/11/4 12:16
  **/
 @Repository
 public class RoleDao implements InitializingBean {
@@ -46,6 +47,15 @@ public class RoleDao implements InitializingBean {
 
     @Autowired
     private RolePoMapper roleMapper;
+
+    @Autowired
+    private UserPoMapper userMapper;
+
+    @Autowired
+    private UserRolePoMapper userRolePoMapper;
+
+    @Autowired
+    private UserProxyPoMapper userProxyPoMapper;
 
     @Autowired
     private RolePrivilegePoMapper rolePrivilegePoMapper;
@@ -128,5 +138,140 @@ public class RoleDao implements InitializingBean {
             rolePrivilegePoMapper.updateByPrimaryKeySelective(newPo);
         }
 
+    }
+
+    /**
+     * 分页查询所有角色
+     * @param pageNum
+     * @param pageSize
+     * @return ReturnObject<List>
+     */
+    public ReturnObject<List> selectAllRole(Integer pageNum, Integer pageSize) {
+        RolePoExample example = new RolePoExample();
+        RolePoExample.Criteria criteria = example.createCriteria();
+        //分页查询
+        PageHelper.startPage(pageNum, pageSize);
+        logger.debug("page = " + pageNum + "pageSize = " + pageSize);
+        //不加限定条件查询所有
+        List<RolePo> rolePos = roleMapper.selectByExample(example);
+        List<Role> roles = new ArrayList<>(rolePos.size());
+        logger.debug("selectAllRoles: total roles num = " + rolePos.size());
+        for (RolePo rolePoItem : rolePos) {
+            Role item = new Role(rolePoItem);
+            roles.add(item);
+        }
+        return new ReturnObject<>(roles);
+    }
+
+    /**
+     * 增加一个角色
+     * @param role
+     * @return ReturnObject<Role>
+     */
+    public ReturnObject<Role> insertRole(Role role) {
+        RolePo rolePo = role.gotRolePo();
+        ReturnObject<Role> retObj = null;
+        try{
+            int ret = roleMapper.insertSelective(rolePo);
+            if (ret == 0) {
+                //插入失败
+                logger.debug("updateRole: id not exist = " + rolePo.getId());
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            } else {
+                //插入成功
+                logger.debug("updateRole: update role = " + rolePo.toString());
+                role.setId(rolePo.getId());
+                retObj = new ReturnObject<>(role);
+            }
+        }
+        catch (Exception e) {
+            //e.printStackTrace();
+            //若有重复的角色名则修改失败
+            logger.debug("updateRole: have same role name = " + rolePo.getName());
+            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
+        }
+        return retObj;
+    }
+
+    /**
+     * 删除一个角色
+     * @param id
+     * @return ReturnObject<Object>
+     */
+    public ReturnObject<Object> deleteRole(Long id) {
+        ReturnObject<Object> retObj = null;
+        int ret = roleMapper.deleteByPrimaryKey(id);
+        if (ret == 0) {
+            //删除角色表
+            logger.debug("deleteRole: id not exist = " + id);
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        } else {
+            //删除角色权限表
+            logger.debug("deleteRole: delete role id = " + id);
+            RolePrivilegePoExample exampleRP = new RolePrivilegePoExample();
+            RolePrivilegePoExample.Criteria criteriaRP = exampleRP.createCriteria();
+            criteriaRP.andRoleIdEqualTo(id);
+            List<RolePrivilegePo> rolePrivilegePos = rolePrivilegePoMapper.selectByExample(exampleRP);
+            logger.debug("deleteRole: delete role-privilege num = " + rolePrivilegePos.size());
+            for (RolePrivilegePo rolePrivilegePo : rolePrivilegePos) {
+                rolePrivilegePoMapper.deleteByPrimaryKey(rolePrivilegePo.getId());
+            }
+            //删除缓存中角色权限信息
+            redisTemplate.delete("r_" + id);
+            //删除用户角色表
+            UserRolePoExample exampleUR = new UserRolePoExample();
+            UserRolePoExample.Criteria criteriaUR = exampleUR.createCriteria();
+            criteriaUR.andRoleIdEqualTo(id);
+            List<UserRolePo> userRolePos = userRolePoMapper.selectByExample(exampleUR);
+            logger.debug("deleteRole: delete user-role num = " + userRolePos.size());
+            for (UserRolePo userRolePo : userRolePos) {
+                userRolePoMapper.deleteByPrimaryKey(userRolePo.getId());
+                //删除缓存中具有删除角色的用户权限
+                redisTemplate.delete("u_" + userRolePo.getUserId());
+                redisTemplate.delete("up_" + userRolePo.getUserId());
+                //查询当前所有有效的代理具有删除角色用户的代理用户
+                UserProxyPoExample example = new UserProxyPoExample();
+                UserProxyPoExample.Criteria criteria = example.createCriteria();
+                criteria.andUserBIdEqualTo(userRolePo.getUserId());
+                List<UserProxyPo> userProxyPos = userProxyPoMapper.selectByExample(example);
+                for(UserProxyPo userProxyPo : userProxyPos){
+                    //删除缓存中代理了具有删除角色的用户的代理用户
+                    redisTemplate.delete("u_" + userProxyPo.getUserAId());
+                    redisTemplate.delete("up_" + userProxyPo.getUserAId());
+                }
+            }
+            retObj = new ReturnObject<>();
+        }
+
+        return retObj;
+    }
+
+    /**
+     * 修改一个角色
+     * @param role
+     * @return ReturnObject<Role>
+     */
+    public ReturnObject<Role> updateRole(Role role) {
+        RolePo rolePo = role.gotRolePo();
+        ReturnObject<Role> retObj = null;
+        try{
+            int ret = roleMapper.updateByPrimaryKeySelective(rolePo);
+            if (ret == 0) {
+                //修改失败
+                logger.debug("updateRole: id not exist = " + rolePo.getId());
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            } else {
+                //修改成功
+                logger.debug("updateRole: update role = " + rolePo.toString());
+                retObj = new ReturnObject<>();
+            }
+        }
+        catch (Exception e) {
+            //e.printStackTrace();
+            //若有重复的角色名则修改失败
+            logger.debug("updateRole: have same role name = " + rolePo.getName());
+            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
+        }
+        return retObj;
     }
 }
