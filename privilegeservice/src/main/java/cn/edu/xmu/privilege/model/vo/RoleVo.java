@@ -7,6 +7,12 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 
+/**
+ * 角色视图
+ * 
+ * @author Weice Wang
+ * @date Created in 2020/11/4 12:48
+ **/
 @Data
 @ApiModel(description = "角色视图对象")
 public class RoleVo {

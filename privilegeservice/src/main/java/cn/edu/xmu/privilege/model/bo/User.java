@@ -16,6 +16,7 @@ import java.util.Map;
  *
  * @author Ming Qiu
  * @date Created in 2020/11/3 20:10
+ * Modified at 2020/11/4 21:23
  **/
 @Data
 public class User {

@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 /**
  * 用户信息 Vo
  * @author Han Li
+ * Created at 2020/11/4 20:30
+ * Modified at 2020/11/5 10:42
  **/
 @Data
 @ApiModel(description = "管理员用户信息视图对象")

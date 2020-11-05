@@ -9,6 +9,7 @@ import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.privilege.dao.UserDao;
 import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.bo.User;
+import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import cn.edu.xmu.privilege.model.vo.UserEditVo;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.Set;
 /**
  * 用户服务
  * @author Ming Qiu
+ * Modified at 2020/11/5 10:39
  **/
 @Service
 public class UserService {
@@ -124,6 +127,7 @@ public class UserService {
      * @param vo UserEditVo 对象
      * @return 返回对象 ReturnObject
      */
+    @Transactional
     public ReturnObject<Object> modifyUserInfo(Long id, UserEditVo vo) {
         return userDao.modifyUserByVo(id, vo);
     }
@@ -133,9 +137,10 @@ public class UserService {
      * @param id 用户 id
      * @return 返回对象 ReturnObject
      */
+    @Transactional
     public ReturnObject<Object> deleteUser(Long id) {
         // 注：逻辑删除
-        return userDao.logicallyDeleteUser(id);
+        return userDao.changeUserState(id, User.State.DELETE);
     }
 
     /**
@@ -143,8 +148,9 @@ public class UserService {
      * @param id 用户 id
      * @return 返回对象 ReturnObject
      */
+    @Transactional
     public ReturnObject<Object> forbidUser(Long id) {
-        return userDao.forbidUser(id);
+        return userDao.changeUserState(id, User.State.FORBID);
     }
 
     /**
@@ -152,8 +158,9 @@ public class UserService {
      * @param id 用户 id
      * @return 返回对象 ReturnObject
      */
+    @Transactional
     public ReturnObject<Object> releaseUser(Long id) {
-        return userDao.releaseUser(id);
+        return userDao.changeUserState(id, User.State.NORM);
     }
 
 }
