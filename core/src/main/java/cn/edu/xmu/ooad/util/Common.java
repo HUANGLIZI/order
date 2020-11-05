@@ -155,10 +155,9 @@ public class Common {
                         HttpStatus.INTERNAL_SERVER_ERROR);
             case OK:
                 // 200: 无错误
-                VoObject data = returnObject.getData();
+                Object data = returnObject.getData();
                 if (data != null){
-                    Object voObj = data.createVo();
-                    return ResponseUtil.ok(voObj);
+                    return ResponseUtil.ok(data);
                 }else{
                     return ResponseUtil.ok();
                 }

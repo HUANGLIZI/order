@@ -19,6 +19,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -27,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Weice Wang
  * @date Created in 2020/11/4 11:48
- * Modified in 2020/11/4 12:16
+ * Modified in 2020/11/5 14:16
  **/
 @Repository
 public class RoleDao implements InitializingBean {
@@ -186,10 +187,10 @@ public class RoleDao implements InitializingBean {
             }
         }
         catch (DataAccessException e) {
-            if (Objects.requireNonNull(e.getMessage()).contains("auth_user.auth_user_mobile_uindex")) {
+            if (Objects.requireNonNull(e.getMessage()).contains("auth_role.auth_role_name_uindex")) {
                 //若有重复的角色名则新增失败
                 logger.debug("updateRole: have same role name = " + rolePo.getName());
-                retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("用户名重复：" + rolePo.getName()));
+                retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("角色名重复：" + rolePo.getName()));
             } else {
                 // 其他数据库错误
                 logger.debug("other sql exception : " + e.getMessage());
@@ -215,7 +216,7 @@ public class RoleDao implements InitializingBean {
         if (ret == 0) {
             //删除角色表
             logger.debug("deleteRole: id not exist = " + id);
-            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("角色id不存在：" + id));
         } else {
             //删除角色权限表
             logger.debug("deleteRole: delete role id = " + id);
@@ -270,7 +271,7 @@ public class RoleDao implements InitializingBean {
             if (ret == 0) {
                 //修改失败
                 logger.debug("updateRole: update role fail : " + rolePo.toString());
-                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("修改失败：" + rolePo.getName()));
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("角色id不存在：" + rolePo.getId()));
             } else {
                 //修改成功
                 logger.debug("updateRole: update role = " + rolePo.toString());
@@ -279,9 +280,9 @@ public class RoleDao implements InitializingBean {
         }
         catch (DataAccessException e) {
             if (Objects.requireNonNull(e.getMessage()).contains("auth_role.auth_role_name_uindex")) {
-                //若有重复的角色名则新增失败
+                //若有重复的角色名则修改失败
                 logger.debug("updateRole: have same role name = " + rolePo.getName());
-                retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("用户名重复：" + rolePo.getName()));
+                retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("角色名重复：" + rolePo.getName()));
             } else {
                 // 其他数据库错误
                 logger.debug("other sql exception : " + e.getMessage());

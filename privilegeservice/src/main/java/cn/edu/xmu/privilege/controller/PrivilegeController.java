@@ -8,12 +8,9 @@ import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
-<<<<<<< HEAD
 import cn.edu.xmu.privilege.model.vo.RoleVo;
-import cn.edu.xmu.privilege.service.RoleService;
-=======
 import cn.edu.xmu.privilege.model.vo.UserEditVo;
->>>>>>> 70cb8742c4e6e7f73e8adf5e75f3387d20555110
+import cn.edu.xmu.privilege.service.RoleService;
 import cn.edu.xmu.privilege.service.UserService;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;

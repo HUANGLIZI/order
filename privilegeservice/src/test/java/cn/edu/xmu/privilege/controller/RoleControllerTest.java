@@ -18,7 +18,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,7 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * 角色控制器测试类
  * 
  * @author Weice Wang
- * @date Created in 2020/11/4 9:23
+ * @date Created in 2020/11/5 14:23
+ * Modified in 2020/11/5 14:16
  **/
 @SpringBootTest(classes = PrivilegeServiceApplication.class)   //标识本类是一个SpringBootTest
 @AutoConfigureMockMvc    //配置模拟的MVC，这样可以不启动服务器测试
@@ -98,7 +98,7 @@ public class RoleControllerTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        expectedResponse = "{\"errno\":0,\"data\":{\"id\":88,\"name\":\"test\",\"desc\":\"test\",\"createdBy\":1},\"errmsg\":\"成功\"}";
+        expectedResponse = "{\"errno\":0,\"data\":{\"id\":88,\"name\":\"test\",\"creatorId\":1,\"describe\":\"test\"},\"errmsg\":\"成功\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, false);
         } catch (JSONException e) {
@@ -126,7 +126,7 @@ public class RoleControllerTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        expectedResponse = "{\"errno\":736,\"errmsg\":\"角色名已存在\"}";
+        expectedResponse = "{\"errno\":736,\"errmsg\":\"角色名重复：管理员\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, true);
         } catch (JSONException e) {
@@ -238,7 +238,7 @@ public class RoleControllerTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        expectedResponse = "{\"errno\":504,\"errmsg\":\"角色id不存在：0\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, true);
         } catch (JSONException e) {
@@ -266,7 +266,7 @@ public class RoleControllerTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        expectedResponse = "{\"errno\":736,\"errmsg\":\"角色名已存在\"}";
+        expectedResponse = "{\"errno\":736,\"errmsg\":\"角色名重复：管理员\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, true);
         } catch (JSONException e) {
@@ -316,7 +316,7 @@ public class RoleControllerTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        expectedResponse = "{\"errno\":504,\"errmsg\":\"角色id不存在：0\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, true);
         } catch (JSONException e) {
