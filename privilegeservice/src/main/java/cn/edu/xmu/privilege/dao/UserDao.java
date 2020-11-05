@@ -83,12 +83,27 @@ public class UserDao implements InitializingBean {
         if (userRolePo == null){
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
+        //清除缓存
         clearUserPrivCache(userRolePo.getUserId());
 
-        int state = userRolePoMapper.deleteByPrimaryKey(id);
-        if (state == 0){
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        try {
+            int state = userRolePoMapper.deleteByPrimaryKey(id);
+            if (state == 0){
+                logger.warn("revokeRole: 未找到该用户角色id" + id);
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+        } catch (DataAccessException e) {
+            // 数据库错误
+            logger.error("数据库错误：" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
+                    String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        } catch (Exception e) {
+            // 属未知错误
+            logger.error("严重错误：" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
+                    String.format("发生了严重的未知错误：%s", e.getMessage()));
         }
+
         return new ReturnObject<>();
     }
 
@@ -110,7 +125,7 @@ public class UserDao implements InitializingBean {
         RolePo rolePo = rolePoMapper.selectByPrimaryKey(roleid);
 
         //用户id或角色id不存在
-        if (user == null || create == null || rolePo == null){
+        if (user == null || create == null || rolePo == null) {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
 
@@ -127,12 +142,26 @@ public class UserDao implements InitializingBean {
         criteria.andRoleIdEqualTo(roleid);
 
         //若未拥有，则插入数据
-        if (userRolePoMapper.selectByExample(example).isEmpty()){
-            clearUserPrivCache(userid);
-            userRolePoMapper.insert(userRolePo);
+        try {
+            if (userRolePoMapper.selectByExample(example).isEmpty()){
+                clearUserPrivCache(userid);
+                userRolePoMapper.insert(userRolePo);
+            } else {
+                logger.warn("assignRole: 该用户已拥有该角色 userid=" + userid + "roleid=" + roleid);
+            }
+        } catch (DataAccessException e) {
+            // 数据库错误
+            logger.error("数据库错误：" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
+                    String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        } catch (Exception e) {
+            // 属未知错误
+            logger.error("严重错误：" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
+                    String.format("发生了严重的未知错误：%s", e.getMessage()));
         }
 
-        return new ReturnObject<>(userRole);
+        return new ReturnObject<>(new UserRole(userRolePo, user, new Role(rolePo), create));
 
     }
 
@@ -170,21 +199,30 @@ public class UserDao implements InitializingBean {
         criteria.andUserIdEqualTo(id);
 
         List<UserRolePo> userRolePoList = userRolePoMapper.selectByExample(example);
-        logger.debug("getUserRoles: userId = "+ id + "roleNum = "+ userRolePoList.size());
+        logger.info("getUserRoles: userId = "+ id + "roleNum = "+ userRolePoList.size());
 
         List<UserRole> retUserRoleList = new ArrayList<>(userRolePoList.size());
 
         for (UserRolePo po : userRolePoList) {
             User user = getUserById(po.getUserId());
             User creator = getUserById(po.getCreatorId());
-            Role role = new Role(rolePoMapper.selectByPrimaryKey(po.getRoleId()));
+            RolePo rolePo = rolePoMapper.selectByPrimaryKey(po.getRoleId());
 
+            if (user == null || creator == null) {
+                logger.error("getUserRoles: 数据库不存在该资源");
+            }
+            if (rolePo == null) {
+                logger.error("getUserRoles: 数据库不存在该资源:rolePo id=" + po.getRoleId());
+                continue;
+            }
+
+            Role role = new Role(rolePo);
             UserRole userRole = new UserRole(po, user, role, creator);
 
             //校验签名
             if (userRole.authetic()){
                 retUserRoleList.add(userRole);
-                logger.debug("getRoleIdByUserId: userId = " + po.getUserId() + " roleId = " + po.getRoleId());
+                logger.info("getRoleIdByUserId: userId = " + po.getUserId() + " roleId = " + po.getRoleId());
             } else {
                 logger.error("getUserRoles: Wrong Signature(auth_user_role): id =" + po.getId());
             }

@@ -26,13 +26,7 @@ public class UserRoleRetVo {
     @ApiModelProperty(name = "创建时间", value = "gmtCreate")
     private String gmtCreate;
 
-    public UserRoleRetVo(UserRole userRole){
-        this.id = userRole.getId();
-        this.user = new UserNameVo(userRole.getUser());
-        this.role = new RoleRetVo(userRole.getRole());
-        this.creator = new UserNameVo(userRole.getCreator());
-
-        this.gmtCreate = userRole.getGmtCreate().toString();
+    public UserRoleRetVo(){
 
     }
 }

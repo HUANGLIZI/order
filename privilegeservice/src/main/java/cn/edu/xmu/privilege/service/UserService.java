@@ -38,9 +38,9 @@ public class UserService {
      * @return ReturnObject<VoObject>
      * @author Xianwei Wang
      * */
+    @Transactional
     public ReturnObject<VoObject> revokeRole(Long id){
         return userDao.revokeRole(id);
-
     }
 
     /**
@@ -51,6 +51,7 @@ public class UserService {
      * @return UserRole
      * @author Xianwei Wang
      * */
+    @Transactional
     public ReturnObject<VoObject> assignRole(Long createid, Long userid, Long roleid){
         return userDao.assignRole(createid, userid, roleid);
     }
@@ -61,6 +62,7 @@ public class UserService {
      * @return 角色信息
      * @author Xianwei Wang
      * */
+    @Transactional
     public ReturnObject<List> getSelfUserRoles(Long id){
         return userDao.getUserRoles(id);
     }

@@ -6,6 +6,8 @@ import cn.edu.xmu.ooad.util.StringUtil;
 import cn.edu.xmu.privilege.model.po.RolePo;
 import cn.edu.xmu.privilege.model.po.UserPo;
 import cn.edu.xmu.privilege.model.po.UserRolePo;
+import cn.edu.xmu.privilege.model.vo.RoleRetVo;
+import cn.edu.xmu.privilege.model.vo.UserNameVo;
 import cn.edu.xmu.privilege.model.vo.UserRoleRetVo;
 import lombok.Data;
 
@@ -50,6 +52,13 @@ public class UserRole implements VoObject {
 
     @Override
     public Object createVo() {
-        return new UserRoleRetVo(this);
+        UserRoleRetVo userRoleRetVo = new UserRoleRetVo();
+        userRoleRetVo.setId(this.id);
+        userRoleRetVo.setUser(new UserNameVo(this.user));
+        userRoleRetVo.setCreator(new UserNameVo(this.creator));
+        userRoleRetVo.setRole(new RoleRetVo(this.role));
+        userRoleRetVo.setGmtCreate(this.gmtCreate.toString());
+
+        return userRoleRetVo;
     }
 }
