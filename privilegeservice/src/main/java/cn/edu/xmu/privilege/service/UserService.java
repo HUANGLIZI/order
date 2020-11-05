@@ -111,7 +111,6 @@ public class UserService {
                 object = ImgHelper.saveImg(multipartFile,imgLocation);
                 if(object.getErrmsg().equals(ResponseCode.FILE_NO_WRITE_PERMISSION.getMessage())){
                     logger.debug(object.getErrmsg());
-                    throw new IOException();
                 }
                 user.setAvatar(object.getData().toString());
                 userDao.updateUserAvatar(user);
@@ -122,7 +121,6 @@ public class UserService {
                 object = ImgHelper.saveImg(multipartFile,imgLocation);
                 if(object.getErrmsg().equals(ResponseCode.FILE_NO_WRITE_PERMISSION.getMessage())){
                     logger.debug(object.getErrmsg());
-                    throw new IOException();
                 }
                 user.setAvatar(object.getData().toString());
                 userDao.updateUserAvatar(user);
