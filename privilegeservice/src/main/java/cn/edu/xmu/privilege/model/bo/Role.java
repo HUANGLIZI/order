@@ -1,6 +1,5 @@
 package cn.edu.xmu.privilege.model.bo;
 
-import cn.edu.xmu.privilege.model.po.RolePo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.privilege.model.po.RolePo;
 import cn.edu.xmu.privilege.model.vo.RoleRetVo;
@@ -25,27 +24,21 @@ public class Role implements VoObject, Serializable {
     private LocalDateTime gmtCreate;
     private LocalDateTime gmtModified;
 
-    /**
-     * 构造函数
-     */
-    public Role()
-    {
-
+    public Role() {
     }
 
     /**
-     * 构造函数
-     * @param rolePo po对象
+     * 构造函数     *
+     * @param po 用PO构造
+     * @return Role
      */
-    public Role(RolePo rolePo) {
-        this.id = rolePo.getId();
-        this.name = rolePo.getName();
-        this.creatorId = rolePo.getCreatorId();
-        this.describe = rolePo.getDescr();
-        this.gmtCreate = rolePo.getGmtCreate();
-        this.gmtModified = rolePo.getGmtModified();
-
-
+    public Role(RolePo po) {
+        this.id = po.getId();
+        this.name = po.getName();
+        this.creatorId = po.getCreatorId();
+        this.describe = po.getDescr();
+        this.gmtCreate = po.getGmtCreate();
+        this.gmtModified = po.getGmtModified();
     }
 
     /**
