@@ -66,7 +66,7 @@ public class PrivilegeController {
     })
     @DeleteMapping("/adminusersrole/{id}")
     public Object revokeRole(@PathVariable Long id){
-        return Common.getRetObject(userService.revokeRole(id));
+        return Common.decorateReturnObject(userService.revokeRole(id));
     }
 
     /***
@@ -88,7 +88,12 @@ public class PrivilegeController {
     public Object assignRole(@RequestParam(name = "createid") Long createid, @PathVariable Long userid, @PathVariable Long roleid){
 
         ReturnObject<VoObject> returnObject =  userService.assignRole(createid, userid, roleid);
-        return Common.getRetObject(returnObject);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+
     }
 
     /***
@@ -127,7 +132,12 @@ public class PrivilegeController {
     @GetMapping("/adminusers/{id}/roles")
     public Object getSelfRole(@PathVariable Long id){
         ReturnObject<List> returnObject =  userService.getSelfUserRoles(id);
-        return Common.getListRetObject(returnObject);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getListRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+
     }
 
 

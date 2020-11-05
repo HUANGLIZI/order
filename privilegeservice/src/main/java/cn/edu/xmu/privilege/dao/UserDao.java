@@ -203,13 +203,23 @@ public class UserDao implements InitializingBean {
 
         List<UserRole> retUserRoleList = new ArrayList<>(userRolePoList.size());
 
+        if (retUserRoleList.isEmpty()) {
+            User user = getUserById(id);
+            if (user == null) {
+                logger.error("getUserRoles: 数据库不存在该用户 userid=" + id);
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+        }
+
         for (UserRolePo po : userRolePoList) {
             User user = getUserById(po.getUserId());
             User creator = getUserById(po.getCreatorId());
             RolePo rolePo = rolePoMapper.selectByPrimaryKey(po.getRoleId());
-
-            if (user == null || creator == null) {
-                logger.error("getUserRoles: 数据库不存在该资源");
+            if (user == null) {
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+            if (creator == null) {
+                logger.error("getUserRoles: 数据库不存在该资源 userid=" + po.getCreatorId());
             }
             if (rolePo == null) {
                 logger.error("getUserRoles: 数据库不存在该资源:rolePo id=" + po.getRoleId());
