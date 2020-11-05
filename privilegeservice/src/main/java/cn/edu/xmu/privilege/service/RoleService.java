@@ -12,6 +12,13 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 角色服务类
+ *
+ * @author Weice Wang
+ * @date Created in 2020/11/4 11:48
+ * Modified in 2020/11/4 12:16
+ **/
 @Service
 public class RoleService {
     @Autowired

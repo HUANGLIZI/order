@@ -23,8 +23,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 /**
+ * 角色控制器测试类
+ * 
  * @author Weice Wang
- * @date Created in 2020/11/3 15:23
+ * @date Created in 2020/11/4 9:23
  **/
 @SpringBootTest(classes = PrivilegeServiceApplication.class)   //标识本类是一个SpringBootTest
 @AutoConfigureMockMvc    //配置模拟的MVC，这样可以不启动服务器测试
@@ -87,7 +89,6 @@ public class RoleControllerTest {
         String roleJson = JacksonUtil.toJson(vo);
         String expectedResponse = "";
         String responseString = null;
-
         try {
             responseString = this.mvc.perform(post("/roles").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isCreated())
@@ -116,7 +117,6 @@ public class RoleControllerTest {
         String roleJson = JacksonUtil.toJson(vo);
         String expectedResponse = "";
         String responseString = null;
-
         try {
             responseString = this.mvc.perform(post("/roles").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isCreated())
@@ -145,7 +145,6 @@ public class RoleControllerTest {
         String roleJson = JacksonUtil.toJson(vo);
         String expectedResponse = "";
         String responseString = null;
-
         try {
             responseString = this.mvc.perform(post("/roles").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isBadRequest())
@@ -174,7 +173,6 @@ public class RoleControllerTest {
         String roleJson = JacksonUtil.toJson(vo);
         String expectedResponse = "";
         String responseString = null;
-
         try {
             responseString = this.mvc.perform(put("/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isOk())
@@ -203,7 +201,6 @@ public class RoleControllerTest {
         String roleJson = JacksonUtil.toJson(vo);
         String expectedResponse = "";
         String responseString = null;
-
         try {
             responseString = this.mvc.perform(put("/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isBadRequest())
@@ -232,7 +229,6 @@ public class RoleControllerTest {
         String roleJson = JacksonUtil.toJson(vo);
         String expectedResponse = "";
         String responseString = null;
-
         try {
             responseString = this.mvc.perform(put("/roles/0").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isNotFound())
@@ -261,7 +257,6 @@ public class RoleControllerTest {
         String roleJson = JacksonUtil.toJson(vo);
         String expectedResponse = "";
         String responseString = null;
-
         try {
             responseString = this.mvc.perform(put("/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isOk())
@@ -283,11 +278,11 @@ public class RoleControllerTest {
      */
     @Test
     public void deleteRoleTest1() {
-        // chushihua
+        //测试数据
         String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDQ0ODIwMzAsInVzZXJJZCI6MSwiaWF0IjoxNjA0NDc0ODMwfQ.f1g65bUbkK8FlyW9ac5WhM9FBT6ILOmGROjuMVJntyE";
         String expectedResponse = "";
         String responseString = null;
-        //ceshichenggongshanchu
+        //测试删除成功
         try {
             responseString = this.mvc.perform(delete("/roles/87").header("authorization", token))
                     .andExpect(status().isOk())
@@ -309,11 +304,9 @@ public class RoleControllerTest {
      */
     @Test
     public void deleteRoleTest2() {
-        // chushihua
         String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDQ0ODIwMzAsInVzZXJJZCI6MSwiaWF0IjoxNjA0NDc0ODMwfQ.f1g65bUbkK8FlyW9ac5WhM9FBT6ILOmGROjuMVJntyE";
         String expectedResponse = "";
         String responseString = null;
-        //ceshiwuid
         try {
             responseString = this.mvc.perform(delete("/roles/0").header("authorization", token))
                     .andExpect(status().isNotFound())

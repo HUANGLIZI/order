@@ -10,9 +10,10 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 角色
- * @author Ming Qiu
- * @date Created in 2020/11/3 11:48
+ * 角色Bo类
+ * 
+ * @author Weice Wang
+ * @date Created in 2020/11/4 11:48
  **/
 @Data
 public class Role implements VoObject, Serializable {

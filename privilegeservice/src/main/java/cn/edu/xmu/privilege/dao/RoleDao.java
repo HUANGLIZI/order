@@ -24,9 +24,9 @@ import java.util.concurrent.TimeUnit;
 /**
  * 角色访问类
  *
- * @author Ming Qiu
- * @date Created in 2020/11/1 11:48
- * Modified in 2020/11/3 12:16
+ * @author Weice Wang
+ * @date Created in 2020/11/4 11:48
+ * Modified in 2020/11/4 12:16
  **/
 @Repository
 public class RoleDao implements InitializingBean {
