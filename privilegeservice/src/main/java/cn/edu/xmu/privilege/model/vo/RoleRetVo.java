@@ -7,6 +7,12 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 角色返回视图
+ * 
+ * @author Weice Wang
+ * @date Created in 2020/11/4 11:48
+ **/
 @Data
 @ApiModel(description = "角色视图对象")
 public class RoleRetVo {
