@@ -109,7 +109,7 @@ public class PrivilegeDao implements InitializingBean {
             return priv;
         }
         else {
-            logger.error("findPriv: Wrong Signature(auth_privilege): id =" + po.getId());
+            logger.info("findPriv: Wrong Signature(auth_privilege): id =" + po.getId());
             return null;
         }
     }

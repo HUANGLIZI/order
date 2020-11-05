@@ -5,6 +5,7 @@ import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
 import cn.edu.xmu.privilege.model.bo.User;
+import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.po.*;
 import cn.edu.xmu.privilege.model.vo.UserEditVo;
 import org.slf4j.Logger;

@@ -85,6 +85,24 @@ public class PrivilegeController {
         ReturnObject returnObject =  userService.changePriv(id, vo);
         return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
     }
+    /**
+     * auth007: 查询某一用户权限
+     * @param id
+     * @return Object
+     */
+    @ApiOperation(value = "获得某一用户的权限")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @GetMapping("/adminusers/{id}/privileges")
+    public Object getPrivsByUserId(@PathVariable Long id){
+        ReturnObject<List> returnObject =  userService.findPrivsByUserId(id);
+        return Common.getListRetObject(returnObject);
+    }
 
     /* auth008 start*/
     //region
