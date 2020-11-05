@@ -6,13 +6,10 @@ import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.ooad.util.StringUtil;
 import cn.edu.xmu.ooad.util.*;
-import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.po.*;
-import cn.edu.xmu.privilege.model.po.*;
-import cn.edu.xmu.privilege.service.UserService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -272,6 +269,12 @@ public class UserDao implements InitializingBean {
 
     }
 
+    /**
+     * ID获取用户信息
+     * @author XQChen
+     * @param id
+     * @return 用户
+     */
     public UserPo findUserById(Long Id) {
         UserPoExample example = new UserPoExample();
         UserPoExample.Criteria criteria = example.createCriteria();
@@ -291,6 +294,11 @@ public class UserDao implements InitializingBean {
         return userPo;
     }
 
+    /**
+     * 获取所有用户信息
+     * @author XQChen
+     * @return List<UserPo> 用户列表
+     */
     public List<UserPo> findAllUsers() {
         UserPoExample example = new UserPoExample();
 

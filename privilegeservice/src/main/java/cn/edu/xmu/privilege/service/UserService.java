@@ -31,10 +31,10 @@ public class UserService {
     UserDao userDao;
 
     /**
-     * 获取所有用户信息
+     * ID获取用户信息
      * @author XQChen
      * @param id
-     * @return 用户列表
+     * @return 用户
      */
     public ReturnObject<VoObject> findUserById(Long id) {
         ReturnObject<VoObject> returnObject = null;
