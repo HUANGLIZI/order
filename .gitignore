@@ -2,4 +2,6 @@
 *.log
 *.iml
 .idea/
+.gitignore
+.history/*
 target/
