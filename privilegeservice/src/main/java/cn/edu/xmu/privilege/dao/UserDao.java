@@ -92,8 +92,7 @@ public class UserDao implements InitializingBean {
                 logger.warn("revokeRole: 未找到该用户角色id" + id);
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
-            //清除缓存
-            clearUserPrivCache(userRolePo.getUserId());
+            
 
         } catch (DataAccessException e) {
             // 数据库错误
@@ -106,6 +105,9 @@ public class UserDao implements InitializingBean {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
                     String.format("发生了严重的未知错误：%s", e.getMessage()));
         }
+        
+        //清除缓存
+        clearUserPrivCache(userRolePo.getUserId());
 
         return new ReturnObject<>();
     }
@@ -149,8 +151,7 @@ public class UserDao implements InitializingBean {
             if (userRolePoMapper.selectByExample(example).isEmpty()){
                 userRolePoMapper.insert(userRolePo);
 
-                //清除缓存
-                clearUserPrivCache(userid);
+                
             } else {
                 logger.warn("assignRole: 该用户已拥有该角色 userid=" + userid + "roleid=" + roleid);
             }
@@ -165,6 +166,8 @@ public class UserDao implements InitializingBean {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
                     String.format("发生了严重的未知错误：%s", e.getMessage()));
         }
+        //清除缓存
+        clearUserPrivCache(userid);
 
         return new ReturnObject<>(new UserRole(userRolePo, user, new Role(rolePo), create));
 
