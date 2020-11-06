@@ -144,7 +144,7 @@ public class PrivilegeController {
     }
 
 
-    //    @Autowired
+//    @Autowired
     private JwtHelper jwtHelper = new JwtHelper();
 
     @Autowired
