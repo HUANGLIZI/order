@@ -4,6 +4,7 @@ import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.util.AES;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
 
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
@@ -19,15 +20,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.event.annotation.BeforeTestMethod;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * @author Ming Qiu
@@ -123,9 +125,170 @@ public class PrivilegeControllerTest {
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 
-/*    @Test
-    @Audit
-    public void changePriv(@LoginUser Long userId, @Depart Long departId) throws Exception{
+    /**
+     * @author Song Runhan
+     * @date Created in 2020/11/4/ 16:00
+     */
+    @Test
+    public void login() throws Exception{
+        String requireJson = null;
+        String responseString = null;
+        ResultActions res = null;
+
+        //region 正常用户登录
+        requireJson = "{\"userName\":\"537300010\",\"password\":\"123456\"}";
+        res = this.mvc.perform(post("/privilege/privileges/login")
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson));
+        responseString = res.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.errno").value(ResponseCode.OK.getCode()))
+                .andExpect(jsonPath("$.errmsg").value("成功"))
+                .andExpect(jsonPath("$.data").isString())
+                .andReturn().getResponse().getContentAsString();
+        //endregion
+
+        //region 密码错误的用户登录
+        requireJson = "{\"userName\":\"537300010\",\"password\":\"000000\"}";
+        res = this.mvc.perform(post("/privilege/privileges/login")
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson));
+        responseString = res.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.errno").value(ResponseCode.AUTH_INVALID_ACCOUNT.getCode()))
+                .andExpect(jsonPath("$.errmsg").value("用户名或密码错误"))
+                .andExpect(jsonPath("$.data").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+        //endregion
+
+        //region 用户名错误的用户登录
+        requireJson = "{\"userName\":\"NotExist\",\"password\":\"123456\"}";
+        res = this.mvc.perform(post("/privilege/privileges/login")
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson));
+        responseString = res.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.errno").value(ResponseCode.AUTH_INVALID_ACCOUNT.getCode()))
+                .andExpect(jsonPath("$.errmsg").value("用户名或密码错误"))
+                .andExpect(jsonPath("$.data").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+        //endregion
+
+        //region 没有输入用户名的用户登录
+        requireJson = "{\"password\":\"123456\"}";
+        res = this.mvc.perform(post("/privilege/privileges/login")
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson));
+        responseString = res.andExpect(status().isBadRequest())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.errno").value(ResponseCode.FIELD_NOTVALID.getCode()))
+                .andExpect(jsonPath("$.errmsg").value("必须输入用户名;"))
+                .andReturn().getResponse().getContentAsString();
+        //endregion
+
+        //region 没有输入密码（密码空）的用户登录
+        requireJson = "{\"userName\":\"537300010\",\"password\":\"\"}";
+        res = this.mvc.perform(post("/privilege/privileges/login")
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson));
+        responseString = res.andExpect(status().isBadRequest())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.errno").value(ResponseCode.FIELD_NOTVALID.getCode()))
+                .andExpect(jsonPath("$.errmsg").value("必须输入密码;"))
+                .andReturn().getResponse().getContentAsString();
+        //endregion
+
+        //region 用户重复登录
+        requireJson = "{\"userName\":\"537300010\",\"password\":\"123456\"}";
+        res = this.mvc.perform(post("/privilege/privileges/login")
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson));
+        responseString = res.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.errno").value(ResponseCode.OK.getCode()))
+                .andExpect(jsonPath("$.errmsg").value("成功"))
+                .andExpect(jsonPath("$.data").isString())
+                .andReturn().getResponse().getContentAsString();
+        //endregion
+
+        //region 当前状态不可登录的用户登录
+        requireJson = "{\"userName\":\"13088admin\",\"password\":\"123456\"}";
+        res = this.mvc.perform(post("/privilege/privileges/login")
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson));
+        responseString = res.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.errno").value(ResponseCode.AUTH_USER_FORBIDDEN.getCode()))
+                .andExpect(jsonPath("$.errmsg").value("您的状态为新注册"))
+                .andExpect(jsonPath("$.data").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+        //endregion
+    }
+
+    /**
+     * @author Song Runhan
+     * @date Created in 2020/11/4/ 16:00
+     */
+    @Test
+    public void logout() throws  Exception{
+        String requireJson = null;
+        String responseString = null;
+        ResultActions res = null;
+
+        requireJson = "{\"userName\":\"537300010\",\"password\":\"123456\"}";
+        res = this.mvc.perform(post("/privilege/privileges/login")
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson));
+        responseString = res.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.errno").value(ResponseCode.OK.getCode()))
+                .andExpect(jsonPath("$.errmsg").value("成功"))
+                .andExpect(jsonPath("$.data").isString())
+                .andReturn().getResponse().getContentAsString();
+        String json = JacksonUtil.parseString(responseString,"data");
+
+        //region 用户正常登出
+        res = this.mvc.perform(get("/privilege/privileges/logout")
+                .contentType("application/json;charset=UTF-8")
+                .header("authorization",json));
+        responseString = res.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.errno").value(ResponseCode.OK.getCode()))
+                .andExpect(jsonPath("$.errmsg").value("成功"))
+                .andReturn().getResponse().getContentAsString();
+        //endregion
+
+        //region 用户多次登出
+        res = this.mvc.perform(get("/privilege/privileges/logout")
+                .contentType("application/json;charset=UTF-8")
+                .header("authorization",json));
+        responseString = res.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.errno").value(ResponseCode.AUTH_ID_NOTEXIST.getCode()))
+                .andExpect(jsonPath("$.errmsg").value("您尚未登录，无需注销"))
+                .andReturn().getResponse().getContentAsString();
+        //endregion
+
+        //region 空JWT用户登出
+//        res = this.mvc.perform(get("/privilege/privileges/logout")
+//                .contentType("application/json;charset=UTF-8")
+//                .header("authorization",""));
+//        responseString = res.andExpect(status().isBadRequest())
+//                .andExpect(content().contentType("application/json;charset=UTF-8"))
+//                .andExpect(jsonPath("$.errno").value(ResponseCode.FIELD_NOTVALID.getCode()))
+//                .andExpect(jsonPath("$.errmsg").value("请传入JWT令牌;"))
+//                .andReturn().getResponse().getContentAsString();
+        //endregion
+
+        //region 无JWT用户登出
+//        res = this.mvc.perform(get("/privilege/privileges/logout")
+//                .contentType("application/json;charset=UTF-8"));
+//        res.andExpect(status().isBadRequest());
+        //endregion
+    }
+
+    /*@Test
+    public void changePriv() throws Exception{
         PrivilegeVo vo = new PrivilegeVo();
         vo.setName("车市");
         String json = "{\"name\":\"车市\"}";
@@ -152,7 +315,7 @@ public class PrivilegeControllerTest {
         loginVo.setUserName(userName);
         loginVo.setPassword(password);
         String jsonString = JacksonUtil.toJson(loginVo);
-        String responseString = this.mvc.perform(post("/privilege/adminusers/login").contentType("application/json;charset=UTF-8").content(jsonString))
+        String responseString = this.mvc.perform(post("/privilege/login").contentType("application/json;charset=UTF-8").content(jsonString))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
