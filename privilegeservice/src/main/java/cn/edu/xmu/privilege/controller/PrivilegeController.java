@@ -3,12 +3,8 @@ package cn.edu.xmu.privilege.controller;
 import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.ooad.annotation.*;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
-import cn.edu.xmu.ooad.annotation.Audit;
-import cn.edu.xmu.ooad.annotation.Depart;
-import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
-import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
@@ -24,20 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import javax.servlet.http.HttpServletResponse;
-import java.net.http.HttpResponse;
 import java.util.List;
 
 /**
@@ -105,6 +92,15 @@ public class PrivilegeController {
         return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
     }
 
+    /**
+     * 用户登录
+     * @param loginVo
+     * @param bindingResult
+     * @param httpServletResponse
+     * @param httpServletRequest
+     * @return
+     * @author 24320182203266
+     */
     @ApiOperation(value = "登录")
     @PostMapping("privileges/login")
     public Object login(@Validated @RequestBody LoginVo loginVo, BindingResult bindingResult
@@ -324,6 +320,12 @@ public class PrivilegeController {
     }
     /* auth009 结束 */
 
+    /**
+     * 用户注销
+     * @param userId
+     * @return
+     * @author 24320182203266
+     */
     @ApiOperation(value = "注销")
     @Audit
     @GetMapping("privileges/logout")
