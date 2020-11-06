@@ -80,7 +80,7 @@ public class UserDao implements InitializingBean {
             logger.error(message.toString());
         }
 
-        if (null == users && users.isEmpty()){
+        if (null == users || users.isEmpty()){
             return new ReturnObject<>();
         }else{
             User user = new User(users.get(0));

@@ -59,6 +59,7 @@ public class PrivilegeController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
+    @Audit
     @GetMapping("privileges")
     public Object getAllPrivs(){
         ReturnObject<List> returnObject =  userService.findAllPrivs();

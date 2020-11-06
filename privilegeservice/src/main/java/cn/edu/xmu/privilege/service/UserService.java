@@ -91,13 +91,18 @@ public class UserService {
         User user = (User) retObj.getData();
         password = AES.encrypt(password, User.AESPASS);
         if(user == null || !password.equals(user.getPassword())){
-            logger.debug("login: user = "+user +" password = "+password );
             retObj = new ReturnObject<>(ResponseCode.AUTH_INVALID_ACCOUNT);
             return retObj;
         }
         if (user.getState() != User.State.NORM){
             retObj = new ReturnObject<>(ResponseCode.AUTH_USER_FORBIDDEN);
             return retObj;
+        }
+        if (!user.getEmailVerified()){
+            return new ReturnObject<>(ResponseCode.EMAIL_NOTVERIFIED);
+        }
+        if (!user.getMobileVerified()){
+            return new ReturnObject<>(ResponseCode.MOBILE_NOTVERIFIED);
         }
         if (!user.authetic()){
             retObj = new ReturnObject<>(ResponseCode.AUTH_USER_FORBIDDEN, "信息被篡改");
@@ -108,7 +113,8 @@ public class UserService {
         }
 
         String key = "up_" + user.getId();
-        if(redisTemplate.hasKey(key) && canMultiplyLogin == false){
+        logger.debug("login: key = "+ key);
+        if(redisTemplate.hasKey(key) && !canMultiplyLogin){
             // 用户重复登录处理
             Set<Serializable > set = redisTemplate.opsForSet().members(key);
             redisTemplate.delete(key);
@@ -122,13 +128,13 @@ public class UserService {
                     break;
                 }
             }
+            logger.debug("login: banJwt ="+jwt);
             this.banJwt(jwt);
         }
 
         //创建新的token
         JwtHelper jwtHelper = new JwtHelper();
         String jwt = jwtHelper.createToken(user.getId(),user.getDepartId(), jwtExpireTime);
-        logger.debug("login: jwt ="+ jwt);
         userDao.loadUserPriv(user.getId(), jwt);
         userDao.setLoginIPAndPosition(user.getId(),ipAddr, LocalDateTime.now());
         retObj = new ReturnObject<>(jwt);
@@ -143,27 +149,31 @@ public class UserService {
     private void banJwt(String jwt){
         String[] banSetName = {"BanJwt_0", "BanJwt_1"};
         long bannIndex = 0;
-
+        logger.debug("banJwt: " + jwt);
         if (!redisTemplate.hasKey("banIndex")){
-            redisTemplate.opsForValue().set("banIndex", "0");
+            redisTemplate.opsForValue().set("banIndex", Long.valueOf(0));
         } else {
-            bannIndex = Long.parseLong(redisTemplate.opsForValue().get("banIndex").toString());
+            bannIndex = (Long) redisTemplate.opsForValue().get("banIndex");
         }
-
+        logger.debug("banJwt: banIndex = " + bannIndex);
         String currentSetName = banSetName[(int) (bannIndex % banSetName.length)];
-
+        logger.debug("banJwt: currentSetName = " + currentSetName);
         if(!redisTemplate.hasKey(currentSetName)) {
             // 新建
+            logger.debug("banJwt: create ban set" + currentSetName);
             redisTemplate.opsForSet().add(currentSetName, jwt);
             redisTemplate.expire(currentSetName,jwtExpireTime * 2,TimeUnit.SECONDS);
         }else{
             //准备向其中添加元素
+
             if(redisTemplate.getExpire(currentSetName, TimeUnit.SECONDS) > jwtExpireTime) {
                 // 有效期还长，直接加入
+                logger.debug("banJwt: add to exist ban set" + currentSetName);
                 redisTemplate.opsForSet().add(currentSetName, jwt);
             } else {
                 // 有效期不够JWT的过期时间，准备用第二集合，让第一个集合自然过期
                 // 分步式加锁
+                logger.debug("banJwt: switch to next ban set" + currentSetName);
                 while (!redisTemplate.opsForValue().setIfAbsent("banIndexLocker","nouse", lockerExpireTime, TimeUnit.SECONDS)){
                     try {
                         Thread.sleep(10);
@@ -178,6 +188,7 @@ public class UserService {
                 currentSetName = banSetName[(int) (bannIndex % banSetName.length)];
                 //启用之前，不管有没有，先删除一下，应该是没有，保险起见
                 redisTemplate.delete(currentSetName);
+                logger.debug("banJwt: next ban set =" + currentSetName);
                 redisTemplate.opsForSet().add(currentSetName, jwt);
                 redisTemplate.expire(currentSetName,jwtExpireTime * 2,TimeUnit.SECONDS);
                 // 解锁

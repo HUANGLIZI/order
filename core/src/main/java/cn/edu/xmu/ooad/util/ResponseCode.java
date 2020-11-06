@@ -56,6 +56,8 @@ public enum ResponseCode {
     EMAIL_WRONG(745,"与系统预留的邮箱不一致"),
     MOBILE_WRONG(746,"与系统预留的电话不一致"),
     USERPROXY_CONFLICT(747,"同一时间段有冲突的代理关系"),
+    EMAIL_NOTVERIFIED(748,"Email未确认"),
+    MOBILE_NOTVERIFIED(749,"电话号码未确认"),
     /***************************************************
      *    订单模块错误码
      **************************************************/
