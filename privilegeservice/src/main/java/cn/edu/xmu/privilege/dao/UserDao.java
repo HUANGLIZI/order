@@ -84,8 +84,7 @@ public class UserDao implements InitializingBean {
         if (userRolePo == null){
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-        //清除缓存
-        clearUserPrivCache(userRolePo.getUserId());
+
 
         try {
             int state = userRolePoMapper.deleteByPrimaryKey(id);
@@ -93,6 +92,9 @@ public class UserDao implements InitializingBean {
                 logger.warn("revokeRole: 未找到该用户角色id" + id);
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
+            //清除缓存
+            clearUserPrivCache(userRolePo.getUserId());
+
         } catch (DataAccessException e) {
             // 数据库错误
             logger.error("数据库错误：" + e.getMessage());
@@ -145,8 +147,10 @@ public class UserDao implements InitializingBean {
         //若未拥有，则插入数据
         try {
             if (userRolePoMapper.selectByExample(example).isEmpty()){
-                clearUserPrivCache(userid);
                 userRolePoMapper.insert(userRolePo);
+
+                //清除缓存
+                clearUserPrivCache(userid);
             } else {
                 logger.warn("assignRole: 该用户已拥有该角色 userid=" + userid + "roleid=" + roleid);
             }
