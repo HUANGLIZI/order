@@ -14,7 +14,7 @@ import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 
-import cn.edu.xmu.privilege.service.RoleService;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
@@ -27,11 +27,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponse;
+import java.net.http.HttpResponse;
 import java.util.List;
 
 /**
@@ -143,6 +148,9 @@ public class PrivilegeController {
 
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private HttpServletResponse httpServletResponse;
 
     @Autowired
     private HttpServletResponse httpServletResponse;
@@ -388,5 +396,24 @@ public class PrivilegeController {
 
     /* auth009 结束 */
 
+
+    /**
+     * @author 24320182203218
+     **/
+    @ApiOperation(value = "用户上传图片",  produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value ="用户id" ,required = true),
+            @ApiImplicitParam(paramType = "formData", dataType = "file", name = "img", value ="文件", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 506, message = "该目录文件夹没有写入的权限"),
+    })
+    @PostMapping("/adminusers/{id}/uploadImg")
+    public Object uploadImg(@PathVariable("id") Integer id, @RequestParam("img") MultipartFile multipartFile){
+        logger.debug("uploadImg: id = "+ id +" img" + multipartFile.getOriginalFilename());
+        ReturnObject returnObject = userService.uploadImg(id,multipartFile);
+        return Common.getNullRetObj(returnObject, httpServletResponse);
+    }
 }
 

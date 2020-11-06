@@ -23,6 +23,7 @@
     <description>the role base privilege mangament systems</description>
 
     <properties>
+        <skipTests>True</skipTests>
         <java.version>11</java.version>
     </properties>
 

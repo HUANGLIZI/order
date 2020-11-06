@@ -1,20 +1,28 @@
 package cn.edu.xmu.privilege.service;
 
 import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.privilege.dao.UserDao;
 import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.bo.User;
+import cn.edu.xmu.privilege.dao.UserDao;
+import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
+import cn.edu.xmu.privilege.util.ImgHelper;
 import cn.edu.xmu.privilege.model.vo.UserEditVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -25,6 +33,12 @@ import java.util.List;
 @Service
 public class UserService {
     private Logger logger = LoggerFactory.getLogger(UserService.class);
+
+    /**
+     * @author 24320182203218
+     **/
+    @Value("${prvilegeservice.imgloaction}")
+    private String imgLocation;
 
     @Autowired
     private PrivilegeDao privilegeDao;
@@ -126,5 +140,50 @@ public class UserService {
     @Transactional
     public ReturnObject<Object> releaseUser(Long id) {
         return userDao.changeUserState(id, User.State.NORM);
+    }
+
+    /**
+     * 上传图片
+     * @author 3218
+     * @param id: 用户id
+     * @param multipartFile: 文件
+     * @return
+     */
+    @Transactional
+    public ReturnObject uploadImg(Integer id, MultipartFile multipartFile){
+        ReturnObject<User> userReturnObject = userDao.getUserById(id);
+
+        if(userReturnObject.getCode() == ResponseCode.RESOURCE_ID_NOTEXIST)
+            return userReturnObject;
+        User user = userReturnObject.getData();
+
+        ReturnObject returnObject = new ReturnObject();
+        try{
+            returnObject = ImgHelper.saveImg(multipartFile,imgLocation);
+            //无写入权限
+            if(returnObject.getCode() == ResponseCode.FILE_NO_WRITE_PERMISSION){
+                logger.debug(returnObject.getErrmsg());
+                return returnObject;
+            }
+
+            String oldFilename = user.getAvatar();
+            user.setAvatar(returnObject.getData().toString());
+            ReturnObject updateReturnObject = userDao.updateUserAvatar(user);
+
+            //数据库更新失败，需删除新增的图片
+            if(updateReturnObject.getCode()==ResponseCode.FIELD_NOTVALID){
+                ImgHelper.deleteImg(returnObject.getData().toString(),imgLocation);
+                return updateReturnObject;
+            }
+
+            //数据库更新成功需删除旧图片，未设置则不删除
+            if(oldFilename!=null) {
+                ImgHelper.deleteImg(oldFilename, imgLocation);
+            }
+        }
+        catch (IOException e){
+            logger.debug("uploadImg: I/O Error:" + imgLocation);
+        }
+        return returnObject;
     }
 }
