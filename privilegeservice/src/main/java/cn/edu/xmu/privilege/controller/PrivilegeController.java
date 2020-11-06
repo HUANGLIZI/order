@@ -144,13 +144,15 @@ public class PrivilegeController {
     }
 
 
-    @Autowired
-    private RoleService roleService;
-//    @Autowired
+    //    @Autowired
     private JwtHelper jwtHelper = new JwtHelper();
 
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private HttpServletResponse httpServletResponse;
+
 
 
     /**
