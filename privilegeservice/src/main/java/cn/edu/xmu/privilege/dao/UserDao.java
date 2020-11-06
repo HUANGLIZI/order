@@ -41,6 +41,7 @@ public class UserDao implements InitializingBean {
     @Value("${prvilegeservice.initialization}")
     private Boolean initialization;
 
+    // 用户在Redis中的过期时间，而不是JWT的有效期
     @Value("${prvilegeservice.user.expiretime}")
     private long timeout;
 
@@ -61,6 +62,60 @@ public class UserDao implements InitializingBean {
 
     @Autowired
     private RoleDao roleDao;
+
+    @Autowired
+    private UserPoMapper userPoMapper;
+
+    private int jwtBannedSetIndex = 0;
+
+    public User getUserByName(String userName)
+    {
+        UserPoExample example = new UserPoExample();
+        UserPoExample.Criteria criteria = example.createCriteria();
+        criteria.andUserNameEqualTo(userName);
+        List<UserPo> users = userPoMapper.selectByExample(example);
+
+        if (users.isEmpty()) return null;
+        else return new User(users.get(0));
+    }
+
+    /**
+     * 禁止持有特定令牌的用户登录
+     * @param jwt JWT令牌
+     */
+    public void banJwt(String jwt){
+        // 如果这个集合存在则准备向其中添加元素，否则新建
+        String currentSetName = "BanJwt_" + jwtBannedSetIndex;
+        if(redisTemplate.hasKey(currentSetName)){
+            // 如果无效则换到第二个集合，否则直接加入
+            if(redisTemplate.getExpire(currentSetName,TimeUnit.SECONDS) < JwtHelper.EXPIRE) {
+                redisTemplate.opsForSet().add("BanJwt_" + ++jwtBannedSetIndex % 2, jwt);
+                redisTemplate.expire("BanJwt_" + jwtBannedSetIndex,JwtHelper.EXPIRE * 2,TimeUnit.SECONDS);
+            } else {
+                redisTemplate.opsForSet().add(currentSetName, jwt);
+            }
+        } else {
+            redisTemplate.opsForSet().add(currentSetName, jwt);
+            redisTemplate.expire(currentSetName,JwtHelper.EXPIRE * 2,TimeUnit.SECONDS);
+        }
+    }
+
+    /**
+     *
+     * @param userId 用户ID
+     * @param IPAddr IP地址
+     * @param date 登录时间
+     * @return 是否成功更新
+     */
+    public Boolean setLoginIPAndPosition(Long userId, String IPAddr, LocalDateTime date)
+    {
+        UserPo userPo = new UserPo();
+        userPo.setId(userId);
+        userPo.setLastLoginIp(IPAddr);
+        userPo.setLastLoginTime(date);
+        if(userPoMapper.updateByPrimaryKeySelective(userPo)==1) return true;
+        else return false;
+    }
 
     /**
      * 计算User自己的权限，load到Redis
@@ -128,7 +183,7 @@ public class UserDao implements InitializingBean {
      * createdBy Ming Qiu 2020/11/1 11:48
      * modifiedBy Ming Qiu 2020/11/3 14:37
      */
-    public void loadUserPriv(Long id) {
+    public void loadUserPriv(Long id, String jwt) {
 
         String key = "u_" + id;
         String aKey = "up_" + id;
@@ -147,6 +202,8 @@ public class UserDao implements InitializingBean {
             loadSingleUserPriv(id);
         }
         redisTemplate.opsForSet().unionAndStore(key, proxyUserKey, aKey);
+        redisTemplate.opsForSet().remove(aKey, "0");
+        redisTemplate.opsForSet().add(aKey, jwt);
         redisTemplate.expire(aKey, this.timeout + new Random().nextInt(randomTime), TimeUnit.SECONDS);
     }
 

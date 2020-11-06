@@ -7,6 +7,7 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 
@@ -18,6 +19,12 @@ import java.util.*;
  *         增加departId 到createToken
  */
 public class JwtHelper {
+    // 令牌有效期（秒）
+    // 这个注解有问题！！！
+    // 这个注解有问题！！！
+    // 这个注解有问题！！！
+    @Value("${core.jwt.expire}")
+    static public final int EXPIRE = 3600;
     // 秘钥
     static final String SECRET = "Role-Privilege-Token";
     // 签名是有谁生成
@@ -60,7 +67,7 @@ public class JwtHelper {
             Map<String, Object> map = new HashMap<String, Object>();
             Date nowDate = new Date();
             // 过期时间：2小时
-            Date expireDate = getAfterDate(nowDate, 0, 0, 0, 2, 0, 0);
+            Date expireDate = getAfterDate(nowDate, 0, 0, 0, 0, 0, EXPIRE);
             map.put("alg", "HS256");
             map.put("typ", "JWT");
             String token = JWT.create()

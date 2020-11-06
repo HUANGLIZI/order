@@ -1,11 +1,10 @@
 package cn.edu.xmu.privilege.controller;
 
-import cn.edu.xmu.ooad.annotation.Audit;
-import cn.edu.xmu.ooad.annotation.Depart;
-import cn.edu.xmu.ooad.annotation.LoginUser;
+import cn.edu.xmu.ooad.util.*;
+import cn.edu.xmu.ooad.annotation.*;
+import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
-import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
@@ -13,21 +12,19 @@ import cn.edu.xmu.privilege.model.vo.RoleVo;
 import cn.edu.xmu.privilege.model.vo.UserEditVo;
 import cn.edu.xmu.privilege.service.RoleService;
 import cn.edu.xmu.privilege.service.UserService;
+import cn.edu.xmu.privilege.util.IpUtil;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponse;
-import java.net.http.HttpResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -45,11 +42,11 @@ public class PrivilegeController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private RoleService roleService;
+//    @Autowired
+    private JwtHelper jwtHelper = new JwtHelper();
 
     @Autowired
-    private HttpServletResponse httpServletResponse;
+    private RoleService roleService;
 
     @Autowired
     private HttpServletResponse httpServletResponse;
@@ -93,6 +90,35 @@ public class PrivilegeController {
         logger.debug("getAllPrivs: userId = " + userId +" departId = "+departId);
         ReturnObject returnObject =  userService.changePriv(id, vo);
         return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+    }
+
+    /**
+     * 用户登录
+     * @param loginVo
+     * @param bindingResult
+     * @param httpServletResponse
+     * @param httpServletRequest
+     * @return
+     * @author 24320182203266
+     */
+    @ApiOperation(value = "登录")
+    @PostMapping("privileges/login")
+    public Object login(@Validated @RequestBody LoginVo loginVo, BindingResult bindingResult
+            , HttpServletResponse httpServletResponse,HttpServletRequest httpServletRequest){
+        /* 处理参数校验错误 */
+        Object o = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if(o != null){
+            return o;
+        }
+
+        String ip = IpUtil.getIpAddr(httpServletRequest);
+        ReturnObject<String> jwt = userService.Login(loginVo.getUserName(), loginVo.getPassword(), ip);
+
+            if(jwt.getData() == null){
+            return ResponseUtil.fail(jwt.getCode(), jwt.getErrmsg());
+        }else{
+            return ResponseUtil.ok(jwt.getData());
+        }
     }
 
     /* auth008 start*/
@@ -292,9 +318,24 @@ public class PrivilegeController {
         ReturnObject returnObject = userService.releaseUser(id);
         return Common.decorateReturnObject(returnObject);
     }
-
     /* auth009 结束 */
 
+    /**
+     * 用户注销
+     * @param userId
+     * @return
+     * @author 24320182203266
+     */
+    @ApiOperation(value = "注销")
+    @Audit
+    @GetMapping("privileges/logout")
+    public Object logout(@LoginUser Long userId){
+
+//        JwtHelper.UserAndDepart user = jwtHelper.verifyTokenAndGetClaims(authorization);
+        ReturnObject<Boolean> success = userService.Logout(userId);
+        if (success.getData() == null) return ResponseUtil.fail(success.getCode(), success.getErrmsg());
+        else return ResponseUtil.ok();
+    }
 
     /**
      * @author 24320182203218
