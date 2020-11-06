@@ -1,12 +1,7 @@
 package cn.edu.xmu.privilege.model.vo;
 
-import cn.edu.xmu.ooad.util.AES;
-import cn.edu.xmu.privilege.model.bo.User;
-import cn.edu.xmu.privilege.model.po.UserPo;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 /**
  * 用户信息 Vo

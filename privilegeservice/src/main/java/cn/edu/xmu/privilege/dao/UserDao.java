@@ -1,14 +1,12 @@
 package cn.edu.xmu.privilege.dao;
 
-import cn.edu.xmu.ooad.util.AES;
+import cn.edu.xmu.ooad.util.encript.AES;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.ooad.util.SHA256;
-import cn.edu.xmu.ooad.util.StringUtil;
+import cn.edu.xmu.ooad.util.encript.SHA256;
 import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
-import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.po.*;
 import cn.edu.xmu.privilege.model.vo.UserEditVo;
@@ -21,6 +19,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -38,15 +37,13 @@ public class UserDao implements InitializingBean {
     /**
      * 是否初始化，生成signature和加密
      */
-    @Value("${prvilegeservice.initialization}")
+    @Value("${privilegeservice.initialization}")
     private Boolean initialization;
 
     // 用户在Redis中的过期时间，而不是JWT的有效期
-    @Value("${prvilegeservice.user.expiretime}")
+    @Value("${privilegeservice.user.expiretime}")
     private long timeout;
 
-    @Value("${prvilegeservice.randomtime}")
-    private int randomTime;
 
     @Autowired
     private UserRolePoMapper userRolePoMapper;
@@ -58,7 +55,7 @@ public class UserDao implements InitializingBean {
     private UserPoMapper userMapper;
 
     @Autowired
-    private RedisTemplate<String, String> redisTemplate;
+    private RedisTemplate<String, Serializable> redisTemplate;
 
     @Autowired
     private RoleDao roleDao;
@@ -66,37 +63,35 @@ public class UserDao implements InitializingBean {
     @Autowired
     private UserPoMapper userPoMapper;
 
-    private int jwtBannedSetIndex = 0;
-
-    public User getUserByName(String userName)
-    {
+    /**
+     * 由用户名获得用户
+     * @param userName
+     * @return
+     */
+    public ReturnObject<User> getUserByName(String userName) {
         UserPoExample example = new UserPoExample();
         UserPoExample.Criteria criteria = example.createCriteria();
         criteria.andUserNameEqualTo(userName);
-        List<UserPo> users = userPoMapper.selectByExample(example);
+        List<UserPo> users = null;
+        try {
+            users = userPoMapper.selectByExample(example);
+        }catch (DataAccessException e){
+            StringBuilder message = new StringBuilder().append("getUserByName: ").append(e.getMessage());
+            logger.error(message.toString());
+        }
 
-        if (users.isEmpty()) return null;
-        else return new User(users.get(0));
-    }
-
-    /**
-     * 禁止持有特定令牌的用户登录
-     * @param jwt JWT令牌
-     */
-    public void banJwt(String jwt){
-        // 如果这个集合存在则准备向其中添加元素，否则新建
-        String currentSetName = "BanJwt_" + jwtBannedSetIndex;
-        if(redisTemplate.hasKey(currentSetName)){
-            // 如果无效则换到第二个集合，否则直接加入
-            if(redisTemplate.getExpire(currentSetName,TimeUnit.SECONDS) < JwtHelper.EXPIRE) {
-                redisTemplate.opsForSet().add("BanJwt_" + ++jwtBannedSetIndex % 2, jwt);
-                redisTemplate.expire("BanJwt_" + jwtBannedSetIndex,JwtHelper.EXPIRE * 2,TimeUnit.SECONDS);
-            } else {
-                redisTemplate.opsForSet().add(currentSetName, jwt);
+        if (null == users && users.isEmpty()){
+            return new ReturnObject<>();
+        }else{
+            User user = new User(users.get(0));
+            if (!user.authetic()) {
+                StringBuilder message = new StringBuilder().append("getUserByName: ").append("id= ")
+                        .append(user.getId()).append(" username=").append(user.getUserName());
+                logger.error(message.toString());
+                return new ReturnObject<>(ResponseCode.RESOURCE_FALSIFY);
+            }else{
+                return new ReturnObject<>(user);
             }
-        } else {
-            redisTemplate.opsForSet().add(currentSetName, jwt);
-            redisTemplate.expire(currentSetName,JwtHelper.EXPIRE * 2,TimeUnit.SECONDS);
         }
     }
 
@@ -113,8 +108,12 @@ public class UserDao implements InitializingBean {
         userPo.setId(userId);
         userPo.setLastLoginIp(IPAddr);
         userPo.setLastLoginTime(date);
-        if(userPoMapper.updateByPrimaryKeySelective(userPo)==1) return true;
-        else return false;
+        if(userPoMapper.updateByPrimaryKeySelective(userPo)==1){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     /**
@@ -129,20 +128,18 @@ public class UserDao implements InitializingBean {
     private void loadSingleUserPriv(Long id) {
         List<Long> roleIds = this.getRoleIdByUserId(id);
         String key = "u_" + id;
-        if (roleIds.size() == 0){
-            redisTemplate.opsForSet().add(key, "0");
-        } else {
-            Set<String> roleKeys = new HashSet<>(roleIds.size());
-            for (Long roleId : roleIds) {
-                String roleKey = "r_" + roleId;
-                roleKeys.add(roleKey);
-                if (!redisTemplate.hasKey(roleKey)) {
-                    roleDao.loadRolePriv(roleId);
-                }
+        Set<String> roleKeys = new HashSet<>(roleIds.size());
+        for (Long roleId : roleIds) {
+            String roleKey = "r_" + roleId;
+            roleKeys.add(roleKey);
+            if (!redisTemplate.hasKey(roleKey)) {
+                roleDao.loadRolePriv(roleId);
             }
             redisTemplate.opsForSet().unionAndStore(roleKeys, key);
         }
-        redisTemplate.expire(key, this.timeout + new Random().nextInt(randomTime), TimeUnit.SECONDS);
+        redisTemplate.opsForSet().add(key, 0);
+        long randTimeout = Common.addRandomTime(timeout);
+        redisTemplate.expire(key, randTimeout, TimeUnit.SECONDS);
     }
 
     /**
@@ -160,7 +157,7 @@ public class UserDao implements InitializingBean {
         logger.debug("getRoleIdByUserId: userId = "+ id + "roleNum = "+ userRolePoList.size());
         List<Long> retIds = new ArrayList<>(userRolePoList.size());
         for (UserRolePo po : userRolePoList) {
-            StringBuilder signature = StringUtil.concatString("-",
+            StringBuilder signature = Common.concatString("-",
                     po.getUserId().toString(), po.getRoleId().toString(), po.getCreatorId().toString());
             String newSignature = SHA256.getSHA256(signature.toString());
 
@@ -169,7 +166,7 @@ public class UserDao implements InitializingBean {
                 retIds.add(po.getRoleId());
                 logger.debug("getRoleIdByUserId: userId = " + po.getUserId() + " roleId = " + po.getRoleId());
             } else {
-                logger.error("getRoleIdByUserId: Wrong Signature(auth_role_privilege): id =" + po.getId());
+                logger.error("getRoleIdByUserId: 签名错误(auth_role_privilege): id =" + po.getId());
             }
         }
         return retIds;
@@ -202,9 +199,9 @@ public class UserDao implements InitializingBean {
             loadSingleUserPriv(id);
         }
         redisTemplate.opsForSet().unionAndStore(key, proxyUserKey, aKey);
-        redisTemplate.opsForSet().remove(aKey, "0");
         redisTemplate.opsForSet().add(aKey, jwt);
-        redisTemplate.expire(aKey, this.timeout + new Random().nextInt(randomTime), TimeUnit.SECONDS);
+        long randTimeout = Common.addRandomTime(timeout);
+        redisTemplate.expire(aKey, randTimeout, TimeUnit.SECONDS);
     }
 
     /**
@@ -224,7 +221,7 @@ public class UserDao implements InitializingBean {
         List<Long> retIds = new ArrayList<>(userProxyPos.size());
         LocalDateTime now = LocalDateTime.now();
         for (UserProxyPo po : userProxyPos) {
-            StringBuilder signature = StringUtil.concatString("-", po.getUserAId().toString(),
+            StringBuilder signature = Common.concatString("-", po.getUserAId().toString(),
                     po.getUserBId().toString(), po.getBeginDate().toString(), po.getEndDate().toString(), po.getValid().toString());
             String newSignature = SHA256.getSHA256(signature.toString());
             UserProxyPo newPo = null;
@@ -238,7 +235,7 @@ public class UserDao implements InitializingBean {
                     //代理过期了，但标志位依然是有效
                     newPo = newPo == null ? new UserProxyPo() : newPo;
                     newPo.setValid((byte) 0);
-                    signature = StringUtil.concatString("-", po.getUserAId().toString(),
+                    signature = Common.concatString("-", po.getUserAId().toString(),
                             po.getUserBId().toString(), po.getBeginDate().toString(), po.getEndDate().toString(), newPo.getValid().toString());
                     newSignature = SHA256.getSHA256(signature.toString());
                     newPo.setSignature(newSignature);
@@ -275,7 +272,7 @@ public class UserDao implements InitializingBean {
             newPo.setName(AES.encrypt(po.getName(), User.AESPASS));
             newPo.setId(po.getId());
 
-            StringBuilder signature = StringUtil.concatString("-", po.getUserName(), newPo.getPassword(),
+            StringBuilder signature = Common.concatString("-", po.getUserName(), newPo.getPassword(),
                     newPo.getMobile(),newPo.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
                     po.getCreatorId().toString());
             newPo.setSignature(SHA256.getSHA256(signature.toString()));
@@ -292,7 +289,7 @@ public class UserDao implements InitializingBean {
         for (UserProxyPo po : userProxyPos) {
             UserProxyPo newPo = new UserProxyPo();
             newPo.setId(po.getId());
-            StringBuilder signature = StringUtil.concatString("-", po.getUserAId().toString(),
+            StringBuilder signature = Common.concatString("-", po.getUserAId().toString(),
                     po.getUserBId().toString(), po.getBeginDate().toString(), po.getEndDate().toString(), po.getValid().toString());
             String newSignature = SHA256.getSHA256(signature.toString());
             newPo.setSignature(newSignature);
@@ -305,7 +302,7 @@ public class UserDao implements InitializingBean {
         criteria3.andSignatureIsNull();
         List<UserRolePo> userRolePoList = userRolePoMapper.selectByExample(example3);
         for (UserRolePo po : userRolePoList) {
-            StringBuilder signature = StringUtil.concatString("-",
+            StringBuilder signature = Common.concatString("-",
                     po.getUserId().toString(), po.getRoleId().toString(), po.getCreatorId().toString());
             String newSignature = SHA256.getSHA256(signature.toString());
 
@@ -328,11 +325,17 @@ public class UserDao implements InitializingBean {
 
     public ReturnObject<User> getUserById(long id){
         UserPo userPo= userMapper.selectByPrimaryKey(id);
-        if(userPo==null)
+        if (userPo==null) {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
         User user = new User(userPo);
-        return new ReturnObject<User>(user);
-//        return user;
+        if (!user.authetic()) {
+            StringBuilder message = new StringBuilder().append("getUserById: ").append(ResponseCode.RESOURCE_FALSIFY.getMessage()).append(" id = ")
+                    .append(user.getId()).append(" username =").append(user.getUserName());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.RESOURCE_FALSIFY);
+        }
+        return new ReturnObject<>(user);
     }
 
 

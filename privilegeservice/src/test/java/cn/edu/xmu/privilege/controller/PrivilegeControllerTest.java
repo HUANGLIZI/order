@@ -1,25 +1,17 @@
 package cn.edu.xmu.privilege.controller;
 
-import cn.edu.xmu.ooad.annotation.Audit;
-import cn.edu.xmu.ooad.util.AES;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
-import cn.edu.xmu.privilege.mapper.UserPoMapper;
-import cn.edu.xmu.privilege.model.bo.User;
-import cn.edu.xmu.privilege.model.po.UserPo;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
-import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.event.annotation.BeforeTestMethod;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -52,7 +44,7 @@ public class PrivilegeControllerTest {
      * @date Created in 2020/11/4/ 16:00
      */
     @Test
-    public void login() throws Exception{
+    public void login1() throws Exception {
         String requireJson = null;
         String responseString = null;
         ResultActions res = null;
@@ -69,6 +61,13 @@ public class PrivilegeControllerTest {
                 .andExpect(jsonPath("$.data").isString())
                 .andReturn().getResponse().getContentAsString();
         //endregion
+    }
+
+    @Test
+    public void login2() throws Exception {
+        String requireJson = null;
+        String responseString = null;
+        ResultActions res = null;
 
         //region 密码错误的用户登录
         requireJson = "{\"userName\":\"537300010\",\"password\":\"000000\"}";
@@ -78,10 +77,16 @@ public class PrivilegeControllerTest {
         responseString = res.andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andExpect(jsonPath("$.errno").value(ResponseCode.AUTH_INVALID_ACCOUNT.getCode()))
-                .andExpect(jsonPath("$.errmsg").value("用户名或密码错误"))
                 .andExpect(jsonPath("$.data").doesNotExist())
                 .andReturn().getResponse().getContentAsString();
         //endregion
+    }
+
+    @Test
+    public void login3() throws Exception {
+        String requireJson = null;
+        String responseString = null;
+        ResultActions res = null;
 
         //region 用户名错误的用户登录
         requireJson = "{\"userName\":\"NotExist\",\"password\":\"123456\"}";
@@ -91,10 +96,16 @@ public class PrivilegeControllerTest {
         responseString = res.andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andExpect(jsonPath("$.errno").value(ResponseCode.AUTH_INVALID_ACCOUNT.getCode()))
-                .andExpect(jsonPath("$.errmsg").value("用户名或密码错误"))
                 .andExpect(jsonPath("$.data").doesNotExist())
                 .andReturn().getResponse().getContentAsString();
         //endregion
+    }
+
+    @Test
+    public void login4() throws Exception {
+        String requireJson = null;
+        String responseString = null;
+        ResultActions res = null;
 
         //region 没有输入用户名的用户登录
         requireJson = "{\"password\":\"123456\"}";
@@ -107,6 +118,12 @@ public class PrivilegeControllerTest {
                 .andExpect(jsonPath("$.errmsg").value("必须输入用户名;"))
                 .andReturn().getResponse().getContentAsString();
         //endregion
+    }
+    @Test
+    public void login5() throws Exception {
+        String requireJson = null;
+        String responseString = null;
+        ResultActions res = null;
 
         //region 没有输入密码（密码空）的用户登录
         requireJson = "{\"userName\":\"537300010\",\"password\":\"\"}";
@@ -119,6 +136,13 @@ public class PrivilegeControllerTest {
                 .andExpect(jsonPath("$.errmsg").value("必须输入密码;"))
                 .andReturn().getResponse().getContentAsString();
         //endregion
+    }
+
+    @Test
+    public void login6() throws Exception {
+        String requireJson = null;
+        String responseString = null;
+        ResultActions res = null;
 
         //region 用户重复登录
         requireJson = "{\"userName\":\"537300010\",\"password\":\"123456\"}";
@@ -132,7 +156,12 @@ public class PrivilegeControllerTest {
                 .andExpect(jsonPath("$.data").isString())
                 .andReturn().getResponse().getContentAsString();
         //endregion
-
+    }
+    @Test
+    public void login7() throws Exception {
+        String requireJson = null;
+        String responseString = null;
+        ResultActions res = null;
         //region 当前状态不可登录的用户登录
         requireJson = "{\"userName\":\"13088admin\",\"password\":\"123456\"}";
         res = this.mvc.perform(post("/privilege/privileges/login")
@@ -141,7 +170,6 @@ public class PrivilegeControllerTest {
         responseString = res.andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andExpect(jsonPath("$.errno").value(ResponseCode.AUTH_USER_FORBIDDEN.getCode()))
-                .andExpect(jsonPath("$.errmsg").value("您的状态为新注册"))
                 .andExpect(jsonPath("$.data").doesNotExist())
                 .andReturn().getResponse().getContentAsString();
         //endregion
@@ -187,26 +215,9 @@ public class PrivilegeControllerTest {
         responseString = res.andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andExpect(jsonPath("$.errno").value(ResponseCode.AUTH_ID_NOTEXIST.getCode()))
-                .andExpect(jsonPath("$.errmsg").value("您尚未登录，无需注销"))
                 .andReturn().getResponse().getContentAsString();
         //endregion
 
-        //region 空JWT用户登出
-//        res = this.mvc.perform(get("/privilege/privileges/logout")
-//                .contentType("application/json;charset=UTF-8")
-//                .header("authorization",""));
-//        responseString = res.andExpect(status().isBadRequest())
-//                .andExpect(content().contentType("application/json;charset=UTF-8"))
-//                .andExpect(jsonPath("$.errno").value(ResponseCode.FIELD_NOTVALID.getCode()))
-//                .andExpect(jsonPath("$.errmsg").value("请传入JWT令牌;"))
-//                .andReturn().getResponse().getContentAsString();
-        //endregion
-
-        //region 无JWT用户登出
-//        res = this.mvc.perform(get("/privilege/privileges/logout")
-//                .contentType("application/json;charset=UTF-8"));
-//        res.andExpect(status().isBadRequest());
-        //endregion
     }
 
     /*@Test

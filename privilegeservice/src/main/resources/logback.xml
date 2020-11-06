@@ -65,9 +65,10 @@
     </logger>
 
     <!-- 日志输出级别 -->
-    <logger name="cn.edu.xmu.privilege.dao" level = "DEBUG"/>
+    <logger name="cn.edu.xmu.privilege.dao" level = "INFO"/>
     <logger name="cn.edu.xmu.privilege.controller" level = "DEBUG"/>
-
+    <logger name="cn.edu.xmu.privilege.service" level = "DEBUG"/>
+    <logger name="cn.edu.xmu.ooad" level = "DEBUG"/>
     <root level="ERROR">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />

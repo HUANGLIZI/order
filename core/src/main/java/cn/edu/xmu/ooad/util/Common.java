@@ -70,7 +70,7 @@ public class Common {
                 msg.append(error.getDefaultMessage());
                 msg.append(";");
             }
-            logger.info("methodArgumentNotValid: msg = "+ msg.toString());
+            logger.debug("processFieldErrors: msg = "+ msg.toString());
             retObj = ResponseUtil.fail(ResponseCode.FIELD_NOTVALID, msg.toString());
             response.setStatus(HttpStatus.BAD_REQUEST.value());
         }
@@ -165,4 +165,39 @@ public class Common {
                 return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
         }
     }
+
+    /**
+     * 动态拼接字符串
+     * @param sep 分隔符
+     * @param fields 拼接的字符串
+     * @return StringBuilder
+     * createdBy: Ming Qiu 2020-11-02 11:44
+     */
+    public static StringBuilder concatString(String sep, String... fields){
+        StringBuilder ret = new StringBuilder();
+
+        for (int i = 0; i< fields.length; i++){
+            if (i > 0){
+                ret.append(sep);
+            }
+            ret.append(fields[i]);
+        }
+        return ret;
+    }
+
+    /**
+     * 增加20%以内的随机时间
+     * 如果timeout <0 则会返回60s+随机时间
+     * @param timeout 时间
+     * @return 增加后的随机时间
+     */
+    public static long addRandomTime(long timeout) {
+        if (timeout <= 0) {
+            timeout = 60;
+        }
+        //增加随机数，防止雪崩
+        timeout += (long) new Random().nextDouble() * (timeout / 5 - 1);
+        return timeout;
+    }
+
 }

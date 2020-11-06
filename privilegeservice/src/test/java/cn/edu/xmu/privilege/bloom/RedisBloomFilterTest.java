@@ -1,14 +1,15 @@
 package cn.edu.xmu.privilege.bloom;
 
-import cn.edu.xmu.ooad.bloom.BloomFilterHelper;
-import cn.edu.xmu.ooad.bloom.RedisBloomFilter;
+import cn.edu.xmu.ooad.util.bloom.BloomFilterHelper;
+import cn.edu.xmu.ooad.util.bloom.RedisBloomFilter;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
 import com.google.common.hash.Funnels;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.util.Assert;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest(classes = PrivilegeServiceApplication.class)
@@ -35,6 +36,6 @@ public class RedisBloomFilterTest {
 				j++;
 			}
 		}
-		Assert.isTrue(j == 82, "Unknown Error");
+		assertEquals( 100, j);
 	}
 }

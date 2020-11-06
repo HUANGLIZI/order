@@ -1,9 +1,9 @@
 package cn.edu.xmu.privilege.dao;
 
+import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.ooad.util.SHA256;
-import cn.edu.xmu.ooad.util.StringUtil;
+import cn.edu.xmu.ooad.util.encript.SHA256;
 import cn.edu.xmu.privilege.mapper.*;
 import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.po.*;
@@ -38,20 +38,14 @@ public class RoleDao implements InitializingBean {
     /**
      * 是否初始化，生成signature和加密
      */
-    @Value("${prvilegeservice.initialization}")
+    @Value("${privilegeservice.initialization}")
     private Boolean initialization;
 
-    @Value("${prvilegeservice.role.expiretime}")
+    @Value("${privilegeservice.role.expiretime}")
     private long timeout;
-
-    @Value("${prvilegeservice.randomtime}")
-    private int randomTime;
 
     @Autowired
     private RolePoMapper roleMapper;
-
-    @Autowired
-    private UserPoMapper userMapper;
 
     @Autowired
     private UserRolePoMapper userRolePoMapper;
@@ -87,7 +81,8 @@ public class RoleDao implements InitializingBean {
                 redisTemplate.opsForSet().add(key, pId.toString());
             }
         }
-        redisTemplate.expire(key, this.timeout + new Random().nextInt(randomTime), TimeUnit.SECONDS);
+        long randTimeout = Common.addRandomTime(this.timeout);
+        redisTemplate.expire(key, randTimeout, TimeUnit.SECONDS);
     }
 
     /**
@@ -104,7 +99,7 @@ public class RoleDao implements InitializingBean {
         List<RolePrivilegePo> rolePrivilegePos = rolePrivilegePoMapper.selectByExample(example);
         List<Long> retIds = new ArrayList<>(rolePrivilegePos.size());
         for (RolePrivilegePo po : rolePrivilegePos) {
-            StringBuilder signature = StringUtil.concatString("-", po.getRoleId().toString(),
+            StringBuilder signature = Common.concatString("-", po.getRoleId().toString(),
                     po.getPrivilegeId().toString(), po.getCreatorId().toString());
             String newSignature = SHA256.getSHA256(signature.toString());
 
@@ -131,7 +126,7 @@ public class RoleDao implements InitializingBean {
         List<RolePrivilegePo> rolePrivilegePos = rolePrivilegePoMapper.selectByExample(example);
         List<Long> retIds = new ArrayList<>(rolePrivilegePos.size());
         for (RolePrivilegePo po : rolePrivilegePos) {
-            StringBuilder signature = StringUtil.concatString("-", po.getRoleId().toString(),
+            StringBuilder signature = Common.concatString("-", po.getRoleId().toString(),
                     po.getPrivilegeId().toString(), po.getCreatorId().toString());
             String newSignature = SHA256.getSHA256(signature.toString());
             RolePrivilegePo newPo = new RolePrivilegePo();
