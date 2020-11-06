@@ -152,8 +152,6 @@ public class PrivilegeController {
     @Autowired
     private HttpServletResponse httpServletResponse;
 
-    @Autowired
-    private HttpServletResponse httpServletResponse;
 
     /**
      * 获得所有权限
