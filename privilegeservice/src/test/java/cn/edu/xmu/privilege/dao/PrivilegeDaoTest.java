@@ -21,19 +21,7 @@ public class PrivilegeDaoTest {
     @Autowired
     private PrivilegeDao privilegeDao;
 
-    @Autowired
-    private UserDao userDao;
-
-    private static final Logger logger = LoggerFactory.getLogger(PrivilegeDaoTest.class);
-
-
-
-    @Test
-    public void getUserRoleById(){
-        Long id = new Long(46);
-        String userRole = userDao.getUserRoles(id).getData().toString();
-        logger.debug(userRole);
-    }
+    
     @Test
     public void getPrivIdByKey(){
         Long p1 = privilegeDao.getPrivIdByKey("/adminusers/{id}", Privilege.RequestType.GET);
