@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * @author Ming Qiu
  **/
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"cn.edu.xmu.privilege", "cn.edu.xmu.ooad"})
 @MapperScan("cn.edu.xmu.privilege.mapper")
 public class PrivilegeServiceApplication {
     public static void main(String[] args) {
