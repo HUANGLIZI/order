@@ -24,10 +24,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * 角色控制器测试类
- * 
- * @author Weice Wang
- * @date Created in 2020/11/5 14:23
- * Modified in 2020/11/5 14:16
+ *
+ * @author 24320182203281 王纬策
+ * createdBy 王纬策 2020/11/04 13:57
+ * modifiedBy 王纬策 2020/11/7 19:20
  **/
 @SpringBootTest(classes = PrivilegeServiceApplication.class)   //标识本类是一个SpringBootTest
 @AutoConfigureMockMvc    //配置模拟的MVC，这样可以不启动服务器测试
@@ -43,15 +43,36 @@ public class PrivilegeControllerTest2 {
     @Autowired
     private MockMvc mvc;
 
-    private static final Logger logger = LoggerFactory.getLogger(RoleDaoTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(PrivilegeControllerTest2.class);
 
     /**
-     *查询角色 成功
+     * 创建测试用token
+     *
+     * @author 24320182203281 王纬策
+     * @param userId
+     * @param departId
+     * @param expireTime
+     * @return token
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
+     */
+    private final String creatTestToken(Long userId, Long departId, int expireTime) {
+        String token = new JwtHelper().createToken(userId, departId, expireTime);
+        logger.debug(token);
+        return token;
+    }
+
+    /**
+     * 查询角色 成功
+     *
+     * @author 24320182203281 王纬策
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Test
     public void selectRoleTest() {
         String responseString = null;
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDQ0ODIwMzAsInVzZXJJZCI6MSwiaWF0IjoxNjA0NDc0ODMwfQ.f1g65bUbkK8FlyW9ac5WhM9FBT6ILOmGROjuMVJntyE";
+        String token = creatTestToken(1L, 0L, 100);
         try {
             responseString = this.mvc.perform(get("/privilege/roles?page=1&pageSize=2").header("authorization", token))
                     .andExpect(status().isOk())
@@ -60,7 +81,7 @@ public class PrivilegeControllerTest2 {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String expectedResponse = "{\"errno\":0,\"data\":[{\"id\":23,\"name\":\"管理员\",\"desc\":\"超级管理员，所有权限都有\",\"createdBy\":1,\"gmtCreate\":\"2020-11-01T09:48:24\",\"gmtModified\":\"2020-11-01T09:48:24\"},{\"id\":80,\"name\":\"财务\",\"desc\":null,\"createdBy\":1}],\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":{\"total\":2,\"pages\":1,\"pageSize\":2,\"page\":1,\"list\":[{\"id\":23,\"name\":\"管理员\",\"desc\":\"超级管理员，所有权限都有\",\"createdBy\":1},{\"id\":80,\"name\":\"财务\",\"desc\":null,\"createdBy\":1}]},\"errmsg\":\"成功\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, false);
         } catch (JSONException e) {
@@ -69,14 +90,17 @@ public class PrivilegeControllerTest2 {
     }
 
     /**
-     *插入角色 成功
+     * 插入角色 成功
+     * @author 24320182203281 王纬策
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Test
     public void insertRoleTest1() {
         RoleVo vo = new RoleVo();
         vo.setName("test");
         vo.setDescr("test");
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDQ0ODIwMzAsInVzZXJJZCI6MSwiaWF0IjoxNjA0NDc0ODMwfQ.f1g65bUbkK8FlyW9ac5WhM9FBT6ILOmGROjuMVJntyE";
+        String token = creatTestToken(1L, 0L, 100);
         String roleJson = JacksonUtil.toJson(vo);
         String expectedResponse = "";
         String responseString = null;
@@ -97,14 +121,17 @@ public class PrivilegeControllerTest2 {
     }
 
     /**
-     *插入角色 角色名已存在
+     * 插入角色 角色名已存在
+     * @author 24320182203281 王纬策
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Test
     public void insertRoleTest2() {
         RoleVo vo = new RoleVo();
         vo.setName("管理员");
         vo.setDescr("管理员test");
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDQ0ODIwMzAsInVzZXJJZCI6MSwiaWF0IjoxNjA0NDc0ODMwfQ.f1g65bUbkK8FlyW9ac5WhM9FBT6ILOmGROjuMVJntyE";
+        String token = creatTestToken(1L, 0L, 100);
         String roleJson = JacksonUtil.toJson(vo);
         String expectedResponse = "";
         String responseString = null;
@@ -125,14 +152,17 @@ public class PrivilegeControllerTest2 {
     }
 
     /**
-     *插入角色 角色名为空
+     * 插入角色 角色名为空
+     * @author 24320182203281 王纬策
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Test
     public void insertRoleTest3() {
         RoleVo vo = new RoleVo();
         vo.setName("");
         vo.setDescr("test");
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDQ0ODIwMzAsInVzZXJJZCI6MSwiaWF0IjoxNjA0NDc0ODMwfQ.f1g65bUbkK8FlyW9ac5WhM9FBT6ILOmGROjuMVJntyE";
+        String token = creatTestToken(1L, 0L, 100);
         String roleJson = JacksonUtil.toJson(vo);
         String expectedResponse = "";
         String responseString = null;
@@ -153,14 +183,17 @@ public class PrivilegeControllerTest2 {
     }
 
     /**
-     *修改角色 成功
+     * 修改角色 成功
+     * @author 24320182203281 王纬策
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Test
     public void updateRoleTest1() {
         RoleVo vo = new RoleVo();
         vo.setName("test");
         vo.setDescr("test");
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDQ0ODIwMzAsInVzZXJJZCI6MSwiaWF0IjoxNjA0NDc0ODMwfQ.f1g65bUbkK8FlyW9ac5WhM9FBT6ILOmGROjuMVJntyE";
+        String token = creatTestToken(1L, 0L, 100);
         String roleJson = JacksonUtil.toJson(vo);
         String expectedResponse = "";
         String responseString = null;
@@ -181,14 +214,17 @@ public class PrivilegeControllerTest2 {
     }
 
     /**
-     *修改角色 角色名为空
+     * 修改角色 角色名为空
+     * @author 24320182203281 王纬策
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Test
     public void updateRoleTest2() {
         RoleVo vo = new RoleVo();
         vo.setName("");
         vo.setDescr("test");
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDQ0ODIwMzAsInVzZXJJZCI6MSwiaWF0IjoxNjA0NDc0ODMwfQ.f1g65bUbkK8FlyW9ac5WhM9FBT6ILOmGROjuMVJntyE";
+        String token = creatTestToken(1L, 0L, 100);
         String roleJson = JacksonUtil.toJson(vo);
         String expectedResponse = "";
         String responseString = null;
@@ -209,14 +245,17 @@ public class PrivilegeControllerTest2 {
     }
 
     /**
-     *修改角色 id不存在
+     * 修改角色 id不存在
+     * @author 24320182203281 王纬策
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Test
     public void updateRoleTest3() {
         RoleVo vo = new RoleVo();
         vo.setName("test");
         vo.setDescr("test");
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDQ0ODIwMzAsInVzZXJJZCI6MSwiaWF0IjoxNjA0NDc0ODMwfQ.f1g65bUbkK8FlyW9ac5WhM9FBT6ILOmGROjuMVJntyE";
+        String token = creatTestToken(1L, 0L, 100);
         String roleJson = JacksonUtil.toJson(vo);
         String expectedResponse = "";
         String responseString = null;
@@ -237,14 +276,17 @@ public class PrivilegeControllerTest2 {
     }
 
     /**
-     *修改角色 角色名重复
+     * 修改角色 角色名重复
+     * @author 24320182203281 王纬策
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Test
     public void updateRoleTest4() {
         RoleVo vo = new RoleVo();
         vo.setName("管理员");
         vo.setDescr("管理员test");
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDQ0ODIwMzAsInVzZXJJZCI6MSwiaWF0IjoxNjA0NDc0ODMwfQ.f1g65bUbkK8FlyW9ac5WhM9FBT6ILOmGROjuMVJntyE";
+        String token = creatTestToken(1L, 0L, 100);
         String roleJson = JacksonUtil.toJson(vo);
         String expectedResponse = "";
         String responseString = null;
@@ -265,12 +307,15 @@ public class PrivilegeControllerTest2 {
     }
 
     /**
-     *删除角色 成功
+     * 删除角色 成功
+     * @author 24320182203281 王纬策
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Test
     public void deleteRoleTest1() {
         //测试数据
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDQ0ODIwMzAsInVzZXJJZCI6MSwiaWF0IjoxNjA0NDc0ODMwfQ.f1g65bUbkK8FlyW9ac5WhM9FBT6ILOmGROjuMVJntyE";
+        String token = creatTestToken(1L, 0L, 100);
         String expectedResponse = "";
         String responseString = null;
         //测试删除成功
@@ -291,11 +336,14 @@ public class PrivilegeControllerTest2 {
     }
 
     /**
-     *删除角色 id不存在
+     * 删除角色 id不存在
+     * @author 24320182203281 王纬策
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Test
     public void deleteRoleTest2() {
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDQ0ODIwMzAsInVzZXJJZCI6MSwiaWF0IjoxNjA0NDc0ODMwfQ.f1g65bUbkK8FlyW9ac5WhM9FBT6ILOmGROjuMVJntyE";
+        String token = creatTestToken(1L, 0L, 100);
         String expectedResponse = "";
         String responseString = null;
         try {
