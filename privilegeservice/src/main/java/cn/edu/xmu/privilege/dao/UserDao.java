@@ -203,12 +203,12 @@ public class UserDao implements InitializingBean {
 
         //若未拥有，则插入数据
         try {
-            if (userRolePoMapper.selectByExample(example).isEmpty()){
+            List<UserRolePo> userRolePoList = userRolePoMapper.selectByExample(example);
+            if (userRolePoList.isEmpty()){
                 userRolePoMapper.insert(userRolePo);
-
-                
             } else {
                 logger.warn("assignRole: 该用户已拥有该角色 userid=" + userid + "roleid=" + roleid);
+                return new ReturnObject<>(ResponseCode.USER_ROLE_REGISTERED);
             }
         } catch (DataAccessException e) {
             // 数据库错误

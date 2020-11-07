@@ -48,6 +48,7 @@ public enum ResponseCode {
     EMAIL_REGISTERED(732, "邮箱已被注册"),
     MOBILE_REGISTERED(733,"电话已被注册"),
     ROLE_REGISTERED(736, "角色名已存在"),
+    USER_ROLE_REGISTERED(737, "用户已拥有该角色"),
     PASSWORD_SAME(741,"不能与旧密码相同"),
     URL_SAME(742,"权限url与RequestType重复"),
     PRIVILEGE_SAME(743,"权限名称重复"),
