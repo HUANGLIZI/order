@@ -5,6 +5,7 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.ooad.util.encript.SHA256;
 import cn.edu.xmu.privilege.mapper.*;
+import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.po.*;
 import com.github.pagehelper.PageHelper;
@@ -64,11 +65,10 @@ public class RoleDao implements InitializingBean {
     private RedisTemplate<String, Serializable> redisTemplate;
 
     /**
-     * Role通过自己的id找到对应的privIds, 根据privDao获取权限
+     * 根据角色Id,查询角色的所有权限
      *
-     * @param id roleID
-     * @return List<Privilege>
-     * 将获取用户所有权限
+     * @param id 角色ID
+     * @return 角色的权限列表
      */
     public List<Privilege> findPrivsByRoleId(Long id) {
         //getPrivIdsByRoleId已经进行role的签名校验

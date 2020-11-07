@@ -116,11 +116,9 @@ public class UserDao implements InitializingBean {
     }
 
     /**
-     * User通过自己的id找到对应的roleIds,根据roleDao返回角色对应的权限
      *
-     * @param id userID
-     * @return List<Privilege>
-     * 将获取用户所有权限
+     * @param id 用户ID
+     * @return 用户的权限列表
      */
 
     public List<Privilege> findPrivsByUserId(Long id) {

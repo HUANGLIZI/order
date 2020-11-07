@@ -95,11 +95,10 @@ public class PrivilegeDao implements InitializingBean {
     }
 
     /**
-     * prvi通过自己的id找到自己的权限
+     * 根据权限Id查询权限
      *
-     * @param id privID
-     * @return privilege
-     * 将获取privId对应的权限
+     * @param id 权限ID
+     * @return 权限
      */
     public Privilege findPriv(Long id){
         PrivilegePo po = poMapper.selectByPrimaryKey(id);

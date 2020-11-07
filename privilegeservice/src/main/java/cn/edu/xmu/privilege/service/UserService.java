@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -52,8 +53,9 @@ public class UserService {
     @Autowired
     private UserDao userDao;
     /**
-     * 根据用户Id查询他的所有权限
-     * @return 权限列表
+     * 根据用户Id查询用户所有权限
+     * @param id:用户id
+     * @return 用户权限列表
      */
     public ReturnObject<List> findPrivsByUserId(Long id){
         ReturnObject<List>  ret = new ReturnObject<>(userDao.findPrivsByUserId(id));
