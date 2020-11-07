@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Ming Qiu
  * @date Created in 2020/11/1 11:48
- * Modified in 2020/11/3 14:37
+ * Modified in 2020/11/8 0:57
  **/
 @Repository
 public class UserDao implements InitializingBean {
@@ -371,6 +371,9 @@ public class UserDao implements InitializingBean {
      *
      * @param userVo 传入的 User 对象
      * @return 返回对象 ReturnObj
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:30
+     * Modified by 19720182203919 李涵 at 2020/11/5 10:42
      */
     public ReturnObject<Object> modifyUserByVo(Long id, UserVo userVo) {
         // 查询密码等资料以计算新签名
@@ -435,6 +438,9 @@ public class UserDao implements InitializingBean {
      *
      * @param id 用户 id
      * @return 返回对象 ReturnObj
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:30
+     * Modified by 19720182203919 李涵 at 2020/11/5 10:42
      */
     public ReturnObject<Object> physicallyDeleteUser(Long id) {
         ReturnObject<Object> retObj;
@@ -455,6 +461,9 @@ public class UserDao implements InitializingBean {
      * @param id    用户 id
      * @param state 用户目标状态
      * @return UserPo 对象
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:30
+     * Modified by 19720182203919 李涵 at 2020/11/5 10:42
      */
     private UserPo createUserStateModPo(Long id, User.State state) {
         // 查询密码等资料以计算新签名
@@ -479,6 +488,9 @@ public class UserDao implements InitializingBean {
      * @param id    用户 id
      * @param state 目标状态
      * @return 返回对象 ReturnObj
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:30
+     * Modified by 19720182203919 李涵 at 2020/11/5 10:42
      */
     public ReturnObject<Object> changeUserState(Long id, User.State state) {
         UserPo po = createUserStateModPo(id, state);
