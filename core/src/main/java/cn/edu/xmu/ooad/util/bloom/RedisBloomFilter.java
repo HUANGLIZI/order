@@ -1,4 +1,4 @@
-package cn.edu.xmu.ooad.bloom;
+package cn.edu.xmu.ooad.util.bloom;
 
 import com.google.common.base.Preconditions;
 import org.springframework.data.redis.core.RedisTemplate;

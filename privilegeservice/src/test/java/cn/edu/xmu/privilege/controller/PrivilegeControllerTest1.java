@@ -1,6 +1,6 @@
 package cn.edu.xmu.privilege.controller;
 
-import cn.edu.xmu.ooad.util.AES;
+import cn.edu.xmu.ooad.util.encript.AES;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.privilege.model.bo.User;
@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = PrivilegeServiceApplication.class)   //标识本类是一个SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class AdminUserControllerTest {
+public class PrivilegeControllerTest1 {
 
     @Autowired
     private MockMvc mvc;

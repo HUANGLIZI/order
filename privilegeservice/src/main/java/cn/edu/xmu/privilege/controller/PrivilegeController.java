@@ -1,7 +1,7 @@
 package cn.edu.xmu.privilege.controller;
 
-import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.ooad.annotation.*;
+import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
@@ -19,10 +19,11 @@ import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import cn.edu.xmu.privilege.model.vo.RoleVo;
-import cn.edu.xmu.privilege.model.vo.UserEditVo;
+import cn.edu.xmu.privilege.model.vo.UserVo;
 import cn.edu.xmu.privilege.service.RoleService;
 import cn.edu.xmu.privilege.service.UserService;
 import cn.edu.xmu.privilege.util.IpUtil;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,10 +168,17 @@ public class PrivilegeController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
+    @Audit
     @GetMapping("privileges")
-    public Object getAllPrivs(){
-        ReturnObject<List> returnObject =  userService.findAllPrivs();
-        return Common.getListRetObject(returnObject);
+    public Object getAllPrivs(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize){
+
+        logger.debug("getAllPrivs: page = "+ page +"  pageSize ="+pageSize);
+
+        page = (page == null)?1:page;
+        pageSize = (pageSize == null)?10:pageSize;
+
+        ReturnObject<PageInfo<VoObject>> returnObject =  userService.findAllPrivs(page, pageSize);
+        return Common.getPageRetObject(returnObject);
     }
 
     /**
@@ -196,34 +204,7 @@ public class PrivilegeController {
         return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
     }
 
-    /**
-     * 用户登录
-     * @param loginVo
-     * @param bindingResult
-     * @param httpServletResponse
-     * @param httpServletRequest
-     * @return
-     * @author 24320182203266
-     */
-    @ApiOperation(value = "登录")
-    @PostMapping("privileges/login")
-    public Object login(@Validated @RequestBody LoginVo loginVo, BindingResult bindingResult
-            , HttpServletResponse httpServletResponse,HttpServletRequest httpServletRequest){
-        /* 处理参数校验错误 */
-        Object o = Common.processFieldErrors(bindingResult, httpServletResponse);
-        if(o != null){
-            return o;
-        }
 
-        String ip = IpUtil.getIpAddr(httpServletRequest);
-        ReturnObject<String> jwt = userService.Login(loginVo.getUserName(), loginVo.getPassword(), ip);
-
-            if(jwt.getData() == null){
-            return ResponseUtil.fail(jwt.getCode(), jwt.getErrmsg());
-        }else{
-            return ResponseUtil.ok(jwt.getData());
-        }
-    }
 
     /* auth008 start*/
     //region
@@ -349,7 +330,7 @@ public class PrivilegeController {
             @ApiResponse(code = 0, message = "成功"),
     })
     @PutMapping("adminusers/{id}")
-    public Object modifyUserInfo(@PathVariable Long id, @RequestBody UserEditVo vo) {
+    public Object modifyUserInfo(@PathVariable Long id, @RequestBody UserVo vo) {
         if (logger.isDebugEnabled()) {
             logger.debug("modifyUserInfo: id = "+ id +" vo = " + vo);
         }
@@ -425,6 +406,35 @@ public class PrivilegeController {
     /* auth009 结束 */
 
     /**
+     * 用户登录
+     * @param loginVo
+     * @param bindingResult
+     * @param httpServletResponse
+     * @param httpServletRequest
+     * @return
+     * @author 24320182203266
+     */
+    @ApiOperation(value = "登录")
+    @PostMapping("privileges/login")
+    public Object login(@Validated @RequestBody LoginVo loginVo, BindingResult bindingResult
+            , HttpServletResponse httpServletResponse,HttpServletRequest httpServletRequest){
+        /* 处理参数校验错误 */
+        Object o = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if(o != null){
+            return o;
+        }
+
+        String ip = IpUtil.getIpAddr(httpServletRequest);
+        ReturnObject<String> jwt = userService.login(loginVo.getUserName(), loginVo.getPassword(), ip);
+
+        if(jwt.getData() == null){
+            return ResponseUtil.fail(jwt.getCode(), jwt.getErrmsg());
+        }else{
+            return ResponseUtil.ok(jwt.getData());
+        }
+    }
+
+    /**
      * 用户注销
      * @param userId
      * @return
@@ -435,10 +445,13 @@ public class PrivilegeController {
     @GetMapping("privileges/logout")
     public Object logout(@LoginUser Long userId){
 
-//        JwtHelper.UserAndDepart user = jwtHelper.verifyTokenAndGetClaims(authorization);
+        logger.debug("logout: userId = "+userId);
         ReturnObject<Boolean> success = userService.Logout(userId);
-        if (success.getData() == null) return ResponseUtil.fail(success.getCode(), success.getErrmsg());
-        else return ResponseUtil.ok();
+        if (success.getData() == null)  {
+            return ResponseUtil.fail(success.getCode(), success.getErrmsg());
+        }else {
+            return ResponseUtil.ok();
+        }
     }
 
     /**
