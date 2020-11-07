@@ -1,8 +1,8 @@
 package cn.edu.xmu.privilege.model.bo;
 
 import cn.edu.xmu.ooad.model.VoObject;
-import cn.edu.xmu.ooad.util.SHA256;
-import cn.edu.xmu.ooad.util.StringUtil;
+import cn.edu.xmu.ooad.util.Common;
+import cn.edu.xmu.ooad.util.encript.SHA256;
 import cn.edu.xmu.privilege.model.po.RolePo;
 import cn.edu.xmu.privilege.model.po.UserPo;
 import cn.edu.xmu.privilege.model.po.UserRolePo;
@@ -37,7 +37,7 @@ public class UserRole implements VoObject {
         this.gmtCreate = userRolePo.getGmtCreate();
         this.signature = userRolePo.getSignature();
 
-        StringBuilder signature = StringUtil.concatString("-",
+        StringBuilder signature = Common.concatString("-",
                 userRolePo.getUserId().toString(), userRolePo.getRoleId().toString(), userRolePo.getCreatorId().toString());
         this.cacuSignature = SHA256.getSHA256(signature.toString());
     }
@@ -60,5 +60,10 @@ public class UserRole implements VoObject {
         userRoleRetVo.setGmtCreate(this.gmtCreate.toString());
 
         return userRoleRetVo;
+    }
+
+    @Override
+    public Object createSimpleVo() {
+        return null;
     }
 }

@@ -10,6 +10,7 @@ import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
+import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.po.*;
@@ -61,6 +62,9 @@ public class UserDao implements InitializingBean {
 
     @Autowired
     private UserPoMapper userMapper;
+
+    @Autowired
+    private RolePoMapper rolePoMapper;
 
     @Autowired
     private RedisTemplate<String, Serializable> redisTemplate;
