@@ -5,6 +5,7 @@ import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.ooad.util.encript.SHA256;
 import cn.edu.xmu.privilege.model.po.PrivilegePo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeRetVo;
+import cn.edu.xmu.privilege.model.vo.PrivilegeSimpleRetVo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import lombok.Data;
 
@@ -117,6 +118,11 @@ public class Privilege implements VoObject{
     @Override
     public Object createVo() {
         return new PrivilegeRetVo(this);
+    }
+
+    @Override
+    public Object createSimpleVo() {
+        return new PrivilegeSimpleRetVo(this);
     }
 
     /**

@@ -3,6 +3,7 @@ package cn.edu.xmu.privilege.model.bo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.privilege.model.po.RolePo;
 import cn.edu.xmu.privilege.model.vo.RoleRetVo;
+import cn.edu.xmu.privilege.model.vo.RoleSimpleRetVo;
 import cn.edu.xmu.privilege.model.vo.RoleVo;
 import lombok.Data;
 
@@ -48,6 +49,11 @@ public class Role implements VoObject, Serializable {
     @Override
     public Object createVo() {
         return new RoleRetVo(this);
+    }
+
+    @Override
+    public Object createSimpleVo() {
+        return new RoleSimpleRetVo(this);
     }
 
     /**

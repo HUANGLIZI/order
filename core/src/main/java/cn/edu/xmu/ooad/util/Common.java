@@ -1,6 +1,7 @@
 package cn.edu.xmu.ooad.util;
 
 import cn.edu.xmu.ooad.model.VoObject;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -12,9 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.text.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * 通用工具类
@@ -123,6 +122,43 @@ public class Common {
                 return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
         }
     }
+
+
+    /**
+     * 处理分页返回对象
+     * @param returnObject 返回的对象
+     * @return
+     */
+    public static Object getPageRetObject(ReturnObject<PageInfo<VoObject>> returnObject) {
+        ResponseCode code = returnObject.getCode();
+        switch (code){
+            case OK:
+
+                PageInfo<VoObject> objs = returnObject.getData();
+                if (objs != null){
+                    List<Object> voObjs = new ArrayList<>(objs.getList().size());
+                    for (Object data : objs.getList()) {
+                        if (data instanceof VoObject) {
+                            voObjs.add(((VoObject)data).createVo());
+                        }
+                    }
+
+                    Map<String, Object> ret = new HashMap<>();
+                    ret.put("list", voObjs);
+                    ret.put("total", objs.getTotal());
+                    ret.put("page", objs.getPageNum());
+                    ret.put("pageSize", objs.getPageSize());
+                    ret.put("pages", objs.getPages());
+                    return ResponseUtil.ok(ret);
+                }else{
+                    return ResponseUtil.ok();
+                }
+            default:
+                return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+        }
+    }
+
+
 
 
     public static Object getNullRetObj(ReturnObject<Object> returnObject, HttpServletResponse httpServletResponse) {

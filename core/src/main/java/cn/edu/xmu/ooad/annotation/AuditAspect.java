@@ -18,6 +18,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
@@ -60,13 +61,20 @@ public class AuditAspect {
         Method method = ms.getMethod();
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        String token = request.getHeader(JwtHelper.LOGIN_TOKEN_KEY);
+        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+                String token = request.getHeader(JwtHelper.LOGIN_TOKEN_KEY);
+        if (token == null){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return ResponseUtil.fail(ResponseCode.AUTH_NEED_LOGIN);
+        }
+
         JwtHelper.UserAndDepart userAndDepart = new JwtHelper().verifyTokenAndGetClaims(token);
         Long userId = userAndDepart.getUserId();
         Long departId = userAndDepart.getDepartId();
 
         logger.debug("around: userId ="+userId+" departId="+departId);
         if (userId == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return ResponseUtil.fail(ResponseCode.AUTH_NEED_LOGIN);
         }
 
@@ -75,6 +83,10 @@ public class AuditAspect {
         for (int i = 0; i < annotations.length; i++) {
             Object param = args[i];
             Annotation[] paramAnn = annotations[i];
+            if (param == null || paramAnn.length == 0){
+                continue;
+            }
+
             for (Annotation annotation : paramAnn) {
                 //这里判断当前注解是否为LoginUser.class
                 if (annotation.annotationType().equals(LoginUser.class)) {
