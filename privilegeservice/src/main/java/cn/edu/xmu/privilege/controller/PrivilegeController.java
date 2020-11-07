@@ -1,27 +1,31 @@
 package cn.edu.xmu.privilege.controller;
 
-import cn.edu.xmu.ooad.annotation.Audit;
-import cn.edu.xmu.ooad.annotation.Depart;
-import cn.edu.xmu.ooad.annotation.LoginUser;
+import cn.edu.xmu.ooad.annotation.*;
+import cn.edu.xmu.privilege.model.bo.Privilege;
+import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import cn.edu.xmu.privilege.model.vo.RoleVo;
-import cn.edu.xmu.privilege.model.vo.UserEditVo;
+import cn.edu.xmu.privilege.model.vo.UserVo;
 import cn.edu.xmu.privilege.service.RoleService;
 import cn.edu.xmu.privilege.service.UserService;
+import cn.edu.xmu.privilege.util.IpUtil;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -57,10 +61,17 @@ public class PrivilegeController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
+    @Audit
     @GetMapping("privileges")
-    public Object getAllPrivs(){
-        ReturnObject<List> returnObject =  userService.findAllPrivs();
-        return Common.getListRetObject(returnObject);
+    public Object getAllPrivs(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize){
+
+        logger.debug("getAllPrivs: page = "+ page +"  pageSize ="+pageSize);
+
+        page = (page == null)?1:page;
+        pageSize = (pageSize == null)?10:pageSize;
+
+        ReturnObject<PageInfo<VoObject>> returnObject =  userService.findAllPrivs(page, pageSize);
+        return Common.getPageRetObject(returnObject);
     }
 
     /**
@@ -103,6 +114,8 @@ public class PrivilegeController {
         ReturnObject<List> returnObject =  userService.findPrivsByUserId(id);
         return Common.getListRetObject(returnObject);
     }
+
+
 
     /* auth008 start*/
     //region
@@ -228,7 +241,7 @@ public class PrivilegeController {
             @ApiResponse(code = 0, message = "成功"),
     })
     @PutMapping("adminusers/{id}")
-    public Object modifyUserInfo(@PathVariable Long id, @RequestBody UserEditVo vo) {
+    public Object modifyUserInfo(@PathVariable Long id, @RequestBody UserVo vo) {
         if (logger.isDebugEnabled()) {
             logger.debug("modifyUserInfo: id = "+ id +" vo = " + vo);
         }
@@ -301,7 +314,73 @@ public class PrivilegeController {
         ReturnObject returnObject = userService.releaseUser(id);
         return Common.decorateReturnObject(returnObject);
     }
-
     /* auth009 结束 */
 
+    /**
+     * 用户登录
+     * @param loginVo
+     * @param bindingResult
+     * @param httpServletResponse
+     * @param httpServletRequest
+     * @return
+     * @author 24320182203266
+     */
+    @ApiOperation(value = "登录")
+    @PostMapping("privileges/login")
+    public Object login(@Validated @RequestBody LoginVo loginVo, BindingResult bindingResult
+            , HttpServletResponse httpServletResponse,HttpServletRequest httpServletRequest){
+        /* 处理参数校验错误 */
+        Object o = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if(o != null){
+            return o;
+        }
+
+        String ip = IpUtil.getIpAddr(httpServletRequest);
+        ReturnObject<String> jwt = userService.login(loginVo.getUserName(), loginVo.getPassword(), ip);
+
+        if(jwt.getData() == null){
+            return ResponseUtil.fail(jwt.getCode(), jwt.getErrmsg());
+        }else{
+            return ResponseUtil.ok(jwt.getData());
+        }
+    }
+
+    /**
+     * 用户注销
+     * @param userId
+     * @return
+     * @author 24320182203266
+     */
+    @ApiOperation(value = "注销")
+    @Audit
+    @GetMapping("privileges/logout")
+    public Object logout(@LoginUser Long userId){
+
+        logger.debug("logout: userId = "+userId);
+        ReturnObject<Boolean> success = userService.Logout(userId);
+        if (success.getData() == null)  {
+            return ResponseUtil.fail(success.getCode(), success.getErrmsg());
+        }else {
+            return ResponseUtil.ok();
+        }
+    }
+
+    /**
+     * @author 24320182203218
+     **/
+    @ApiOperation(value = "用户上传图片",  produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value ="用户id" ,required = true),
+            @ApiImplicitParam(paramType = "formData", dataType = "file", name = "img", value ="文件", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 506, message = "该目录文件夹没有写入的权限"),
+    })
+    @PostMapping("/adminusers/{id}/uploadImg")
+    public Object uploadImg(@PathVariable("id") Integer id, @RequestParam("img") MultipartFile multipartFile){
+        logger.debug("uploadImg: id = "+ id +" img" + multipartFile.getOriginalFilename());
+        ReturnObject returnObject = userService.uploadImg(id,multipartFile);
+        return Common.getNullRetObj(returnObject, httpServletResponse);
+    }
 }

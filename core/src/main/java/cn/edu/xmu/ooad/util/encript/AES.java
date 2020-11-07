@@ -1,4 +1,4 @@
-package cn.edu.xmu.ooad.util;
+package cn.edu.xmu.ooad.util.encript;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

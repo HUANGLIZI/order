@@ -1,10 +1,10 @@
 package cn.edu.xmu.privilege.model.bo;
 
-import cn.edu.xmu.ooad.util.AES;
-import cn.edu.xmu.ooad.util.SHA256;
-import cn.edu.xmu.ooad.util.StringUtil;
+import cn.edu.xmu.ooad.util.Common;
+import cn.edu.xmu.ooad.util.encript.AES;
+import cn.edu.xmu.ooad.util.encript.SHA256;
 import cn.edu.xmu.privilege.model.po.UserPo;
-import cn.edu.xmu.privilege.model.vo.UserEditVo;
+import cn.edu.xmu.privilege.model.vo.UserVo;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -131,7 +131,7 @@ public class User {
         this.gmtModified = po.getGmtModified();
         this.signature = po.getSignature();
 
-        StringBuilder signature = StringUtil.concatString("-", po.getUserName(), po.getPassword(),
+        StringBuilder signature = Common.concatString("-", po.getUserName(), po.getPassword(),
                 po.getMobile(),po.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
                 po.getCreatorId().toString());
         this.cacuSignature = SHA256.getSHA256(signature.toString());
@@ -150,7 +150,7 @@ public class User {
      * @param vo vo 对象
      * @return po 对象
      */
-    public UserPo createUpdatePo(UserEditVo vo) {
+    public UserPo createUpdatePo(UserVo vo) {
         String nameEnc = vo.getName() == null ? null : AES.encrypt(vo.getName(), User.AESPASS);
         String mobEnc = vo.getMobile() == null ? null : AES.encrypt(vo.getMobile(), User.AESPASS);
         String emlEnc = vo.getEmail() == null ? null : AES.encrypt(vo.getEmail(), User.AESPASS);
@@ -168,7 +168,7 @@ public class User {
         po.setGmtModified(LocalDateTime.now());
 
         // 签名：user_name,password,mobile,email,open_id,state,depart_id,creator
-        StringBuilder signature = StringUtil.concatString("-",
+        StringBuilder signature = Common.concatString("-",
                 this.getUserName(),
                 this.getPassword(),
                 mobEnc == null ? AES.encrypt(this.mobile, User.AESPASS) : mobEnc,

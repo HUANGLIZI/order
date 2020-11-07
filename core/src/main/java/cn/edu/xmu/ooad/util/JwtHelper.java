@@ -7,6 +7,9 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 
@@ -18,6 +21,9 @@ import java.util.*;
  *         增加departId 到createToken
  */
 public class JwtHelper {
+
+    private Logger logger = LoggerFactory.getLogger(JwtHelper.class);
+
     // 秘钥
     static final String SECRET = "Role-Privilege-Token";
     // 签名是有谁生成
@@ -54,21 +60,26 @@ public class JwtHelper {
      * @param departId 部门id
      * @return token
      */
-    public String createToken(Long userId, Long departId) {
+    public String createToken(Long userId, Long departId, int expireTime) {
+        logger.debug("createToken:");
         try {
             Algorithm algorithm = Algorithm.HMAC256(SECRET);
             Map<String, Object> map = new HashMap<String, Object>();
             Date nowDate = new Date();
-            // 过期时间：2小时
-            Date expireDate = getAfterDate(nowDate, 0, 0, 0, 2, 0, 0);
+            Date expireDate = getAfterDate(nowDate, 0, 0, 0, 0, 0, expireTime);
             map.put("alg", "HS256");
             map.put("typ", "JWT");
+            String tokenId = Common.genSeqNum();
+            StringBuilder message = new StringBuilder().append("createToken: ").append("userId = ")
+                    .append(userId).append(" departId=").append(departId).append(" tokenId:").append(tokenId);
+            logger.debug(message.toString());
             String token = JWT.create()
                     // 设置头部信息 Header
                     .withHeader(map)
                     // 设置 载荷 Payload
                     .withClaim("userId", userId)
                     .withClaim("departId", departId)
+                    .withClaim("tokenId",tokenId)
                     .withIssuer(ISSUSER)
                     .withSubject(SUBJECT)
                     .withAudience(AUDIENCE)

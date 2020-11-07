@@ -1,4 +1,4 @@
-package cn.edu.xmu.ooad.util;
+package cn.edu.xmu.ooad.util.encript;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;

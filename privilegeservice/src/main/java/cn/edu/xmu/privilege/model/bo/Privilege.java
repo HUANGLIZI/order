@@ -2,8 +2,10 @@ package cn.edu.xmu.privilege.model.bo;
 
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.*;
+import cn.edu.xmu.ooad.util.encript.SHA256;
 import cn.edu.xmu.privilege.model.po.PrivilegePo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeRetVo;
+import cn.edu.xmu.privilege.model.vo.PrivilegeSimpleRetVo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import lombok.Data;
 
@@ -98,7 +100,7 @@ public class Privilege implements VoObject{
         this.gmtModified = po.getGmtModified();
         this.requestType = RequestType.getTypeByCode(po.getRequestType().intValue());
 
-        StringBuilder signature = StringUtil.concatString("-", po.getUrl(), po.getRequestType().toString());
+        StringBuilder signature = Common.concatString("-", po.getUrl(), po.getRequestType().toString());
         this.key = signature.toString();
         signature.append("-");
         signature.append(po.getId());
@@ -118,6 +120,11 @@ public class Privilege implements VoObject{
         return new PrivilegeRetVo(this);
     }
 
+    @Override
+    public Object createSimpleVo() {
+        return new PrivilegeSimpleRetVo(this);
+    }
+
     /**
      * 用vo对象创建更新po对象
      * @param vo vo对象
@@ -131,7 +138,7 @@ public class Privilege implements VoObject{
         po.setRequestType(vo.getRequestType().byteValue());
         po.setGmtCreate(null);
         po.setGmtModified(LocalDateTime.now());
-        StringBuilder signature = StringUtil.concatString("-", po.getUrl(), po.getRequestType().toString(), po.getId().toString());
+        StringBuilder signature = Common.concatString("-", po.getUrl(), po.getRequestType().toString(), po.getId().toString());
         po.setSignature(SHA256.getSHA256(signature.toString()));
         return po;
     }

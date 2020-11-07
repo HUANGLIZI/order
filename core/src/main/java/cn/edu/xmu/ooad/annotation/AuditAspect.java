@@ -17,6 +17,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
@@ -54,20 +55,24 @@ public class AuditAspect {
     //配置controller环绕通知,使用在方法aspect()上注册的切入点
     @Around("auditAspect()")
     public Object around(JoinPoint joinPoint){
-        String operationTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         MethodSignature ms = (MethodSignature) joinPoint.getSignature();
         Method method = ms.getMethod();
-        // 获取注解的参数信息
-        Audit auditAnno = method.getAnnotation(Audit.class);
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        String token = request.getHeader(JwtHelper.LOGIN_TOKEN_KEY);
-        String ip = request.getRemoteAddr();
+        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+                String token = request.getHeader(JwtHelper.LOGIN_TOKEN_KEY);
+        if (token == null){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return ResponseUtil.fail(ResponseCode.AUTH_NEED_LOGIN);
+        }
+
         JwtHelper.UserAndDepart userAndDepart = new JwtHelper().verifyTokenAndGetClaims(token);
         Long userId = userAndDepart.getUserId();
         Long departId = userAndDepart.getDepartId();
 
+        logger.debug("around: userId ="+userId+" departId="+departId);
         if (userId == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return ResponseUtil.fail(ResponseCode.AUTH_NEED_LOGIN);
         }
 
@@ -76,10 +81,10 @@ public class AuditAspect {
         for (int i = 0; i < annotations.length; i++) {
             Object param = args[i];
             Annotation[] paramAnn = annotations[i];
-            //参数为空，直接下一个参数
-            if (param == null || paramAnn.length == 0) {
+            if (param == null || paramAnn.length == 0){
                 continue;
             }
+
             for (Annotation annotation : paramAnn) {
                 //这里判断当前注解是否为LoginUser.class
                 if (annotation.annotationType().equals(LoginUser.class)) {

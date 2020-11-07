@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = PrivilegeServiceApplication.class)   //标识本类是一个SpringBootTest
 @AutoConfigureMockMvc    //配置模拟的MVC，这样可以不启动服务器测试
 @Transactional
-public class RoleControllerTest {
+public class PrivilegeControllerTest2 {
 
     @Autowired
     private RoleDao roleDao;
@@ -44,16 +44,6 @@ public class RoleControllerTest {
     private MockMvc mvc;
 
     private static final Logger logger = LoggerFactory.getLogger(RoleDaoTest.class);
-
-    /**
-     *新建token
-     */
-    @Test
-    public void createToken() {
-        JwtHelper jwtHelper = new JwtHelper();
-        String token = jwtHelper.createToken(1L, 0L);
-        logger.info(token);
-    }
 
     /**
      *查询角色 成功
