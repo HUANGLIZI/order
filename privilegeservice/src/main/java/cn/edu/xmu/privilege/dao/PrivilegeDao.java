@@ -1,17 +1,22 @@
 package cn.edu.xmu.privilege.dao;
 
+import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.privilege.mapper.PrivilegeMapper;
 import cn.edu.xmu.privilege.mapper.PrivilegePoMapper;
 import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.po.PrivilegePo;
 import cn.edu.xmu.privilege.model.po.PrivilegePoExample;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -33,9 +38,6 @@ public class PrivilegeDao implements InitializingBean {
      */
     @Value("${privilegeservice.initialization}")
     private Boolean initialization;
-
-    @Autowired
-    private PrivilegeMapper mapper;
 
     @Autowired
     private PrivilegePoMapper poMapper;
@@ -94,19 +96,32 @@ public class PrivilegeDao implements InitializingBean {
 
     /**
      * 查询所有权限
+     * @param page: 页码
+     * @param pageSize : 每页数量
      * @return 权限列表
      */
-    public List<Privilege> findAllPrivs(){
-        List<PrivilegePo> privilegePos = mapper.selectAll();
-        List<Privilege> ret = new ArrayList<>(privilegePos.size());
+    public ReturnObject<PageInfo<VoObject>> findAllPrivs(Integer page, Integer pageSize){
+        PrivilegePoExample example = new PrivilegePoExample();
+        PrivilegePoExample.Criteria criteria = example.createCriteria();
+        PageHelper.startPage(page, pageSize);
+        List<PrivilegePo> privilegePos = null;
+        try {
+            privilegePos = poMapper.selectByExample(example);
+        }catch (DataAccessException e){
+            logger.error("findAllPrivs: DataAccessException:" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+
+        List<VoObject> ret = new ArrayList<>(privilegePos.size());
         for (PrivilegePo po : privilegePos) {
             Privilege priv = new Privilege(po);
             if (priv.authetic()) {
-                logger.debug("afterPropertiesSet: key = " + priv.getKey() + " p = " + priv);
+                logger.debug("findAllPrivs: key = " + priv.getKey() + " p = " + priv);
                 ret.add(priv);
             }
         }
-        return ret;
+        PageInfo<VoObject> privPage = PageInfo.of(ret);
+        return new ReturnObject<>(privPage);
     }
 
     /**

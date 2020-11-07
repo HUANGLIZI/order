@@ -1,6 +1,7 @@
 package cn.edu.xmu.privilege.controller;
 
 import cn.edu.xmu.ooad.annotation.*;
+import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
@@ -8,10 +9,11 @@ import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import cn.edu.xmu.privilege.model.vo.RoleVo;
-import cn.edu.xmu.privilege.model.vo.UserEditVo;
+import cn.edu.xmu.privilege.model.vo.UserVo;
 import cn.edu.xmu.privilege.service.RoleService;
 import cn.edu.xmu.privilege.service.UserService;
 import cn.edu.xmu.privilege.util.IpUtil;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,9 +63,15 @@ public class PrivilegeController {
     })
     @Audit
     @GetMapping("privileges")
-    public Object getAllPrivs(){
-        ReturnObject<List> returnObject =  userService.findAllPrivs();
-        return Common.getListRetObject(returnObject);
+    public Object getAllPrivs(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize){
+
+        logger.debug("getAllPrivs: page = "+ page +"  pageSize ="+pageSize);
+
+        page = (page == null)?1:page;
+        pageSize = (pageSize == null)?10:pageSize;
+
+        ReturnObject<PageInfo<VoObject>> returnObject =  userService.findAllPrivs(page, pageSize);
+        return Common.getPageRetObject(returnObject);
     }
 
     /**
@@ -215,7 +223,7 @@ public class PrivilegeController {
             @ApiResponse(code = 0, message = "成功"),
     })
     @PutMapping("adminusers/{id}")
-    public Object modifyUserInfo(@PathVariable Long id, @RequestBody UserEditVo vo) {
+    public Object modifyUserInfo(@PathVariable Long id, @RequestBody UserVo vo) {
         if (logger.isDebugEnabled()) {
             logger.debug("modifyUserInfo: id = "+ id +" vo = " + vo);
         }

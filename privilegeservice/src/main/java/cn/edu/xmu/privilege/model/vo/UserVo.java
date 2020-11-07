@@ -11,7 +11,7 @@ import lombok.Data;
  **/
 @Data
 @ApiModel(description = "管理员用户信息视图对象")
-public class UserEditVo {
+public class UserVo {
 
     private String name;
 

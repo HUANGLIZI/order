@@ -9,7 +9,7 @@ import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.po.*;
-import cn.edu.xmu.privilege.model.vo.UserEditVo;
+import cn.edu.xmu.privilege.model.vo.UserVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -369,10 +369,10 @@ public class UserDao implements InitializingBean {
     /**
      * 根据 id 修改用户信息
      *
-     * @param userEditVo 传入的 User 对象
+     * @param userVo 传入的 User 对象
      * @return 返回对象 ReturnObj
      */
-    public ReturnObject<Object> modifyUserByVo(Long id, UserEditVo userEditVo) {
+    public ReturnObject<Object> modifyUserByVo(Long id, UserVo userVo) {
         // 查询密码等资料以计算新签名
         UserPo orig = userMapper.selectByPrimaryKey(id);
         // 不修改已被逻辑废弃的账户
@@ -383,13 +383,13 @@ public class UserDao implements InitializingBean {
 
         // 构造 User 对象以计算签名
         User user = new User(orig);
-        UserPo po = user.createUpdatePo(userEditVo);
+        UserPo po = user.createUpdatePo(userVo);
 
         // 将更改的联系方式 (如发生变化) 的已验证字段改为 false
-        if (userEditVo.getEmail() != null && !userEditVo.getEmail().equals(user.getEmail())) {
+        if (userVo.getEmail() != null && !userVo.getEmail().equals(user.getEmail())) {
             po.setEmailVerified((byte) 0);
         }
-        if (userEditVo.getMobile() != null && !userEditVo.getMobile().equals(user.getMobile())) {
+        if (userVo.getMobile() != null && !userVo.getMobile().equals(user.getMobile())) {
             po.setMobileVerified((byte) 0);
         }
 
@@ -401,10 +401,10 @@ public class UserDao implements InitializingBean {
         } catch (DataAccessException e) {
             // 如果发生 Exception，判断是邮箱还是啥重复错误
             if (Objects.requireNonNull(e.getMessage()).contains("auth_user.auth_user_mobile_uindex")) {
-                logger.info("电话重复：" + userEditVo.getMobile());
+                logger.info("电话重复：" + userVo.getMobile());
                 retObj = new ReturnObject<>(ResponseCode.MOBILE_REGISTERED);
             } else if (e.getMessage().contains("auth_user.auth_user_email_uindex")) {
-                logger.info("邮箱重复：" + userEditVo.getEmail());
+                logger.info("邮箱重复：" + userVo.getEmail());
                 retObj = new ReturnObject<>(ResponseCode.EMAIL_REGISTERED);
             } else {
                 // 其他情况属未知错误
@@ -468,7 +468,7 @@ public class UserDao implements InitializingBean {
         User user = new User(orig);
         user.setState(state);
         // 构造一个全为 null 的 vo 因为其他字段都不用更新
-        UserEditVo vo = new UserEditVo();
+        UserVo vo = new UserVo();
 
         return user.createUpdatePo(vo);
     }
