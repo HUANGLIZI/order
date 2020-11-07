@@ -3,7 +3,6 @@ package cn.edu.xmu.privilege.controller;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
-
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
