@@ -1,32 +1,37 @@
 package cn.edu.xmu.privilege.dao;
 
+import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.ooad.util.SHA256;
-import cn.edu.xmu.ooad.util.StringUtil;
+import cn.edu.xmu.ooad.util.encript.SHA256;
 import cn.edu.xmu.privilege.mapper.*;
+import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.po.*;
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
  * 角色访问类
- *
- * @author Weice Wang
- * @date Created in 2020/11/4 11:48
- * Modified in 2020/11/4 12:16
+ * @author Ming Qiu
+ * createdBy Ming Qiu 2020/11/02 13:57
+ * modifiedBy 王纬策 2020/11/7 19:20
  **/
 @Repository
 public class RoleDao implements InitializingBean {
@@ -36,20 +41,14 @@ public class RoleDao implements InitializingBean {
     /**
      * 是否初始化，生成signature和加密
      */
-    @Value("${prvilegeservice.initialization}")
+    @Value("${privilegeservice.initialization}")
     private Boolean initialization;
 
-    @Value("${prvilegeservice.role.expiretime}")
+    @Value("${privilegeservice.role.expiretime}")
     private long timeout;
-
-    @Value("${prvilegeservice.randomtime}")
-    private int randomTime;
 
     @Autowired
     private RolePoMapper roleMapper;
-
-    @Autowired
-    private UserPoMapper userMapper;
 
     @Autowired
     private UserRolePoMapper userRolePoMapper;
@@ -64,28 +63,29 @@ public class RoleDao implements InitializingBean {
     private PrivilegeDao privDao;
 
     @Autowired
-    private RedisTemplate<String, String> redisTemplate;
+    private RedisTemplate<String, Serializable> redisTemplate;
 
     /**
      * 将一个角色的所有权限id载入到Redis
      *
      * @param id 角色id
      * @return void
+     *
      * createdBy: Ming Qiu 2020-11-02 11:44
      * ModifiedBy: Ming Qiu 2020-11-03 12:24
      * 将读取权限id的代码独立为getPrivIdsByRoleId. 增加redis值的有效期
+     *            Ming Qiu 2020-11-07 8:00
+     * 集合里强制加“0”
      */
     public void loadRolePriv(Long id) {
         List<Long> privIds = this.getPrivIdsByRoleId(id);
         String key = "r_" + id;
-        if (privIds.size() == 0){
-            redisTemplate.opsForSet().add(key,"0");
-        } else {
-            for (Long pId : privIds) {
-                redisTemplate.opsForSet().add(key, pId.toString());
-            }
+        for (Long pId : privIds) {
+            redisTemplate.opsForSet().add(key, pId);
         }
-        redisTemplate.expire(key, this.timeout + new Random().nextInt(randomTime), TimeUnit.SECONDS);
+        redisTemplate.opsForSet().add(key,0);
+        long randTimeout = Common.addRandomTime(this.timeout);
+        redisTemplate.expire(key, randTimeout, TimeUnit.SECONDS);
     }
 
     /**
@@ -102,7 +102,7 @@ public class RoleDao implements InitializingBean {
         List<RolePrivilegePo> rolePrivilegePos = rolePrivilegePoMapper.selectByExample(example);
         List<Long> retIds = new ArrayList<>(rolePrivilegePos.size());
         for (RolePrivilegePo po : rolePrivilegePos) {
-            StringBuilder signature = StringUtil.concatString("-", po.getRoleId().toString(),
+            StringBuilder signature = Common.concatString("-", po.getRoleId().toString(),
                     po.getPrivilegeId().toString(), po.getCreatorId().toString());
             String newSignature = SHA256.getSHA256(signature.toString());
 
@@ -129,7 +129,7 @@ public class RoleDao implements InitializingBean {
         List<RolePrivilegePo> rolePrivilegePos = rolePrivilegePoMapper.selectByExample(example);
         List<Long> retIds = new ArrayList<>(rolePrivilegePos.size());
         for (RolePrivilegePo po : rolePrivilegePos) {
-            StringBuilder signature = StringUtil.concatString("-", po.getRoleId().toString(),
+            StringBuilder signature = Common.concatString("-", po.getRoleId().toString(),
                     po.getPrivilegeId().toString(), po.getCreatorId().toString());
             String newSignature = SHA256.getSHA256(signature.toString());
             RolePrivilegePo newPo = new RolePrivilegePo();
@@ -142,31 +142,46 @@ public class RoleDao implements InitializingBean {
 
     /**
      * 分页查询所有角色
-     * @param pageNum
-     * @param pageSize
-     * @return ReturnObject<List>
+     *
+     * @author 24320182203281 王纬策
+     * @param pageNum 页数
+     * @param pageSize 每页大小
+     * @return ReturnObject<List> 角色列表
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
-    public ReturnObject<List> selectAllRole(Integer pageNum, Integer pageSize) {
+    public ReturnObject<PageInfo<VoObject>> selectAllRole(Integer pageNum, Integer pageSize) {
         RolePoExample example = new RolePoExample();
         RolePoExample.Criteria criteria = example.createCriteria();
         //分页查询
         PageHelper.startPage(pageNum, pageSize);
         logger.debug("page = " + pageNum + "pageSize = " + pageSize);
-        //不加限定条件查询所有
-        List<RolePo> rolePos = roleMapper.selectByExample(example);
-        List<Role> roles = new ArrayList<>(rolePos.size());
-        logger.debug("selectAllRoles: total roles num = " + rolePos.size());
-        for (RolePo rolePoItem : rolePos) {
-            Role item = new Role(rolePoItem);
-            roles.add(item);
+        List<RolePo> rolePos = null;
+        try {
+            //不加限定条件查询所有
+            rolePos = roleMapper.selectByExample(example);
+        }catch (DataAccessException e){
+            logger.error("selectAllRole: DataAccessException:" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
         }
-        return new ReturnObject<>(roles);
+
+        List<VoObject> ret = new ArrayList<>(rolePos.size());
+        for (RolePo po : rolePos) {
+            Role role = new Role(po);
+            ret.add(role);
+        }
+        PageInfo<VoObject> rolePage = PageInfo.of(ret);
+        return new ReturnObject<>(rolePage);
     }
 
     /**
      * 增加一个角色
-     * @param role
-     * @return ReturnObject<Role>
+     *
+     * @author 24320182203281 王纬策
+     * @param role 角色bo
+     * @return ReturnObject<Role> 新增结果
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     public ReturnObject<Role> insertRole(Role role) {
         RolePo rolePo = role.gotRolePo();
@@ -175,28 +190,42 @@ public class RoleDao implements InitializingBean {
             int ret = roleMapper.insertSelective(rolePo);
             if (ret == 0) {
                 //插入失败
-                logger.debug("updateRole: id not exist = " + rolePo.getId());
-                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+                logger.debug("insertRole: insert role fail " + rolePo.toString());
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + rolePo.getName()));
             } else {
                 //插入成功
-                logger.debug("updateRole: update role = " + rolePo.toString());
+                logger.debug("insertRole: insert role = " + rolePo.toString());
                 role.setId(rolePo.getId());
                 retObj = new ReturnObject<>(role);
             }
         }
+        catch (DataAccessException e) {
+            if (Objects.requireNonNull(e.getMessage()).contains("auth_role.auth_role_name_uindex")) {
+                //若有重复的角色名则新增失败
+                logger.debug("updateRole: have same role name = " + rolePo.getName());
+                retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("角色名重复：" + rolePo.getName()));
+            } else {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }
+        }
         catch (Exception e) {
-            //e.printStackTrace();
-            //若有重复的角色名则修改失败
-            logger.debug("updateRole: have same role name = " + rolePo.getName());
-            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
         return retObj;
     }
 
     /**
      * 删除一个角色
-     * @param id
-     * @return ReturnObject<Object>
+     *
+     * @author 24320182203281 王纬策
+     * @param id 角色id
+     * @return ReturnObject<Object> 删除结果
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     public ReturnObject<Object> deleteRole(Long id) {
         ReturnObject<Object> retObj = null;
@@ -204,7 +233,7 @@ public class RoleDao implements InitializingBean {
         if (ret == 0) {
             //删除角色表
             logger.debug("deleteRole: id not exist = " + id);
-            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("角色id不存在：" + id));
         } else {
             //删除角色权限表
             logger.debug("deleteRole: delete role id = " + id);
@@ -248,8 +277,12 @@ public class RoleDao implements InitializingBean {
 
     /**
      * 修改一个角色
-     * @param role
-     * @return ReturnObject<Role>
+     *
+     * @author 24320182203281 王纬策
+     * @param role 角色bo
+     * @return ReturnObject<Role> 修改结果
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     public ReturnObject<Role> updateRole(Role role) {
         RolePo rolePo = role.gotRolePo();
@@ -258,19 +291,29 @@ public class RoleDao implements InitializingBean {
             int ret = roleMapper.updateByPrimaryKeySelective(rolePo);
             if (ret == 0) {
                 //修改失败
-                logger.debug("updateRole: id not exist = " + rolePo.getId());
-                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+                logger.debug("updateRole: update role fail : " + rolePo.toString());
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("角色id不存在：" + rolePo.getId()));
             } else {
                 //修改成功
                 logger.debug("updateRole: update role = " + rolePo.toString());
                 retObj = new ReturnObject<>();
             }
         }
+        catch (DataAccessException e) {
+            if (Objects.requireNonNull(e.getMessage()).contains("auth_role.auth_role_name_uindex")) {
+                //若有重复的角色名则修改失败
+                logger.debug("updateRole: have same role name = " + rolePo.getName());
+                retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("角色名重复：" + rolePo.getName()));
+            } else {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }
+        }
         catch (Exception e) {
-            //e.printStackTrace();
-            //若有重复的角色名则修改失败
-            logger.debug("updateRole: have same role name = " + rolePo.getName());
-            retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED);
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
         return retObj;
     }

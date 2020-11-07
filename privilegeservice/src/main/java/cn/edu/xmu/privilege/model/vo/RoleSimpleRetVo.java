@@ -5,10 +5,10 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 
 /**
- * 角色视图
+ * 角色返回简单视图
  *
  * @author 24320182203281 王纬策
  * createdBy 王纬策 2020/11/04 13:57
@@ -16,26 +16,24 @@ import javax.validation.constraints.NotBlank;
  **/
 @Data
 @ApiModel(description = "角色视图对象")
-public class RoleVo {
-    @NotBlank(message = "角色名不能为空")
+public class RoleSimpleRetVo {
+    @ApiModelProperty(value = "角色id")
+    private Long id;
+
     @ApiModelProperty(value = "角色名称")
     private String name;
 
-    @ApiModelProperty(value = "角色描述")
-    private String descr;
-
     /**
-     * 构造函数
+     * 用Role对象建立Vo对象
      *
      * @author 24320182203281 王纬策
-     * @return Role
+     * @param role role
+     * @return RoleSimpleRetVo
      * createdBy 王纬策 2020/11/04 13:57
      * modifiedBy 王纬策 2020/11/7 19:20
      */
-    public Role createRole() {
-        Role role = new Role();
-        role.setDescribe(this.descr);
-        role.setName(this.name);
-        return role;
+    public RoleSimpleRetVo(Role role) {
+        this.id = role.getId();
+        this.name = role.getName();
     }
 }

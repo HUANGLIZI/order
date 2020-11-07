@@ -3,6 +3,7 @@ package cn.edu.xmu.privilege.model.bo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.privilege.model.po.RolePo;
 import cn.edu.xmu.privilege.model.vo.RoleRetVo;
+import cn.edu.xmu.privilege.model.vo.RoleSimpleRetVo;
 import cn.edu.xmu.privilege.model.vo.RoleVo;
 import lombok.Data;
 
@@ -11,9 +12,10 @@ import java.time.LocalDateTime;
 
 /**
  * 角色Bo类
- * 
- * @author Weice Wang
- * @date Created in 2020/11/4 11:48
+ *
+ * @author 24320182203281 王纬策
+ * createdBy 王纬策 2020/11/04 13:57
+ * modifiedBy 王纬策 2020/11/7 19:20
  **/
 @Data
 public class Role implements VoObject, Serializable {
@@ -28,9 +30,13 @@ public class Role implements VoObject, Serializable {
     }
 
     /**
-     * 构造函数     *
+     * 构造函数
+     *
+     * @author 24320182203281 王纬策
      * @param po 用PO构造
      * @return Role
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     public Role(RolePo po) {
         this.id = po.getId();
@@ -43,7 +49,11 @@ public class Role implements VoObject, Serializable {
 
     /**
      * 生成RoleRetVo对象作为返回前端
+     *
+     * @author 24320182203281 王纬策
      * @return Object
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Override
     public Object createVo() {
@@ -51,9 +61,26 @@ public class Role implements VoObject, Serializable {
     }
 
     /**
+     * 生成RoleSimpleRetVo对象作为返回前端
+     *
+     * @author 24320182203281 王纬策
+     * @return Object
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
+     */
+    @Override
+    public Object createSimpleVo() {
+        return new RoleSimpleRetVo(this);
+    }
+
+    /**
      * 用vo对象创建更新po对象
+     *
+     * @author 24320182203281 王纬策
      * @param vo vo对象
      * @return po对象
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     public RolePo createUpdatePo(RoleVo vo){
         RolePo po = new RolePo();
@@ -68,7 +95,11 @@ public class Role implements VoObject, Serializable {
 
     /**
      * 用bo对象创建更新po对象
+     *
+     * @author 24320182203281 王纬策
      * @return RolePo
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     public RolePo gotRolePo() {
         RolePo po = new RolePo();

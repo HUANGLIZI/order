@@ -1,9 +1,11 @@
 package cn.edu.xmu.ooad.util;
 
 import cn.edu.xmu.ooad.model.VoObject;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
@@ -11,9 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.text.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * 通用工具类
@@ -69,7 +69,7 @@ public class Common {
                 msg.append(error.getDefaultMessage());
                 msg.append(";");
             }
-            logger.info("methodArgumentNotValid: msg = "+ msg.toString());
+            logger.debug("processFieldErrors: msg = "+ msg.toString());
             retObj = ResponseUtil.fail(ResponseCode.FIELD_NOTVALID, msg.toString());
             response.setStatus(HttpStatus.BAD_REQUEST.value());
         }
@@ -124,6 +124,43 @@ public class Common {
     }
 
 
+    /**
+     * 处理分页返回对象
+     * @param returnObject 返回的对象
+     * @return
+     */
+    public static Object getPageRetObject(ReturnObject<PageInfo<VoObject>> returnObject) {
+        ResponseCode code = returnObject.getCode();
+        switch (code){
+            case OK:
+
+                PageInfo<VoObject> objs = returnObject.getData();
+                if (objs != null){
+                    List<Object> voObjs = new ArrayList<>(objs.getList().size());
+                    for (Object data : objs.getList()) {
+                        if (data instanceof VoObject) {
+                            voObjs.add(((VoObject)data).createVo());
+                        }
+                    }
+
+                    Map<String, Object> ret = new HashMap<>();
+                    ret.put("list", voObjs);
+                    ret.put("total", objs.getTotal());
+                    ret.put("page", objs.getPageNum());
+                    ret.put("pageSize", objs.getPageSize());
+                    ret.put("pages", objs.getPages());
+                    return ResponseUtil.ok(ret);
+                }else{
+                    return ResponseUtil.ok();
+                }
+            default:
+                return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+        }
+    }
+
+
+
+
     public static Object getNullRetObj(ReturnObject<Object> returnObject, HttpServletResponse httpServletResponse) {
         ResponseCode code = returnObject.getCode();
         switch (code) {
@@ -133,6 +170,70 @@ public class Common {
             default:
                 return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
         }
+    }
+
+    /**
+     * 根据 errCode 修饰 API 返回对象的 HTTP Status
+     * @param returnObject 原返回 Object
+     * @return 修饰后的返回 Object
+     */
+    public static Object decorateReturnObject(ReturnObject returnObject) {
+        switch (returnObject.getCode()) {
+            case RESOURCE_ID_NOTEXIST:
+                // 404：资源不存在
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.NOT_FOUND);
+            case INTERNAL_SERVER_ERR:
+                // 500：数据库或其他严重错误
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            case OK:
+                // 200: 无错误
+                Object data = returnObject.getData();
+                if (data != null){
+                    return ResponseUtil.ok(data);
+                }else{
+                    return ResponseUtil.ok();
+                }
+            default:
+                return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+        }
+    }
+
+    /**
+     * 动态拼接字符串
+     * @param sep 分隔符
+     * @param fields 拼接的字符串
+     * @return StringBuilder
+     * createdBy: Ming Qiu 2020-11-02 11:44
+     */
+    public static StringBuilder concatString(String sep, String... fields){
+        StringBuilder ret = new StringBuilder();
+
+        for (int i = 0; i< fields.length; i++){
+            if (i > 0){
+                ret.append(sep);
+            }
+            ret.append(fields[i]);
+        }
+        return ret;
+    }
+
+    /**
+     * 增加20%以内的随机时间
+     * 如果timeout <0 则会返回60s+随机时间
+     * @param timeout 时间
+     * @return 增加后的随机时间
+     */
+    public static long addRandomTime(long timeout) {
+        if (timeout <= 0) {
+            timeout = 60;
+        }
+        //增加随机数，防止雪崩
+        timeout += (long) new Random().nextDouble() * (timeout / 5 - 1);
+        return timeout;
     }
 
 }

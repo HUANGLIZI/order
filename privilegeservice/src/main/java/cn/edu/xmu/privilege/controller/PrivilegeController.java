@@ -1,20 +1,33 @@
 package cn.edu.xmu.privilege.controller;
 
-import cn.edu.xmu.ooad.annotation.Audit;
-import cn.edu.xmu.ooad.annotation.Depart;
-import cn.edu.xmu.ooad.annotation.LoginUser;
+import cn.edu.xmu.ooad.annotation.*;
+import cn.edu.xmu.privilege.model.bo.Privilege;
+import cn.edu.xmu.privilege.model.vo.LoginVo;
+import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
+import cn.edu.xmu.privilege.model.vo.RoleVo;
+import cn.edu.xmu.privilege.model.vo.UserVo;
+import cn.edu.xmu.privilege.service.RoleService;
 import cn.edu.xmu.privilege.service.UserService;
+import cn.edu.xmu.privilege.util.IpUtil;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 权限控制器
  * @author Ming Qiu
+ * Modified at 2020/11/5 13:21
  **/
 @Api(value = "权限服务", tags = "privilege")
 @RestController /*Restful的Controller对象*/
@@ -33,6 +47,13 @@ public class PrivilegeController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private RoleService roleService;
+
+    @Autowired
+    private HttpServletResponse httpServletResponse;
+
 
     @Autowired
     private PrivilegeDao privilegeDao;
@@ -49,10 +70,17 @@ public class PrivilegeController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
+    @Audit
     @GetMapping("privileges")
-    public Object getAllPrivs(){
-        ReturnObject<List> returnObject =  userService.findAllPrivs();
-        return Common.getListRetObject(returnObject);
+    public Object getAllPrivs(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize){
+
+        logger.debug("getAllPrivs: page = "+ page +"  pageSize ="+pageSize);
+
+        page = (page == null)?1:page;
+        pageSize = (pageSize == null)?10:pageSize;
+
+        ReturnObject<PageInfo<VoObject>> returnObject =  userService.findAllPrivs(page, pageSize);
+        return Common.getPageRetObject(returnObject);
     }
 
     /**
@@ -76,5 +104,304 @@ public class PrivilegeController {
         logger.debug("getAllPrivs: userId = " + userId +" departId = "+departId);
         ReturnObject returnObject =  userService.changePriv(id, vo);
         return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+    }
+
+
+
+    /* auth008 start*/
+    //region
+    /**
+     * 分页查询所有角色
+     *
+     * @author 24320182203281 王纬策
+     * @param page 页数
+     * @param pageSize 每页大小
+     * @return Object 角色分页查询结果
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
+     */
+    @ApiOperation(value = "auth008: 查询角色", produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "page", value = "页码", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageSize", value = "每页数目", required = false)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @GetMapping("roles")
+    public Object selectAllRoles(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize) {
+        logger.debug("selectAllRoles: page = "+ page +"  pageSize ="+pageSize);
+
+        page = (page == null)?1:page;
+        pageSize = (pageSize == null)?10:pageSize;
+
+        ReturnObject<PageInfo<VoObject>> returnObject =  roleService.selectAllRoles(page, pageSize);
+        return Common.getPageRetObject(returnObject);
+    }
+
+    /**
+     * 新增一个角色
+     *
+     * @author 24320182203281 王纬策
+     * @param vo 角色视图
+     * @param bindingResult 校验错误
+     * @return Object 角色返回视图
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
+     */
+    @ApiOperation(value = "auth008: 新增角色", produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "RoleVo", name = "vo", value = "可修改的用户信息", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 736, message = "角色名已存在"),
+    })
+    @Audit
+    @PostMapping("roles")
+    public Object insertRole(@Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
+        logger.info("insert role");
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            logger.info("validate fail");
+            return returnObject;
+        }
+        //由AOP解析token获取userId
+        Long userId = 1L;
+        ReturnObject<VoObject> retObject = roleService.insertRole(userId, vo);
+        httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        return Common.decorateReturnObject(retObject);
+    }
+
+    /**
+     * 删除角色，同时级联删除用户角色表与角色权限表
+     *
+     * @author 24320182203281 王纬策
+     * @param id 角色id
+     * @return Object 删除结果
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
+     */
+    @ApiOperation(value = "auth008： 删除角色", produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "角色id", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @DeleteMapping("roles/{id}")
+    public Object deleteRole(@PathVariable("id") Long id) {
+        logger.info("delete role");
+        ReturnObject<Object> returnObject = roleService.deleteRole(id);
+        return Common.decorateReturnObject(returnObject);
+    }
+
+    /**
+     * 修改角色信息
+     *
+     * @author 24320182203281 王纬策
+     * @param id 角色id
+     * @param vo 角色视图
+     * @param bindingResult 校验数据
+     * @return Object 角色返回视图
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
+     */
+    @ApiOperation(value = "auth008:修改角色信息", produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "角色id", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "RoleVo", name = "vo", value = "可修改的用户信息", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 736, message = "角色名已存在"),
+    })
+    @Audit
+    @PutMapping("roles/{id}")
+    public Object updateRole(@PathVariable("id") Long id, @Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
+        logger.info("update role");
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            return returnObject;
+        }
+        //由AOP解析token获取userId
+        Long userId = 1L;
+        ReturnObject<Object> retObject = roleService.updateRole(userId, id, vo);
+        return Common.decorateReturnObject(retObject);
+    }
+    //endregion
+    /* auth008 end*/
+
+    /* auth009 */
+
+    /**
+     * auth009: 修改任意用户信息
+     * @param id: 用户 id
+     * @return Object
+     */
+    @ApiOperation(value = "修改任意用户信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="id", required = true, dataType="Integer", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 732, message = "邮箱已被注册"),
+            @ApiResponse(code = 733, message = "电话已被注册"),
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @PutMapping("adminusers/{id}")
+    public Object modifyUserInfo(@PathVariable Long id, @RequestBody UserVo vo) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("modifyUserInfo: id = "+ id +" vo = " + vo);
+        }
+        ReturnObject returnObject = userService.modifyUserInfo(id, vo);
+        return Common.decorateReturnObject(returnObject);
+    }
+
+    /**
+     * auth009: 删除任意用户
+     * @param id: 用户 id
+     * @return Object
+     */
+    @ApiOperation(value = "删除任意用户")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="id", required = true, dataType="Integer", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @DeleteMapping("adminusers/{id}")
+    public Object deleteUser(@PathVariable Long id) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("deleteUser: id = "+ id);
+        }
+        ReturnObject returnObject = userService.deleteUser(id);
+        return Common.decorateReturnObject(returnObject);
+    }
+
+    /**
+     * auth009: 禁止用户登录
+     * @param id: 用户 id
+     * @return Object
+     */
+    @ApiOperation(value = "禁止用户登录")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="id", required = true, dataType="Integer", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @PutMapping("adminusers/{id}/forbid")
+    public Object forbidUser(@PathVariable Long id) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("forbidUser: id = "+ id);
+        }
+        ReturnObject returnObject = userService.forbidUser(id);
+        return Common.decorateReturnObject(returnObject);
+    }
+
+    /**
+     * auth009: 恢复用户
+     * @param id: 用户 id
+     * @return Object
+     */
+    @ApiOperation(value = "恢复用户")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="id", required = true, dataType="Integer", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @PutMapping("adminusers/{id}/release")
+    public Object releaseUser(@PathVariable Long id) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("releaseUser: id = "+ id);
+        }
+        ReturnObject returnObject = userService.releaseUser(id);
+        return Common.decorateReturnObject(returnObject);
+    }
+    /* auth009 结束 */
+
+    /**
+     * 用户登录
+     * @param loginVo
+     * @param bindingResult
+     * @param httpServletResponse
+     * @param httpServletRequest
+     * @return
+     * @author 24320182203266
+     */
+    @ApiOperation(value = "登录")
+    @PostMapping("privileges/login")
+    public Object login(@Validated @RequestBody LoginVo loginVo, BindingResult bindingResult
+            , HttpServletResponse httpServletResponse,HttpServletRequest httpServletRequest){
+        /* 处理参数校验错误 */
+        Object o = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if(o != null){
+            return o;
+        }
+
+        String ip = IpUtil.getIpAddr(httpServletRequest);
+        ReturnObject<String> jwt = userService.login(loginVo.getUserName(), loginVo.getPassword(), ip);
+
+        if(jwt.getData() == null){
+            return ResponseUtil.fail(jwt.getCode(), jwt.getErrmsg());
+        }else{
+            return ResponseUtil.ok(jwt.getData());
+        }
+    }
+
+    /**
+     * 用户注销
+     * @param userId
+     * @return
+     * @author 24320182203266
+     */
+    @ApiOperation(value = "注销")
+    @Audit
+    @GetMapping("privileges/logout")
+    public Object logout(@LoginUser Long userId){
+
+        logger.debug("logout: userId = "+userId);
+        ReturnObject<Boolean> success = userService.Logout(userId);
+        if (success.getData() == null)  {
+            return ResponseUtil.fail(success.getCode(), success.getErrmsg());
+        }else {
+            return ResponseUtil.ok();
+        }
+    }
+
+    /**
+     * @param id
+     * @param multipartFile
+     * @return
+     * @author 24320182203218
+     **/
+    @ApiOperation(value = "用户上传图片",  produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value ="用户id" ,required = true),
+            @ApiImplicitParam(paramType = "formData", dataType = "file", name = "img", value ="文件", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 506, message = "该目录文件夹没有写入的权限"),
+    })
+    @Audit
+    @PostMapping("/adminusers/{id}/uploadImg")
+    public Object uploadImg(@PathVariable("id") Integer id, @RequestParam("img") MultipartFile multipartFile){
+        logger.debug("uploadImg: id = "+ id +" img" + multipartFile.getOriginalFilename());
+        ReturnObject returnObject = userService.uploadImg(id,multipartFile);
+        return Common.getNullRetObj(returnObject, httpServletResponse);
     }
 }
