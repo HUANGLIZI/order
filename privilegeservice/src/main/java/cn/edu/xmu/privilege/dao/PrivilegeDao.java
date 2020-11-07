@@ -1,7 +1,6 @@
 package cn.edu.xmu.privilege.dao;
 
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.ooad.util.SHA256;
 import cn.edu.xmu.privilege.mapper.PrivilegeMapper;
 import cn.edu.xmu.privilege.mapper.PrivilegePoMapper;
 import cn.edu.xmu.privilege.model.bo.Privilege;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +31,7 @@ public class PrivilegeDao implements InitializingBean {
     /**
      * 是否初始化，生成signature和加密
      */
-    @Value("${prvilegeservice.initialization}")
+    @Value("${privilegeservice.initialization}")
     private Boolean initialization;
 
     @Autowired

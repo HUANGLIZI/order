@@ -1,3 +1,0 @@
-core:
-  jwt:
-    expire: 3600
