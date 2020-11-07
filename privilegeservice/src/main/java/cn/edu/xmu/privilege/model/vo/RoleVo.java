@@ -9,9 +9,10 @@ import javax.validation.constraints.NotBlank;
 
 /**
  * 角色视图
- * 
- * @author Weice Wang
- * @date Created in 2020/11/4 12:48
+ *
+ * @author 24320182203281 王纬策
+ * createdBy 王纬策 2020/11/04 13:57
+ * modifiedBy 王纬策 2020/11/7 19:20
  **/
 @Data
 @ApiModel(description = "角色视图对象")
@@ -25,7 +26,11 @@ public class RoleVo {
 
     /**
      * 构造函数
+     *
+     * @author 24320182203281 王纬策
      * @return Role
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     public Role createRole() {
         Role role = new Role();

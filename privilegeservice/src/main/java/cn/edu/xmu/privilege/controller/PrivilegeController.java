@@ -103,31 +103,44 @@ public class PrivilegeController {
     //region
     /**
      * 分页查询所有角色
-     * @param page
-     * @param pageSize
-     * @return Object
+     *
+     * @author 24320182203281 王纬策
+     * @param page 页数
+     * @param pageSize 每页大小
+     * @return Object 角色分页查询结果
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @ApiOperation(value = "auth008: 查询角色", produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(paramType = "query", dataType = "int", name = "page", value = "页码", required = true),
-            @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageSize", value = "每页数目", required = true)
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "page", value = "页码", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageSize", value = "每页数目", required = false)
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
+    @Audit
     @GetMapping("roles")
-    public Object selectAllRoles(@RequestParam Integer page, @RequestParam Integer pageSize) {
-        logger.info("select all roles");
-        ReturnObject<List> returnObject = roleService.selectAllRoles(page, pageSize);
-        return Common.getListRetObject(returnObject);
+    public Object selectAllRoles(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize) {
+        logger.debug("selectAllRoles: page = "+ page +"  pageSize ="+pageSize);
+
+        page = (page == null)?1:page;
+        pageSize = (pageSize == null)?10:pageSize;
+
+        ReturnObject<PageInfo<VoObject>> returnObject =  roleService.selectAllRoles(page, pageSize);
+        return Common.getPageRetObject(returnObject);
     }
 
     /**
      * 新增一个角色
-     * @param vo
-     * @param bindingResult
-     * @return Object
+     *
+     * @author 24320182203281 王纬策
+     * @param vo 角色视图
+     * @param bindingResult 校验错误
+     * @return Object 角色返回视图
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @ApiOperation(value = "auth008: 新增角色", produces = "application/json")
     @ApiImplicitParams({
@@ -136,7 +149,9 @@ public class PrivilegeController {
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 736, message = "角色名已存在"),
     })
+    @Audit
     @PostMapping("roles")
     public Object insertRole(@Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
         logger.info("insert role");
@@ -155,8 +170,12 @@ public class PrivilegeController {
 
     /**
      * 删除角色，同时级联删除用户角色表与角色权限表
-     * @param id
-     * @return Object
+     *
+     * @author 24320182203281 王纬策
+     * @param id 角色id
+     * @return Object 删除结果
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @ApiOperation(value = "auth008： 删除角色", produces = "application/json")
     @ApiImplicitParams({
@@ -166,6 +185,7 @@ public class PrivilegeController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
+    @Audit
     @DeleteMapping("roles/{id}")
     public Object deleteRole(@PathVariable("id") Long id) {
         logger.info("delete role");
@@ -175,10 +195,14 @@ public class PrivilegeController {
 
     /**
      * 修改角色信息
-     * @param id
-     * @param vo
-     * @param bindingResult
-     * @return Object
+     *
+     * @author 24320182203281 王纬策
+     * @param id 角色id
+     * @param vo 角色视图
+     * @param bindingResult 校验数据
+     * @return Object 角色返回视图
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @ApiOperation(value = "auth008:修改角色信息", produces = "application/json")
     @ApiImplicitParams({
@@ -188,7 +212,9 @@ public class PrivilegeController {
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 736, message = "角色名已存在"),
     })
+    @Audit
     @PutMapping("roles/{id}")
     public Object updateRole(@PathVariable("id") Long id, @Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
         logger.info("update role");

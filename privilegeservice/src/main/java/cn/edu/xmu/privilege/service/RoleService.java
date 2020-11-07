@@ -6,19 +6,19 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.dao.RoleDao;
 import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.vo.RoleVo;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 角色服务类
  *
- * @author Weice Wang
- * @date Created in 2020/11/4 11:48
- * Modified in 2020/11/4 12:16
+ * @author 24320182203281 王纬策
+ * createdBy 王纬策 2020/11/04 13:57
+ * modifiedBy 王纬策 2020/11/7 19:20
  **/
 @Service
 public class RoleService {
@@ -27,20 +27,27 @@ public class RoleService {
 
     /**
      * 分页查询所有角色
-     * @param pageNum
-     * @param pageSize
-     * @return ReturnObject<List>
+     *
+     * @author 24320182203281 王纬策
+     * @param pageNum  页数
+     * @param pageSize 每页大小
+     * @return ReturnObject<PageInfo < VoObject>> 分页返回角色信息
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
-    public ReturnObject<List> selectAllRoles(Integer pageNum, Integer pageSize) {
-        ReturnObject<List> returnObject = roleDao.selectAllRole(pageNum, pageSize);
+    public ReturnObject<PageInfo<VoObject>> selectAllRoles(Integer pageNum, Integer pageSize) {
+        ReturnObject<PageInfo<VoObject>> returnObject = roleDao.selectAllRole(pageNum, pageSize);
         return returnObject;
     }
 
     /**
      * 新增角色
-     * @param userId
-     * @param vo
-     * @return ReturnObject<VoObject>
+     * @author 24320182203281 王纬策
+     * @param userId 用户id
+     * @param vo 角色视图
+     * @return ReturnObject<VoObject> 角色返回视图
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Transactional
     public ReturnObject<VoObject> insertRole(Long userId, RoleVo vo) {
@@ -59,8 +66,11 @@ public class RoleService {
 
     /**
      * 删除角色
-     * @param id
-     * @return ReturnObject<Object>
+     * @author 24320182203281 王纬策
+     * @param id 角色id
+     * @return ReturnObject<Object> 返回视图
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Transactional
     public ReturnObject<Object> deleteRole(Long id) {
@@ -69,10 +79,13 @@ public class RoleService {
 
     /**
      * 修改角色
-     * @param userId
-     * @param id
-     * @param vo
-     * @return ReturnObject<Object>
+     * @author 24320182203281 王纬策
+     * @param userId 用户id
+     * @param id 角色id
+     * @param vo 角色视图
+     * @return ReturnObject<Object> 角色返回视图
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Transactional
     public ReturnObject<Object> updateRole(Long userId, Long id, RoleVo vo) {
