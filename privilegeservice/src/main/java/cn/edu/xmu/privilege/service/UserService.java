@@ -1,15 +1,18 @@
 package cn.edu.xmu.privilege.service;
 
+import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.encript.AES;
 import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.privilege.dao.UserDao;
+import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import cn.edu.xmu.privilege.util.ImgHelper;
-import cn.edu.xmu.privilege.model.vo.UserEditVo;
+import cn.edu.xmu.privilege.model.vo.UserVo;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -64,11 +66,12 @@ public class UserService {
 
     /**
      * 查询所有权限
+     * @param page: 页码
+     * @param pageSize : 每页数量
      * @return 权限列表
      */
-    public ReturnObject<List> findAllPrivs(){
-        ReturnObject<List>  ret = new ReturnObject<>(privilegeDao.findAllPrivs());
-        return ret;
+    public ReturnObject<PageInfo<VoObject>> findAllPrivs(Integer page, Integer pageSize){
+        return privilegeDao.findAllPrivs(page, pageSize);
     }
 
     /**
@@ -224,7 +227,7 @@ public class UserService {
      * @return 返回对象 ReturnObject
      */
     @Transactional
-    public ReturnObject<Object> modifyUserInfo(Long id, UserEditVo vo) {
+    public ReturnObject<Object> modifyUserInfo(Long id, UserVo vo) {
         return userDao.modifyUserByVo(id, vo);
     }
 
