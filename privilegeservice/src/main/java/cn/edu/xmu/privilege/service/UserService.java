@@ -304,6 +304,7 @@ public class UserService {
         }
         catch (IOException e){
             logger.debug("uploadImg: I/O Error:" + imgLocation);
+            return new ReturnObject(ResponseCode.INTERNAL_SERVER_ERR);
         }
         return returnObject;
     }

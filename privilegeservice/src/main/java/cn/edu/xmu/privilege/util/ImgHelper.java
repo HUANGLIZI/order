@@ -24,7 +24,7 @@ public class ImgHelper {
                 return new ReturnObject(ResponseCode.FILE_NO_WRITE_PERMISSION);
             }
         }
-        FileInputStream fileInputStream = (FileInputStream) multipartFile.getInputStream();
+        InputStream fileInputStream = multipartFile.getInputStream();
 
         String currentTime = String.valueOf(System.currentTimeMillis());
         String fileName = getMD5(currentTime)+".png";

@@ -18,6 +18,7 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.http.HttpStatus;
@@ -48,6 +49,7 @@ public class PrivilegeController {
 
     @Autowired
     private HttpServletResponse httpServletResponse;
+
 
     /**
      * 获得所有权限
@@ -374,6 +376,9 @@ public class PrivilegeController {
     }
 
     /**
+     * @param id
+     * @param multipartFile
+     * @return
      * @author 24320182203218
      **/
     @ApiOperation(value = "用户上传图片",  produces="application/json")
@@ -385,6 +390,7 @@ public class PrivilegeController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 506, message = "该目录文件夹没有写入的权限"),
     })
+    @Audit
     @PostMapping("/adminusers/{id}/uploadImg")
     public Object uploadImg(@PathVariable("id") Integer id, @RequestParam("img") MultipartFile multipartFile){
         logger.debug("uploadImg: id = "+ id +" img" + multipartFile.getOriginalFilename());
