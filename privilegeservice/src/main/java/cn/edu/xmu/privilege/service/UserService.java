@@ -115,6 +115,7 @@ public class UserService {
         String key = "up_" + user.getId();
         logger.debug("login: key = "+ key);
         if(redisTemplate.hasKey(key) && !canMultiplyLogin){
+            logger.debug("login: multiply  login key ="+key);
             // 用户重复登录处理
             Set<Serializable > set = redisTemplate.opsForSet().members(key);
             redisTemplate.delete(key);
@@ -123,12 +124,12 @@ public class UserService {
             String jwt = null;
             for (Serializable str : set) {
                 /* 找出JWT */
-                if(((String)str).length() > 8){
-                    jwt = (String) str;
+                if((str.toString()).length() > 8){
+                    jwt =  str.toString();
                     break;
                 }
             }
-            logger.debug("login: banJwt ="+jwt);
+            logger.debug("login: oldJwt" + jwt);
             this.banJwt(jwt);
         }
 
@@ -136,6 +137,7 @@ public class UserService {
         JwtHelper jwtHelper = new JwtHelper();
         String jwt = jwtHelper.createToken(user.getId(),user.getDepartId(), jwtExpireTime);
         userDao.loadUserPriv(user.getId(), jwt);
+        logger.debug("login: newJwt = "+ jwt);
         userDao.setLoginIPAndPosition(user.getId(),ipAddr, LocalDateTime.now());
         retObj = new ReturnObject<>(jwt);
 
@@ -149,11 +151,11 @@ public class UserService {
     private void banJwt(String jwt){
         String[] banSetName = {"BanJwt_0", "BanJwt_1"};
         long bannIndex = 0;
-        logger.debug("banJwt: " + jwt);
         if (!redisTemplate.hasKey("banIndex")){
             redisTemplate.opsForValue().set("banIndex", Long.valueOf(0));
         } else {
-            bannIndex = (Long) redisTemplate.opsForValue().get("banIndex");
+            logger.debug("banJwt: banIndex = " +redisTemplate.opsForValue().get("banIndex"));
+            bannIndex = Long.parseLong(redisTemplate.opsForValue().get("banIndex").toString());
         }
         logger.debug("banJwt: banIndex = " + bannIndex);
         String currentSetName = banSetName[(int) (bannIndex % banSetName.length)];
@@ -165,7 +167,6 @@ public class UserService {
             redisTemplate.expire(currentSetName,jwtExpireTime * 2,TimeUnit.SECONDS);
         }else{
             //准备向其中添加元素
-
             if(redisTemplate.getExpire(currentSetName, TimeUnit.SECONDS) > jwtExpireTime) {
                 // 有效期还长，直接加入
                 logger.debug("banJwt: add to exist ban set" + currentSetName);
@@ -174,9 +175,14 @@ public class UserService {
                 // 有效期不够JWT的过期时间，准备用第二集合，让第一个集合自然过期
                 // 分步式加锁
                 logger.debug("banJwt: switch to next ban set" + currentSetName);
-                while (!redisTemplate.opsForValue().setIfAbsent("banIndexLocker","nouse", lockerExpireTime, TimeUnit.SECONDS)){
+                long newBanIndex = bannIndex;
+                while (newBanIndex == bannIndex &&
+                        !redisTemplate.opsForValue().setIfAbsent("banIndexLocker","nouse", lockerExpireTime, TimeUnit.SECONDS)){
+                    //如果BanIndex没被其他线程改变，且锁获取不到
                     try {
                         Thread.sleep(10);
+                        //重新获得新的BanIndex
+                        newBanIndex = (Long) redisTemplate.opsForValue().get("banIndex");
                     }catch (InterruptedException e){
                         logger.error("banJwt: 锁等待被打断");
                     }
@@ -184,7 +190,14 @@ public class UserService {
 
                     }
                 }
-                bannIndex = redisTemplate.opsForValue().increment("banIndex");
+                if (newBanIndex == bannIndex) {
+                    //切换ban set
+                    bannIndex = redisTemplate.opsForValue().increment("banIndex");
+                }else{
+                    //已经被其他线程改变
+                    bannIndex = newBanIndex;
+                }
+
                 currentSetName = banSetName[(int) (bannIndex % banSetName.length)];
                 //启用之前，不管有没有，先删除一下，应该是没有，保险起见
                 redisTemplate.delete(currentSetName);

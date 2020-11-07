@@ -140,7 +140,7 @@ public class PrivilegeControllerTest {
     @Test
     public void login6() throws Exception {
         String requireJson = null;
-        String jwt = null;
+        String response = null;
         ResultActions res = null;
 
         //region 用户重复登录
@@ -148,7 +148,7 @@ public class PrivilegeControllerTest {
         res = this.mvc.perform(post("/privilege/privileges/login")
                 .contentType("application/json;charset=UTF-8")
                 .content(requireJson));
-        jwt = res.andExpect(status().isOk())
+        response = res.andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andExpect(jsonPath("$.errno").value(ResponseCode.OK.getCode()))
                 .andExpect(jsonPath("$.errmsg").value("成功"))
@@ -158,16 +158,17 @@ public class PrivilegeControllerTest {
         res = this.mvc.perform(post("/privilege/privileges/login")
                 .contentType("application/json;charset=UTF-8")
                 .content(requireJson));
-        String jwt1 = res.andExpect(status().isOk())
+        String response1 = res.andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andExpect(jsonPath("$.errno").value(ResponseCode.OK.getCode()))
                 .andExpect(jsonPath("$.errmsg").value("成功"))
-                .andExpect(jsonPath("$.data").isString())
                 .andReturn().getResponse().getContentAsString();
 
-        assertNotEquals(jwt1, jwt);
+        String jwt = JacksonUtil.parseString(response, "data");
+        String jwt1 = JacksonUtil.parseString(response1, "data");
+        assertNotEquals(jwt, jwt1);
 
-        String responseString = this.mvc.perform(get("/privilege/privileges"))
+        String responseString = this.mvc.perform(get("/privilege/privileges").header("authorization", jwt1))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();

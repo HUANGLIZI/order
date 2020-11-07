@@ -65,6 +65,7 @@ public class UserDao implements InitializingBean {
 
     /**
      * 由用户名获得用户
+     *
      * @param userName
      * @return
      */
@@ -75,43 +76,40 @@ public class UserDao implements InitializingBean {
         List<UserPo> users = null;
         try {
             users = userPoMapper.selectByExample(example);
-        }catch (DataAccessException e){
+        } catch (DataAccessException e) {
             StringBuilder message = new StringBuilder().append("getUserByName: ").append(e.getMessage());
             logger.error(message.toString());
         }
 
-        if (null == users || users.isEmpty()){
+        if (null == users || users.isEmpty()) {
             return new ReturnObject<>();
-        }else{
+        } else {
             User user = new User(users.get(0));
             if (!user.authetic()) {
                 StringBuilder message = new StringBuilder().append("getUserByName: ").append("id= ")
                         .append(user.getId()).append(" username=").append(user.getUserName());
                 logger.error(message.toString());
                 return new ReturnObject<>(ResponseCode.RESOURCE_FALSIFY);
-            }else{
+            } else {
                 return new ReturnObject<>(user);
             }
         }
     }
 
     /**
-     *
      * @param userId 用户ID
      * @param IPAddr IP地址
-     * @param date 登录时间
+     * @param date   登录时间
      * @return 是否成功更新
      */
-    public Boolean setLoginIPAndPosition(Long userId, String IPAddr, LocalDateTime date)
-    {
+    public Boolean setLoginIPAndPosition(Long userId, String IPAddr, LocalDateTime date) {
         UserPo userPo = new UserPo();
         userPo.setId(userId);
         userPo.setLastLoginIp(IPAddr);
         userPo.setLastLoginTime(date);
-        if(userPoMapper.updateByPrimaryKeySelective(userPo)==1){
+        if (userPoMapper.updateByPrimaryKeySelective(userPo) == 1) {
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }
@@ -121,9 +119,12 @@ public class UserDao implements InitializingBean {
      *
      * @param id userID
      * @return void
+     * <p>
      * createdBy: Ming Qiu 2020-11-02 11:44
      * modifiedBy: Ming Qiu 2020-11-03 12:31
      * 将获取用户Roleid的代码独立, 增加redis过期时间
+     * Ming Qiu 2020-11-07 8:00
+     * 集合里强制加“0”
      */
     private void loadSingleUserPriv(Long id) {
         List<Long> roleIds = this.getRoleIdByUserId(id);
@@ -154,7 +155,7 @@ public class UserDao implements InitializingBean {
         UserRolePoExample.Criteria criteria = example.createCriteria();
         criteria.andUserIdEqualTo(id);
         List<UserRolePo> userRolePoList = userRolePoMapper.selectByExample(example);
-        logger.debug("getRoleIdByUserId: userId = "+ id + "roleNum = "+ userRolePoList.size());
+        logger.debug("getRoleIdByUserId: userId = " + id + "roleNum = " + userRolePoList.size());
         List<Long> retIds = new ArrayList<>(userRolePoList.size());
         for (UserRolePo po : userRolePoList) {
             StringBuilder signature = Common.concatString("-",
@@ -189,13 +190,13 @@ public class UserDao implements InitializingBean {
         List<String> proxyUserKey = new ArrayList<>(proxyIds.size());
         for (Long proxyId : proxyIds) {
             if (!redisTemplate.hasKey("u_" + proxyId)) {
-                logger.debug("loadUserPriv: loading proxy user. proxId = "+ proxyId);
+                logger.debug("loadUserPriv: loading proxy user. proxId = " + proxyId);
                 loadSingleUserPriv(proxyId);
             }
             proxyUserKey.add("u_" + proxyId);
         }
         if (!redisTemplate.hasKey(key)) {
-            logger.debug("loadUserPriv: loading user. id = "+ id);
+            logger.debug("loadUserPriv: loading user. id = " + id);
             loadSingleUserPriv(id);
         }
         redisTemplate.opsForSet().unionAndStore(key, proxyUserKey, aKey);
@@ -254,7 +255,7 @@ public class UserDao implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (! initialization){
+        if (!initialization) {
             return;
         }
         //初始化user
@@ -264,7 +265,7 @@ public class UserDao implements InitializingBean {
 
         List<UserPo> userPos = userMapper.selectByExample(example);
 
-        for (UserPo po : userPos){
+        for (UserPo po : userPos) {
             UserPo newPo = new UserPo();
             newPo.setPassword(AES.encrypt(po.getPassword(), User.AESPASS));
             newPo.setEmail(AES.encrypt(po.getEmail(), User.AESPASS));
@@ -273,7 +274,7 @@ public class UserDao implements InitializingBean {
             newPo.setId(po.getId());
 
             StringBuilder signature = Common.concatString("-", po.getUserName(), newPo.getPassword(),
-                    newPo.getMobile(),newPo.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
+                    newPo.getMobile(), newPo.getEmail(), po.getOpenId(), po.getState().toString(), po.getDepartId().toString(),
                     po.getCreatorId().toString());
             newPo.setSignature(SHA256.getSHA256(signature.toString()));
 
@@ -323,9 +324,9 @@ public class UserDao implements InitializingBean {
      * modifiedBy 3218 2020/11/4 15:48
      */
 
-    public ReturnObject<User> getUserById(long id){
-        UserPo userPo= userMapper.selectByPrimaryKey(id);
-        if (userPo==null) {
+    public ReturnObject<User> getUserById(long id) {
+        UserPo userPo = userMapper.selectByPrimaryKey(id);
+        if (userPo == null) {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         User user = new User(userPo);
@@ -347,7 +348,7 @@ public class UserDao implements InitializingBean {
      * createdBy 3218 2020/11/4 15:55
      * modifiedBy 3218 2020/11/4 15:55
      */
-    public ReturnObject updateUserAvatar(User user){
+    public ReturnObject updateUserAvatar(User user) {
         ReturnObject returnObject = new ReturnObject();
         UserPo newUserPo = new UserPo();
         newUserPo.setId(user.getId());
@@ -356,8 +357,7 @@ public class UserDao implements InitializingBean {
         if (ret == 0) {
             logger.debug("updateUserAvatar: update fail. user id: " + user.getId());
             returnObject = new ReturnObject(ResponseCode.FIELD_NOTVALID);
-        }
-        else {
+        } else {
             logger.debug("updateUserAvatar: update user success : " + user.toString());
             returnObject = new ReturnObject();
         }
@@ -368,6 +368,7 @@ public class UserDao implements InitializingBean {
 
     /**
      * 根据 id 修改用户信息
+     *
      * @param userEditVo 传入的 User 对象
      * @return 返回对象 ReturnObj
      */
@@ -431,6 +432,7 @@ public class UserDao implements InitializingBean {
 
     /**
      * (物理) 删除用户
+     *
      * @param id 用户 id
      * @return 返回对象 ReturnObj
      */
@@ -449,7 +451,8 @@ public class UserDao implements InitializingBean {
 
     /**
      * 创建可改变目标用户状态的 Po
-     * @param id 用户 id
+     *
+     * @param id    用户 id
      * @param state 用户目标状态
      * @return UserPo 对象
      */
@@ -472,7 +475,8 @@ public class UserDao implements InitializingBean {
 
     /**
      * 改变用户状态
-     * @param id 用户 id
+     *
+     * @param id    用户 id
      * @param state 目标状态
      * @return 返回对象 ReturnObj
      */

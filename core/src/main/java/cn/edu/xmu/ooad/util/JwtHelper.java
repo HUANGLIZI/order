@@ -66,12 +66,12 @@ public class JwtHelper {
             Algorithm algorithm = Algorithm.HMAC256(SECRET);
             Map<String, Object> map = new HashMap<String, Object>();
             Date nowDate = new Date();
-            // 过期时间：2小时
             Date expireDate = getAfterDate(nowDate, 0, 0, 0, 0, 0, expireTime);
             map.put("alg", "HS256");
             map.put("typ", "JWT");
+            String tokenId = Common.genSeqNum();
             StringBuilder message = new StringBuilder().append("createToken: ").append("userId = ")
-                    .append(userId).append(" departId=").append(departId);
+                    .append(userId).append(" departId=").append(departId).append(" tokenId:").append(tokenId);
             logger.debug(message.toString());
             String token = JWT.create()
                     // 设置头部信息 Header
@@ -79,6 +79,7 @@ public class JwtHelper {
                     // 设置 载荷 Payload
                     .withClaim("userId", userId)
                     .withClaim("departId", departId)
+                    .withClaim("tokenId",tokenId)
                     .withIssuer(ISSUSER)
                     .withSubject(SUBJECT)
                     .withAudience(AUDIENCE)

@@ -330,6 +330,7 @@ public class PrivilegeController {
     @GetMapping("privileges/logout")
     public Object logout(@LoginUser Long userId){
 
+        logger.debug("logout: userId = "+userId);
         ReturnObject<Boolean> success = userService.Logout(userId);
         if (success.getData() == null)  {
             return ResponseUtil.fail(success.getCode(), success.getErrmsg());
