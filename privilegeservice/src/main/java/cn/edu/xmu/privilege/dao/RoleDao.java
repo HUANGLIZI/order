@@ -66,7 +66,7 @@ public class RoleDao implements InitializingBean {
 
     /**
      * 根据角色Id,查询角色的所有权限
-     *
+     * @author yue hao
      * @param id 角色ID
      * @return 角色的权限列表
      */

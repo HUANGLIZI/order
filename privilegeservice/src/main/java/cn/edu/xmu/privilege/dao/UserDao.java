@@ -116,7 +116,7 @@ public class UserDao implements InitializingBean {
     }
 
     /**
-     *
+     * @author yue hao
      * @param id 用户ID
      * @return 用户的权限列表
      */

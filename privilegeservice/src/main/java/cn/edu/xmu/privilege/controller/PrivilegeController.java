@@ -98,6 +98,7 @@ public class PrivilegeController {
     }
     /**
      * auth007: 查询某一用户权限
+     * @author yue hao
      * @param id
      * @return Object
      */

@@ -53,6 +53,7 @@ public class UserService {
     @Autowired
     private UserDao userDao;
     /**
+     * @author yue hao
      * 根据用户Id查询用户所有权限
      * @param id:用户id
      * @return 用户权限列表

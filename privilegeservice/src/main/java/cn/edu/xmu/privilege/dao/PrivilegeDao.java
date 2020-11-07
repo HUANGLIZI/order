@@ -96,7 +96,7 @@ public class PrivilegeDao implements InitializingBean {
 
     /**
      * 根据权限Id查询权限
-     *
+     * @author yue hao
      * @param id 权限ID
      * @return 权限
      */

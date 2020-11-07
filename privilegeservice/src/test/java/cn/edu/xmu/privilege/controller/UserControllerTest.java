@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author yuehao
  * @date Created in 2020/11/4
+ * Modified in 2020/11/7
  **/
 @SpringBootTest(classes = PrivilegeServiceApplication.class)   //标识本类是一个SpringBootTest
 @AutoConfigureMockMvc
