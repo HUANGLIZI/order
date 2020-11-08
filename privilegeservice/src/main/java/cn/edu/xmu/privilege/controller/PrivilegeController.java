@@ -70,6 +70,7 @@ public class PrivilegeController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
+    @Audit
     @DeleteMapping("/adminusersrole/{id}")
     public Object revokeRole(@PathVariable Long id){
         return Common.decorateReturnObject(userService.revokeRole(id));
@@ -90,6 +91,7 @@ public class PrivilegeController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
+    @Audit
     @PostMapping("/adminusers/{userid}/roles/{roleid}")
     public Object assignRole(@RequestParam(name = "createid") Long createid, @PathVariable Long userid, @PathVariable Long roleid){
 
@@ -115,6 +117,7 @@ public class PrivilegeController {
             @ApiResponse(code = 0, message = "成功"),
 
     })
+    @Audit
     @GetMapping("/adminusers/self/roles")
     public Object getUserSelfRole(@RequestParam(name = "id") Long id){
 
@@ -135,6 +138,7 @@ public class PrivilegeController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
+    @Audit
     @GetMapping("/adminusers/{id}/roles")
     public Object getSelfRole(@PathVariable Long id){
         ReturnObject<List> returnObject =  userService.getSelfUserRoles(id);

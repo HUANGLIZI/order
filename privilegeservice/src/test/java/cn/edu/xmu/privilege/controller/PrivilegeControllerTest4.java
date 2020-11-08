@@ -1,8 +1,11 @@
 package cn.edu.xmu.privilege.controller;
 
+import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +27,26 @@ public class PrivilegeControllerTest4 {
     @Autowired
     private MockMvc mvc;
 
+    private static final Logger logger = LoggerFactory.getLogger(PrivilegeControllerTest4.class);
+    /**
+     * 创建测试用token
+     *
+     * @author 24320182203281 王纬策
+     * @param userId
+     * @param departId
+     * @param expireTime
+     * @return token
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
+     */
+    private final String creatTestToken(Long userId, Long departId, int expireTime) {
+        String token = new JwtHelper().createToken(userId, departId, expireTime);
+        logger.debug(token);
+        return token;
+    }
+
+
+
     /**
      * 取消用户角色测试
      * @throws Exception
@@ -31,7 +54,8 @@ public class PrivilegeControllerTest4 {
      */
     @Test
     public void revokeRoleTest() throws Exception {
-        String responseString = this.mvc.perform(delete("/privilege/adminusersrole/90"))
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString = this.mvc.perform(delete("/privilege/adminusersrole/90").header("authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -43,8 +67,8 @@ public class PrivilegeControllerTest4 {
      */
     @Test
     public void assignRoleTest() throws Exception {
-
-        String responseString = this.mvc.perform(post("/privilege/adminusers/47/roles/84?createid=47"))
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString = this.mvc.perform(post("/privilege/adminusers/47/roles/84?createid=47").header("authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -60,7 +84,8 @@ public class PrivilegeControllerTest4 {
      */
     @Test
     public void getUserRoleTest() throws Exception {
-        String responseString = this.mvc.perform(get("/privilege/adminusers/47/roles"))
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString = this.mvc.perform(get("/privilege/adminusers/47/roles").header("authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -76,8 +101,8 @@ public class PrivilegeControllerTest4 {
      */
     @Test
     public void getSelfUserRoleTest() throws Exception {
-
-        String responseString = this.mvc.perform(get("/privilege/adminusers/self/roles?id=47"))
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString = this.mvc.perform(get("/privilege/adminusers/self/roles?id=47").header("authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();

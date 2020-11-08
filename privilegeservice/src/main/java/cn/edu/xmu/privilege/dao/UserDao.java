@@ -178,8 +178,8 @@ public class UserDao implements InitializingBean {
         userRolePo.setUserId(userid);
         userRolePo.setRoleId(roleid);
 
-        User user = getUserById(userid);
-        User create = getUserById(createid);
+        User user = getUserById(userid.longValue()).getData();
+        User create = getUserById(createid.longValue()).getData();
         RolePo rolePo = rolePoMapper.selectByPrimaryKey(roleid);
 
         //用户id或角色id不存在
@@ -240,10 +240,39 @@ public class UserDao implements InitializingBean {
         criteria.andUserBIdEqualTo(userid);
         List<UserProxyPo> userProxyPoList = userProxyPoMapper.selectByExample(example);
 
-        for (UserProxyPo user:
+        LocalDateTime now = LocalDateTime.now();
+
+        for (UserProxyPo po:
              userProxyPoList) {
-            String proxyKey = "up_" + user.getUserAId();
-            redisTemplate.delete(proxyKey);
+            StringBuilder signature = Common.concatString("-", po.getUserAId().toString(),
+                    po.getUserBId().toString(), po.getBeginDate().toString(), po.getEndDate().toString(), po.getValid().toString());
+            String newSignature = SHA256.getSHA256(signature.toString());
+            UserProxyPo newPo = null;
+
+            if (newSignature.equals(po.getSignature())) {
+                if (now.isBefore(po.getEndDate()) && now.isAfter(po.getBeginDate())) {
+                    //在有效期内
+                    String proxyKey = "up_" + po.getUserAId();
+                    redisTemplate.delete(proxyKey);
+                    logger.debug("getProxyIdsByUserId: userAId = " + po.getUserAId() + " userBId = " + po.getUserBId());
+                } else {
+                    //代理过期了，但标志位依然是有效
+                    newPo = newPo == null ? new UserProxyPo() : newPo;
+                    newPo.setValid((byte) 0);
+                    signature = Common.concatString("-", po.getUserAId().toString(),
+                            po.getUserBId().toString(), po.getBeginDate().toString(), po.getEndDate().toString(), newPo.getValid().toString());
+                    newSignature = SHA256.getSHA256(signature.toString());
+                    newPo.setSignature(newSignature);
+                }
+            } else {
+                logger.error("getProxyIdsByUserId: Wrong Signature(auth_user_proxy): id =" + po.getId());
+            }
+
+            if (null != newPo) {
+                logger.debug("getProxyIdsByUserId: writing back.. po =" + newPo);
+                userProxyPoMapper.updateByPrimaryKeySelective(newPo);
+            }
+
         }
     }
 
@@ -256,16 +285,14 @@ public class UserDao implements InitializingBean {
     public ReturnObject<List> getUserRoles(Long id){
         UserRolePoExample example = new UserRolePoExample();
         UserRolePoExample.Criteria criteria = example.createCriteria();
-
         criteria.andUserIdEqualTo(id);
-
         List<UserRolePo> userRolePoList = userRolePoMapper.selectByExample(example);
         logger.info("getUserRoles: userId = "+ id + "roleNum = "+ userRolePoList.size());
 
         List<UserRole> retUserRoleList = new ArrayList<>(userRolePoList.size());
 
         if (retUserRoleList.isEmpty()) {
-            User user = getUserById(id);
+            User user = getUserById(id.longValue()).getData();
             if (user == null) {
                 logger.error("getUserRoles: 数据库不存在该用户 userid=" + id);
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
@@ -273,8 +300,8 @@ public class UserDao implements InitializingBean {
         }
 
         for (UserRolePo po : userRolePoList) {
-            User user = getUserById(po.getUserId());
-            User creator = getUserById(po.getCreatorId());
+            User user = getUserById(po.getUserId().longValue()).getData();
+            User creator = getUserById(po.getCreatorId().longValue()).getData();
             RolePo rolePo = rolePoMapper.selectByPrimaryKey(po.getRoleId());
             if (user == null) {
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
@@ -301,25 +328,6 @@ public class UserDao implements InitializingBean {
         return new ReturnObject<>(retUserRoleList);
     }
 
-    /***
-     * 根据id查找用户
-     * @param id 用户id
-     * @return 用户,若签名校验失败返回null
-     * @author Xianwei Wang
-     */
-    private User getUserById(Long id){
-        UserPo userPo = userMapper.selectByPrimaryKey(id);
-        if (userPo == null){
-            return null;
-        }
-
-        User user = new User(userPo);
-        if (! user.authetic()){
-            logger.error("getUser: Wrong Signature(auth_user): id =" + id);
-            return null;
-        }
-        return user;
-    }
 
 
 
