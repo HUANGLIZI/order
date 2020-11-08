@@ -22,6 +22,8 @@ public class UserVo {
     @ApiModelProperty(value = "用户头像 URL")
     private String avatar;
 
+    @Pattern(regexp = "[+]?[0-9*#]+",
+            message = "手机号码格式不正确")
     @ApiModelProperty(value = "用户手机号")
     private String mobile;
 
