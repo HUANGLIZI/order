@@ -62,7 +62,7 @@ public class PrivilegeController {
      */
     @ApiOperation(value = "取消用户权限")
     @ApiImplicitParams({
-
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(name="userid", value="用户id", required = true, dataType="Integer", paramType="path")
 
     })
@@ -84,6 +84,7 @@ public class PrivilegeController {
      */
     @ApiOperation(value = "赋予用户权限")
     @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(name="userid", value="用户id", required = true, dataType="Integer", paramType="path"),
             @ApiImplicitParam(name="roleid", value="角色id", required = true, dataType="Integer", paramType="path")
     })
@@ -93,7 +94,7 @@ public class PrivilegeController {
     })
     @Audit
     @PostMapping("/adminusers/{userid}/roles/{roleid}")
-    public Object assignRole(@RequestParam(name = "createid") Long createid, @PathVariable Long userid, @PathVariable Long roleid){
+    public Object assignRole(@LoginUser Long createid, @PathVariable Long userid, @PathVariable Long roleid){
 
         ReturnObject<VoObject> returnObject =  userService.assignRole(createid, userid, roleid);
         if (returnObject.getCode() == ResponseCode.OK) {
@@ -111,7 +112,7 @@ public class PrivilegeController {
      */
     @ApiOperation(value = "获得自己角色信息")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="id", value="用户", required = true, dataType="String", paramType="param")
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
@@ -119,7 +120,7 @@ public class PrivilegeController {
     })
     @Audit
     @GetMapping("/adminusers/self/roles")
-    public Object getUserSelfRole(@RequestParam(name = "id") Long id){
+    public Object getUserSelfRole(@LoginUser Long id){
 
         ReturnObject<List> returnObject =  userService.getSelfUserRoles(id);
         return Common.getListRetObject(returnObject);
@@ -132,7 +133,7 @@ public class PrivilegeController {
      */
     @ApiOperation(value = "获得所有人角色信息")
     @ApiImplicitParams({
-
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(name="id", value="用户id", required = true, dataType="int", paramType="path")
     })
     @ApiResponses({

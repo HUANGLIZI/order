@@ -101,7 +101,7 @@ public class PrivilegeControllerTest4 {
      */
     @Test
     public void getSelfUserRoleTest() throws Exception {
-        String token = creatTestToken(1L, 0L, 100);
+        String token = creatTestToken(47L, 0L, 100);
         String responseString = this.mvc.perform(get("/privilege/adminusers/self/roles?id=47").header("authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
