@@ -24,6 +24,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -140,6 +141,7 @@ public class PrivilegeController {
      * @author 24320182203281 王纬策
      * @param vo 角色视图
      * @param bindingResult 校验错误
+     * @param userId 当前用户id
      * @return Object 角色返回视图
      * createdBy 王纬策 2020/11/04 13:57
      * modifiedBy 王纬策 2020/11/7 19:20
@@ -155,16 +157,14 @@ public class PrivilegeController {
     })
     @Audit
     @PostMapping("roles")
-    public Object insertRole(@Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
-        logger.info("insert role");
+    public Object insertRole(@Validated @RequestBody RoleVo vo, BindingResult bindingResult, @LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId) {
+        logger.debug("insert role by userId:" + userId);
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
-            logger.info("validate fail");
+            logger.debug("validate fail");
             return returnObject;
         }
-        //由AOP解析token获取userId
-        Long userId = 1L;
         ReturnObject<VoObject> retObject = roleService.insertRole(userId, vo);
         httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return Common.decorateReturnObject(retObject);
@@ -190,7 +190,7 @@ public class PrivilegeController {
     @Audit
     @DeleteMapping("roles/{id}")
     public Object deleteRole(@PathVariable("id") Long id) {
-        logger.info("delete role");
+        logger.debug("delete role");
         ReturnObject<Object> returnObject = roleService.deleteRole(id);
         return Common.decorateReturnObject(returnObject);
     }
@@ -202,6 +202,7 @@ public class PrivilegeController {
      * @param id 角色id
      * @param vo 角色视图
      * @param bindingResult 校验数据
+     * @param userId 当前用户id
      * @return Object 角色返回视图
      * createdBy 王纬策 2020/11/04 13:57
      * modifiedBy 王纬策 2020/11/7 19:20
@@ -218,15 +219,13 @@ public class PrivilegeController {
     })
     @Audit
     @PutMapping("roles/{id}")
-    public Object updateRole(@PathVariable("id") Long id, @Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
-        logger.info("update role");
+    public Object updateRole(@PathVariable("id") Long id, @Validated @RequestBody RoleVo vo, BindingResult bindingResult, @LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId) {
+        logger.debug("update role by userId:" + userId);
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
-        //由AOP解析token获取userId
-        Long userId = 1L;
         ReturnObject<Object> retObject = roleService.updateRole(userId, id, vo);
         return Common.decorateReturnObject(retObject);
     }
