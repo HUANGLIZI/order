@@ -1,25 +1,35 @@
 package cn.edu.xmu.privilege.controller;
 
-import cn.edu.xmu.ooad.util.JacksonUtil;
+
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
-import cn.edu.xmu.privilege.model.vo.LoginVo;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import java.io.File;
+import java.io.FileInputStream;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * @author Xianwei Wang
+ *
+ * @author 3218
+ * @date Created in 2020/11/7 18:49
  **/
+
 @SpringBootTest(classes = PrivilegeServiceApplication.class)   //标识本类是一个SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -28,73 +38,50 @@ public class PrivilegeControllerTest3 {
     @Autowired
     private MockMvc mvc;
 
-
-
-    /**
-     * 取消用户角色测试
-     * @throws Exception
-     * @author Xianwei Wang
+    /*
+     * 上传成功
      */
     @Test
-    public void revokeRoleTest() throws Exception {
-        String responseString = this.mvc.perform(delete("/privilege/adminusersrole/90"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andReturn().getResponse().getContentAsString();
+    public void uploadFileSuccess() throws Exception{
+        MockMultipartFile firstFile = null;
+        MockHttpServletRequestBuilder request = null;
+        ResultActions result = null;
+
+        File file = new File("."+File.separator+"testImg"+File.separator+"timg.png");
+        firstFile = new MockMultipartFile("img", "timg.png" , "multipart/form-data", new FileInputStream(file));
+        String responseString = mvc.perform(MockMvcRequestBuilders
+                .multipart("/privilege/adminusers/1/uploadImg")
+                .file(firstFile)
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
         String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 
-    /**
-     * 赋予用户角色测试
-     * @throws Exception
-     * @author Xianwei Wang
+    /*
+     * 上传失败（id不存在）
+     * （无权限和系统错误无法写成测试类）
      */
     @Test
-    public void assignRoleTest() throws Exception {
+    public void UploadFileFail() throws Exception{
+        MockMultipartFile firstFile = null;
+        MockHttpServletRequestBuilder request = null;
+        ResultActions result = null;
 
-        String responseString = this.mvc.perform(post("/privilege/adminusers/47/roles/84?createid=47"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andReturn().getResponse().getContentAsString();
-
-        String expectedResponse = "{\"errno\":0,\"data\":{\"id\":91,\"user\":{\"id\":47,\"userName\":\"2721900002\"},\"role\":{\"id\":84,\"name\":\"文案\",\"creatorId\":1,\"desc\":null,\"gmtCreate\":\"2020-11-01T09:48:24\",\"gmtModified\":\"2020-11-01T09:48:24\"},\"creator\":{\"id\":47,\"userName\":\"2721900002\"},\"gmtCreate\":\"\"},\"errmsg\":\"成功\"}";
-        //JSONAssert.assertEquals(expectedResponse, responseString, false);
-
-    }
-
-
-
-    /**
-     * 查看用户的角色测试
-     * @throws Exception
-     * @author Xianwei Wang
-     */
-    @Test
-    public void getUserRoleTest() throws Exception {
-        String responseString = this.mvc.perform(get("/privilege/adminusers/47/roles"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andReturn().getResponse().getContentAsString();
-        String expectedResponse = "{\"errno\":0,\"data\":[{\"id\":78,\"user\":{\"id\":47,\"userName\":\"2721900002\"},\"role\":{\"id\":85,\"name\":\"总经办\",\"createdBy\":1,\"desc\":null,\"gmtCreate\":\"2020-11-01T09:48:24\",\"gmtModified\":\"2020-11-01T09:48:24\"},\"creator\":{\"id\":1,\"userName\":\"13088admin\"},\"gmtCreate\":\"2020-11-01T09:48:24\"}],\"errmsg\":\"成功\"}";
+        File file = new File("."+File.separator+"testImg"+File.separator+"timg.png");
+        firstFile = new MockMultipartFile("img", "timg.png" , "multipart/form-data", new FileInputStream(file));
+        String responseString = mvc.perform(MockMvcRequestBuilders
+                .multipart("/privilege/adminusers/1111/uploadImg")
+                .file(firstFile)
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
-
-    }
-
-    /**
-     * 查看自己的角色测试
-     * @throws Exception
-     * @author Xianwei Wang
-     */
-    @Test
-    public void getSelfUserRoleTest() throws Exception {
-
-        String responseString = this.mvc.perform(get("/privilege/adminusers/self/roles?id=47"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andReturn().getResponse().getContentAsString();
-        String expectedResponse = "{\"errno\":0,\"data\":[{\"id\":78,\"user\":{\"id\":47,\"userName\":\"2721900002\"},\"role\":{\"id\":85,\"name\":\"总经办\",\"createdBy\":1,\"desc\":null,\"gmtCreate\":\"2020-11-01T09:48:24\",\"gmtModified\":\"2020-11-01T09:48:24\"},\"creator\":{\"id\":1,\"userName\":\"13088admin\"},\"gmtCreate\":\"2020-11-01T09:48:24\"}],\"errmsg\":\"成功\"}";
-        JSONAssert.assertEquals(expectedResponse, responseString, true);
-
     }
 }

@@ -28,11 +28,13 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -155,7 +157,6 @@ public class PrivilegeController {
     private HttpServletResponse httpServletResponse;
 
 
-
     /**
      * 获得所有权限
      * @return Object
@@ -245,6 +246,7 @@ public class PrivilegeController {
      * @author 24320182203281 王纬策
      * @param vo 角色视图
      * @param bindingResult 校验错误
+     * @param userId 当前用户id
      * @return Object 角色返回视图
      * createdBy 王纬策 2020/11/04 13:57
      * modifiedBy 王纬策 2020/11/7 19:20
@@ -260,16 +262,14 @@ public class PrivilegeController {
     })
     @Audit
     @PostMapping("roles")
-    public Object insertRole(@Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
-        logger.info("insert role");
+    public Object insertRole(@Validated @RequestBody RoleVo vo, BindingResult bindingResult, @LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId) {
+        logger.debug("insert role by userId:" + userId);
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
-            logger.info("validate fail");
+            logger.debug("validate fail");
             return returnObject;
         }
-        //由AOP解析token获取userId
-        Long userId = 1L;
         ReturnObject<VoObject> retObject = roleService.insertRole(userId, vo);
         httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return Common.decorateReturnObject(retObject);
@@ -295,7 +295,7 @@ public class PrivilegeController {
     @Audit
     @DeleteMapping("roles/{id}")
     public Object deleteRole(@PathVariable("id") Long id) {
-        logger.info("delete role");
+        logger.debug("delete role");
         ReturnObject<Object> returnObject = roleService.deleteRole(id);
         return Common.decorateReturnObject(returnObject);
     }
@@ -307,6 +307,7 @@ public class PrivilegeController {
      * @param id 角色id
      * @param vo 角色视图
      * @param bindingResult 校验数据
+     * @param userId 当前用户id
      * @return Object 角色返回视图
      * createdBy 王纬策 2020/11/04 13:57
      * modifiedBy 王纬策 2020/11/7 19:20
@@ -323,15 +324,13 @@ public class PrivilegeController {
     })
     @Audit
     @PutMapping("roles/{id}")
-    public Object updateRole(@PathVariable("id") Long id, @Validated @RequestBody RoleVo vo, BindingResult bindingResult) {
-        logger.info("update role");
+    public Object updateRole(@PathVariable("id") Long id, @Validated @RequestBody RoleVo vo, BindingResult bindingResult, @LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId) {
+        logger.debug("update role by userId:" + userId);
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
-        //由AOP解析token获取userId
-        Long userId = 1L;
         ReturnObject<Object> retObject = roleService.updateRole(userId, id, vo);
         return Common.decorateReturnObject(retObject);
     }
@@ -343,7 +342,12 @@ public class PrivilegeController {
     /**
      * auth009: 修改任意用户信息
      * @param id: 用户 id
+     * @param vo 修改信息 UserVo 视图
+     * @param bindingResult 校验信息
      * @return Object
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:20
+     * Modified by 19720182203919 李涵 at 2020/11/8 0:19
      */
     @ApiOperation(value = "修改任意用户信息")
     @ApiImplicitParams({
@@ -355,19 +359,29 @@ public class PrivilegeController {
             @ApiResponse(code = 733, message = "电话已被注册"),
             @ApiResponse(code = 0, message = "成功"),
     })
+    @Audit // 需要认证
     @PutMapping("adminusers/{id}")
-    public Object modifyUserInfo(@PathVariable Long id, @RequestBody UserVo vo) {
+    public Object modifyUserInfo(@PathVariable Long id, @Validated @RequestBody UserVo vo, BindingResult bindingResult) {
         if (logger.isDebugEnabled()) {
             logger.debug("modifyUserInfo: id = "+ id +" vo = " + vo);
         }
-        ReturnObject returnObject = userService.modifyUserInfo(id, vo);
-        return Common.decorateReturnObject(returnObject);
+        // 校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (returnObject != null) {
+            logger.info("incorrect data received while modifyUserInfo id = " + id);
+            return returnObject;
+        }
+        ReturnObject returnObj = userService.modifyUserInfo(id, vo);
+        return Common.decorateReturnObject(returnObj);
     }
 
     /**
      * auth009: 删除任意用户
      * @param id: 用户 id
      * @return Object
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:20
+     * Modified by 19720182203919 李涵 at 2020/11/8 0:19
      */
     @ApiOperation(value = "删除任意用户")
     @ApiImplicitParams({
@@ -377,6 +391,7 @@ public class PrivilegeController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
+    @Audit // 需要认证
     @DeleteMapping("adminusers/{id}")
     public Object deleteUser(@PathVariable Long id) {
         if (logger.isDebugEnabled()) {
@@ -390,6 +405,9 @@ public class PrivilegeController {
      * auth009: 禁止用户登录
      * @param id: 用户 id
      * @return Object
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:20
+     * Modified by 19720182203919 李涵 at 2020/11/8 0:19
      */
     @ApiOperation(value = "禁止用户登录")
     @ApiImplicitParams({
@@ -399,6 +417,7 @@ public class PrivilegeController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
+    @Audit // 需要认证
     @PutMapping("adminusers/{id}/forbid")
     public Object forbidUser(@PathVariable Long id) {
         if (logger.isDebugEnabled()) {
@@ -412,6 +431,9 @@ public class PrivilegeController {
      * auth009: 恢复用户
      * @param id: 用户 id
      * @return Object
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:20
+     * Modified by 19720182203919 李涵 at 2020/11/8 0:19
      */
     @ApiOperation(value = "恢复用户")
     @ApiImplicitParams({
@@ -421,6 +443,7 @@ public class PrivilegeController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
+    @Audit // 需要认证
     @PutMapping("adminusers/{id}/release")
     public Object releaseUser(@PathVariable Long id) {
         if (logger.isDebugEnabled()) {
@@ -481,6 +504,9 @@ public class PrivilegeController {
     }
 
     /**
+     * @param id
+     * @param multipartFile
+     * @return
      * @author 24320182203218
      **/
     @ApiOperation(value = "用户上传图片",  produces="application/json")
@@ -492,6 +518,7 @@ public class PrivilegeController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 506, message = "该目录文件夹没有写入的权限"),
     })
+    @Audit
     @PostMapping("/adminusers/{id}/uploadImg")
     public Object uploadImg(@PathVariable("id") Integer id, @RequestParam("img") MultipartFile multipartFile){
         logger.debug("uploadImg: id = "+ id +" img" + multipartFile.getOriginalFilename());
