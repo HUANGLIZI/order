@@ -232,10 +232,13 @@ public class UserService {
     }
 
     /**
-     * 根据 ID 和 UserEditVo 修改任意用户信息
+     * auth009 业务: 根据 ID 和 UserEditVo 修改任意用户信息
      * @param id 用户 id
      * @param vo UserEditVo 对象
      * @return 返回对象 ReturnObject
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:30
+     * Modified by 19720182203919 李涵 at 2020/11/5 10:42
      */
     @Transactional
     public ReturnObject<Object> modifyUserInfo(Long id, UserVo vo) {
@@ -243,9 +246,12 @@ public class UserService {
     }
 
     /**
-     * 根据 id 删除任意用户
+     * auth009 业务: 根据 id 删除任意用户
      * @param id 用户 id
      * @return 返回对象 ReturnObject
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:30
+     * Modified by 19720182203919 李涵 at 2020/11/5 10:42
      */
     @Transactional
     public ReturnObject<Object> deleteUser(Long id) {
@@ -254,9 +260,12 @@ public class UserService {
     }
 
     /**
-     * 根据 id 禁止任意用户登录
+     * auth009 业务: 根据 id 禁止任意用户登录
      * @param id 用户 id
      * @return 返回对象 ReturnObject
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:30
+     * Modified by 19720182203919 李涵 at 2020/11/5 10:42
      */
     @Transactional
     public ReturnObject<Object> forbidUser(Long id) {
@@ -264,9 +273,12 @@ public class UserService {
     }
 
     /**
-     * 解禁任意用户
+     * auth009 业务: 解禁任意用户
      * @param id 用户 id
      * @return 返回对象 ReturnObject
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:30
+     * Modified by 19720182203919 李涵 at 2020/11/5 10:42
      */
     @Transactional
     public ReturnObject<Object> releaseUser(Long id) {
@@ -315,6 +327,7 @@ public class UserService {
         }
         catch (IOException e){
             logger.debug("uploadImg: I/O Error:" + imgLocation);
+            return new ReturnObject(ResponseCode.INTERNAL_SERVER_ERR);
         }
         return returnObject;
     }

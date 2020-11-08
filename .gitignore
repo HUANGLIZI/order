@@ -2,4 +2,7 @@
 *.log
 *.iml
 .idea/
+.gitignore
+.history/*
 target/
+.DS_Store

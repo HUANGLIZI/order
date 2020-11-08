@@ -1,5 +1,6 @@
 package cn.edu.xmu.privilege.dao;
 
+import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -9,6 +10,7 @@ import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.po.*;
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -27,10 +29,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 角色访问类
- *
- * @author Weice Wang
- * @date Created in 2020/11/4 11:48
- * Modified in 2020/11/5 14:16
+ * @author Ming Qiu
+ * createdBy Ming Qiu 2020/11/02 13:57
+ * modifiedBy 王纬策 2020/11/7 19:20
  **/
 @Repository
 public class RoleDao implements InitializingBean {
@@ -159,31 +160,46 @@ public class RoleDao implements InitializingBean {
 
     /**
      * 分页查询所有角色
-     * @param pageNum
-     * @param pageSize
-     * @return ReturnObject<List>
+     *
+     * @author 24320182203281 王纬策
+     * @param pageNum 页数
+     * @param pageSize 每页大小
+     * @return ReturnObject<List> 角色列表
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
-    public ReturnObject<List> selectAllRole(Integer pageNum, Integer pageSize) {
+    public ReturnObject<PageInfo<VoObject>> selectAllRole(Integer pageNum, Integer pageSize) {
         RolePoExample example = new RolePoExample();
         RolePoExample.Criteria criteria = example.createCriteria();
         //分页查询
         PageHelper.startPage(pageNum, pageSize);
         logger.debug("page = " + pageNum + "pageSize = " + pageSize);
-        //不加限定条件查询所有
-        List<RolePo> rolePos = roleMapper.selectByExample(example);
-        List<Role> roles = new ArrayList<>(rolePos.size());
-        logger.debug("selectAllRoles: total roles num = " + rolePos.size());
-        for (RolePo rolePoItem : rolePos) {
-            Role item = new Role(rolePoItem);
-            roles.add(item);
+        List<RolePo> rolePos = null;
+        try {
+            //不加限定条件查询所有
+            rolePos = roleMapper.selectByExample(example);
+        }catch (DataAccessException e){
+            logger.error("selectAllRole: DataAccessException:" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
         }
-        return new ReturnObject<>(roles);
+
+        List<VoObject> ret = new ArrayList<>(rolePos.size());
+        for (RolePo po : rolePos) {
+            Role role = new Role(po);
+            ret.add(role);
+        }
+        PageInfo<VoObject> rolePage = PageInfo.of(ret);
+        return new ReturnObject<>(rolePage);
     }
 
     /**
      * 增加一个角色
-     * @param role
-     * @return ReturnObject<Role>
+     *
+     * @author 24320182203281 王纬策
+     * @param role 角色bo
+     * @return ReturnObject<Role> 新增结果
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     public ReturnObject<Role> insertRole(Role role) {
         RolePo rolePo = role.gotRolePo();
@@ -222,8 +238,12 @@ public class RoleDao implements InitializingBean {
 
     /**
      * 删除一个角色
-     * @param id
-     * @return ReturnObject<Object>
+     *
+     * @author 24320182203281 王纬策
+     * @param id 角色id
+     * @return ReturnObject<Object> 删除结果
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     public ReturnObject<Object> deleteRole(Long id) {
         ReturnObject<Object> retObj = null;
@@ -275,8 +295,12 @@ public class RoleDao implements InitializingBean {
 
     /**
      * 修改一个角色
-     * @param role
-     * @return ReturnObject<Role>
+     *
+     * @author 24320182203281 王纬策
+     * @param role 角色bo
+     * @return ReturnObject<Role> 修改结果
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     public ReturnObject<Role> updateRole(Role role) {
         RolePo rolePo = role.gotRolePo();

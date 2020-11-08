@@ -9,9 +9,10 @@ import java.time.LocalDateTime;
 
 /**
  * 角色返回简单视图
- * 
- * @author Weice Wang
- * @date Created in 2020/11/4 11:48
+ *
+ * @author 24320182203281 王纬策
+ * createdBy 王纬策 2020/11/04 13:57
+ * modifiedBy 王纬策 2020/11/7 19:20
  **/
 @Data
 @ApiModel(description = "角色视图对象")
@@ -24,8 +25,12 @@ public class RoleSimpleRetVo {
 
     /**
      * 用Role对象建立Vo对象
+     *
+     * @author 24320182203281 王纬策
      * @param role role
-     * @return RoleRetVo
+     * @return RoleSimpleRetVo
+     * createdBy 王纬策 2020/11/04 13:57
+     * modifiedBy 王纬策 2020/11/7 19:20
      */
     public RoleSimpleRetVo(Role role) {
         this.id = role.getId();
