@@ -254,7 +254,7 @@ public class UserDao implements InitializingBean {
                     //在有效期内
                     String proxyKey = "up_" + po.getUserAId();
                     redisTemplate.delete(proxyKey);
-                    logger.debug("getProxyIdsByUserId: userAId = " + po.getUserAId() + " userBId = " + po.getUserBId());
+                    logger.debug("clearUserPrivCache: userAId = " + po.getUserAId() + " userBId = " + po.getUserBId());
                 } else {
                     //代理过期了，但标志位依然是有效
                     newPo = newPo == null ? new UserProxyPo() : newPo;
@@ -265,11 +265,11 @@ public class UserDao implements InitializingBean {
                     newPo.setSignature(newSignature);
                 }
             } else {
-                logger.error("getProxyIdsByUserId: Wrong Signature(auth_user_proxy): id =" + po.getId());
+                logger.error("clearUserPrivCache: Wrong Signature(auth_user_proxy): id =" + po.getId());
             }
 
             if (null != newPo) {
-                logger.debug("getProxyIdsByUserId: writing back.. po =" + newPo);
+                logger.debug("clearUserPrivCache: writing back.. po =" + newPo);
                 userProxyPoMapper.updateByPrimaryKeySelective(newPo);
             }
 
