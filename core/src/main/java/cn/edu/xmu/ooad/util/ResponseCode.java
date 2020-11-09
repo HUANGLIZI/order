@@ -49,6 +49,7 @@ public enum ResponseCode {
     EMAIL_REGISTERED(732, "邮箱已被注册"),
     MOBILE_REGISTERED(733,"电话已被注册"),
     ROLE_REGISTERED(736, "角色名已存在"),
+    USER_ROLE_REGISTERED(737, "用户已拥有该角色"),
     PASSWORD_SAME(741,"不能与旧密码相同"),
     URL_SAME(742,"权限url与RequestType重复"),
     PRIVILEGE_SAME(743,"权限名称重复"),
@@ -58,6 +59,8 @@ public enum ResponseCode {
     USERPROXY_CONFLICT(747,"同一时间段有冲突的代理关系"),
     EMAIL_NOTVERIFIED(748,"Email未确认"),
     MOBILE_NOTVERIFIED(749,"电话号码未确认"),
+    USERPROXY_BIGGER(750,"开始时间要小于失效时间"),
+    USERPROXY_SELF(751,"自己不可以代理自己"),
     /***************************************************
      *    订单模块错误码
      **************************************************/
