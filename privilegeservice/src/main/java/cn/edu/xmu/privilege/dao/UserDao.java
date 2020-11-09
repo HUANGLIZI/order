@@ -88,7 +88,7 @@ public class UserDao implements InitializingBean {
         if (roleIds.isEmpty()) {
             User user = getUserById(id.longValue()).getData();
             if (user == null) {//判断是否是由于用户不存在造成的
-                logger.error("getUserRoles: 数据库不存在该用户 userid=" + id);
+                logger.error("findPrivsByUserId: 数据库不存在该用户 userid=" + id);
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
         }
