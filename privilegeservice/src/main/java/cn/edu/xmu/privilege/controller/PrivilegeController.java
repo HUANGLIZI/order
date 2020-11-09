@@ -2,7 +2,7 @@ package cn.edu.xmu.privilege.controller;
 
 import cn.edu.xmu.ooad.annotation.*;
 import cn.edu.xmu.privilege.model.bo.Privilege;
-import cn.edu.xmu.privilege.model.vo.LoginVo;
+import cn.edu.xmu.privilege.model.vo.*;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JwtHelper;
@@ -12,15 +12,13 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
-import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
-
+import cn.edu.xmu.privilege.model.vo.UserProxyVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
-import cn.edu.xmu.privilege.model.vo.RoleVo;
-import cn.edu.xmu.privilege.model.vo.UserVo;
 import cn.edu.xmu.privilege.service.RoleService;
+import cn.edu.xmu.privilege.service.UserProxyService;
 import cn.edu.xmu.privilege.service.UserService;
 import cn.edu.xmu.privilege.util.IpUtil;
 import com.github.pagehelper.PageInfo;
@@ -54,6 +52,9 @@ public class PrivilegeController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserProxyService userProxyService;
 
     /***
      * 取消用户权限
@@ -529,6 +530,135 @@ public class PrivilegeController {
         logger.debug("uploadImg: id = "+ id +" img" + multipartFile.getOriginalFilename());
         ReturnObject returnObject = userService.uploadImg(id,multipartFile);
         return Common.getNullRetObj(returnObject, httpServletResponse);
+    }
+
+
+    /**
+     * 设置用户代理关系
+     *
+     * @param id
+     * @param vo
+     * @return createdBy Di Han Li 2020/11/04 09:57
+     * Modified by 24320182203221 李狄翰 at 2020/11/8 8:00
+     */
+    @ApiOperation(value = "设置用户代理关系")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "Token", required = true, dataType = "String", paramType = "header"),
+            @ApiImplicitParam(name = "id", required = true, dataType = "Long", paramType = "path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @PostMapping("users/{id}/proxy")
+    public Object usersProxy(@LoginUser @ApiIgnore  Long userId, @PathVariable Long id, @Validated @RequestBody UserProxyVo vo, BindingResult bindingresult) {
+        logger.debug("usersProxy: id = " + id + " vo" + vo);
+        Object returnObject = Common.processFieldErrors(bindingresult, httpServletResponse);
+        if (null != returnObject) {
+            logger.info("validate fail");
+            return returnObject;
+        }
+        ReturnObject retObject = userProxyService.usersProxy(userId, id, vo);
+        return retObject;
+    }
+
+    /**
+     * 管理员设置用户代理关系
+     *
+     * @param aid
+     * @param bid
+     * @param vo
+     * @return createdBy Di Han Li 2020/11/04 09:57
+     * Modified by 24320182203221 李狄翰 at 2020/11/8 8:00
+     */
+    @ApiOperation(value = "管理员设置用户代理关系")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "Token", required = true, dataType = "String", paramType = "header"),
+            @ApiImplicitParam(name = "aid", required = true, dataType = "Long", paramType = "path"),
+            @ApiImplicitParam(name = "bid", required = true, dataType = "Long", paramType = "path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @PostMapping("ausers/{aid}/busers/{bid}")
+    public Object aUsersProxy(@PathVariable Long aid, @PathVariable Long bid,@Validated @RequestBody UserProxyVo vo, BindingResult bindingresult) {
+        logger.debug("aUsersProxy: aid = " + aid + " bid" + bid + " vo" + vo);
+        Object returnObject = Common.processFieldErrors(bindingresult, httpServletResponse);
+        if (null != returnObject) {
+            logger.info("validate fail");
+            return returnObject;
+        }
+        ReturnObject retObject = userProxyService.aUsersProxy(aid, bid, vo);
+        return retObject;
+    }
+
+    /**
+     * 解除用户代理关系
+     *
+     * @param id
+     * @return createdBy Di Han Li 2020/11/04 09:57
+     * Modified by 24320182203221 李狄翰 at 2020/11/8 8:00
+     */
+    @ApiOperation(value = "解除用户代理关系")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "Token", required = true, dataType = "String", paramType = "header"),
+            @ApiImplicitParam(name = "id", required = true, dataType = "Long", paramType = "path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @DeleteMapping("proxie/{id}")
+    public Object removeUserProxy(@PathVariable Long id, @LoginUser @ApiIgnore Long userId) {
+        logger.debug("removeUserProxy: id = " + id);
+        ReturnObject returnObject = userProxyService.removeUserProxy( id, userId);
+        return returnObject;
+    }
+
+    /**
+     * 查询所有用户代理关系
+     *
+     * @param aId
+     * @param bId
+     * @return createdBy Di Han Li 2020/11/04 09:57
+     * Modified by 24320182203221 李狄翰 at 2020/11/8 8:00
+     */
+    @ApiOperation(value = "查询所有用户代理关系")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "Token", required = true, dataType = "String", paramType = "header")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @GetMapping("proxies")
+    public Object listProxies(Long aId, Long bId) {
+        logger.debug("listProxies: aId = " + aId + " bId = " + bId);
+        ReturnObject<List> returnObject = userProxyService.listProxies(aId, bId);
+        return returnObject;
+    }
+
+    /**
+     * 禁止代理关系
+     *
+     * @param id
+     * @return createdBy Di Han Li 2020/11/04 09:57
+     * Modified by 24320182203221 李狄翰 at 2020/11/8 8:00
+     */
+    @ApiOperation(value = "禁止代理关系")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "Token", required = true, dataType = "String", paramType = "header"),
+            @ApiImplicitParam(name = "id", required = true, dataType = "Long", paramType = "path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @DeleteMapping("allproxie/{id}")
+    public Object removeAllProxies(@PathVariable Long id) {
+        logger.debug("removeAllProxies: id) = " + id);
+        ReturnObject returnObject = userProxyService.removeAllProxies(id);
+        return returnObject;
     }
 }
 
