@@ -113,6 +113,7 @@ public class PrivilegeController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
+    @Audit // 需要认证
     @GetMapping("adminusers/{id}/privileges")
     public Object getPrivsByUserId(@PathVariable Long id){
         ReturnObject<List> returnObject =  userService.findPrivsByUserId(id);

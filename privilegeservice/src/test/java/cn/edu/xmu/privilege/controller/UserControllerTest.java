@@ -2,6 +2,7 @@ package cn.edu.xmu.privilege.controller;
 
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.util.JacksonUtil;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
@@ -14,8 +15,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 /**
  * @author yuehao
@@ -32,7 +33,8 @@ public class UserControllerTest {
 
     @Test
     public void getUserPrivs() throws Exception{
-        String responseString = this.mvc.perform(get("/privilege/adminusers/1/privileges"))
+        String token = this.login("13088admin", "123456");
+        String responseString = this.mvc.perform(get("/privilege/adminusers/1/privileges").header("authorization",token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -41,6 +43,29 @@ public class UserControllerTest {
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 
+    @Test
+    public void getUserPriv2() throws Exception{
+        String responseString = this.mvc.perform(get("/privilege/adminusers/1/privileges"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+    }
 
+    private String login(String userName, String password) throws Exception{
+        LoginVo vo = new LoginVo();
+        vo.setUserName(userName);
+        vo.setPassword(password);
+
+        String requireJson = JacksonUtil.toJson(vo);
+        String response = this.mvc.perform(post("/privilege/privileges/login")
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson)).andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.errno").value(ResponseCode.OK.getCode()))
+                .andExpect(jsonPath("$.errmsg").value("成功"))
+                .andReturn().getResponse().getContentAsString();
+        return  JacksonUtil.parseString(response, "data");
+
+    }
 }
 
