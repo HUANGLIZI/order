@@ -227,7 +227,11 @@ public class PrivilegeController {
     @GetMapping("adminusers/{id}/privileges")
     public Object getPrivsByUserId(@PathVariable Long id){
         ReturnObject<List> returnObject =  userService.findPrivsByUserId(id);
-        return Common.getListRetObject(returnObject);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getListRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
 
