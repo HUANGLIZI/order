@@ -1,7 +1,5 @@
 package cn.edu.xmu.privilege.model.vo;
 
-public class UserVo {
-
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 

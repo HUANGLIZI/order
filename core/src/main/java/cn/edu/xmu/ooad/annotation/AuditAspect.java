@@ -81,7 +81,7 @@ public class AuditAspect {
         for (int i = 0; i < annotations.length; i++) {
             Object param = args[i];
             Annotation[] paramAnn = annotations[i];
-            if (param == null || paramAnn.length == 0){
+            if ( paramAnn.length == 0){
                 continue;
             }
 

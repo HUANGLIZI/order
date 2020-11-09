@@ -2,16 +2,12 @@ package cn.edu.xmu.privilege.service;
 
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
-import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.encript.AES;
 import cn.edu.xmu.ooad.util.JwtHelper;
-import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.privilege.dao.UserDao;
-import cn.edu.xmu.privilege.model.bo.Privilege;
-import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import cn.edu.xmu.privilege.util.ImgHelper;
 import cn.edu.xmu.privilege.model.vo.UserVo;
@@ -22,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import cn.edu.xmu.privilege.dao.UserDao;
 import cn.edu.xmu.privilege.model.po.UserPo;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,67 +38,8 @@ import java.util.concurrent.TimeUnit;
  **/
 @Service
 public class UserService {
+
     private Logger logger = LoggerFactory.getLogger(UserService.class);
-
-    @Autowired
-    UserDao userDao;
-
-    /**
-     * ID获取用户信息
-     * @author XQChen
-     * @param id
-     * @return 用户
-     */
-    public ReturnObject<VoObject> findUserById(Long id) {
-        ReturnObject<VoObject> returnObject = null;
-
-        UserPo userPo = userDao.findUserById(id);
-        if(userPo != null) {
-            returnObject = new ReturnObject<>(new User(userPo));
-        } else {
-            returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        }
-
-        return returnObject;
-    }
-
-    /**
-     * 获取所有用户信息
-     * @author XQChen
-     * @param userName
-     * @param mobile
-     * @param page
-     * @param pagesize
-     * @return 用户列表
-     */
-    public ReturnObject<List> findAllUsers(String userName, String mobile, Integer page, Integer pagesize) {
-
-        List<UserPo> userPos = userDao.findAllUsers();
-
-        Stream<UserPo> userPoStream = userPos.stream();
-        if(!(userName == null) && !userName.isBlank())
-            userPoStream = userPoStream.filter(userPo -> (userPo.getUserName().contentEquals(userName)));
-        if(!(mobile == null) && !mobile.isBlank())
-            userPoStream = userPoStream.filter(userPo -> (userPo.getMobile().contentEquals(mobile)));
-
-        List<UserPo> tmpUserPos = userPoStream.collect(Collectors.toList());
-
-        Integer size = tmpUserPos.size();
-
-        userPoStream = tmpUserPos.stream();
-
-        if(page * pagesize <= size)
-        {
-            userPoStream = userPoStream.skip((page - 1) * pagesize).limit(pagesize);
-        } else {
-            Integer returnSize = size < pagesize ? size : pagesize;
-            userPoStream = userPoStream.skip(size - returnSize).limit(returnSize);
-        }
-
-        ReturnObject<List> returnObject = new ReturnObject<>(userPoStream.map(User::new).collect(Collectors.toList()));
-
-        return returnObject;
-    }
 
     @Value("${privilegeservice.login.jwtExpire}")
     private Integer jwtExpireTime;
@@ -131,6 +67,68 @@ public class UserService {
      */
     @Value("${privilegeservice.lockerExpireTime}")
     private long lockerExpireTime;
+
+    /**
+     * ID获取用户信息
+     * @author XQChen
+     * @param id
+     * @return 用户
+     */
+    public ReturnObject<VoObject> findUserById(Long id) {
+        ReturnObject<VoObject> returnObject = null;
+
+        UserPo userPo = userDao.findUserById(id);
+        if(userPo != null) {
+            logger.debug("findUserById : " + returnObject);
+            returnObject = new ReturnObject<>(new User(userPo));
+        } else {
+            logger.debug("findUserById: Not Found");
+            returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        return returnObject;
+    }
+
+    /**
+     * 获取所有用户信息
+     * @author XQChen
+     * @param userName
+     * @param mobile
+     * @param page
+     * @param pagesize
+     * @return 用户列表
+     */
+    public ReturnObject<List> findAllUsers(String userName, String mobile, Integer page, Integer pagesize) {
+
+
+        String userNameAES = userName.isBlank() ? "" : AES.encrypt(userName, User.AESPASS);
+        String mobileAES = mobile.isBlank() ? "" : AES.encrypt(mobile, User.AESPASS);
+        List<UserPo> userPos = userDao.findAllUsers(userNameAES, mobileAES, page, pagesize);
+
+        Stream<UserPo> userPoStream = userPos.stream();
+        if(!(userName == null) && !userName.isBlank())
+            userPoStream = userPoStream.filter(userPo -> (userPo.getUserName().contentEquals(userName)));
+        if(!(mobile == null) && !mobile.isBlank())
+            userPoStream = userPoStream.filter(userPo -> (userPo.getMobile().contentEquals(mobile)));
+
+        List<UserPo> tmpUserPos = userPoStream.collect(Collectors.toList());
+
+        Integer size = tmpUserPos.size();
+
+        userPoStream = tmpUserPos.stream();
+
+        if(page * pagesize <= size)
+        {
+            userPoStream = userPoStream.skip((page - 1) * pagesize).limit(pagesize);
+        } else {
+            Integer returnSize = size < pagesize ? size : pagesize;
+            userPoStream = userPoStream.skip(size - returnSize).limit(returnSize);
+        }
+
+        ReturnObject<List> returnObject = new ReturnObject<>(userPoStream.map(User::new).collect(Collectors.toList()));
+
+        return returnObject;
+    }
 
     /**
      * 查询所有权限

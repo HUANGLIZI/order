@@ -180,8 +180,8 @@ public class UserDaoTest {
 
     @Test
     public void findAllUsers() {
-        List<UserPo> userPos = userDao.findAllUsers();
+        List<UserPo> userPos = userDao.findAllUsers("", "", 1, 5);
 
-        assertEquals(userPos.size(), 14);
+        assertEquals(userPos.size(), 5);
     }
 }

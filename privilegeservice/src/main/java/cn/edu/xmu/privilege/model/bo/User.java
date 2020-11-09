@@ -1,15 +1,11 @@
 package cn.edu.xmu.privilege.model.bo;
 
 import cn.edu.xmu.ooad.model.VoObject;
-import cn.edu.xmu.ooad.util.AES;
-import cn.edu.xmu.ooad.util.SHA256;
-import cn.edu.xmu.ooad.util.StringUtil;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.encript.AES;
 import cn.edu.xmu.ooad.util.encript.SHA256;
 import cn.edu.xmu.privilege.model.po.UserPo;
 import cn.edu.xmu.privilege.model.vo.UserRetVo;
-import cn.edu.xmu.privilege.model.vo.UserEditVo;
 import cn.edu.xmu.privilege.model.vo.UserVo;
 import lombok.Data;
 
@@ -137,8 +133,6 @@ public class User implements VoObject {
         this.gmtModified = po.getGmtModified();
         this.signature = po.getSignature();
 
-
-        StringBuilder signature = StringUtil.concatString("-", po.getUserName(), po.getPassword(),
         StringBuilder signature = Common.concatString("-", po.getUserName(), po.getPassword(),
                 po.getMobile(),po.getEmail(),po.getOpenId(),po.getState().toString(),po.getDepartId().toString(),
                 po.getCreatorId().toString());
@@ -168,6 +162,16 @@ public class User implements VoObject {
         userRetVo.setGmtModified(gmtModified.toString());
 
         return userRetVo;
+    }
+
+    /**
+     * Create return Vo object
+     * @author XQChen
+     * @return
+     */
+    @Override
+    public UserVo createSimpleVo() {
+        return null;
     }
 
 

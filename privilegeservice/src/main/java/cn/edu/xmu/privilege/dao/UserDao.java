@@ -1,27 +1,24 @@
 package cn.edu.xmu.privilege.dao;
 
-import cn.edu.xmu.ooad.util.AES;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.ooad.util.encript.AES;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.ooad.util.encript.SHA256;
 import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
-import cn.edu.xmu.ooad.util.SHA256;
-import cn.edu.xmu.ooad.util.StringUtil;
 import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.po.*;
 
+import com.github.pagehelper.PageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cn.edu.xmu.privilege.model.po.UserProxyPo;
 import cn.edu.xmu.privilege.model.po.UserProxyPoExample;
 import cn.edu.xmu.privilege.model.po.UserRolePo;
 import cn.edu.xmu.privilege.model.po.UserRolePoExample;
-import cn.edu.xmu.privilege.model.vo.UserEditVo;
 import cn.edu.xmu.privilege.model.vo.UserVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,9 +72,6 @@ public class UserDao implements InitializingBean {
 
     @Autowired
     private RoleDao roleDao;
-
-    @Autowired
-    private UserPoMapper userPoMapper;
 
     /**
      * 由用户名获得用户
@@ -391,16 +385,8 @@ public class UserDao implements InitializingBean {
         UserPoExample.Criteria criteria = example.createCriteria();
         criteria.andIdEqualTo(Id);
 
-        logger.info("findUserById: Id =" + Id);
-        List<UserPo> userPos = userPoMapper.selectByExample(example);
-
-        UserPo userPo = null;
-
-        Integer size = userPos.size();
-        logger.info("findUserById: getUsers = " + userPos + " size = " + size);
-        if(size == 1)
-            userPo = userPos.get(0);
-
+        logger.debug("findUserById: Id =" + Id);
+        UserPo userPo = userPoMapper.selectByPrimaryKey(Id);
 
         return userPo;
     }
@@ -410,14 +396,19 @@ public class UserDao implements InitializingBean {
      * @author XQChen
      * @return List<UserPo> 用户列表
      */
-    public List<UserPo> findAllUsers() {
+    public List<UserPo> findAllUsers(String userNameAES, String mobileAES, int page, int pageSize) {
         UserPoExample example = new UserPoExample();
+        UserPoExample.Criteria criteria = example.createCriteria();
+        if(!userNameAES.isBlank())
+            criteria.andUserNameEqualTo(userNameAES);
+        if(!mobileAES.isBlank())
+            criteria.andMobileEqualTo(mobileAES);
 
+        PageHelper.startPage(page, pageSize);
         List<UserPo> userPos = userPoMapper.selectByExample(example);
 
-        logger.info("findUserById: retUsers = "+userPos);
-
-
+        logger.debug("findUserById: retUsers = "+userPos);
+        
         return userPos;
     }
 
