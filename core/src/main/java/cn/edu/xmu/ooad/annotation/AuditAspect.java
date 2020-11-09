@@ -62,13 +62,17 @@ public class AuditAspect {
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
-                String token = request.getHeader(JwtHelper.LOGIN_TOKEN_KEY);
+        String token = request.getHeader(JwtHelper.LOGIN_TOKEN_KEY);
         if (token == null){
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return ResponseUtil.fail(ResponseCode.AUTH_NEED_LOGIN);
         }
 
         JwtHelper.UserAndDepart userAndDepart = new JwtHelper().verifyTokenAndGetClaims(token);
+        if (null == userAndDepart){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return ResponseUtil.fail(ResponseCode.AUTH_INVALID_JWT);
+        }
         Long userId = userAndDepart.getUserId();
         Long departId = userAndDepart.getDepartId();
 

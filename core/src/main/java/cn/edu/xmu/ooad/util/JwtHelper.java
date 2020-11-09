@@ -117,9 +117,8 @@ public class JwtHelper {
             Claim claimDepartId = claims.get("departId");
             return new UserAndDepart(claimUserId.asLong(), claimDepartId.asLong());
         } catch (JWTVerificationException exception) {
-//			exception.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     public Date getAfterDate(Date date, int year, int month, int day, int hour, int minute, int second) {

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 权限DAO
@@ -118,9 +119,17 @@ public class PrivilegeDao implements InitializingBean {
             if (priv.authetic()) {
                 logger.debug("findAllPrivs: key = " + priv.getKey() + " p = " + priv);
                 ret.add(priv);
+            }else{
+                logger.error("findAllPrivs: 信息签名错误：id = "+po.getId());
             }
+
         }
-        PageInfo<VoObject> privPage = PageInfo.of(ret);
+        PageInfo<PrivilegePo> privPoPage = PageInfo.of(privilegePos);
+        PageInfo<VoObject> privPage = new PageInfo<>(ret);
+        privPage.setPages(privPoPage.getPages());
+        privPage.setPageNum(privPoPage.getPageNum());
+        privPage.setPageSize(privPoPage.getPageSize());
+        privPage.setTotal(privPoPage.getTotal());
         return new ReturnObject<>(privPage);
     }
 
