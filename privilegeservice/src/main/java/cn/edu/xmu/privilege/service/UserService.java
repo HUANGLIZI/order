@@ -322,7 +322,7 @@ public class UserService {
      * @return
      */
     @Transactional
-    public ReturnObject uploadImg(Integer id, MultipartFile multipartFile){
+    public ReturnObject uploadImg(Long id, MultipartFile multipartFile){
         ReturnObject<User> userReturnObject = userDao.getUserById(id);
 
         if(userReturnObject.getCode() == ResponseCode.RESOURCE_ID_NOTEXIST) {

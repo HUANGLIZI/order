@@ -525,7 +525,7 @@ public class PrivilegeController {
     })
     @Audit
     @PostMapping("/adminusers/{id}/uploadImg")
-    public Object uploadImg(@PathVariable("id") Integer id, @RequestParam("img") MultipartFile multipartFile){
+    public Object uploadImg(@PathVariable("id") Long id, @RequestParam("img") MultipartFile multipartFile){
         logger.debug("uploadImg: id = "+ id +" img" + multipartFile.getOriginalFilename());
         ReturnObject returnObject = userService.uploadImg(id,multipartFile);
         return Common.getNullRetObj(returnObject, httpServletResponse);
