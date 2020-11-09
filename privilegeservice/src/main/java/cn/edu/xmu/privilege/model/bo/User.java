@@ -166,17 +166,6 @@ public class User implements VoObject {
     }
 
     /**
-     * Create return Vo object
-     * @author XQChen
-     * @return
-     */
-    @Override
-    public UserVo createSimpleVo() {
-        return null;
-    }
-
-
-    /**
      * 对象未篡改
      * @return
      */
@@ -219,12 +208,6 @@ public class User implements VoObject {
         po.setSignature(SHA256.getSHA256(signature.toString()));
         return po;
     }
-
-    @Override
-    public Object createVo() {
-        return null;
-    }
-
 
     /**
      * 创建SimpleVo
