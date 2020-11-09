@@ -1,10 +1,12 @@
 package cn.edu.xmu.privilege.controller;
 
 
-import cn.edu.xmu.ooad.util.ResponseCode;
+import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +24,6 @@ import java.io.FileInputStream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  *
@@ -38,20 +39,19 @@ public class PrivilegeControllerTest3 {
     @Autowired
     private MockMvc mvc;
 
+    private static final Logger logger = LoggerFactory.getLogger(PrivilegeControllerTest3.class);
     /*
      * 上传成功
      */
     @Test
     public void uploadFileSuccess() throws Exception{
-        MockMultipartFile firstFile = null;
-        MockHttpServletRequestBuilder request = null;
-        ResultActions result = null;
-
-        File file = new File("."+File.separator+"testImg"+File.separator+"timg.png");
-        firstFile = new MockMultipartFile("img", "timg.png" , "multipart/form-data", new FileInputStream(file));
+        String token = creatTestToken(1L, 0L, 100);
+        File file = new File("."+File.separator + "src" + File.separator + "test" + File.separator+"resources" + File.separator + "img" + File.separator+"timg.png");
+        MockMultipartFile firstFile = new MockMultipartFile("img", "timg.png" , "multipart/form-data", new FileInputStream(file));
         String responseString = mvc.perform(MockMvcRequestBuilders
                 .multipart("/privilege/adminusers/1/uploadImg")
                 .file(firstFile)
+                .header("authorization", token)
                 .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn()
@@ -67,15 +67,13 @@ public class PrivilegeControllerTest3 {
      */
     @Test
     public void UploadFileFail() throws Exception{
-        MockMultipartFile firstFile = null;
-        MockHttpServletRequestBuilder request = null;
-        ResultActions result = null;
-
-        File file = new File("."+File.separator+"testImg"+File.separator+"timg.png");
-        firstFile = new MockMultipartFile("img", "timg.png" , "multipart/form-data", new FileInputStream(file));
+        String token = creatTestToken(1L, 0L, 100);
+        File file = new File("."+File.separator + "src" + File.separator +  "test" + File.separator + "resources" + File.separator + "img" +File.separator+"timg.png");
+        MockMultipartFile firstFile = new MockMultipartFile("img", "timg.png" , "multipart/form-data", new FileInputStream(file));
         String responseString = mvc.perform(MockMvcRequestBuilders
                 .multipart("/privilege/adminusers/1111/uploadImg")
                 .file(firstFile)
+                .header("authorization", token)
                 .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andReturn()
@@ -83,5 +81,22 @@ public class PrivilegeControllerTest3 {
                 .getContentAsString();
         String expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    /**
+     * 创建测试用token
+     *
+     * @author 3218
+     * @param userId
+     * @param departId
+     * @param expireTime
+     * @return token
+     * createdBy 3218 2020/11/09 16:54
+     * modifiedBy 3218 2020/11/09 16:54
+     */
+    private final String creatTestToken(Long userId, Long departId, int expireTime) {
+        String token = new JwtHelper().createToken(userId, departId, expireTime);
+        logger.debug(token);
+        return token;
     }
 }
