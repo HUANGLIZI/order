@@ -7,6 +7,9 @@ import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
+import cn.edu.xmu.privilege.model.bo.Privilege;
+import cn.edu.xmu.privilege.model.bo.UserRole;
+import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.dao.UserDao;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import cn.edu.xmu.privilege.util.ImgHelper;
@@ -28,6 +31,7 @@ import java.util.stream.Stream;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -129,6 +133,42 @@ public class UserService {
 
         return returnObject;
     }
+
+    /**
+     * 取消用户角色
+     * @param id 用户角色id
+     * @return ReturnObject<VoObject>
+     * @author Xianwei Wang
+     * */
+    @Transactional
+    public ReturnObject<VoObject> revokeRole(Long id){
+        return userDao.revokeRole(id);
+    }
+
+    /**
+     * 赋予用户角色
+     * @param createid 创建者id
+     * @param userid 用户id
+     * @param roleid 角色id
+     * @return UserRole
+     * @author Xianwei Wang
+     * */
+    @Transactional
+    public ReturnObject<VoObject> assignRole(Long createid, Long userid, Long roleid){
+        return userDao.assignRole(createid, userid, roleid);
+    }
+
+    /**
+     * 查看用户的角色信息
+     * @param id 用户id
+     * @return 角色信息
+     * @author Xianwei Wang
+     * */
+    @Transactional
+    public ReturnObject<List> getSelfUserRoles(Long id){
+        return userDao.getUserRoles(id);
+    }
+
 
     /**
      * 查询所有权限
@@ -287,10 +327,13 @@ public class UserService {
     }
 
     /**
-     * 根据 ID 和 UserEditVo 修改任意用户信息
+     * auth009 业务: 根据 ID 和 UserEditVo 修改任意用户信息
      * @param id 用户 id
      * @param vo UserEditVo 对象
      * @return 返回对象 ReturnObject
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:30
+     * Modified by 19720182203919 李涵 at 2020/11/5 10:42
      */
     @Transactional
     public ReturnObject<Object> modifyUserInfo(Long id, UserVo vo) {
@@ -298,9 +341,12 @@ public class UserService {
     }
 
     /**
-     * 根据 id 删除任意用户
+     * auth009 业务: 根据 id 删除任意用户
      * @param id 用户 id
      * @return 返回对象 ReturnObject
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:30
+     * Modified by 19720182203919 李涵 at 2020/11/5 10:42
      */
     @Transactional
     public ReturnObject<Object> deleteUser(Long id) {
@@ -309,9 +355,12 @@ public class UserService {
     }
 
     /**
-     * 根据 id 禁止任意用户登录
+     * auth009 业务: 根据 id 禁止任意用户登录
      * @param id 用户 id
      * @return 返回对象 ReturnObject
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:30
+     * Modified by 19720182203919 李涵 at 2020/11/5 10:42
      */
     @Transactional
     public ReturnObject<Object> forbidUser(Long id) {
@@ -319,9 +368,12 @@ public class UserService {
     }
 
     /**
-     * 解禁任意用户
+     * auth009 业务: 解禁任意用户
      * @param id 用户 id
      * @return 返回对象 ReturnObject
+     * @author 19720182203919 李涵
+     * Created at 2020/11/4 20:30
+     * Modified by 19720182203919 李涵 at 2020/11/5 10:42
      */
     @Transactional
     public ReturnObject<Object> releaseUser(Long id) {

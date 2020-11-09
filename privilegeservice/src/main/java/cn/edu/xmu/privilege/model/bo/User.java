@@ -6,6 +6,7 @@ import cn.edu.xmu.ooad.util.encript.AES;
 import cn.edu.xmu.ooad.util.encript.SHA256;
 import cn.edu.xmu.privilege.model.po.UserPo;
 import cn.edu.xmu.privilege.model.vo.UserRetVo;
+import cn.edu.xmu.privilege.model.vo.UserSimpleRetVo;
 import cn.edu.xmu.privilege.model.vo.UserVo;
 import lombok.Data;
 
@@ -217,5 +218,25 @@ public class User implements VoObject {
                 this.getCreatorId().toString());
         po.setSignature(SHA256.getSHA256(signature.toString()));
         return po;
+    }
+
+    @Override
+    public Object createVo() {
+        return null;
+    }
+
+
+    /**
+     * 创建SimpleVo
+     * @return userSimpleRetVo
+     * @author Xianwei Wang
+     */
+    @Override
+    public UserSimpleRetVo createSimpleVo() {
+        UserSimpleRetVo userSimpleRetVo = new UserSimpleRetVo();
+        userSimpleRetVo.setId(this.id);
+        userSimpleRetVo.setUserName(this.userName);
+
+        return userSimpleRetVo;
     }
 }
