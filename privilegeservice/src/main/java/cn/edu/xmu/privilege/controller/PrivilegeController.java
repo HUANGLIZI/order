@@ -222,6 +222,7 @@ public class PrivilegeController {
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
     })
     @Audit // 需要认证
     @GetMapping("adminusers/{id}/privileges")

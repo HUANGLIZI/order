@@ -84,14 +84,12 @@ public class UserDao implements InitializingBean {
 
     public ReturnObject<List> findPrivsByUserId(Long id) {
         //getRoleIdByUserId已经进行签名校验
-        List<Long> roleIds = this.getRoleIdByUserId(id);
-        if (roleIds.isEmpty()) {
-            User user = getUserById(id.longValue()).getData();
-            if (user == null) {//判断是否是由于用户不存在造成的
-                logger.error("findPrivsByUserId: 数据库不存在该用户 userid=" + id);
-                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-            }
+        User user = getUserById(id.longValue()).getData();
+        if (user == null) {//判断是否是由于用户不存在造成的
+            logger.error("findPrivsByUserId: 数据库不存在该用户 userid=" + id);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
+        List<Long> roleIds = this.getRoleIdByUserId(id);
         List<Privilege> privileges = new ArrayList<>();
         for(Long roleId: roleIds) {
             List<Privilege> rolePriv = roleDao.findPrivsByRoleId(roleId);
