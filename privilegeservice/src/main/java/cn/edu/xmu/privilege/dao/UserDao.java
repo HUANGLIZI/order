@@ -1,5 +1,8 @@
 package cn.edu.xmu.privilege.dao;
 
+import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.*;
+import cn.edu.xmu.privilege.mapper.RolePoMapper;
 import cn.edu.xmu.ooad.util.encript.AES;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.ooad.util.encript.SHA256;
@@ -7,8 +10,9 @@ import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
+import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.bo.User;
-import cn.edu.xmu.privilege.model.bo.Privilege;
+import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.po.*;
 import cn.edu.xmu.privilege.model.vo.UserVo;
 import org.slf4j.Logger;
@@ -21,6 +25,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +62,9 @@ public class UserDao implements InitializingBean {
 
     @Autowired
     private UserPoMapper userMapper;
+
+    @Autowired
+    private RolePoMapper rolePoMapper;
 
     @Autowired
     private RedisTemplate<String, Serializable> redisTemplate;
@@ -116,21 +127,209 @@ public class UserDao implements InitializingBean {
     }
 
     /**
-     * @author yue hao
-     * @param id 用户ID
-     * @return 用户的权限列表
-     */
-
-    public List<Privilege> findPrivsByUserId(Long id) {
-        //getRoleIdByUserId已经进行签名校验
-        List<Long> roleIds = this.getRoleIdByUserId(id);
-        List<Privilege> privileges = new ArrayList<>();
-        for(Long roleId: roleIds) {
-            List<Privilege> rolePriv = roleDao.findPrivsByRoleId(roleId);
-            privileges.addAll(rolePriv);
+     * 取消用户角色
+     * @param id 用户角色id
+     * @return ReturnObject<VoObject>
+     * @author Xianwei Wang
+     * */
+    public ReturnObject<VoObject> revokeRole(Long id){
+        UserRolePo userRolePo = userRolePoMapper.selectByPrimaryKey(id);
+        if (userRolePo == null){
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-        return privileges;
+
+
+        try {
+            int state = userRolePoMapper.deleteByPrimaryKey(id);
+            if (state == 0){
+                logger.warn("revokeRole: 未找到该用户角色id" + id);
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+            
+
+        } catch (DataAccessException e) {
+            // 数据库错误
+            logger.error("数据库错误：" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
+                    String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        } catch (Exception e) {
+            // 属未知错误
+            logger.error("严重错误：" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
+                    String.format("发生了严重的未知错误：%s", e.getMessage()));
+        }
+        
+        //清除缓存
+        clearUserPrivCache(userRolePo.getUserId());
+
+        return new ReturnObject<>();
     }
+
+    /**
+     * 赋予用户角色
+     * @param createid 创建者id
+     * @param userid 用户id
+     * @param roleid 角色id
+     * @return ReturnObject<VoObject>
+     * @author Xianwei Wang
+     * */
+    public ReturnObject<VoObject> assignRole(Long createid, Long userid, Long roleid){
+        UserRolePo userRolePo = new UserRolePo();
+        userRolePo.setUserId(userid);
+        userRolePo.setRoleId(roleid);
+
+        User user = getUserById(userid.longValue()).getData();
+        User create = getUserById(createid.longValue()).getData();
+        RolePo rolePo = rolePoMapper.selectByPrimaryKey(roleid);
+
+        //用户id或角色id不存在
+        if (user == null || create == null || rolePo == null) {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        userRolePo.setCreatorId(createid);
+        userRolePo.setGmtCreate(LocalDateTime.now());
+
+        UserRole userRole = new UserRole(userRolePo, user, new Role(rolePo), create);
+        userRolePo.setSignature(userRole.getCacuSignature());
+
+        //查询该用户是否已经拥有该角色
+        UserRolePoExample example = new UserRolePoExample();
+        UserRolePoExample.Criteria criteria = example.createCriteria();
+        criteria.andUserIdEqualTo(userid);
+        criteria.andRoleIdEqualTo(roleid);
+
+        //若未拥有，则插入数据
+        try {
+            List<UserRolePo> userRolePoList = userRolePoMapper.selectByExample(example);
+            if (userRolePoList.isEmpty()){
+                userRolePoMapper.insert(userRolePo);
+            } else {
+                logger.warn("assignRole: 该用户已拥有该角色 userid=" + userid + "roleid=" + roleid);
+                return new ReturnObject<>(ResponseCode.USER_ROLE_REGISTERED);
+            }
+        } catch (DataAccessException e) {
+            // 数据库错误
+            logger.error("数据库错误：" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
+                    String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        } catch (Exception e) {
+            // 属未知错误
+            logger.error("严重错误：" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
+                    String.format("发生了严重的未知错误：%s", e.getMessage()));
+        }
+        //清除缓存
+        clearUserPrivCache(userid);
+
+        return new ReturnObject<>(new UserRole(userRolePo, user, new Role(rolePo), create));
+
+    }
+
+    /**
+     * 使用用户id，清空该用户和被代理对象的redis缓存
+     * @param userid 用户id
+     * @author Xianwei Wang
+     */
+    private void clearUserPrivCache(Long userid){
+        String key = "u_" + userid;
+        redisTemplate.delete(key);
+
+        UserProxyPoExample example = new UserProxyPoExample();
+        UserProxyPoExample.Criteria criteria = example.createCriteria();
+        criteria.andUserBIdEqualTo(userid);
+        List<UserProxyPo> userProxyPoList = userProxyPoMapper.selectByExample(example);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        for (UserProxyPo po:
+             userProxyPoList) {
+            StringBuilder signature = Common.concatString("-", po.getUserAId().toString(),
+                    po.getUserBId().toString(), po.getBeginDate().toString(), po.getEndDate().toString(), po.getValid().toString());
+            String newSignature = SHA256.getSHA256(signature.toString());
+            UserProxyPo newPo = null;
+
+            if (newSignature.equals(po.getSignature())) {
+                if (now.isBefore(po.getEndDate()) && now.isAfter(po.getBeginDate())) {
+                    //在有效期内
+                    String proxyKey = "up_" + po.getUserAId();
+                    redisTemplate.delete(proxyKey);
+                    logger.debug("clearUserPrivCache: userAId = " + po.getUserAId() + " userBId = " + po.getUserBId());
+                } else {
+                    //代理过期了，但标志位依然是有效
+                    newPo = newPo == null ? new UserProxyPo() : newPo;
+                    newPo.setValid((byte) 0);
+                    signature = Common.concatString("-", po.getUserAId().toString(),
+                            po.getUserBId().toString(), po.getBeginDate().toString(), po.getEndDate().toString(), newPo.getValid().toString());
+                    newSignature = SHA256.getSHA256(signature.toString());
+                    newPo.setSignature(newSignature);
+                }
+            } else {
+                logger.error("clearUserPrivCache: Wrong Signature(auth_user_proxy): id =" + po.getId());
+            }
+
+            if (null != newPo) {
+                logger.debug("clearUserPrivCache: writing back.. po =" + newPo);
+                userProxyPoMapper.updateByPrimaryKeySelective(newPo);
+            }
+
+        }
+    }
+
+    /**
+     * 获取用户的角色信息
+     * @param id 用户id
+     * @return UserRole列表
+     * @author Xianwei Wang
+     * */
+    public ReturnObject<List> getUserRoles(Long id){
+        UserRolePoExample example = new UserRolePoExample();
+        UserRolePoExample.Criteria criteria = example.createCriteria();
+        criteria.andUserIdEqualTo(id);
+        List<UserRolePo> userRolePoList = userRolePoMapper.selectByExample(example);
+        logger.info("getUserRoles: userId = "+ id + "roleNum = "+ userRolePoList.size());
+
+        List<UserRole> retUserRoleList = new ArrayList<>(userRolePoList.size());
+
+        if (retUserRoleList.isEmpty()) {
+            User user = getUserById(id.longValue()).getData();
+            if (user == null) {
+                logger.error("getUserRoles: 数据库不存在该用户 userid=" + id);
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+        }
+
+        for (UserRolePo po : userRolePoList) {
+            User user = getUserById(po.getUserId().longValue()).getData();
+            User creator = getUserById(po.getCreatorId().longValue()).getData();
+            RolePo rolePo = rolePoMapper.selectByPrimaryKey(po.getRoleId());
+            if (user == null) {
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+            if (creator == null) {
+                logger.error("getUserRoles: 数据库不存在该资源 userid=" + po.getCreatorId());
+            }
+            if (rolePo == null) {
+                logger.error("getUserRoles: 数据库不存在该资源:rolePo id=" + po.getRoleId());
+                continue;
+            }
+
+            Role role = new Role(rolePo);
+            UserRole userRole = new UserRole(po, user, role, creator);
+
+            //校验签名
+            if (userRole.authetic()){
+                retUserRoleList.add(userRole);
+                logger.info("getRoleIdByUserId: userId = " + po.getUserId() + " roleId = " + po.getRoleId());
+            } else {
+                logger.error("getUserRoles: Wrong Signature(auth_user_role): id =" + po.getId());
+            }
+        }
+        return new ReturnObject<>(retUserRoleList);
+    }
+
+
+
 
     /**
      * 计算User自己的权限，load到Redis
@@ -544,3 +743,4 @@ public class UserDao implements InitializingBean {
 
     /* auth009 ends */
 }
+

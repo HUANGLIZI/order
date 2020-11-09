@@ -6,6 +6,9 @@ import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
+import cn.edu.xmu.privilege.model.bo.Privilege;
+import cn.edu.xmu.privilege.model.bo.UserRole;
+import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.dao.UserDao;
 import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.bo.User;
@@ -74,6 +77,42 @@ public class UserService {
      */
     @Value("${privilegeservice.lockerExpireTime}")
     private long lockerExpireTime;
+
+    /**
+     * 取消用户角色
+     * @param id 用户角色id
+     * @return ReturnObject<VoObject>
+     * @author Xianwei Wang
+     * */
+    @Transactional
+    public ReturnObject<VoObject> revokeRole(Long id){
+        return userDao.revokeRole(id);
+    }
+
+    /**
+     * 赋予用户角色
+     * @param createid 创建者id
+     * @param userid 用户id
+     * @param roleid 角色id
+     * @return UserRole
+     * @author Xianwei Wang
+     * */
+    @Transactional
+    public ReturnObject<VoObject> assignRole(Long createid, Long userid, Long roleid){
+        return userDao.assignRole(createid, userid, roleid);
+    }
+
+    /**
+     * 查看用户的角色信息
+     * @param id 用户id
+     * @return 角色信息
+     * @author Xianwei Wang
+     * */
+    @Transactional
+    public ReturnObject<List> getSelfUserRoles(Long id){
+        return userDao.getUserRoles(id);
+    }
+
 
     /**
      * 查询所有权限

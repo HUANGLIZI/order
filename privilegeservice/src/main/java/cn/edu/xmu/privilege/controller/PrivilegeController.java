@@ -5,6 +5,16 @@ import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
+import cn.edu.xmu.ooad.util.JwtHelper;
+import cn.edu.xmu.ooad.util.ResponseCode;
+import cn.edu.xmu.ooad.util.ResponseUtil;
+import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.privilege.dao.PrivilegeDao;
+import cn.edu.xmu.privilege.model.bo.UserRole;
+import cn.edu.xmu.privilege.model.vo.LoginVo;
+import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
+
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
@@ -44,6 +54,106 @@ public class PrivilegeController {
 
     @Autowired
     private UserService userService;
+
+    /***
+     * 取消用户权限
+     * @param id 用户id
+     * @return
+     */
+    @ApiOperation(value = "取消用户权限")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(name="userid", value="用户id", required = true, dataType="Integer", paramType="path")
+
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    @Audit
+    @DeleteMapping("/adminusersrole/{id}")
+    public Object revokeRole(@PathVariable Long id){
+        return Common.decorateReturnObject(userService.revokeRole(id));
+    }
+
+    /***
+     * 赋予用户权限
+     * @param userid 用户id
+     * @param roleid 角色id
+     * @return
+     */
+    @ApiOperation(value = "赋予用户权限")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(name="userid", value="用户id", required = true, dataType="Integer", paramType="path"),
+            @ApiImplicitParam(name="roleid", value="角色id", required = true, dataType="Integer", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    @Audit
+    @PostMapping("/adminusers/{userid}/roles/{roleid}")
+    public Object assignRole(@LoginUser Long createid, @PathVariable Long userid, @PathVariable Long roleid){
+
+        ReturnObject<VoObject> returnObject =  userService.assignRole(createid, userid, roleid);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+
+    }
+
+    /***
+     * 获得自己角色信息
+     * @author Xianwei Wang
+     * @return
+     */
+    @ApiOperation(value = "获得自己角色信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+
+    })
+    @Audit
+    @GetMapping("/adminusers/self/roles")
+    public Object getUserSelfRole(@LoginUser Long id){
+
+        ReturnObject<List> returnObject =  userService.getSelfUserRoles(id);
+        return Common.getListRetObject(returnObject);
+    }
+
+    /***
+     * 获得所有人角色信息
+     * @param id 用户id
+     * @return
+     */
+    @ApiOperation(value = "获得所有人角色信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(name="id", value="用户id", required = true, dataType="int", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @GetMapping("/adminusers/{id}/roles")
+    public Object getSelfRole(@PathVariable Long id){
+        ReturnObject<List> returnObject =  userService.getSelfUserRoles(id);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getListRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+
+    }
+
+
+//    @Autowired
+    private JwtHelper jwtHelper = new JwtHelper();
 
     @Autowired
     private RoleService roleService;
@@ -441,3 +551,4 @@ public class PrivilegeController {
         return Common.getNullRetObj(returnObject, httpServletResponse);
     }
 }
+
