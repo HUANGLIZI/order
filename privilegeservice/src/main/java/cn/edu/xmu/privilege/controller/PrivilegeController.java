@@ -244,11 +244,7 @@ public class PrivilegeController {
         ReturnObject<VoObject> user =  userService.findUserById(userId);
         logger.debug("finderSelf: user = " + user.getData() + " code = " + user.getCode());
 
-        if(!user.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)) {
-            returnObject = Common.getRetObject(user);
-        } else {
-            returnObject = Common.getNullRetObj(new ReturnObject<>(user.getCode(), user.getErrmsg()), httpServletResponse);
-        }
+        returnObject = Common.getRetObject(user);
 
         return returnObject;
     }
@@ -301,8 +297,8 @@ public class PrivilegeController {
     public Object findAllUser(
             @RequestParam  String  userName,
             @RequestParam  String  mobile,
-            @RequestParam  Integer page,
-            @RequestParam  Integer pagesize) {
+            @RequestParam(required = false, defaultValue = "1")  Integer page,
+            @RequestParam(required = false, defaultValue = "10")  Integer pagesize) {
 
         Object object = null;
 
