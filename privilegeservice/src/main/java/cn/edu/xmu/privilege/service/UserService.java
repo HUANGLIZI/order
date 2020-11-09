@@ -14,6 +14,7 @@ import cn.edu.xmu.privilege.dao.UserDao;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import cn.edu.xmu.privilege.util.ImgHelper;
 import cn.edu.xmu.privilege.model.vo.UserVo;
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,36 +103,23 @@ public class UserService {
      * @param pagesize
      * @return 用户列表
      */
-    public ReturnObject<List> findAllUsers(String userName, String mobile, Integer page, Integer pagesize) {
-
+    public ReturnObject<PageInfo<VoObject>> findAllUsers(String userName, String mobile, Integer page, Integer pagesize) {
 
         String userNameAES = userName.isBlank() ? "" : AES.encrypt(userName, User.AESPASS);
         String mobileAES = mobile.isBlank() ? "" : AES.encrypt(mobile, User.AESPASS);
-        List<UserPo> userPos = userDao.findAllUsers(userNameAES, mobileAES, page, pagesize);
 
-        Stream<UserPo> userPoStream = userPos.stream();
-        if(!(userName == null) && !userName.isBlank())
-            userPoStream = userPoStream.filter(userPo -> (userPo.getUserName().contentEquals(userName)));
-        if(!(mobile == null) && !mobile.isBlank())
-            userPoStream = userPoStream.filter(userPo -> (userPo.getMobile().contentEquals(mobile)));
+        PageHelper.startPage(page, pagesize);
+        PageInfo<UserPo> userPos = userDao.findAllUsers(userNameAES, mobileAES, page, pagesize);
 
-        List<UserPo> tmpUserPos = userPoStream.collect(Collectors.toList());
+        List<VoObject> users = userPos.getList().stream().map(User::new).collect(Collectors.toList());
 
-        Integer size = tmpUserPos.size();
+        PageInfo<VoObject> returnObject = new PageInfo<>(users);
+        returnObject.setPages(userPos.getPages());
+        returnObject.setPageNum(userPos.getPageNum());
+        returnObject.setPageSize(userPos.getPageSize());
+        returnObject.setTotal(userPos.getTotal());
 
-        userPoStream = tmpUserPos.stream();
-
-        if(page * pagesize <= size)
-        {
-            userPoStream = userPoStream.skip((page - 1) * pagesize).limit(pagesize);
-        } else {
-            Integer returnSize = size < pagesize ? size : pagesize;
-            userPoStream = userPoStream.skip(size - returnSize).limit(returnSize);
-        }
-
-        ReturnObject<List> returnObject = new ReturnObject<>(userPoStream.map(User::new).collect(Collectors.toList()));
-
-        return returnObject;
+        return new ReturnObject<>(returnObject);
     }
 
     /**

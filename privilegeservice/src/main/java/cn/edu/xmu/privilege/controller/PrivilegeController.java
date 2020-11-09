@@ -195,6 +195,7 @@ public class PrivilegeController {
         page = (page == null)?1:page;
         pageSize = (pageSize == null)?10:pageSize;
 
+        logger.debug("getAllPrivs: page = "+ page +"  pageSize ="+pageSize);
         ReturnObject<PageInfo<VoObject>> returnObject =  userService.findAllPrivs(page, pageSize);
         return Common.getPageRetObject(returnObject);
     }
@@ -307,9 +308,9 @@ public class PrivilegeController {
         if(page <= 0 || pagesize <= 0) {
             object = Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
         } else {
-            ReturnObject<List> returnObject = userService.findAllUsers(userName, mobile, page, pagesize);
+            ReturnObject<PageInfo<VoObject>> returnObject = userService.findAllUsers(userName, mobile, page, pagesize);
             logger.debug("findUserById: getUsers = " + returnObject);
-            object = Common.getListRetObject(returnObject);
+            object = Common.getPageRetObject(returnObject);
         }
 
         return object;

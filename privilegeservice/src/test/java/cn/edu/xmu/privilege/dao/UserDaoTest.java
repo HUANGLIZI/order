@@ -1,8 +1,10 @@
 package cn.edu.xmu.privilege.dao;
 
+import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.po.UserPo;
+import com.github.pagehelper.PageInfo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -180,8 +182,8 @@ public class UserDaoTest {
 
     @Test
     public void findAllUsers() {
-        List<UserPo> userPos = userDao.findAllUsers("", "", 1, 5);
+        PageInfo<UserPo> userPos = userDao.findAllUsers("", "", 1, 5);
 
-        assertEquals(userPos.size(), 5);
+        assertEquals(userPos.getList().size(), 5);
     }
 }

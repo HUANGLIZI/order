@@ -18,6 +18,7 @@ import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.po.*;
 
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cn.edu.xmu.privilege.model.po.UserProxyPo;
@@ -42,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author Ming Qiu
@@ -613,7 +615,7 @@ public class UserDao implements InitializingBean {
      * @author XQChen
      * @return List<UserPo> 用户列表
      */
-    public List<UserPo> findAllUsers(String userNameAES, String mobileAES, int page, int pageSize) {
+    public PageInfo<UserPo> findAllUsers(String userNameAES, String mobileAES, int page, int pageSize) {
         UserPoExample example = new UserPoExample();
         UserPoExample.Criteria criteria = example.createCriteria();
         if(!userNameAES.isBlank())
@@ -621,12 +623,11 @@ public class UserDao implements InitializingBean {
         if(!mobileAES.isBlank())
             criteria.andMobileEqualTo(mobileAES);
 
-        PageHelper.startPage(page, pageSize);
-        List<UserPo> userPos = userPoMapper.selectByExample(example);
+        List<UserPo> users = userPoMapper.selectByExample(example);
 
-        logger.debug("findUserById: retUsers = "+userPos);
+        logger.debug("findUserById: retUsers = "+users);
 
-        return userPos;
+        return new PageInfo<>(users);
     }
 
     /* auth009 */

@@ -197,8 +197,7 @@ public class PrivilegeControllerTest4 {
 
         JSONAssert.assertEquals(responseFailString, content, true);
     }
-}
-    private static final Logger logger = LoggerFactory.getLogger(PrivilegeControllerTest4.class);
+
     /**
      * 创建测试用token
      *
