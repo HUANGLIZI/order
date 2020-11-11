@@ -5,6 +5,7 @@ import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.encript.AES;
 import cn.edu.xmu.ooad.util.encript.SHA256;
 import cn.edu.xmu.privilege.model.po.UserPo;
+import cn.edu.xmu.privilege.model.vo.UserRetVo;
 import cn.edu.xmu.privilege.model.vo.UserSimpleRetVo;
 import cn.edu.xmu.privilege.model.vo.UserVo;
 import lombok.Data;
@@ -139,6 +140,31 @@ public class User implements VoObject {
         this.cacuSignature = SHA256.getSHA256(signature.toString());
     }
 
+
+    /**
+     * Create return Vo object
+     * @author XQChen
+     * @return
+     */
+    @Override
+    public UserRetVo createVo() {
+        UserRetVo userRetVo = new UserRetVo();
+        userRetVo.setId(id);
+        userRetVo.setUserName(userName);
+        userRetVo.setMobile(mobile);
+        userRetVo.setName(name);
+        userRetVo.setEmail(email);
+        userRetVo.setAvatar(avatar);
+        userRetVo.setLastLoginTime(lastLoginTime.toString());
+        userRetVo.setLastLoginIp(lastLoginIp);
+        userRetVo.setStatus(state.getCode().byteValue());
+        userRetVo.setDepart_id(departId);
+        userRetVo.setGmtCreate(gmtCreate.toString());
+        userRetVo.setGmtModified(gmtModified.toString());
+
+        return userRetVo;
+    }
+
     /**
      * 对象未篡改
      * @return
@@ -182,12 +208,6 @@ public class User implements VoObject {
         po.setSignature(SHA256.getSHA256(signature.toString()));
         return po;
     }
-
-    @Override
-    public Object createVo() {
-        return null;
-    }
-
 
     /**
      * 创建SimpleVo

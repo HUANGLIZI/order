@@ -1,20 +1,20 @@
 package cn.edu.xmu.privilege.service;
 
 import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.encript.AES;
 import cn.edu.xmu.ooad.util.JwtHelper;
-import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.dao.UserDao;
-import cn.edu.xmu.privilege.model.bo.Privilege;
-import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import cn.edu.xmu.privilege.util.ImgHelper;
 import cn.edu.xmu.privilege.model.vo.UserVo;
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import cn.edu.xmu.privilege.model.po.UserPo;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.io.IOException;
@@ -39,6 +43,7 @@ import java.util.concurrent.TimeUnit;
  **/
 @Service
 public class UserService {
+
     private Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Value("${privilegeservice.login.jwtExpire}")
@@ -67,6 +72,55 @@ public class UserService {
      */
     @Value("${privilegeservice.lockerExpireTime}")
     private long lockerExpireTime;
+
+    /**
+     * ID获取用户信息
+     * @author XQChen
+     * @param id
+     * @return 用户
+     */
+    public ReturnObject<VoObject> findUserById(Long id) {
+        ReturnObject<VoObject> returnObject = null;
+
+        UserPo userPo = userDao.findUserById(id);
+        if(userPo != null) {
+            logger.debug("findUserById : " + returnObject);
+            returnObject = new ReturnObject<>(new User(userPo));
+        } else {
+            logger.debug("findUserById: Not Found");
+            returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        return returnObject;
+    }
+
+    /**
+     * 获取所有用户信息
+     * @author XQChen
+     * @param userName
+     * @param mobile
+     * @param page
+     * @param pagesize
+     * @return 用户列表
+     */
+    public ReturnObject<PageInfo<VoObject>> findAllUsers(String userName, String mobile, Integer page, Integer pagesize) {
+
+        String userNameAES = userName.isBlank() ? "" : AES.encrypt(userName, User.AESPASS);
+        String mobileAES = mobile.isBlank() ? "" : AES.encrypt(mobile, User.AESPASS);
+
+        PageHelper.startPage(page, pagesize);
+        PageInfo<UserPo> userPos = userDao.findAllUsers(userNameAES, mobileAES, page, pagesize);
+
+        List<VoObject> users = userPos.getList().stream().map(User::new).collect(Collectors.toList());
+
+        PageInfo<VoObject> returnObject = new PageInfo<>(users);
+        returnObject.setPages(userPos.getPages());
+        returnObject.setPageNum(userPos.getPageNum());
+        returnObject.setPageSize(userPos.getPageSize());
+        returnObject.setTotal(userPos.getTotal());
+
+        return new ReturnObject<>(returnObject);
+    }
 
     /**
      * 取消用户角色

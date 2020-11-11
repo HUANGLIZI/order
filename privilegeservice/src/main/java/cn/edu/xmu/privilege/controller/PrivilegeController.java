@@ -1,9 +1,15 @@
 package cn.edu.xmu.privilege.controller;
 
+import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.annotation.Depart;
+import cn.edu.xmu.ooad.annotation.LoginUser;
+import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.annotation.*;
+import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.vo.*;
 import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -26,6 +32,7 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.HttpRequestHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -37,6 +44,12 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import io.swagger.annotations.Api;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 权限控制器
@@ -162,7 +175,6 @@ public class PrivilegeController {
     @Autowired
     private HttpServletResponse httpServletResponse;
 
-
     /**
      * 获得所有权限
      * @return Object
@@ -184,6 +196,7 @@ public class PrivilegeController {
         page = (page == null)?1:page;
         pageSize = (pageSize == null)?10:pageSize;
 
+        logger.debug("getAllPrivs: page = "+ page +"  pageSize ="+pageSize);
         ReturnObject<PageInfo<VoObject>> returnObject =  userService.findAllPrivs(page, pageSize);
         return Common.getPageRetObject(returnObject);
     }
@@ -209,6 +222,95 @@ public class PrivilegeController {
         logger.debug("getAllPrivs: userId = " + userId +" departId = "+departId);
         ReturnObject returnObject =  userService.changePriv(id, vo);
         return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+    }
+
+    /**
+     * @author XQChen
+     * @date Created in 2020/11/8 0:33
+     **/
+    @ApiOperation(value = "auth003:查看自己信息",  produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value ="用户token", required = true)
+    })
+    @ApiResponses({
+    })
+    @Audit
+    @GetMapping("adminusers")
+    public Object getUserSelf(@LoginUser Long userId) {
+        logger.debug("getUserSelf userId:" + userId);
+
+        Object returnObject;
+
+        ReturnObject<VoObject> user =  userService.findUserById(userId);
+        logger.debug("finderSelf: user = " + user.getData() + " code = " + user.getCode());
+
+        returnObject = Common.getRetObject(user);
+
+        return returnObject;
+    }
+
+    /**
+     * @author XQChen
+     * @date Created in 2020/11/8 0:33
+     **/
+    @Audit
+    @ApiOperation(value = "auth003: 查看任意用户信息",  produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String",  name = "authorization", value ="用户token", required = true),
+            @ApiImplicitParam(paramType = "path",   dataType = "Integer", name = "id",            value ="用户id",    required = true)
+    })
+    @ApiResponses({
+    })
+    @GetMapping("adminusers/{id}")
+    public Object getUserById(@PathVariable("id") Long id) {
+
+        Object returnObject = null;
+
+        ReturnObject<VoObject> user = userService.findUserById(id);
+        logger.debug("findUserById: user = " + user.getData() + " code = " + user.getCode());
+
+        if (!user.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)) {
+            returnObject = Common.getRetObject(user);
+        } else {
+            returnObject = Common.getNullRetObj(new ReturnObject<>(user.getCode(), user.getErrmsg()), httpServletResponse);
+        }
+
+        return returnObject;
+    }
+
+    /**
+     * @author XQChen
+     * @date Created in 2020/11/8 0:33
+     **/
+    @Audit
+    @ApiOperation(value = "auth003: 查询用户信息",  produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String",  name = "authorization", value ="用户token", required = true),
+            @ApiImplicitParam(paramType = "query",  dataType = "String",  name = "userName",      value ="用户名",    required = false),
+            @ApiImplicitParam(paramType = "query",  dataType = "String",  name = "mobile",        value ="电话号码",  required = false),
+            @ApiImplicitParam(paramType = "query",  dataType = "Integer", name = "page",          value ="页码",      required = true),
+            @ApiImplicitParam(paramType = "query",  dataType = "Integer", name = "pagesize",      value ="每页数目",  required = true)
+    })
+    @ApiResponses({
+    })
+    @GetMapping("adminusers/all")
+    public Object findAllUser(
+            @RequestParam  String  userName,
+            @RequestParam  String  mobile,
+            @RequestParam(required = false, defaultValue = "1")  Integer page,
+            @RequestParam(required = false, defaultValue = "10")  Integer pagesize) {
+
+        Object object = null;
+
+        if(page <= 0 || pagesize <= 0) {
+            object = Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+        } else {
+            ReturnObject<PageInfo<VoObject>> returnObject = userService.findAllUsers(userName, mobile, page, pagesize);
+            logger.debug("findUserById: getUsers = " + returnObject);
+            object = Common.getPageRetObject(returnObject);
+        }
+
+        return object;
     }
 
 

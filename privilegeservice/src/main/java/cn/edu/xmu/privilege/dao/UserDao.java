@@ -1,5 +1,6 @@
 package cn.edu.xmu.privilege.dao;
 
+import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.RolePoMapper;
@@ -8,12 +9,22 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.ooad.util.encript.SHA256;
 import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
+import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
 import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.po.*;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import cn.edu.xmu.privilege.model.po.UserProxyPo;
+import cn.edu.xmu.privilege.model.po.UserProxyPoExample;
+import cn.edu.xmu.privilege.model.po.UserRolePo;
+import cn.edu.xmu.privilege.model.po.UserRolePoExample;
 import cn.edu.xmu.privilege.model.vo.UserVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author Ming Qiu
@@ -40,6 +52,9 @@ import java.util.concurrent.TimeUnit;
  **/
 @Repository
 public class UserDao implements InitializingBean {
+
+    @Autowired
+    private UserPoMapper userPoMapper;
 
     private static final Logger logger = LoggerFactory.getLogger(UserDao.class);
 
@@ -71,9 +86,6 @@ public class UserDao implements InitializingBean {
 
     @Autowired
     private RoleDao roleDao;
-
-    @Autowired
-    private UserPoMapper userPoMapper;
 
     /**
      * 由用户名获得用户
@@ -145,7 +157,7 @@ public class UserDao implements InitializingBean {
                 logger.warn("revokeRole: 未找到该用户角色id" + id);
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
-            
+
 
         } catch (DataAccessException e) {
             // 数据库错误
@@ -158,7 +170,7 @@ public class UserDao implements InitializingBean {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
                     String.format("发生了严重的未知错误：%s", e.getMessage()));
         }
-        
+
         //清除缓存
         clearUserPrivCache(userRolePo.getUserId());
 
@@ -579,6 +591,43 @@ public class UserDao implements InitializingBean {
             returnObject = new ReturnObject();
         }
         return returnObject;
+    }
+
+    /**
+     * ID获取用户信息
+     * @author XQChen
+     * @param id
+     * @return 用户
+     */
+    public UserPo findUserById(Long Id) {
+        UserPoExample example = new UserPoExample();
+        UserPoExample.Criteria criteria = example.createCriteria();
+        criteria.andIdEqualTo(Id);
+
+        logger.debug("findUserById: Id =" + Id);
+        UserPo userPo = userPoMapper.selectByPrimaryKey(Id);
+
+        return userPo;
+    }
+
+    /**
+     * 获取所有用户信息
+     * @author XQChen
+     * @return List<UserPo> 用户列表
+     */
+    public PageInfo<UserPo> findAllUsers(String userNameAES, String mobileAES, int page, int pageSize) {
+        UserPoExample example = new UserPoExample();
+        UserPoExample.Criteria criteria = example.createCriteria();
+        if(!userNameAES.isBlank())
+            criteria.andUserNameEqualTo(userNameAES);
+        if(!mobileAES.isBlank())
+            criteria.andMobileEqualTo(mobileAES);
+
+        List<UserPo> users = userPoMapper.selectByExample(example);
+
+        logger.debug("findUserById: retUsers = "+users);
+
+        return new PageInfo<>(users);
     }
 
     /* auth009 */
