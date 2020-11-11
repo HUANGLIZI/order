@@ -96,6 +96,24 @@ public class PrivilegeDao implements InitializingBean {
     }
 
     /**
+     * 根据权限Id查询权限
+     * @author yue hao
+     * @param id 权限ID
+     * @return 权限
+     */
+    public Privilege findPriv(Long id){
+        PrivilegePo po = poMapper.selectByPrimaryKey(id);
+        Privilege priv = new Privilege(po);
+        if (priv.authetic()) {
+            logger.debug("afterPropertiesSet: key = " + priv.getKey() + " p = " + priv);
+            return priv;
+        }
+        else {
+            logger.error("findPriv: Wrong Signature(auth_privilege): id =" + po.getId());
+            return null;
+        }
+    }
+    /**
      * 查询所有权限
      * @param page: 页码
      * @param pageSize : 每页数量
