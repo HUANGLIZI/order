@@ -111,7 +111,7 @@ public class UserService {
         PageHelper.startPage(page, pagesize);
         PageInfo<UserPo> userPos = userDao.findAllUsers(userNameAES, mobileAES, page, pagesize);
 
-        List<VoObject> users = userPos.getList().stream().map(User::new).collect(Collectors.toList());
+        List<VoObject> users = userPos.getList().stream().map(User::new).filter(User::authetic).collect(Collectors.toList());
 
         PageInfo<VoObject> returnObject = new PageInfo<>(users);
         returnObject.setPages(userPos.getPages());
