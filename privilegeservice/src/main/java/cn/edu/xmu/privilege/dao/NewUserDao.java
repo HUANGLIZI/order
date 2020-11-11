@@ -105,7 +105,7 @@ public class NewUserDao implements InitializingBean {
             bloomFilter.addByBloomFilter(field.getName()+suffixName,method.invoke(po));
         }
         catch (Exception ex){
-            logger.debug("Exception happened:"+ex.getMessage());
+            logger.error("Exception happened:"+ex.getMessage());
         }
     }
 
