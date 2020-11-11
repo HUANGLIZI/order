@@ -7,6 +7,7 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.annotation.*;
 import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.model.bo.Privilege;
+import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.vo.*;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
@@ -23,6 +24,7 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
+import cn.edu.xmu.privilege.service.NewUserService;
 import cn.edu.xmu.privilege.service.RoleService;
 import cn.edu.xmu.privilege.service.UserProxyService;
 import cn.edu.xmu.privilege.service.UserService;
@@ -43,6 +45,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,6 +69,8 @@ public class PrivilegeController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private NewUserService newUserService;
     @Autowired
     private UserProxyService userProxyService;
 
@@ -786,6 +791,53 @@ public class PrivilegeController {
         logger.debug("removeAllProxies: id) = " + id);
         ReturnObject returnObject = userProxyService.removeAllProxies(id);
         return returnObject;
+    }
+    /**
+     * 注册用户
+     * @param vo:vo对象
+     * @param result 检查结果
+     * @return  Object
+     * createdBy: LiangJi3229 2020-11-10 18:41
+     */
+    @ApiOperation(value="注册用户")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", dataType = "NewUserVo", name = "vo", value = "newUserInfo", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 732, message = "邮箱已被注册"),
+            @ApiResponse(code = 733, message = "电话已被注册"),
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 404, message = "参数不合法")
+    })
+    @PostMapping("adminusers")
+    public Object register(@Validated @RequestBody NewUserVo vo, BindingResult result){
+        if(result.hasErrors()){
+            return Common.processFieldErrors(result,httpServletResponse);
+        }
+        ReturnObject returnObject=newUserService.register(vo);
+        if(returnObject.getCode()==ResponseCode.OK){
+            return ResponseUtil.ok(returnObject.getData());
+        }
+        else return ResponseUtil.fail(returnObject.getCode());
+    }
+
+    /**
+     * 查询所有状态
+     * @return Object
+     * createdBy: LiangJi3229 2020-11-10 18:41
+     */
+    @ApiOperation(value="获得管理员用户的所有状态")
+    @ApiResponses({
+            @ApiResponse(code = 0,message = "成功")
+    })
+    @GetMapping("adminusers/states")
+    public Object getAllStates(){
+        User.State[] states=User.State.class.getEnumConstants();
+        List<StateVo> stateVos=new ArrayList<StateVo>();
+        for(int i=0;i<states.length;i++){
+            stateVos.add(new StateVo(states[i]));
+        }
+        return ResponseUtil.ok(new ReturnObject<List>(stateVos).getData());
     }
 }
 
