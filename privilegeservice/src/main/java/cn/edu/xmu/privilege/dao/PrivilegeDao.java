@@ -105,7 +105,6 @@ public class PrivilegeDao implements InitializingBean {
         PrivilegePo po = poMapper.selectByPrimaryKey(id);
         Privilege priv = new Privilege(po);
         if (priv.authetic()) {
-            logger.debug("afterPropertiesSet: key = " + priv.getKey() + " p = " + priv);
             return priv;
         }
         else {

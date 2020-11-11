@@ -77,7 +77,7 @@ public class RoleDao implements InitializingBean {
         List<Privilege> privileges = new ArrayList<>();
         for(Long privId: privIds) {
             Privilege po = this.privDao.findPriv(privId);
-            logger.debug("getPriv:  po = " + po);
+            logger.debug("findPrivsByRoleId:  po = " + po);
             privileges.add(po);
         }
         return privileges;
