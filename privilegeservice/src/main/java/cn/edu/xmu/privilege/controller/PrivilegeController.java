@@ -23,6 +23,7 @@ import cn.edu.xmu.privilege.model.vo.UserProxyVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import cn.edu.xmu.privilege.service.NewUserService;
 import cn.edu.xmu.privilege.service.RoleService;
@@ -42,7 +43,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotBlank;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -590,6 +593,7 @@ public class PrivilegeController {
         ReturnObject returnObject = userService.releaseUser(id);
         return Common.decorateReturnObject(returnObject);
     }
+
     /* auth009 结束 */
 
     /**
@@ -839,5 +843,41 @@ public class PrivilegeController {
         }
         return ResponseUtil.ok(new ReturnObject<List>(stateVos).getData());
     }
+
+    /**
+     * auth004: 修改自己的信息
+     * @param vo 修改信息 UserVo 视图
+     * @param bindingResult 校验信息
+     * @return Object
+     * @author 24320182203175 陈晓如
+     * Created at 2020/11/11 11:22
+     */
+    @ApiOperation(value = "修改自己的信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "RoleVo", name = "vo", value = "可修改的用户信息", required = true)
+
+    })
+    @ApiResponses({
+            @ApiResponse(code = 732, message = "邮箱已被注册"),
+            @ApiResponse(code = 733, message = "电话已被注册"),
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit // 需要认证
+    @PutMapping("adminusers")
+    public Object changeMyAdminselfInfo(@LoginUser Long id, @Validated @RequestBody UserVo vo, BindingResult bindingResult) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("modifyUserInfo: id = "+ id +" vo = " + vo);
+        }
+        // 校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (returnObject != null) {
+            logger.info("incorrect data received while modifyUserInfo id = " + id);
+            return returnObject;
+        }
+        ReturnObject returnObj = userService.modifyUserInfo(id, vo);
+        return Common.decorateReturnObject(returnObj);
+    }
+
 }
 
