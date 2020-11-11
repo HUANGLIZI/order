@@ -12,6 +12,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -55,18 +56,23 @@ public class AuditAspect {
     //配置controller环绕通知,使用在方法aspect()上注册的切入点
     @Around("auditAspect()")
     public Object around(JoinPoint joinPoint){
+        logger.debug("around: begin joinPoint = "+ joinPoint);
         MethodSignature ms = (MethodSignature) joinPoint.getSignature();
         Method method = ms.getMethod();
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
-                String token = request.getHeader(JwtHelper.LOGIN_TOKEN_KEY);
+        String token = request.getHeader(JwtHelper.LOGIN_TOKEN_KEY);
         if (token == null){
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return ResponseUtil.fail(ResponseCode.AUTH_NEED_LOGIN);
         }
 
         JwtHelper.UserAndDepart userAndDepart = new JwtHelper().verifyTokenAndGetClaims(token);
+        if (null == userAndDepart){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return ResponseUtil.fail(ResponseCode.AUTH_INVALID_JWT);
+        }
         Long userId = userAndDepart.getUserId();
         Long departId = userAndDepart.getDepartId();
 

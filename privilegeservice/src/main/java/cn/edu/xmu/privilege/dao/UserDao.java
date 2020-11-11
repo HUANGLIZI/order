@@ -553,7 +553,7 @@ public class UserDao implements InitializingBean {
      * modifiedBy 3218 2020/11/4 15:48
      */
 
-    public ReturnObject<User> getUserById(long id) {
+    public ReturnObject<User> getUserById(Long id) {
         UserPo userPo = userMapper.selectByPrimaryKey(id);
         if (userPo == null) {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
