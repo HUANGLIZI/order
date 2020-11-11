@@ -14,6 +14,7 @@ import cn.edu.xmu.privilege.dao.UserDao;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import cn.edu.xmu.privilege.util.ImgHelper;
 import cn.edu.xmu.privilege.model.vo.UserVo;
+import cn.edu.xmu.privilege.model.vo.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -422,5 +423,28 @@ public class UserService {
             return new ReturnObject(ResponseCode.INTERNAL_SERVER_ERR);
         }
         return returnObject;
+    }
+
+        /**
+     * auth002: 用户重置密码
+     * @param vo 重置密码对象
+     * @param ip 请求ip地址
+     * @author 24320182203311 杨铭
+     * Created at 2020/11/11 19:32
+     */
+    @Transactional
+    public ReturnObject<Object> resetPassword(ResetPwdVo vo, String ip) {
+        return userDao.resetPassword(vo,ip);
+    }
+
+    /**
+     * auth002: 用户修改密码
+     * @param vo 修改密码对象
+     * @author 24320182203311 杨铭
+     * Created at 2020/11/11 19:32
+     */
+    @Transactional
+    public ReturnObject<Object> modifyPassword(ModifyPwdVo vo) {
+        return userDao.modifyPassword(vo);
     }
 }

@@ -879,5 +879,67 @@ public class PrivilegeController {
         return Common.decorateReturnObject(returnObj);
     }
 
+    
+    /**
+     * auth002: 用户重置密码
+     * @param vo 重置密码对象
+     * @param httpServletResponse HttpResponse
+     * @param httpServletRequest HttpRequest
+     * @param bindingResult 校验信息
+     * @return Object
+     * @author 24320182203311 杨铭
+     * Created at 2020/11/11 19:32
+     */
+    @ApiOperation(value="用户重置密码")
+    @ApiResponses({
+            @ApiResponse(code = 745, message = "与系统预留的邮箱不一致"),
+            @ApiResponse(code = 746, message = "与系统预留的电话不一致"),
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @PutMapping("adminusers/password/reset")
+    @ResponseBody
+    public Object resetPassword(@RequestBody ResetPwdVo vo,BindingResult bindingResult
+            , HttpServletResponse httpServletResponse,HttpServletRequest httpServletRequest) {
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("resetPassword");
+        }
+        /* 处理参数校验错误 */
+        Object o = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if(o != null){
+            return o;
+        }
+
+        String ip = IpUtil.getIpAddr(httpServletRequest);
+
+        ReturnObject returnObject = userService.resetPassword(vo,ip);
+        return Common.decorateReturnObject(returnObject);
+    }
+
+
+    /**
+     * auth002: 用户修改密码
+     * @param vo 修改密码对象
+     * @return Object
+     * @author 24320182203311 杨铭
+     * Created at 2020/11/11 19:32
+     */
+    @ApiOperation(value="用户修改密码",produces = "application/json")
+    @ApiResponses({
+            @ApiResponse(code = 700, message = "用户名不存在或者密码错误"),
+            @ApiResponse(code = 741, message = "不能与旧密码相同"),
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @PutMapping("/adminusers/password")
+    @ResponseBody
+    public Object modifyPassword(@RequestBody ModifyPwdVo vo) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("modifyPassword");
+        }
+        ReturnObject returnObject = userService.modifyPassword(vo);
+        return Common.decorateReturnObject(returnObject);
+    }
+
+
 }
 
