@@ -92,6 +92,8 @@ public class UserDao implements InitializingBean {
     @Autowired
     private RoleDao roleDao;
 
+    @Autowired
+    private JavaMailSender mailSender;
     /**
      * @author yue hao
      * @param id 用户ID
