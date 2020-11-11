@@ -18,11 +18,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 /**
@@ -103,7 +105,7 @@ public class NewUserDao implements InitializingBean {
             bloomFilter.addByBloomFilter(field.getName()+suffixName,method.invoke(po));
         }
         catch (Exception ex){
-            ex.printStackTrace();
+            logger.debug("Exception happened:"+ex.getMessage());
         }
     }
 
@@ -151,10 +153,10 @@ public class NewUserDao implements InitializingBean {
         try{
             returnObject=new ReturnObject<>(newUserPoMapper.selectByPrimaryKey((long) newUserPoMapper.insert(userPo)));
             logger.debug("success trying to insert newUser");
-            return returnObject;
         }
         //catch exception by unique index
-        catch (Exception e){
+
+        catch (DuplicateKeyException e){
             logger.debug("failed trying to insert newUser");
             //e.printStackTrace();
             String info=e.getMessage();
@@ -170,8 +172,13 @@ public class NewUserDao implements InitializingBean {
                 setBloomFilterByName("mobile",userPo);
                 return new ReturnObject(ResponseCode.MOBILE_REGISTERED);
             }
-            return new ReturnObject("Unknown error happened.Check the system.");
+
         }
+        catch (Exception e){
+            logger.error("Internal error Happened:"+e.getMessage());
+            return new ReturnObject(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        return returnObject;
     }
     /**
      * 检查用户名重复
