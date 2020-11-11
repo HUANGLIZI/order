@@ -66,6 +66,24 @@ public class RoleDao implements InitializingBean {
     private RedisTemplate<String, Serializable> redisTemplate;
 
     /**
+     * 根据角色Id,查询角色的所有权限
+     * @author yue hao
+     * @param id 角色ID
+     * @return 角色的权限列表
+     */
+    public List<Privilege> findPrivsByRoleId(Long id) {
+        //getPrivIdsByRoleId已经进行role的签名校验
+        List<Long> privIds = this.getPrivIdsByRoleId(id);
+        List<Privilege> privileges = new ArrayList<>();
+        for(Long privId: privIds) {
+            Privilege po = this.privDao.findPriv(privId);
+            logger.debug("getPriv:  po = " + po);
+            privileges.add(po);
+        }
+        return privileges;
+    }
+
+    /**
      * 将一个角色的所有权限id载入到Redis
      *
      * @param id 角色id
@@ -110,7 +128,7 @@ public class RoleDao implements InitializingBean {
                 retIds.add(po.getPrivilegeId());
                 logger.debug("getPrivIdsBByRoleId: roleId = " + po.getRoleId() + " privId = " + po.getPrivilegeId());
             } else {
-                logger.error("getPrivIdsBByRoleId: Wrong Signature(auth_role_privilege): id =" + po.getId());
+                logger.info("getPrivIdsBByRoleId: Wrong Signature(auth_role_privilege): id =" + po.getId());
             }
         }
         return retIds;
