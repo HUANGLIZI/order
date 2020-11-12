@@ -859,9 +859,9 @@ public class UserDao implements InitializingBean {
 
 
         //随机生成验证码
-        String captcha = RandomPwd.getRandomString(6);
+        String captcha = RandomCaptcha.getRandomString(6);
         while(redisTemplate.hasKey(captcha))
-            captcha = RandomPwd.getRandomString(6);
+            captcha = RandomCaptcha.getRandomString(6);
 
         String id = userPo1.get(0).getId().toString();
         String key = "cp_" + captcha;
