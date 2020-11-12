@@ -2,7 +2,7 @@ package cn.edu.xmu.ooad.util;
 
 import java.util.Random;
 
-public class RandomPwd {
+public class RandomCaptcha {
     public static String getRandomString(int length) {
         String str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random = new Random();
