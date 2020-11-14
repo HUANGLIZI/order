@@ -930,5 +930,24 @@ public class UserDao implements InitializingBean {
     /* auth002 end*/
 
 
+    /**
+     * 清除缓存中的与role关联的user
+     *
+     * @param id 角色id
+     * createdBy 王琛 24320182203277
+     */
+    public void clearUserByRoleId(Long id){
+        UserRolePoExample example = new UserRolePoExample();
+        UserRolePoExample.Criteria criteria = example.createCriteria();
+        criteria.andRoleIdEqualTo(id);
+
+        List<UserRolePo> userrolePos = userRolePoMapper.selectByExample(example);
+        Long uid;
+        for(UserRolePo e:userrolePos){
+            uid = e.getUserId();
+            clearUserPrivCache(uid);
+        }
+    }
+
 }
 

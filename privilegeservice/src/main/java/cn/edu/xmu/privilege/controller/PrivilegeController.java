@@ -940,6 +940,79 @@ public class PrivilegeController {
         return Common.decorateReturnObject(returnObject);
     }
 
+    /**
+     * 获得角色所有权限
+     * @return Object
+     * createdBy 王琛 24320182203277
+     */
+    @ApiOperation(value = "获得角色所有权限")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @GetMapping("roles/{id}/privileges")
+    public Object getRolePrivs(@PathVariable Long id){
+        ReturnObject<List> returnObject = roleService.findRolePrivs(id);
+
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getListRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+    }
+
+
+    /**
+     * 取消角色权限
+     * @return Object
+     * createdBy 王琛 24320182203277
+     */
+    @ApiOperation(value = "取消角色权限")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @DeleteMapping("roleprivileges/{id}")
+    public Object delRolePriv(@PathVariable Long id){
+        logger.debug("delRolePriv: id = "+ id);
+        ReturnObject returnObject = roleService.delRolePriv(id);
+        return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+    }
+
+    /**
+     * 增加角色权限
+     * @return Object
+     * createdBy 王琛 24320182203277
+     */
+    @ApiOperation(value = "新增角色权限")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="roleid", required = true, dataType="String", paramType="path"),
+            @ApiImplicitParam(name="privilegeid", required = true, dataType="String", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @PostMapping("roles/{roleid}/privileges/{privilegeid}")
+    public Object addRolePriv(@PathVariable Long roleid, @PathVariable Long privilegeid, @LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId){
+        logger.debug("addRolePriv: id = "+ roleid+" userid: id = "+ userId);
+        ReturnObject<VoObject> returnObject = roleService.addRolePriv(roleid, privilegeid, userId);
+
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+    }
 
 }
 

@@ -4,6 +4,7 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.dao.RoleDao;
+import cn.edu.xmu.privilege.dao.UserDao;
 import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.vo.RoleVo;
 import com.github.pagehelper.PageInfo;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 角色服务类
@@ -24,6 +26,9 @@ import java.time.LocalDateTime;
 public class RoleService {
     @Autowired
     RoleDao roleDao;
+
+    @Autowired
+    UserDao userDao;
 
     /**
      * 分页查询所有角色
@@ -102,4 +107,53 @@ public class RoleService {
         }
         return retRole;
     }
+
+    @Transactional
+    public void clearuserByroleId(Long id){
+        userDao.clearUserByRoleId(id);
+    }
+
+    /**
+     * 查询角色权限
+     * @param id 角色id
+     * @return 权限列表
+     * createdBy wc 24320182203277
+     */
+    public ReturnObject<List> findRolePrivs(Long id){
+        ReturnObject<List>  ret = roleDao.getRolePrivByRoleId(id);
+        return ret;
+    }
+
+
+    /**
+     * 取消角色权限
+     * @param id 角色权限id
+     * @return 权限列表
+     * createdBy wc 24320182203277
+     */
+    @Transactional
+    public ReturnObject<Object> delRolePriv(Long id){
+        ReturnObject<Object> ret = roleDao.delPrivByPrivRoleId(id);
+        //删除成功，缓存中干掉用户
+        if(ret.getCode()==ResponseCode.OK) clearuserByroleId(id);
+        return ret;
+    }
+
+    /**
+     * 增加角色权限
+     * @param roleid 角色id
+     * @param privid 权限id
+     * @param userid 用户id
+     * @return 权限列表
+     * createdBy 王琛 24320182203277
+     */
+    @Transactional
+    public ReturnObject<VoObject> addRolePriv(Long roleid, Long privid, Long userid){
+        //新增
+        ReturnObject<VoObject> ret = roleDao.addPrivByRoleIdAndPrivId(roleid, privid, userid);
+        //新增成功，缓存中干掉用户
+        if(ret.getCode()==ResponseCode.OK) clearuserByroleId(roleid);
+        return ret;
+    }
+
 }
