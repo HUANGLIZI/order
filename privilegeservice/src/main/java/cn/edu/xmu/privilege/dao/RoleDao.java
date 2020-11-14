@@ -8,6 +8,7 @@ import cn.edu.xmu.ooad.util.encript.SHA256;
 import cn.edu.xmu.privilege.mapper.*;
 import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.bo.Role;
+import cn.edu.xmu.privilege.model.bo.RolePrivilege;
 import cn.edu.xmu.privilege.model.po.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -49,6 +51,12 @@ public class RoleDao implements InitializingBean {
 
     @Autowired
     private RolePoMapper roleMapper;
+
+    @Autowired
+    private UserPoMapper userMapper;
+
+    @Autowired
+    private PrivilegePoMapper privilegePoMapper;
 
     @Autowired
     private UserRolePoMapper userRolePoMapper;
@@ -335,4 +343,157 @@ public class RoleDao implements InitializingBean {
         }
         return retObj;
     }
+
+    /**
+     * 由Role Id, Privilege Id 增加 角色权限
+     *
+     * @param  roleid, Privilegeid, userid
+     * @return RolePrivilegeRetVo
+     * created by 王琛 24320182203277
+     */
+    public ReturnObject<VoObject> addPrivByRoleIdAndPrivId(Long roleid, Long privid, Long userid){
+        UserPo userpo = userMapper.selectByPrimaryKey(userid);
+        PrivilegePo privilegepo = privilegePoMapper.selectByPrimaryKey(privid);
+        RolePo rolePo = roleMapper.selectByPrimaryKey(roleid);
+        if(userpo==null || privilegepo==null || rolePo==null){
+            return new ReturnObject<VoObject>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        ReturnObject<Role> retObj = null;
+        //获取当前时间
+        LocalDateTime localDateTime = LocalDateTime.now();
+        RolePrivilege rolePrivilege = new RolePrivilege();
+
+        //查询是否角色已经存在此权限
+        RolePrivilegePoExample example = new RolePrivilegePoExample();
+        RolePrivilegePoExample.Criteria criteria = example.createCriteria();
+        criteria.andPrivilegeIdEqualTo(privid);
+        criteria.andRoleIdEqualTo(roleid);
+        List<RolePrivilegePo> rolePrivilegePos = rolePrivilegePoMapper.selectByExample(example);
+        RolePrivilegePo roleprivilegepo = new RolePrivilegePo();
+
+        if(rolePrivilegePos.isEmpty()){
+            roleprivilegepo.setRoleId(roleid);
+            roleprivilegepo.setPrivilegeId(privid);
+            roleprivilegepo.setCreatorId(userid);
+            roleprivilegepo.setGmtCreate(localDateTime);
+
+            StringBuilder signature = Common.concatString("-", roleprivilegepo.getRoleId().toString(),
+                    roleprivilegepo.getPrivilegeId().toString(), roleprivilegepo.getCreatorId().toString(), localDateTime.toString());
+            String newSignature = SHA256.getSHA256(signature.toString());
+            roleprivilegepo.setSignature(newSignature);
+
+            try {
+                int ret = rolePrivilegePoMapper.insert(roleprivilegepo);
+
+                if (ret == 0) {
+                    //插入失败
+                    return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+                } else {
+                    //插入成功
+                    //清除角色权限
+                    String key = "r_" + roleid;
+                    if(redisTemplate.hasKey(key)){
+                        redisTemplate.delete(key);
+                    }
+                }
+            }catch (DataAccessException e){
+                // 数据库错误
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }catch (Exception e) {
+                // 其他Exception错误
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了错误：%s", e.getMessage()));
+            }
+
+        }else{
+//            FIELD_NOTVALID
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("角色权限已存在"));
+        }
+
+        //组装返回的bo
+        rolePrivilege.setId(roleprivilegepo.getId());
+        rolePrivilege.setCreator(userpo);
+        rolePrivilege.setRole(rolePo);
+        rolePrivilege.setPrivilege(privilegepo);
+        rolePrivilege.setGmtModified(localDateTime.toString());
+
+        return new ReturnObject<VoObject>(rolePrivilege);
+    }
+
+    /**
+     * 由RolePrivilege Id 删除 角色权限
+     *
+     * @param id: RolePrivilege Id
+     * @return void
+     * created by 王琛 24320182203277
+     */
+
+    public ReturnObject<Object> delPrivByPrivRoleId(Long id){
+        ReturnObject<Object> retObj = null;
+        RolePrivilegePo rolePrivilegePo = rolePrivilegePoMapper.selectByPrimaryKey(id);
+        int ret = rolePrivilegePoMapper.deleteByPrimaryKey(id);
+        if(ret==0){
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }else{
+            Long roleid = rolePrivilegePo.getRoleId();
+            String key = "r_" + roleid;
+            //清除缓存被删除的的角色,重新load
+            if(redisTemplate.hasKey(key)){
+                redisTemplate.delete(key);
+            }
+            retObj = new ReturnObject<>();
+        }
+
+        return retObj;
+    }
+
+    /**
+     * 由Role Id 获取 角色权限
+     *
+     * @param id: Role Id
+     * @return List<RolePrivilegeRetVo>
+     * created by 王琛 24320182203277
+     */
+
+    public ReturnObject<List> getRolePrivByRoleId(Long id){
+        String key = "r_" + id;
+        List<RolePrivilege> rolepribilegere = new ArrayList<>();
+        RolePrivilegePoExample example = new RolePrivilegePoExample();
+        RolePrivilegePoExample.Criteria criteria = example.createCriteria();
+
+
+
+        //查看是否有此角色
+        RolePo rolePo = roleMapper.selectByPrimaryKey(id);
+        if(rolePo==null){
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        RolePrivilege e = new RolePrivilege();
+
+        List<Long> privids = getPrivIdsByRoleId(id);
+
+        for(Long pid: privids){
+            example.clear();
+            criteria.andRoleIdEqualTo(id);
+            criteria.andPrivilegeIdEqualTo(pid);
+            List<RolePrivilegePo> rolePrivilegePos = rolePrivilegePoMapper.selectByExample(example);
+            if(rolePrivilegePos!=null && rolePrivilegePos.size()>0 && rolePrivilegePos.get(0)!=null){
+
+                UserPo userpo = userMapper.selectByPrimaryKey(rolePrivilegePos.get(0).getCreatorId());
+                PrivilegePo privilegepo = privilegePoMapper.selectByPrimaryKey(pid);
+
+                //组装权限bo
+                e.setCreator(userpo);
+                e.setId(pid);
+                e.setPrivilege(privilegepo);
+                e.setRole(rolePo);
+                e.setGmtModified(rolePrivilegePos.get(0).getGmtCreate().toString());
+
+                rolepribilegere.add(e);
+            }
+        }
+
+        return new ReturnObject<>(rolepribilegere);
+    }
+
 }
