@@ -1,5 +1,6 @@
 package cn.edu.xmu.privilege.dao;
 
+import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.RolePoMapper;
@@ -8,12 +9,27 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.ooad.util.encript.SHA256;
 import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.UserPoMapper;
+import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
+import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.po.*;
+import cn.edu.xmu.privilege.model.vo.*;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import cn.edu.xmu.privilege.model.po.UserProxyPo;
+import cn.edu.xmu.privilege.model.po.UserProxyPoExample;
+import cn.edu.xmu.privilege.model.po.UserRolePo;
+import cn.edu.xmu.privilege.model.po.UserRolePoExample;
 import cn.edu.xmu.privilege.model.vo.UserVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +48,7 @@ import java.util.concurrent.TimeUnit;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author Ming Qiu
@@ -40,6 +57,9 @@ import java.util.concurrent.TimeUnit;
  **/
 @Repository
 public class UserDao implements InitializingBean {
+
+    @Autowired
+    private UserPoMapper userPoMapper;
 
     private static final Logger logger = LoggerFactory.getLogger(UserDao.class);
 
@@ -73,7 +93,29 @@ public class UserDao implements InitializingBean {
     private RoleDao roleDao;
 
     @Autowired
-    private UserPoMapper userPoMapper;
+    private JavaMailSender mailSender;
+    /**
+     * @author yue hao
+     * @param id 用户ID
+     * @return 用户的权限列表
+     */
+
+    public ReturnObject<List> findPrivsByUserId(Long id) {
+        //getRoleIdByUserId已经进行签名校验
+        User user = getUserById(id.longValue()).getData();
+        if (user == null) {//判断是否是由于用户不存在造成的
+            logger.error("findPrivsByUserId: 数据库不存在该用户 userid=" + id);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        List<Long> roleIds = this.getRoleIdByUserId(id);
+        List<Privilege> privileges = new ArrayList<>();
+        for(Long roleId: roleIds) {
+            List<Privilege> rolePriv = roleDao.findPrivsByRoleId(roleId);
+            privileges.addAll(rolePriv);
+        }
+        return new ReturnObject<>(privileges);
+    }
+
 
     /**
      * 由用户名获得用户
@@ -145,7 +187,6 @@ public class UserDao implements InitializingBean {
                 logger.warn("revokeRole: 未找到该用户角色id" + id);
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
-            
 
         } catch (DataAccessException e) {
             // 数据库错误
@@ -158,7 +199,6 @@ public class UserDao implements InitializingBean {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
                     String.format("发生了严重的未知错误：%s", e.getMessage()));
         }
-        
         //清除缓存
         clearUserPrivCache(userRolePo.getUserId());
 
@@ -541,7 +581,7 @@ public class UserDao implements InitializingBean {
      * modifiedBy 3218 2020/11/4 15:48
      */
 
-    public ReturnObject<User> getUserById(long id) {
+    public ReturnObject<User> getUserById(Long id) {
         UserPo userPo = userMapper.selectByPrimaryKey(id);
         if (userPo == null) {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
@@ -579,6 +619,43 @@ public class UserDao implements InitializingBean {
             returnObject = new ReturnObject();
         }
         return returnObject;
+    }
+
+    /**
+     * ID获取用户信息
+     * @author XQChen
+     * @param id
+     * @return 用户
+     */
+    public UserPo findUserById(Long Id) {
+        UserPoExample example = new UserPoExample();
+        UserPoExample.Criteria criteria = example.createCriteria();
+        criteria.andIdEqualTo(Id);
+
+        logger.debug("findUserById: Id =" + Id);
+        UserPo userPo = userPoMapper.selectByPrimaryKey(Id);
+
+        return userPo;
+    }
+
+    /**
+     * 获取所有用户信息
+     * @author XQChen
+     * @return List<UserPo> 用户列表
+     */
+    public PageInfo<UserPo> findAllUsers(String userNameAES, String mobileAES, int page, int pageSize) {
+        UserPoExample example = new UserPoExample();
+        UserPoExample.Criteria criteria = example.createCriteria();
+        if(!userNameAES.isBlank())
+            criteria.andUserNameEqualTo(userNameAES);
+        if(!mobileAES.isBlank())
+            criteria.andMobileEqualTo(mobileAES);
+
+        List<UserPo> users = userPoMapper.selectByExample(example);
+
+        logger.debug("findUserById: retUsers = "+users);
+
+        return new PageInfo<>(users);
     }
 
     /* auth009 */
@@ -742,5 +819,133 @@ public class UserDao implements InitializingBean {
     }
 
     /* auth009 ends */
+
+        /* auth002 begin*/
+
+    /**
+     * auth002: 用户重置密码
+     * @param vo 重置密码对象
+     * @param ip 请求ip地址
+     * @author 24320182203311 杨铭
+     * Created at 2020/11/11 19:32
+     */
+    public ReturnObject<Object> resetPassword(ResetPwdVo vo, String ip) {
+
+        //防止重复请求验证码
+        if(redisTemplate.hasKey("ip_"+ip))
+            return new ReturnObject<>(ResponseCode.AUTH_USER_FORBIDDEN);
+        else {
+            //1 min中内不能重复请求
+            redisTemplate.opsForValue().set("ip_"+ip,ip);
+            redisTemplate.expire("ip_" + ip, 60*1000, TimeUnit.MILLISECONDS);
+        }
+
+        //验证邮箱、手机号
+        UserPoExample userPoExample1 = new UserPoExample();
+        UserPoExample.Criteria criteria = userPoExample1.createCriteria();
+        criteria.andMobileEqualTo(AES.encrypt(vo.getMobile(),User.AESPASS));
+        List<UserPo> userPo1 = null;
+        try {
+            userPo1 = userMapper.selectByExample(userPoExample1);
+        }catch (Exception e) {
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,e.getMessage());
+        }
+        if(userPo1.isEmpty())
+            return new ReturnObject<>(ResponseCode.MOBILE_WRONG);
+        else if(!userPo1.get(0).getEmail().equals(AES.encrypt(vo.getEmail(), User.AESPASS)))
+            return new ReturnObject<>(ResponseCode.EMAIL_WRONG);
+
+
+        //随机生成验证码
+        String captcha = RandomCaptcha.getRandomString(6);
+        while(redisTemplate.hasKey(captcha))
+            captcha = RandomCaptcha.getRandomString(6);
+
+        String id = userPo1.get(0).getId().toString();
+        String key = "cp_" + captcha;
+        //key:验证码,value:id存入redis
+        redisTemplate.opsForValue().set(key,id);
+        //五分钟后过期
+        redisTemplate.expire("cp_" + captcha, 5*60*1000, TimeUnit.MILLISECONDS);
+
+
+//        //发送邮件(请在配置文件application.properties填写密钥)
+//        SimpleMailMessage msg = new SimpleMailMessage();
+//        msg.setSubject("【oomall】密码重置通知");
+//        msg.setSentDate(new Date());
+//        msg.setText("您的验证码是：" + captcha + "，5分钟内有效。");
+//        msg.setFrom("925882085@qq.com");
+//        msg.setTo(vo.getEmail());
+//        try {
+//            mailSender.send(msg);
+//        } catch (MailException e) {
+//            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+//        }
+
+        return new ReturnObject<>(ResponseCode.OK);
+    }
+
+    /**
+     * auth002: 用户修改密码
+     * @param modifyPwdVo 修改密码对象
+     * @return Object
+     * @author 24320182203311 杨铭
+     * Created at 2020/11/11 19:32
+     */
+    public ReturnObject<Object> modifyPassword(ModifyPwdVo modifyPwdVo) {
+
+
+        //通过验证码取出id
+        if(!redisTemplate.hasKey("cp_"+modifyPwdVo.getCaptcha()))
+            return new ReturnObject<>(ResponseCode.AUTH_INVALID_ACCOUNT);
+        String id= redisTemplate.opsForValue().get("cp_"+modifyPwdVo.getCaptcha()).toString();
+
+        UserPo userpo = null;
+        try {
+            userpo = userPoMapper.selectByPrimaryKey(Long.parseLong(id));
+        }catch (Exception e) {
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,e.getMessage());
+        }
+
+        //新密码与原密码相同
+        if(AES.decrypt(userpo.getPassword(), User.AESPASS).equals(modifyPwdVo.getNewPassword()))
+            return new ReturnObject<>(ResponseCode.PASSWORD_SAME);
+
+        //加密
+        UserPo userPo = new UserPo();
+        userPo.setPassword(AES.encrypt(modifyPwdVo.getNewPassword(),User.AESPASS));
+
+        //更新数据库
+        try {
+            userMapper.updateByPrimaryKeySelective(userPo);
+        }catch (Exception e) {
+            e.printStackTrace();
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,e.getMessage());
+        }
+        return new ReturnObject<>(ResponseCode.OK);
+    }
+
+    /* auth002 end*/
+
+
+    /**
+     * 清除缓存中的与role关联的user
+     *
+     * @param id 角色id
+     * createdBy 王琛 24320182203277
+     */
+    public void clearUserByRoleId(Long id){
+        UserRolePoExample example = new UserRolePoExample();
+        UserRolePoExample.Criteria criteria = example.createCriteria();
+        criteria.andRoleIdEqualTo(id);
+
+        List<UserRolePo> userrolePos = userRolePoMapper.selectByExample(example);
+        Long uid;
+        for(UserRolePo e:userrolePos){
+            uid = e.getUserId();
+            clearUserPrivCache(uid);
+        }
+    }
+
 }
 

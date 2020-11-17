@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 权限DAO
@@ -95,6 +96,23 @@ public class PrivilegeDao implements InitializingBean {
     }
 
     /**
+     * 根据权限Id查询权限
+     * @author yue hao
+     * @param id 权限ID
+     * @return 权限
+     */
+    public Privilege findPriv(Long id){
+        PrivilegePo po = poMapper.selectByPrimaryKey(id);
+        Privilege priv = new Privilege(po);
+        if (priv.authetic()) {
+            return priv;
+        }
+        else {
+            logger.error("findPriv: Wrong Signature(auth_privilege): id =" + po.getId());
+            return null;
+        }
+    }
+    /**
      * 查询所有权限
      * @param page: 页码
      * @param pageSize : 每页数量
@@ -118,9 +136,17 @@ public class PrivilegeDao implements InitializingBean {
             if (priv.authetic()) {
                 logger.debug("findAllPrivs: key = " + priv.getKey() + " p = " + priv);
                 ret.add(priv);
+            }else{
+                logger.error("findAllPrivs: 信息签名错误：id = "+po.getId());
             }
+
         }
-        PageInfo<VoObject> privPage = PageInfo.of(ret);
+        PageInfo<PrivilegePo> privPoPage = PageInfo.of(privilegePos);
+        PageInfo<VoObject> privPage = new PageInfo<>(ret);
+        privPage.setPages(privPoPage.getPages());
+        privPage.setPageNum(privPoPage.getPageNum());
+        privPage.setPageSize(privPoPage.getPageSize());
+        privPage.setTotal(privPoPage.getTotal());
         return new ReturnObject<>(privPage);
     }
 

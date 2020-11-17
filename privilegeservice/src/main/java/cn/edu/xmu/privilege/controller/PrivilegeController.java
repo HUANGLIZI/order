@@ -1,9 +1,16 @@
 package cn.edu.xmu.privilege.controller;
 
-import cn.edu.xmu.ooad.annotation.*;
-import cn.edu.xmu.privilege.model.bo.Privilege;
-import cn.edu.xmu.privilege.model.vo.LoginVo;
+import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.annotation.Depart;
+import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.annotation.*;
+import cn.edu.xmu.ooad.util.*;
+import cn.edu.xmu.privilege.model.bo.Privilege;
+import cn.edu.xmu.privilege.model.bo.User;
+import cn.edu.xmu.privilege.model.vo.*;
+import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -14,13 +21,15 @@ import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 
+import cn.edu.xmu.privilege.model.vo.UserProxyVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
-import cn.edu.xmu.privilege.model.vo.RoleVo;
-import cn.edu.xmu.privilege.model.vo.UserVo;
+import cn.edu.xmu.privilege.service.NewUserService;
 import cn.edu.xmu.privilege.service.RoleService;
+import cn.edu.xmu.privilege.service.UserProxyService;
 import cn.edu.xmu.privilege.service.UserService;
 import cn.edu.xmu.privilege.util.IpUtil;
 import com.github.pagehelper.PageInfo;
@@ -28,6 +37,7 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.HttpRequestHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -35,10 +45,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotBlank;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
+import io.swagger.annotations.Api;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 权限控制器
@@ -156,11 +175,115 @@ public class PrivilegeController {
     private JwtHelper jwtHelper = new JwtHelper();
 
     @Autowired
+    private NewUserService newUserService;
+    @Autowired
+    private UserProxyService userProxyService;
+
+    /***
+     * 取消用户权限
+     * @param id 用户id
+     * @return
+     */
+    @ApiOperation(value = "取消用户权限")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(name="userid", value="用户id", required = true, dataType="Integer", paramType="path")
+
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    @Audit
+    @DeleteMapping("/adminusersrole/{id}")
+    public Object revokeRole(@PathVariable Long id){
+        return Common.decorateReturnObject(userService.revokeRole(id));
+    }
+
+    /***
+     * 赋予用户权限
+     * @param userid 用户id
+     * @param roleid 角色id
+     * @return
+     */
+    @ApiOperation(value = "赋予用户权限")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(name="userid", value="用户id", required = true, dataType="Integer", paramType="path"),
+            @ApiImplicitParam(name="roleid", value="角色id", required = true, dataType="Integer", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    @Audit
+    @PostMapping("/adminusers/{userid}/roles/{roleid}")
+    public Object assignRole(@LoginUser Long createid, @PathVariable Long userid, @PathVariable Long roleid){
+
+        ReturnObject<VoObject> returnObject =  userService.assignRole(createid, userid, roleid);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+
+    }
+
+    /***
+     * 获得自己角色信息
+     * @author Xianwei Wang
+     * @return
+     */
+    @ApiOperation(value = "获得自己角色信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+
+    })
+    @Audit
+    @GetMapping("/adminusers/self/roles")
+    public Object getUserSelfRole(@LoginUser Long id){
+
+        ReturnObject<List> returnObject =  userService.getSelfUserRoles(id);
+        return Common.getListRetObject(returnObject);
+    }
+
+    /***
+     * 获得所有人角色信息
+     * @param id 用户id
+     * @return
+     */
+    @ApiOperation(value = "获得所有人角色信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(name="id", value="用户id", required = true, dataType="int", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @GetMapping("/adminusers/{id}/roles")
+    public Object getSelfRole(@PathVariable Long id){
+        ReturnObject<List> returnObject =  userService.getSelfUserRoles(id);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getListRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+
+    }
+
+
+//    @Autowired
+    private JwtHelper jwtHelper = new JwtHelper();
+
+    @Autowired
     private RoleService roleService;
 
     @Autowired
     private HttpServletResponse httpServletResponse;
-
 
     /**
      * 获得所有权限
@@ -183,6 +306,7 @@ public class PrivilegeController {
         page = (page == null)?1:page;
         pageSize = (pageSize == null)?10:pageSize;
 
+        logger.debug("getAllPrivs: page = "+ page +"  pageSize ="+pageSize);
         ReturnObject<PageInfo<VoObject>> returnObject =  userService.findAllPrivs(page, pageSize);
         return Common.getPageRetObject(returnObject);
     }
@@ -208,6 +332,120 @@ public class PrivilegeController {
         logger.debug("getAllPrivs: userId = " + userId +" departId = "+departId);
         ReturnObject returnObject =  userService.changePriv(id, vo);
         return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+    }
+    /**
+     * auth007: 查询某一用户权限
+     * @author yue hao
+     * @param id
+     * @return Object
+     */
+    @ApiOperation(value = "获得某一用户的权限")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    @Audit // 需要认证
+    @GetMapping("adminusers/{id}/privileges")
+    public Object getPrivsByUserId(@PathVariable Long id){
+        ReturnObject<List> returnObject =  userService.findPrivsByUserId(id);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getListRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+    }
+
+    /**
+     * @author XQChen
+     * @date Created in 2020/11/8 0:33
+     **/
+    @ApiOperation(value = "auth003:查看自己信息",  produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value ="用户token", required = true)
+    })
+    @ApiResponses({
+    })
+    @Audit
+    @GetMapping("adminusers")
+    public Object getUserSelf(@LoginUser Long userId) {
+        logger.debug("getUserSelf userId:" + userId);
+
+        Object returnObject;
+
+        ReturnObject<VoObject> user =  userService.findUserById(userId);
+        logger.debug("finderSelf: user = " + user.getData() + " code = " + user.getCode());
+
+        returnObject = Common.getRetObject(user);
+
+        return returnObject;
+    }
+
+    /**
+     * @author XQChen
+     * @date Created in 2020/11/8 0:33
+     **/
+    @Audit
+    @ApiOperation(value = "auth003: 查看任意用户信息",  produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String",  name = "authorization", value ="用户token", required = true),
+            @ApiImplicitParam(paramType = "path",   dataType = "Integer", name = "id",            value ="用户id",    required = true)
+    })
+    @ApiResponses({
+    })
+    @GetMapping("adminusers/{id}")
+    public Object getUserById(@PathVariable("id") Long id) {
+
+        Object returnObject = null;
+
+        ReturnObject<VoObject> user = userService.findUserById(id);
+        logger.debug("findUserById: user = " + user.getData() + " code = " + user.getCode());
+
+        if (!user.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)) {
+            returnObject = Common.getRetObject(user);
+        } else {
+            returnObject = Common.getNullRetObj(new ReturnObject<>(user.getCode(), user.getErrmsg()), httpServletResponse);
+        }
+
+        return returnObject;
+    }
+
+    /**
+     * @author XQChen
+     * @date Created in 2020/11/8 0:33
+     **/
+    @Audit
+    @ApiOperation(value = "auth003: 查询用户信息",  produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String",  name = "authorization", value ="用户token", required = true),
+            @ApiImplicitParam(paramType = "query",  dataType = "String",  name = "userName",      value ="用户名",    required = false),
+            @ApiImplicitParam(paramType = "query",  dataType = "String",  name = "mobile",        value ="电话号码",  required = false),
+            @ApiImplicitParam(paramType = "query",  dataType = "Integer", name = "page",          value ="页码",      required = true),
+            @ApiImplicitParam(paramType = "query",  dataType = "Integer", name = "pagesize",      value ="每页数目",  required = true)
+    })
+    @ApiResponses({
+    })
+    @GetMapping("adminusers/all")
+    public Object findAllUser(
+            @RequestParam  String  userName,
+            @RequestParam  String  mobile,
+            @RequestParam(required = false, defaultValue = "1")  Integer page,
+            @RequestParam(required = false, defaultValue = "10")  Integer pagesize) {
+
+        Object object = null;
+
+        if(page <= 0 || pagesize <= 0) {
+            object = Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+        } else {
+            ReturnObject<PageInfo<VoObject>> returnObject = userService.findAllUsers(userName, mobile, page, pagesize);
+            logger.debug("findUserById: getUsers = " + returnObject);
+            object = Common.getPageRetObject(returnObject);
+        }
+
+        return object;
     }
 
 
@@ -457,6 +695,7 @@ public class PrivilegeController {
         ReturnObject returnObject = userService.releaseUser(id);
         return Common.decorateReturnObject(returnObject);
     }
+
     /* auth009 结束 */
 
     /**
@@ -525,10 +764,357 @@ public class PrivilegeController {
     })
     @Audit
     @PostMapping("/adminusers/{id}/uploadImg")
-    public Object uploadImg(@PathVariable("id") Integer id, @RequestParam("img") MultipartFile multipartFile){
+    public Object uploadImg(@PathVariable("id") Long id, @RequestParam("img") MultipartFile multipartFile){
         logger.debug("uploadImg: id = "+ id +" img" + multipartFile.getOriginalFilename());
         ReturnObject returnObject = userService.uploadImg(id,multipartFile);
         return Common.getNullRetObj(returnObject, httpServletResponse);
     }
+
+
+    /**
+     * 设置用户代理关系
+     *
+     * @param id
+     * @param vo
+     * @return createdBy Di Han Li 2020/11/04 09:57
+     * Modified by 24320182203221 李狄翰 at 2020/11/8 8:00
+     */
+    @ApiOperation(value = "设置用户代理关系")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "Token", required = true, dataType = "String", paramType = "header"),
+            @ApiImplicitParam(name = "id", required = true, dataType = "Long", paramType = "path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @PostMapping("users/{id}/proxy")
+    public Object usersProxy(@LoginUser @ApiIgnore  Long userId, @PathVariable Long id, @Validated @RequestBody UserProxyVo vo, BindingResult bindingresult) {
+        logger.debug("usersProxy: id = " + id + " vo" + vo);
+        Object returnObject = Common.processFieldErrors(bindingresult, httpServletResponse);
+        if (null != returnObject) {
+            logger.info("validate fail");
+            return returnObject;
+        }
+        ReturnObject retObject = userProxyService.usersProxy(userId, id, vo);
+        return retObject;
+    }
+
+    /**
+     * 管理员设置用户代理关系
+     *
+     * @param aid
+     * @param bid
+     * @param vo
+     * @return createdBy Di Han Li 2020/11/04 09:57
+     * Modified by 24320182203221 李狄翰 at 2020/11/8 8:00
+     */
+    @ApiOperation(value = "管理员设置用户代理关系")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "Token", required = true, dataType = "String", paramType = "header"),
+            @ApiImplicitParam(name = "aid", required = true, dataType = "Long", paramType = "path"),
+            @ApiImplicitParam(name = "bid", required = true, dataType = "Long", paramType = "path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @PostMapping("ausers/{aid}/busers/{bid}")
+    public Object aUsersProxy(@PathVariable Long aid, @PathVariable Long bid,@Validated @RequestBody UserProxyVo vo, BindingResult bindingresult) {
+        logger.debug("aUsersProxy: aid = " + aid + " bid" + bid + " vo" + vo);
+        Object returnObject = Common.processFieldErrors(bindingresult, httpServletResponse);
+        if (null != returnObject) {
+            logger.info("validate fail");
+            return returnObject;
+        }
+        ReturnObject retObject = userProxyService.aUsersProxy(aid, bid, vo);
+        return retObject;
+    }
+
+    /**
+     * 解除用户代理关系
+     *
+     * @param id
+     * @return createdBy Di Han Li 2020/11/04 09:57
+     * Modified by 24320182203221 李狄翰 at 2020/11/8 8:00
+     */
+    @ApiOperation(value = "解除用户代理关系")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "Token", required = true, dataType = "String", paramType = "header"),
+            @ApiImplicitParam(name = "id", required = true, dataType = "Long", paramType = "path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @DeleteMapping("proxie/{id}")
+    public Object removeUserProxy(@PathVariable Long id, @LoginUser @ApiIgnore Long userId) {
+        logger.debug("removeUserProxy: id = " + id);
+        ReturnObject returnObject = userProxyService.removeUserProxy( id, userId);
+        return returnObject;
+    }
+
+    /**
+     * 查询所有用户代理关系
+     *
+     * @param aId
+     * @param bId
+     * @return createdBy Di Han Li 2020/11/04 09:57
+     * Modified by 24320182203221 李狄翰 at 2020/11/8 8:00
+     */
+    @ApiOperation(value = "查询所有用户代理关系")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "Token", required = true, dataType = "String", paramType = "header")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @GetMapping("proxies")
+    public Object listProxies(Long aId, Long bId) {
+        logger.debug("listProxies: aId = " + aId + " bId = " + bId);
+        ReturnObject<List> returnObject = userProxyService.listProxies(aId, bId);
+        return returnObject;
+    }
+
+    /**
+     * 禁止代理关系
+     *
+     * @param id
+     * @return createdBy Di Han Li 2020/11/04 09:57
+     * Modified by 24320182203221 李狄翰 at 2020/11/8 8:00
+     */
+    @ApiOperation(value = "禁止代理关系")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value = "Token", required = true, dataType = "String", paramType = "header"),
+            @ApiImplicitParam(name = "id", required = true, dataType = "Long", paramType = "path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @DeleteMapping("allproxie/{id}")
+    public Object removeAllProxies(@PathVariable Long id) {
+        logger.debug("removeAllProxies: id) = " + id);
+        ReturnObject returnObject = userProxyService.removeAllProxies(id);
+        return returnObject;
+    }
+    /**
+     * 注册用户
+     * @param vo:vo对象
+     * @param result 检查结果
+     * @return  Object
+     * createdBy: LiangJi3229 2020-11-10 18:41
+     */
+    @ApiOperation(value="注册用户")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", dataType = "NewUserVo", name = "vo", value = "newUserInfo", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 732, message = "邮箱已被注册"),
+            @ApiResponse(code = 733, message = "电话已被注册"),
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 404, message = "参数不合法")
+    })
+    @PostMapping("adminusers")
+    public Object register(@Validated @RequestBody NewUserVo vo, BindingResult result){
+        if(result.hasErrors()){
+            return Common.processFieldErrors(result,httpServletResponse);
+        }
+        ReturnObject returnObject=newUserService.register(vo);
+        if(returnObject.getCode()==ResponseCode.OK){
+            return ResponseUtil.ok(returnObject.getData());
+        }
+        else return ResponseUtil.fail(returnObject.getCode());
+    }
+
+    /**
+     * 查询所有状态
+     * @return Object
+     * createdBy: LiangJi3229 2020-11-10 18:41
+     */
+    @ApiOperation(value="获得管理员用户的所有状态")
+    @ApiResponses({
+            @ApiResponse(code = 0,message = "成功")
+    })
+    @GetMapping("adminusers/states")
+    public Object getAllStates(){
+        User.State[] states=User.State.class.getEnumConstants();
+        List<StateVo> stateVos=new ArrayList<StateVo>();
+        for(int i=0;i<states.length;i++){
+            stateVos.add(new StateVo(states[i]));
+        }
+        return ResponseUtil.ok(new ReturnObject<List>(stateVos).getData());
+    }
+
+    /**
+     * auth004: 修改自己的信息
+     * @param vo 修改信息 UserVo 视图
+     * @param bindingResult 校验信息
+     * @return Object
+     * @author 24320182203175 陈晓如
+     * Created at 2020/11/11 11:22
+     */
+    @ApiOperation(value = "修改自己的信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "RoleVo", name = "vo", value = "可修改的用户信息", required = true)
+
+    })
+    @ApiResponses({
+            @ApiResponse(code = 732, message = "邮箱已被注册"),
+            @ApiResponse(code = 733, message = "电话已被注册"),
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit // 需要认证
+    @PutMapping("adminusers")
+    public Object changeMyAdminselfInfo(@LoginUser Long id, @Validated @RequestBody UserVo vo, BindingResult bindingResult) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("modifyUserInfo: id = "+ id +" vo = " + vo);
+        }
+        // 校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (returnObject != null) {
+            logger.info("incorrect data received while modifyUserInfo id = " + id);
+            return returnObject;
+        }
+        ReturnObject returnObj = userService.modifyUserInfo(id, vo);
+        return Common.decorateReturnObject(returnObj);
+    }
+
+    
+    /**
+     * auth002: 用户重置密码
+     * @param vo 重置密码对象
+     * @param httpServletResponse HttpResponse
+     * @param httpServletRequest HttpRequest
+     * @param bindingResult 校验信息
+     * @return Object
+     * @author 24320182203311 杨铭
+     * Created at 2020/11/11 19:32
+     */
+    @ApiOperation(value="用户重置密码")
+    @ApiResponses({
+            @ApiResponse(code = 745, message = "与系统预留的邮箱不一致"),
+            @ApiResponse(code = 746, message = "与系统预留的电话不一致"),
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @PutMapping("adminusers/password/reset")
+    @ResponseBody
+    public Object resetPassword(@RequestBody ResetPwdVo vo,BindingResult bindingResult
+            , HttpServletResponse httpServletResponse,HttpServletRequest httpServletRequest) {
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("resetPassword");
+        }
+        /* 处理参数校验错误 */
+        Object o = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if(o != null){
+            return o;
+        }
+
+        String ip = IpUtil.getIpAddr(httpServletRequest);
+
+        ReturnObject returnObject = userService.resetPassword(vo,ip);
+        return Common.decorateReturnObject(returnObject);
+    }
+
+
+    /**
+     * auth002: 用户修改密码
+     * @param vo 修改密码对象
+     * @return Object
+     * @author 24320182203311 杨铭
+     * Created at 2020/11/11 19:32
+     */
+    @ApiOperation(value="用户修改密码",produces = "application/json")
+    @ApiResponses({
+            @ApiResponse(code = 700, message = "用户名不存在或者密码错误"),
+            @ApiResponse(code = 741, message = "不能与旧密码相同"),
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @PutMapping("/adminusers/password")
+    @ResponseBody
+    public Object modifyPassword(@RequestBody ModifyPwdVo vo) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("modifyPassword");
+        }
+        ReturnObject returnObject = userService.modifyPassword(vo);
+        return Common.decorateReturnObject(returnObject);
+    }
+
+    /**
+     * 获得角色所有权限
+     * @return Object
+     * createdBy 王琛 24320182203277
+     */
+    @ApiOperation(value = "获得角色所有权限")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @GetMapping("roles/{id}/privileges")
+    public Object getRolePrivs(@PathVariable Long id){
+        ReturnObject<List> returnObject = roleService.findRolePrivs(id);
+
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getListRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+    }
+
+
+    /**
+     * 取消角色权限
+     * @return Object
+     * createdBy 王琛 24320182203277
+     */
+    @ApiOperation(value = "取消角色权限")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @DeleteMapping("roleprivileges/{id}")
+    public Object delRolePriv(@PathVariable Long id){
+        logger.debug("delRolePriv: id = "+ id);
+        ReturnObject returnObject = roleService.delRolePriv(id);
+        return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+    }
+
+    /**
+     * 增加角色权限
+     * @return Object
+     * createdBy 王琛 24320182203277
+     */
+    @ApiOperation(value = "新增角色权限")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="roleid", required = true, dataType="String", paramType="path"),
+            @ApiImplicitParam(name="privilegeid", required = true, dataType="String", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @PostMapping("roles/{roleid}/privileges/{privilegeid}")
+    public Object addRolePriv(@PathVariable Long roleid, @PathVariable Long privilegeid, @LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId){
+        logger.debug("addRolePriv: id = "+ roleid+" userid: id = "+ userId);
+        ReturnObject<VoObject> returnObject = roleService.addRolePriv(roleid, privilegeid, userId);
+
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+    }
+
 }
 

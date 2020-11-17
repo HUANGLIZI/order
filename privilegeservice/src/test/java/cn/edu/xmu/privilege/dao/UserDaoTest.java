@@ -1,11 +1,17 @@
 package cn.edu.xmu.privilege.dao;
 
+import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
+import cn.edu.xmu.privilege.model.bo.User;
+import cn.edu.xmu.privilege.model.po.UserPo;
+import com.github.pagehelper.PageInfo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -163,5 +169,21 @@ public class UserDaoTest {
         assertEquals(2, redisTemplate.opsForSet().size(key3));
 
 
+    }
+
+    @Test
+    public void findUserById(){
+        UserPo userPo = userDao.findUserById(1L);
+
+        assertEquals(userPo.getUserName(), "13088admin");
+        assertEquals(userPo.getDepartId(), 0);
+        assertEquals(userPo.getState(), User.State.NORM);
+    }
+
+    @Test
+    public void findAllUsers() {
+        PageInfo<UserPo> userPos = userDao.findAllUsers("", "", 1, 5);
+
+        assertEquals(userPos.getList().size(), 5);
     }
 }

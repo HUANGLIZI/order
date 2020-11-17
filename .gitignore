@@ -1,8 +1,7 @@
-
+application-dev.yaml
 *.log
 *.iml
 .idea/
-.gitignore
-.history/*
+.history/
 target/
 .DS_Store
