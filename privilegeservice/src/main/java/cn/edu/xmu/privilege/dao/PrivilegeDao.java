@@ -158,8 +158,18 @@ public class PrivilegeDao implements InitializingBean {
     public ReturnObject changePriv(Long id, PrivilegeVo vo){
         PrivilegePo po = this.poMapper.selectByPrimaryKey(id);
         logger.debug("changePriv: vo = "+ vo  + " po = "+ po);
+
         Privilege privilege = new Privilege(po);
+        if(!privilege.getCacuSignature().equals(privilege.getSignature())){
+            return new ReturnObject(ResponseCode.RESOURCE_FALSIFY, "该权限可能被篡改，请联系管理员处理");
+        }
         PrivilegePo newPo = privilege.createUpdatePo(vo);
+        if(po.getUrl().equals(newPo.getUrl()) && po.getRequestType().equals(newPo.getRequestType())){
+            return new ReturnObject(ResponseCode.URL_SAME, "URL与RequestType均重复");
+        }
+
+        newPo.setId(po.getId()); // 这里设置要更新的权限的Id
+
         this.poMapper.updateByPrimaryKeySelective(newPo);
         return new ReturnObject();
     }

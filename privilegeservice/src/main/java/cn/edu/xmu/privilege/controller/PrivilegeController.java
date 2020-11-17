@@ -1014,5 +1014,22 @@ public class PrivilegeController {
         }
     }
 
+    /**
+     * 修改权限信息
+     * @author 24320182203266
+     */
+    @Audit
+    @PostMapping("privileges/{id}")
+    public Object addRolePriv(@Validated @RequestBody PrivilegeVo privilegeVo, @LoginUser Long userId){
+        logger.debug("PrivilegeVo:", privilegeVo);
+        ReturnObject<VoObject> returnObject = userService.changePriv(userId, privilegeVo);
+
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+    }
+
 }
 
