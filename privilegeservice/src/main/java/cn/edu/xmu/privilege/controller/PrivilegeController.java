@@ -4,26 +4,15 @@ import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
-import cn.edu.xmu.ooad.annotation.*;
-import cn.edu.xmu.ooad.util.*;
-import cn.edu.xmu.privilege.model.bo.Privilege;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.vo.*;
-import cn.edu.xmu.ooad.model.VoObject;
-import cn.edu.xmu.privilege.dao.PrivilegeDao;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.privilege.dao.PrivilegeDao;
-import cn.edu.xmu.privilege.model.bo.UserRole;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
 import cn.edu.xmu.privilege.model.vo.UserProxyVo;
-import cn.edu.xmu.ooad.util.ResponseCode;
-import cn.edu.xmu.ooad.util.ResponseUtil;
-import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
 import cn.edu.xmu.privilege.service.NewUserService;
 import cn.edu.xmu.privilege.service.RoleService;
@@ -35,17 +24,13 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.HttpRequestHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.NotBlank;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -53,9 +38,6 @@ import java.util.List;
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * 权限控制器
@@ -211,7 +193,7 @@ public class PrivilegeController {
 
     /**
      * 修改权限
-     * @param id: 权限id
+     * @param id : 权限id
      * @return Object
      * createdBy Ming Qiu 2020/11/03 23:57
      */
@@ -225,12 +207,24 @@ public class PrivilegeController {
     })
     @Audit
     @PutMapping("privileges/{id}")
-    public Object changePriv(@PathVariable Long id, @RequestBody PrivilegeVo vo, @LoginUser Long userId, @Depart Long departId){
+    public Object changePriv(@PathVariable Long id, @Validated @RequestBody PrivilegeVo vo,BindingResult bindingResult, @LoginUser Long userId, @Depart Long departId,
+                              HttpServletResponse httpServletResponse){
         logger.debug("changePriv: id = "+ id +" vo" + vo);
         logger.debug("getAllPrivs: userId = " + userId +" departId = "+departId);
-        ReturnObject returnObject =  userService.changePriv(id, vo);
-        return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+        /* 处理参数校验错误 */
+        Object o = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if(o != null){
+            return o;
+        }
+        ReturnObject<VoObject> returnObject = userService.changePriv(id, vo);
+
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
     }
+
     /**
      * auth007: 查询某一用户权限
      * @author yue hao
@@ -1014,22 +1008,6 @@ public class PrivilegeController {
         }
     }
 
-    /**
-     * 修改权限信息
-     * @author 24320182203266
-     */
-    @Audit
-    @PostMapping("privileges/{id}")
-    public Object addRolePriv(@Validated @RequestBody PrivilegeVo privilegeVo, @LoginUser Long userId){
-        logger.debug("PrivilegeVo:", privilegeVo);
-        ReturnObject<VoObject> returnObject = userService.changePriv(userId, privilegeVo);
-
-        if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getRetObject(returnObject);
-        } else {
-            return Common.decorateReturnObject(returnObject);
-        }
-    }
 
 }
 

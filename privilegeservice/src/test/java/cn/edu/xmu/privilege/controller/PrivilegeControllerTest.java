@@ -10,6 +10,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
@@ -378,17 +379,14 @@ public class PrivilegeControllerTest {
     public void changePriv3() throws Exception{
         PrivilegeVo vo = new PrivilegeVo();
         vo.setName("车市");
-        String json = "{\"name\":\"查看任意用户信息\", \"url\": \"/adminusers/{id}\", \"requestType\": 120}";
+        String json = "{\"name\":\"查看任意用户信息\", \"url\": \"/adminusers/{id}\", \"requestType\": \"120\"}";
 
         String token = login("537300010","123456");
         String responseString = this.mvc.perform(put("/privilege/privileges/2").header("authorization",token).contentType("application/json;charset=UTF-8").content(json))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(content().contentType("application/json;charset=UTF-8"))
-//                .andExpect(jsonPath("$.errno").value(ResponseCode.FIELD_NOTVALID.getCode()))
-//                .andExpect(jsonPath("$.errmsg").value("错误的操作类型;"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errno").value(ResponseCode.FIELD_NOTVALID.getCode()))
+                .andExpect(jsonPath("$.errmsg").value("错误的requestType数值;"))
                 .andReturn().getResponse().getContentAsString();
-
-        JSONAssert.assertEquals("{\"errno\":742,\"errmsg\":\"URL与RequestType均重复\"}", responseString, true);
         responseString = this.mvc.perform(get("/privilege/privileges").header("authorization",token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
