@@ -2,6 +2,7 @@ package cn.edu.xmu.log.model.vo;
 
 import cn.edu.xmu.log.model.bo.Log;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**

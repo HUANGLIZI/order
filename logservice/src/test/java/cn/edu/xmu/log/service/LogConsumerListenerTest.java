@@ -44,7 +44,7 @@ public class LogConsumerListenerTest {
         Log log = new Log();
         log.setUserId(Long.valueOf(1));
         log.setIp("127.0.0.1");
-        log.setDescr("test");
+        log.setDesc("test");
         log.setGmtCreate(LocalDateTime.now());
         log.setPrivilegeId(Long.valueOf(1));
         log.setSuccess(Byte.valueOf((byte) 1));

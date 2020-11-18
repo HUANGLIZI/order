@@ -7,6 +7,7 @@ import cn.edu.xmu.ooad.model.VoObject;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * 日志Bo
@@ -48,7 +49,9 @@ public class Log implements VoObject {
         this.setGmtCreate(po.getGmtCreate());
         this.setSuccess(po.getSuccess());
     }
+    public Log() {
 
+    }
     public Log(LogVo vo) {
         this.setUserId(vo.getUserId());
         this.setIp(vo.getIp());
@@ -95,7 +98,7 @@ public class Log implements VoObject {
 
         logPo.setUserId(this.userId);
         logPo.setIp(this.ip);
-        logPo.setDescr(this.descr);
+        logPo.setDescr(this.desc);
         logPo.setGmtCreate(this.gmtCreate);
         logPo.setPrivilegeId(this.privilegeId);
         logPo.setSuccess(this.success);

@@ -35,6 +35,8 @@ public class LogDao {
     @Autowired
     private LogPoMapper logPoMapper;
 
+    private static final Logger logger = LoggerFactory.getLogger(LogDao.class);
+
     public PageInfo<VoObject> selectLogs(Log logInfo, Integer pageNum, Integer pageSize) {
         LogPoExample example = new LogPoExample();
         LogPoExample.Criteria criteria = example.createCriteria();
