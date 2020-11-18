@@ -447,4 +447,14 @@ public class UserService {
     public ReturnObject<Object> modifyPassword(ModifyPwdVo vo) {
         return userDao.modifyPassword(vo);
     }
+
+    /**
+     * auth014: 增加新用户
+     * @param po
+     * @author 24320182203227 Li Zihan
+     */
+    @Transactional
+    public ReturnObject<Object> addUser(NewUserPo po) {
+        return userDao.createUser(po);
+    }
 }
