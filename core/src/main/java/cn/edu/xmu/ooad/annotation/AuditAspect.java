@@ -76,6 +76,18 @@ public class AuditAspect {
         Long userId = userAndDepart.getUserId();
         Long departId = userAndDepart.getDepartId();
 
+        //检验/shop的api中传入token是否和departId一致
+        String contextPath=request.getContextPath();
+        if(contextPath=="/shops"){
+            String servletPath=request.getServletPath();
+            String s[]=servletPath.split("/");
+            String pathId=s[0];
+            if(!pathId.equals(departId)){
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                return ResponseUtil.fail(ResponseCode.FIELD_NOTVALID, "departId不匹配");
+            }
+        }
+
         logger.debug("around: userId ="+userId+" departId="+departId);
         if (userId == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
