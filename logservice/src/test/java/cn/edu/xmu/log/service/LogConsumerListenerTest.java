@@ -48,6 +48,7 @@ public class LogConsumerListenerTest {
         log.setGmtCreate(LocalDateTime.now());
         log.setPrivilegeId(Long.valueOf(1));
         log.setSuccess(Byte.valueOf((byte) 1));
+        log.setDepartId(Long.valueOf(1));
 
         String json = JacksonUtil.toJson(log);
         Message message = MessageBuilder.withPayload(json).build();

@@ -110,6 +110,7 @@ public class Log implements VoObject {
         logPo.setGmtCreate(this.gmtCreate);
         logPo.setPrivilegeId(this.privilegeId);
         logPo.setSuccess(this.success);
+        logPo.setDepartId(this.departId);
 
         return logPo;
     }
