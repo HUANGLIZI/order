@@ -58,7 +58,7 @@ public class LogController {
             @ApiImplicitParam(paramType = "path", dataType = "int", name = "did", value = "部门ID", required = true),
             @ApiImplicitParam(paramType = "query", dataType = "int", name = "userId", value = "用户ID", required = false),
             @ApiImplicitParam(paramType = "query", dataType = "int", name = "privilegeId", value = "权限ID", required = false),
-            @ApiImplicitParam(paramType = "query", dataType = "bool", name = "success", value = "是否成功", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "boolean", name = "success", value = "是否成功", required = false),
             @ApiImplicitParam(paramType = "query", dataType = "String", name = "beginTime", value = "开始时间", required = false),
             @ApiImplicitParam(paramType = "query", dataType = "String", name = "endTime", value = "结束时间", required = false),
             @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageNum", value = "页码", required = false),
