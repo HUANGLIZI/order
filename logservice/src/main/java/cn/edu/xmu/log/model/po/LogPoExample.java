@@ -315,66 +315,6 @@ public class LogPoExample {
             return (Criteria) this;
         }
 
-        public Criteria andDepartIdIsNull() {
-            addCriterion("depart_id is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andDepartIdIsNotNull() {
-            addCriterion("depart_id is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andDepartIdEqualTo(Long value) {
-            addCriterion("depart_id =", value, "departId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDepartIdNotEqualTo(Long value) {
-            addCriterion("depart_id <>", value, "departId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDepartIdGreaterThan(Long value) {
-            addCriterion("depart_id >", value, "departId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDepartIdGreaterThanOrEqualTo(Long value) {
-            addCriterion("depart_id >=", value, "departId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDepartIdLessThan(Long value) {
-            addCriterion("depart_id <", value, "departId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDepartIdLessThanOrEqualTo(Long value) {
-            addCriterion("depart_id <=", value, "departId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDepartIdIn(List<Long> values) {
-            addCriterion("depart_id in", values, "departId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDepartIdNotIn(List<Long> values) {
-            addCriterion("depart_id not in", values, "departId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDepartIdBetween(Long value1, Long value2) {
-            addCriterion("depart_id between", value1, value2, "departId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDepartIdNotBetween(Long value1, Long value2) {
-            addCriterion("depart_id not between", value1, value2, "departId");
-            return (Criteria) this;
-        }
-
         public Criteria andIpIsNull() {
             addCriterion("ip is null");
             return (Criteria) this;
@@ -692,6 +632,66 @@ public class LogPoExample {
 
         public Criteria andGmtCreateNotBetween(LocalDateTime value1, LocalDateTime value2) {
             addCriterion("gmt_create not between", value1, value2, "gmtCreate");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdIsNull() {
+            addCriterion("depart_id is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdIsNotNull() {
+            addCriterion("depart_id is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdEqualTo(Long value) {
+            addCriterion("depart_id =", value, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdNotEqualTo(Long value) {
+            addCriterion("depart_id <>", value, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdGreaterThan(Long value) {
+            addCriterion("depart_id >", value, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdGreaterThanOrEqualTo(Long value) {
+            addCriterion("depart_id >=", value, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdLessThan(Long value) {
+            addCriterion("depart_id <", value, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdLessThanOrEqualTo(Long value) {
+            addCriterion("depart_id <=", value, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdIn(List<Long> values) {
+            addCriterion("depart_id in", values, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdNotIn(List<Long> values) {
+            addCriterion("depart_id not in", values, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdBetween(Long value1, Long value2) {
+            addCriterion("depart_id between", value1, value2, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdNotBetween(Long value1, Long value2) {
+            addCriterion("depart_id not between", value1, value2, "departId");
             return (Criteria) this;
         }
     }

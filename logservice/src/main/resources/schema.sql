@@ -25,7 +25,6 @@ DROP TABLE IF EXISTS `auth_log`;
 CREATE TABLE `auth_log` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `user_id` bigint NOT NULL,
-  `depart_id` bigint NOT NULL,
   `ip` varchar(64) DEFAULT NULL,
   `descr` varchar(256) DEFAULT NULL,
   `privilege_id` bigint NOT NULL,
