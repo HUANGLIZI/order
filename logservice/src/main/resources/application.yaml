@@ -56,29 +56,38 @@ spring:
 
 mybatis:
   #po对象的包
-  type-aliases-package: cn.edu.xmu.log.model
+  type-aliases-package: cn.edu.xmu.privilege.model
   #mapper.xml所在的位置
-  mapper-locations: classpath*:cn.edu.xmu.log.mapper/*.xml
+  mapper-locations: classpath*:cn.edu.xmu.privilege.mapper/*.xml
   #自动将SQL中查出来的带下划线的字段，转换为驼峰标志，再去匹配类中的属性
   configuration:
     #输出产生的SQL
     #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
 
-# 配置rocketmq
-rocketmq:
-  # 指定namesrv地址
-  name-server: localhost:9876
-  producer:
-    #生产者group名称
-    group: producer_group
-    #一次发送多少数量消息
-    max-message-size: 4096
-    #发送消息超时时间,默认3000
-    send-message-timeout: 3000
-    #发送消息失败重试次数，默认2
-    retry-times-when-send-async-failed: 2
+privilegeservice:
+  #是否对数据库中的未初始化的数据初始化
+  initialization: false
+  #分布式锁失效时间（秒）
+  lockerExpireTime: 30
+  #图片存储位置
+  imglocation: ./img
+  user:
+    # user的权限字在Redis中失效秒数
+    expiretime: 600
+  role:
+    # role的权限字在Redis中失效秒数
+    expiretime: 600
+  login:
+    #是否允许重复登录
+    multiply: false
+    #jwt过期的时间(秒)
+    jwtExpire: 3600
 
+
+#pagehelper分页插件配置
+pagehelper:
+  helper-dialect: mysql
 
 
 
