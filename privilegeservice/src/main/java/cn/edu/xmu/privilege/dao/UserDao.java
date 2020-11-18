@@ -56,18 +56,12 @@ import java.util.stream.Collectors;
  * Modified in 2020/11/8 0:57
  **/
 @Repository
-public class UserDao implements InitializingBean {
+public class UserDao{
 
     @Autowired
     private UserPoMapper userPoMapper;
 
     private static final Logger logger = LoggerFactory.getLogger(UserDao.class);
-
-    /**
-     * 是否初始化，生成signature和加密
-     */
-    @Value("${privilegeservice.initialization}")
-    private Boolean initialization;
 
     // 用户在Redis中的过期时间，而不是JWT的有效期
     @Value("${privilegeservice.user.expiretime}")
@@ -92,8 +86,8 @@ public class UserDao implements InitializingBean {
     @Autowired
     private RoleDao roleDao;
 
-    @Autowired
-    private JavaMailSender mailSender;
+//    @Autowired
+//    private JavaMailSender mailSender;
     /**
      * @author yue hao
      * @param id 用户ID
@@ -512,11 +506,7 @@ public class UserDao implements InitializingBean {
         return retIds;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        if (!initialization) {
-            return;
-        }
+    public void initialize() throws Exception {
         //初始化user
         UserPoExample example = new UserPoExample();
         UserPoExample.Criteria criteria = example.createCriteria();
