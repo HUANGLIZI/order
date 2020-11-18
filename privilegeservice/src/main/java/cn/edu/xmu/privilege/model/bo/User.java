@@ -209,7 +209,6 @@ public class User implements VoObject {
         return po;
     }
 
-    
     /**
      * 创建SimpleVo
      * @return userSimpleRetVo

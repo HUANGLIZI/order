@@ -188,6 +188,7 @@ public class UserDao implements InitializingBean {
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
 
+
         } catch (DataAccessException e) {
             // 数据库错误
             logger.error("数据库错误：" + e.getMessage());
@@ -199,6 +200,7 @@ public class UserDao implements InitializingBean {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
                     String.format("发生了严重的未知错误：%s", e.getMessage()));
         }
+        
         //清除缓存
         clearUserPrivCache(userRolePo.getUserId());
 
