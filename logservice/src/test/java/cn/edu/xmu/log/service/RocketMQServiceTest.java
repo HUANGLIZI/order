@@ -24,18 +24,12 @@ import java.time.LocalDateTime;
  */
 @SpringBootTest(classes = LogServiceApplication.class)   //标识本类是一个SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
 public class RocketMQServiceTest {
     private static final Logger logger = LoggerFactory.getLogger(RocketMQService.class);
 
     @Resource
-    private RocketMQTemplate rocketMQTemplate;
+    private RocketMQService rocketMQService;
 
-    @Value("${rocketmqdemo.order-pay-topic.delay-level}")
-    private int delayLevel;
-
-    @Value("${rocketmqdemo.order-pay-topic.timeout}")
-    private long timeout;
 
 
     @Test
@@ -48,7 +42,6 @@ public class RocketMQServiceTest {
 
         String json = JacksonUtil.toJson(log);
         Message message = MessageBuilder.withPayload(json).build();
-        logger.info("sendLogMessage: message = " + message);
-        rocketMQTemplate.sendOneWay("log-topic:1", message);
+        rocketMQService.sendLogMessage(log);
     }
 }

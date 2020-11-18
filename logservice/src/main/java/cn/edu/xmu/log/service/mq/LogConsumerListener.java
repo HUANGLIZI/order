@@ -30,14 +30,12 @@ public class LogConsumerListener implements RocketMQListener<String>, RocketMQPu
     @Override
     public void onMessage(String message) {
         Log log = JacksonUtil.toObj(message, Log.class);
+        logger.debug("onMessage: got message log =" + log);
         logDao.insertLog(log);
-        logger.info("onMessage: got message log =" + log);
     }
 
     @Override
     public void prepareStart(DefaultMQPushConsumer defaultMQPushConsumer) {
-//        defaultMQPushConsumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_TIMESTAMP);
-//        defaultMQPushConsumer.setConsumeTimestamp(UtilAll.timeMillisToHumanString3(System.currentTimeMillis()));
         logger.info("prepareStart: consumergroup =" + defaultMQPushConsumer.getConsumerGroup());
     }
 }

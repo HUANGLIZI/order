@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
@@ -26,13 +27,14 @@ public class RocketMQService {
     @Resource
     private RocketMQTemplate rocketMQTemplate;
 
-
-    @Value("${rocketmqdemo.order-pay-topic.delay-level}")
-    private int delayLevel;
-
-    @Value("${rocketmqdemo.order-pay-topic.timeout}")
-    private long timeout;
-
+    /**
+     * @description 生产者发送消息
+     * @param log 日志
+     * @return void
+     * @author Xianwei Wang
+     * created at 11/18/20 11:57 AM
+     */
+    @Transactional
     public void sendLogMessage(Log log){
 
         String json = JacksonUtil.toJson(log);
