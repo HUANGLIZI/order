@@ -8,6 +8,7 @@
     -->
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="user_id" jdbcType="BIGINT" property="userId" />
+    <result column="depart_id" jdbcType="BIGINT" property="departId" />
     <result column="ip" jdbcType="VARCHAR" property="ip" />
     <result column="descr" jdbcType="VARCHAR" property="descr" />
     <result column="privilege_id" jdbcType="BIGINT" property="privilegeId" />
