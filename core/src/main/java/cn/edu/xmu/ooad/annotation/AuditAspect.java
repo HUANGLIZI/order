@@ -81,7 +81,7 @@ public class AuditAspect {
         if(contextPath=="/shops"){
             String servletPath=request.getServletPath();
             String s[]=servletPath.split("/");
-            String pathId=s[0];
+            String pathId=s[1];
             if(!pathId.equals(departId)){
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 return ResponseUtil.fail(ResponseCode.FIELD_NOTVALID, "departId不匹配");
