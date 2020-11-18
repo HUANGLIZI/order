@@ -28,9 +28,6 @@ public class NewUserService {
     @Autowired
     NewUserDao newUserDao;
 
-    @Autowired
-    NewUserDao newUserDao;
-
     /**
      * @param vo 注册的vo对象
      * @return ReturnObject
