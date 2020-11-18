@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Ming Qiu
  **/
 @SpringBootApplication(scanBasePackages = {"cn.edu.xmu.log"})
-@MapperScan("cn.edu.xmu.privilege.mapper")
+@MapperScan("cn.edu.xmu.log.mapper")
 public class LogServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(LogServiceApplication.class, args);

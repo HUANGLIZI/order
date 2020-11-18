@@ -1,53 +1,87 @@
 package cn.edu.xmu.log.model.bo;
 
 import cn.edu.xmu.log.model.po.LogPo;
+import cn.edu.xmu.log.model.vo.LogRetVo;
 import cn.edu.xmu.log.model.vo.LogVo;
+import cn.edu.xmu.ooad.model.VoObject;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
- * 用户代理Bo类
+ * 日志Bo
+ * @Author 王纬策
  *
- * @author 24320182203221 李狄翰
- * createdBy 李狄翰2020/11/09 12:00
- **/
+ */
 @Data
-public class Log {
+public class Log implements VoObject {
+    /**
+     *
+     * id 主键
+     * user_id 用户ID
+     * ip 登录的ip
+     * desc 描述
+     * privilege_id 权限ID
+     */
     private Long id;
     private Long userId;
-    private Long privilegeId;
     private String ip;
-    private String descr;
+    private String desc;
+    private Long privilegeId;
+    private LocalDateTime gmtCreate;
     private Byte success;
+
     private LocalDateTime beginTime;
     private LocalDateTime endTime;
-    private LocalDateTime gmtCreate;
-
-    public Log() {
+    private String beginDate;
+    private String endDate;
+    /**
+     * 构造函数
+     * @param po Po对象
+     */
+    public Log(LogPo po){
+        this.setId(po.getId());
+        this.setUserId(po.getUserId());
+        this.setIp(po.getIp());
+        this.setDesc(po.getDescr());
+        this.setPrivilegeId(po.getPrivilegeId());
+        this.setGmtCreate(po.getGmtCreate());
+        this.setSuccess(po.getSuccess());
     }
 
     public Log(LogVo vo) {
+        this.setUserId(vo.getUserId());
+        this.setIp(vo.getIp());
+        this.setPrivilegeId(vo.getPrivilegeId());
+        this.setSuccess(vo.getSuccess());
+        this.setBeginDate(vo.getBeginDate());
+        this.setEndDate(vo.getEndDate());
+        
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         this.beginTime = LocalDateTime.parse(vo.getBeginTime(), df);
         this.endTime = LocalDateTime.parse(vo.getEndTime(), df);
-
     }
 
     /**
-     * 构造函数
-     *
-
+     * Create return Vo object
+     * @author 王纬策
+     * @return
      */
-    public Log(LogPo po) {
-        this.id = po.getId();
-        this.userId = po.getUserId();
-        this.privilegeId = po.getPrivilegeId();
-        this.ip = po.getIp();
-        this.descr = po.getDescr();
-        this.success = po.getSuccess();
-        this.gmtCreate = po.getGmtCreate();
+    @Override
+    public LogRetVo createVo() {
+        LogRetVo logRetVo = new LogRetVo(this);
+        return logRetVo;
+    }
+
+    /**
+     * 创建SimpleVo
+     * @return userSimpleRetVo
+     * @author 王纬策
+     */
+    @Override
+    public LogRetVo createSimpleVo() {
+        LogRetVo logRetVo = new LogRetVo(this);
+        return logRetVo;
     }
 
 }
