@@ -1,4 +1,3 @@
-application-dev.yaml
 *.log
 *.iml
 .idea/

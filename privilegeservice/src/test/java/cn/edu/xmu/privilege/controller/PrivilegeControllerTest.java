@@ -82,7 +82,7 @@ public class PrivilegeControllerTest {
         String responseString = null;
         ResultActions res = null;
 
-        //Email未确认用户登录
+        //region Email未确认用户登录
         requireJson = "{\"userName\":\"5264500009\",\"password\":\"123456\"}";
         res = this.mvc.perform(post("/privilege/privileges/login")
                 .contentType("application/json;charset=UTF-8")
@@ -255,7 +255,7 @@ public class PrivilegeControllerTest {
         ResultActions res = null;
 
         //正常用户登录
-        requireJson = "{\"userName\":\"2721900002\",\"password\":\"123456\"}";
+        requireJson = "{\"userName\":\"13088admin\",\"password\":\"123456\"}";
         res = this.mvc.perform(post("/privilege/privileges/login")
                 .contentType("application/json;charset=UTF-8")
                 .content(requireJson));
@@ -278,7 +278,7 @@ public class PrivilegeControllerTest {
         String responseString = null;
         ResultActions res = null;
 
-        requireJson = "{\"userName\":\"537300010\",\"password\":\"123456\"}";
+        requireJson = "{\"userName\":\"13088admin\",\"password\":\"123456\"}";
         res = this.mvc.perform(post("/privilege/privileges/login")
                 .contentType("application/json;charset=UTF-8")
                 .content(requireJson));
@@ -313,7 +313,7 @@ public class PrivilegeControllerTest {
         vo.setName("车市");
         String json = "{\"name\":\"车市\", \"url\": \"/adminusers/{id}/abcd\", \"requestType\": \"3\"}";
 
-        String token = login("537300010","123456");
+        String token = login("13088admin","123456");
         String responseString = this.mvc.perform(put("/privilege/privileges/2").header("authorization",token).contentType("application/json;charset=UTF-8").content(json))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
@@ -348,7 +348,7 @@ public class PrivilegeControllerTest {
         vo.setName("车市");
         String json = "{\"name\":\"查看任意用户信息\", \"url\": \"/adminusers/{id}\", \"requestType\": \"0\"}";
 
-        String token = login("537300010","123456");
+        String token = login("13088admin","123456");
         String responseString = this.mvc.perform(put("/privilege/privileges/2").header("authorization",token).contentType("application/json;charset=UTF-8").content(json))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
@@ -381,7 +381,7 @@ public class PrivilegeControllerTest {
         vo.setName("车市");
         String json = "{\"name\":\"查看任意用户信息\", \"url\": \"/adminusers/{id}\", \"requestType\": \"120\"}";
 
-        String token = login("537300010","123456");
+        String token = login("13088admin","123456");
         String responseString = this.mvc.perform(put("/privilege/privileges/2").header("authorization",token).contentType("application/json;charset=UTF-8").content(json))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errno").value(ResponseCode.FIELD_NOTVALID.getCode()))
