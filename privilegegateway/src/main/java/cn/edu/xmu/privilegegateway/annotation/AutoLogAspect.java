@@ -1,7 +1,7 @@
 package cn.edu.xmu.privilegegateway.annotation;
 
 import cn.edu.xmu.ooad.util.JwtHelper;
-import cn.edu.xmu.ooad.model.LogInfo;
+import cn.edu.xmu.privilegegateway.model.Log;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.IpUtil;
 import cn.edu.xmu.ooad.util.JacksonUtil;
@@ -18,6 +18,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -64,11 +65,11 @@ public class AutoLogAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
 
-        LogInfo sysLog = new LogInfo();
+        Log sysLog = new Log();
         AutoLog autoLog = method.getAnnotation(AutoLog.class);
         if(autoLog != null){
             //注解上的描述
-            sysLog.setOperation(autoLog.title()+"-"+autoLog.action());
+            sysLog.setDescr(autoLog.title()+"-"+autoLog.action());
         }
 
         //请求的方法名
@@ -96,11 +97,10 @@ public class AutoLogAspect {
         //用户名
         String token = request.getHeader("Token");
         JwtHelper.UserAndDepart userAndDepart = new JwtHelper().verifyTokenAndGetClaims(token);
-        String userId=userAndDepart.getUserId().toString();
+        Long userId = userAndDepart.getUserId();
         sysLog.setUserId(userId);
-        sysLog.setTime((int) time);
-        sysLog.setId(Common.genSeqNum());
-        sysLog.setCreateTime(new Date());
+        sysLog.setGmtCreate(LocalDateTime.now());
+
         log.info(sysLog.toString());
 //        sysLogMapper.insertSelective(sysLog);
 

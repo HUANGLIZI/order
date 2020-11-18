@@ -2,7 +2,6 @@ package cn.edu.xmu.privilegegateway.service.mq;
 
 import cn.edu.xmu.privilegegateway.model.Log;
 import cn.edu.xmu.ooad.util.JacksonUtil;
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.common.UtilAll;
 import org.apache.rocketmq.common.consumer.ConsumeFromWhere;

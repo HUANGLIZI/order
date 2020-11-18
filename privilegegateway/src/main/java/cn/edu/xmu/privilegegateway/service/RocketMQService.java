@@ -48,5 +48,5 @@ public class RocketMQService {
         logger.info("sendLogMessage: message = " + message);
         rocketMQTemplate.sendOneWay("log-topic:1", message);
     }
-    
+
 }
