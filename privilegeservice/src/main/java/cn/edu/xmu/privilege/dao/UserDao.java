@@ -938,6 +938,26 @@ public class UserDao{
             clearUserPrivCache(uid);
         }
     }
+     /**
+     * 创建user
+     *
+     * createdBy Li Zihan 243201822032227
+     */
+    public ReturnObject createUser(NewUserPo po)
+    {
+        UserPo userPo=new UserPo();
+        ReturnObject returnObject = null;
+        userPo.setEmail(AES.encrypt(po.getEmail(), User.AESPASS));
+        userPo.setMobile(AES.encrypt(po.getMobile(),User.AESPASS));
+        userPo.setUserName(po.getUserName());
+        userPo.setAvatar(po.getAvatar());
+        userPo.setDepartId(po.getDepartId());
+        userPo.setOpenId(po.getOpenId());
+        userPo.setGmtCreate(LocalDateTime.now());
+        returnObject=new ReturnObject<>(userPoMapper.insert(userPo));
+        logger.debug("success trying to insert newUser");
+        return returnObject;
+    }
 
 }
 
