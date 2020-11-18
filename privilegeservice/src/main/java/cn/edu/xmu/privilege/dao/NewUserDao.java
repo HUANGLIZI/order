@@ -225,7 +225,37 @@ public class NewUserDao implements InitializingBean {
         List<UserPo> userPos=userPoMapper.selectByExample(example);
         return !userPos.isEmpty();
     }
+    /**
+     * (物理) 删除新用户
+     *
+     * @param id 用户 id
+     * @return 返回对象 ReturnObj
+     * @author 24320182203227 Li Zihan
+     */
+    public ReturnObject<Object> physicallyDeleteUser(Long id) {
+        ReturnObject<Object> retObj;
+        int ret = newUserPoMapper.deleteByPrimaryKey(id);
+        if (ret == 0) {
+            logger.info("用户不存在或已被删除：id = " + id);
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        } else {
+            logger.info("用户 id = " + id + " 已被永久删除");
+            retObj = new ReturnObject<>();
+        }
+        return retObj;
+    }
 
+    /**
+     * ID获取用户信息
+     * @author XQChen
+     * @param id
+     * @return 用户
+     */
+    public NewUserPo findNewUserById(Long Id) {
+        logger.debug("findUserById: Id =" + Id);
+        NewUserPo newUserPo = newUserPoMapper.selectByPrimaryKey(Id);
+        return newUserPo;
+    }
 
 }
 
