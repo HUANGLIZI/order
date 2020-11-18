@@ -4,6 +4,7 @@ import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.privilege.model.bo.Role;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.model.vo.*;
 import cn.edu.xmu.ooad.util.Common;
@@ -33,6 +34,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import io.swagger.annotations.Api;
@@ -355,9 +357,10 @@ public class PrivilegeController {
      * createdBy 王纬策 2020/11/04 13:57
      * modifiedBy 王纬策 2020/11/7 19:20
      */
-    @ApiOperation(value = "auth008: 查询角色", produces = "application/json")
+    @ApiOperation(value = "查询角色", produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "did", value = "部门id", required = true),
             @ApiImplicitParam(paramType = "query", dataType = "int", name = "page", value = "页码", required = false),
             @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageSize", value = "每页数目", required = false)
     })
@@ -365,15 +368,20 @@ public class PrivilegeController {
             @ApiResponse(code = 0, message = "成功"),
     })
     @Audit
-    @GetMapping("roles")
-    public Object selectAllRoles(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize) {
+    @GetMapping("/shops/{did}/roles")
+    public Object selectAllRoles(@LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                                 @Depart @ApiIgnore @RequestParam(required = false) Long departId,
+                                 @PathVariable("did") Long did,
+                                 @RequestParam(required = false, defaultValue = "1") Integer page,
+                                 @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
         logger.debug("selectAllRoles: page = "+ page +"  pageSize ="+pageSize);
-
-        page = (page == null)?1:page;
-        pageSize = (pageSize == null)?10:pageSize;
-
-        ReturnObject<PageInfo<VoObject>> returnObject =  roleService.selectAllRoles(page, pageSize);
-        return Common.getPageRetObject(returnObject);
+        if(did.equals(departId)){
+            ReturnObject<PageInfo<VoObject>> returnObject =  roleService.selectAllRoles(departId, page, pageSize);
+            return Common.getPageRetObject(returnObject);
+        }
+        else{
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("部门id不匹配：" + did)), httpServletResponse);
+        }
     }
 
     /**
@@ -387,7 +395,7 @@ public class PrivilegeController {
      * createdBy 王纬策 2020/11/04 13:57
      * modifiedBy 王纬策 2020/11/7 19:20
      */
-    @ApiOperation(value = "auth008: 新增角色", produces = "application/json")
+    @ApiOperation(value = "新增角色", produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(paramType = "body", dataType = "RoleVo", name = "vo", value = "可修改的用户信息", required = true)
@@ -397,8 +405,10 @@ public class PrivilegeController {
             @ApiResponse(code = 736, message = "角色名已存在"),
     })
     @Audit
-    @PostMapping("roles")
-    public Object insertRole(@Validated @RequestBody RoleVo vo, BindingResult bindingResult, @LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId) {
+    @PostMapping("/roles")
+    public Object insertRole(@Validated @RequestBody RoleVo vo, BindingResult bindingResult,
+                             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                             @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
         logger.debug("insert role by userId:" + userId);
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
@@ -406,7 +416,11 @@ public class PrivilegeController {
             logger.debug("validate fail");
             return returnObject;
         }
-        ReturnObject<VoObject> retObject = roleService.insertRole(userId, vo);
+        Role role = vo.createRole();
+        role.setCreatorId(userId);
+        role.setDepartId(departId);
+        role.setGmtCreate(LocalDateTime.now());
+        ReturnObject<VoObject> retObject = roleService.insertRole(role);
         httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return Common.decorateReturnObject(retObject);
     }
@@ -420,20 +434,28 @@ public class PrivilegeController {
      * createdBy 王纬策 2020/11/04 13:57
      * modifiedBy 王纬策 2020/11/7 19:20
      */
-    @ApiOperation(value = "auth008： 删除角色", produces = "application/json")
+    @ApiOperation(value = "删除角色", produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "did", value = "部门id", required = true),
             @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "角色id", required = true)
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
     @Audit
-    @DeleteMapping("roles/{id}")
-    public Object deleteRole(@PathVariable("id") Long id) {
+    @DeleteMapping("/shops/{did}/roles/{id}")
+    public Object deleteRole(@PathVariable("did") Long did, @PathVariable("id") Long id,
+                             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                             @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
         logger.debug("delete role");
-        ReturnObject<Object> returnObject = roleService.deleteRole(id);
-        return Common.decorateReturnObject(returnObject);
+        if(did.equals(departId)){
+            ReturnObject<Object> returnObject = roleService.deleteRole(departId, id);
+            return Common.decorateReturnObject(returnObject);
+        }
+        else{
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("部门id不匹配：" + did)), httpServletResponse);
+        }
     }
 
     /**
@@ -448,9 +470,10 @@ public class PrivilegeController {
      * createdBy 王纬策 2020/11/04 13:57
      * modifiedBy 王纬策 2020/11/7 19:20
      */
-    @ApiOperation(value = "auth008:修改角色信息", produces = "application/json")
+    @ApiOperation(value = "修改角色信息", produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "did", value = "部门id", required = true),
             @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "角色id", required = true),
             @ApiImplicitParam(paramType = "body", dataType = "RoleVo", name = "vo", value = "可修改的用户信息", required = true)
     })
@@ -459,16 +482,29 @@ public class PrivilegeController {
             @ApiResponse(code = 736, message = "角色名已存在"),
     })
     @Audit
-    @PutMapping("roles/{id}")
-    public Object updateRole(@PathVariable("id") Long id, @Validated @RequestBody RoleVo vo, BindingResult bindingResult, @LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId) {
+    @PutMapping("/shops/{did}/roles/{id}")
+    public Object updateRole(@PathVariable("did") Long did, @PathVariable("id") Long id, @Validated @RequestBody RoleVo vo, BindingResult bindingResult,
+                             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                             @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
         logger.debug("update role by userId:" + userId);
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
-        ReturnObject<Object> retObject = roleService.updateRole(userId, id, vo);
-        return Common.decorateReturnObject(retObject);
+        if(did.equals(departId)){
+            Role role = vo.createRole();
+            role.setId(id);
+            role.setDepartId(departId);
+            role.setCreatorId(userId);
+            role.setGmtModified(LocalDateTime.now());
+
+            ReturnObject<Object> retObject = roleService.updateRole(role);
+            return Common.decorateReturnObject(retObject);
+        }
+        else{
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("部门id不匹配：" + did)), httpServletResponse);
+        }
     }
     //endregion
     /* auth008 end*/

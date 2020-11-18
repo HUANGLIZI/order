@@ -40,8 +40,8 @@ public class RoleService {
      * createdBy 王纬策 2020/11/04 13:57
      * modifiedBy 王纬策 2020/11/7 19:20
      */
-    public ReturnObject<PageInfo<VoObject>> selectAllRoles(Integer pageNum, Integer pageSize) {
-        ReturnObject<PageInfo<VoObject>> returnObject = roleDao.selectAllRole(pageNum, pageSize);
+    public ReturnObject<PageInfo<VoObject>> selectAllRoles(Long departId, Integer pageNum, Integer pageSize) {
+        ReturnObject<PageInfo<VoObject>> returnObject = roleDao.selectAllRole(departId, pageNum, pageSize);
         return returnObject;
     }
 
@@ -55,10 +55,7 @@ public class RoleService {
      * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Transactional
-    public ReturnObject<VoObject> insertRole(Long userId, RoleVo vo) {
-        Role role = vo.createRole();
-        role.setCreatorId(userId);
-        role.setGmtCreate(LocalDateTime.now());
+    public ReturnObject<VoObject> insertRole(Role role) {
         ReturnObject<Role> retObj = roleDao.insertRole(role);
         ReturnObject<VoObject> retRole = null;
         if (retObj.getCode().equals(ResponseCode.OK)) {
@@ -78,8 +75,8 @@ public class RoleService {
      * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Transactional
-    public ReturnObject<Object> deleteRole(Long id) {
-        return roleDao.deleteRole(id);
+    public ReturnObject<Object> deleteRole(Long did, Long id) {
+        return roleDao.deleteRole(did, id);
     }
 
     /**
@@ -93,12 +90,8 @@ public class RoleService {
      * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Transactional
-    public ReturnObject<Object> updateRole(Long userId, Long id, RoleVo vo) {
-        Role role = vo.createRole();
-        role.setId(id);
-        role.setCreatorId(userId);
-        role.setGmtModified(LocalDateTime.now());
-        ReturnObject<Role> retObj = roleDao.updateRole(role);
+    public ReturnObject<Object> updateRole(Role bo) {
+        ReturnObject<Role> retObj = roleDao.updateRole(bo);
         ReturnObject<Object> retRole;
         if (retObj.getCode().equals(ResponseCode.OK)) {
             retRole = new ReturnObject<>(retObj.getData());

@@ -1,19 +1,25 @@
 package cn.edu.xmu.log.model.vo;
 
+import cn.edu.xmu.log.model.bo.Log;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * 权限传值对象
+ * 日志接受Vo
+ * @Author 王纬策
  *
- * @author Di Han Li
- * @date Created in 2020/11/4 9:08
- * Modified by 24320182203221 李狄翰 at 2020/11/8 8:00
- **/
+ */
 @Data
-@ApiModel("日志传值对象")
+@ApiModel(description = "日志传值对象")
 public class LogVo {
+    private Long userId;
+    private Long departId;
+    private String ip;
+    private Long privilegeId;
+    private Byte success;
+    private String beginDate;
+    private String endDate;
 
     @ApiModelProperty(name = "开始时间", value = "beginTime")
     private String beginTime;
@@ -21,5 +27,8 @@ public class LogVo {
     @ApiModelProperty(name = "结束时间", value = "endTime")
     private String endTime;
 
-
+    public Log createBo() {
+        Log operationLog = new Log(this);
+        return operationLog;
+    }
 }

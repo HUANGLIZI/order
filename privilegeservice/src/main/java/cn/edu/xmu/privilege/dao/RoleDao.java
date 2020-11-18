@@ -164,9 +164,10 @@ public class RoleDao {
      * createdBy 王纬策 2020/11/04 13:57
      * modifiedBy 王纬策 2020/11/7 19:20
      */
-    public ReturnObject<PageInfo<VoObject>> selectAllRole(Integer pageNum, Integer pageSize) {
+    public ReturnObject<PageInfo<VoObject>> selectAllRole(Long departId, Integer pageNum, Integer pageSize) {
         RolePoExample example = new RolePoExample();
         RolePoExample.Criteria criteria = example.createCriteria();
+        criteria.andDepartIdEqualTo(departId);
         //分页查询
         PageHelper.startPage(pageNum, pageSize);
         logger.debug("page = " + pageNum + "pageSize = " + pageSize);
@@ -241,9 +242,13 @@ public class RoleDao {
      * createdBy 王纬策 2020/11/04 13:57
      * modifiedBy 王纬策 2020/11/7 19:20
      */
-    public ReturnObject<Object> deleteRole(Long id) {
+    public ReturnObject<Object> deleteRole(Long did, Long id) {
         ReturnObject<Object> retObj = null;
-        int ret = roleMapper.deleteByPrimaryKey(id);
+        RolePoExample rolePoDid= new RolePoExample();
+        RolePoExample.Criteria criteriaDid = rolePoDid.createCriteria();
+        criteriaDid.andIdEqualTo(id);
+        criteriaDid.andDepartIdEqualTo(did);
+        int ret = roleMapper.deleteByExample(rolePoDid);
         if (ret == 0) {
             //删除角色表
             logger.debug("deleteRole: id not exist = " + id);
@@ -301,8 +306,13 @@ public class RoleDao {
     public ReturnObject<Role> updateRole(Role role) {
         RolePo rolePo = role.gotRolePo();
         ReturnObject<Role> retObj = null;
+        RolePoExample rolePoExample = new RolePoExample();
+        RolePoExample.Criteria criteria = rolePoExample.createCriteria();
+        criteria.andIdEqualTo(role.getId());
+        criteria.andDepartIdEqualTo(role.getDepartId());
         try{
-            int ret = roleMapper.updateByPrimaryKeySelective(rolePo);
+            int ret = roleMapper.updateByExampleSelective(rolePo, rolePoExample);
+//            int ret = roleMapper.updateByPrimaryKeySelective(rolePo);
             if (ret == 0) {
                 //修改失败
                 logger.debug("updateRole: update role fail : " + rolePo.toString());

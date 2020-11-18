@@ -74,14 +74,14 @@ public class PrivilegeControllerTest2 {
         String responseString = null;
         String token = creatTestToken(1L, 0L, 100);
         try {
-            responseString = this.mvc.perform(get("/privilege/roles?page=1&pageSize=2").header("authorization", token))
+            responseString = this.mvc.perform(get("/privilege/shops/0/roles?page=1&pageSize=2").header("authorization", token))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String expectedResponse = "{\"errno\":0,\"data\":{\"total\":2,\"pages\":1,\"pageSize\":2,\"page\":1,\"list\":[{\"id\":23,\"name\":\"管理员\",\"desc\":\"超级管理员，所有权限都有\",\"createdBy\":1},{\"id\":80,\"name\":\"财务\",\"desc\":null,\"createdBy\":1}]},\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":{\"total\":2,\"pages\":1,\"pageSize\":2,\"page\":1,\"list\":[{\"id\":23,\"name\":\"管理员\",\"desc\":\"超级管理员，所有权限都有\",\"createdBy\":1,\"departId\":0},{\"id\":80,\"name\":\"财务\",\"desc\":null,\"createdBy\":1,\"departId\":0}]},\"errmsg\":\"成功\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, false);
         } catch (JSONException e) {
@@ -112,7 +112,7 @@ public class PrivilegeControllerTest2 {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        expectedResponse = "{\"errno\":0,\"data\":{\"id\":88,\"name\":\"test\",\"creatorId\":1,\"describe\":\"test\"},\"errmsg\":\"成功\"}";
+        expectedResponse = "{\"errno\":0,\"data\":{\"id\":88,\"name\":\"test\",\"creatorId\":1,\"departId\":0,\"describe\":\"test\",\"gmtModified\":null},\"errmsg\":\"成功\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, false);
         } catch (JSONException e) {
@@ -198,7 +198,7 @@ public class PrivilegeControllerTest2 {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(put("/privilege/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(put("/privilege/shops/0/roles/23").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -229,7 +229,7 @@ public class PrivilegeControllerTest2 {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(put("/privilege/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(put("/privilege/shops/0/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isBadRequest())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -260,7 +260,7 @@ public class PrivilegeControllerTest2 {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(put("/privilege/roles/0").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(put("/privilege/shops/0/roles/0").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isNotFound())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -284,21 +284,21 @@ public class PrivilegeControllerTest2 {
     @Test
     public void updateRoleTest4() {
         RoleVo vo = new RoleVo();
-        vo.setName("管理员");
-        vo.setDescr("管理员test");
+        vo.setName("财务");
+        vo.setDescr("财务test");
         String token = creatTestToken(1L, 0L, 100);
         String roleJson = JacksonUtil.toJson(vo);
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(put("/privilege/roles/87").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
+            responseString = this.mvc.perform(put("/privilege/shops/0/roles/23").header("authorization", token).contentType("application/json;charset=UTF-8").content(roleJson))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        expectedResponse = "{\"errno\":736,\"errmsg\":\"角色名重复：管理员\"}";
+        expectedResponse = "{\"errno\":736,\"errmsg\":\"角色名重复：财务\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, true);
         } catch (JSONException e) {
@@ -320,7 +320,7 @@ public class PrivilegeControllerTest2 {
         String responseString = null;
         //测试删除成功
         try {
-            responseString = this.mvc.perform(delete("/privilege/roles/87").header("authorization", token))
+            responseString = this.mvc.perform(delete("/privilege/shops/0/roles/23").header("authorization", token))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -347,7 +347,7 @@ public class PrivilegeControllerTest2 {
         String expectedResponse = "";
         String responseString = null;
         try {
-            responseString = this.mvc.perform(delete("/privilege/roles/0").header("authorization", token))
+            responseString = this.mvc.perform(delete("/privilege/shops/0/roles/0").header("authorization", token))
                     .andExpect(status().isNotFound())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();

@@ -39,6 +39,9 @@ public enum ResponseCode {
     FLASHSALE_OUTLIMIT(607,"达到时段秒杀上限"),
     ADVERTISEMENT_STATENOTALLOW(608,"广告状态禁止"),
     AFTERSALE_STATENOTALLOW(609,"售后单状态禁止"),
+    Log_Bigger(610,"开始时间大于结束时间"),
+    Log_BEGIN_NULL(611,"开始时间不能为空"),
+    Log_END_NULL(612,"结束时间不能为空"),
     /***************************************************
      *    权限模块错误码
      **************************************************/
