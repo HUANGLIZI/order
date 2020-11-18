@@ -50,6 +50,12 @@ public class Log {
         this.gmtCreate = po.getGmtCreate();
     }
 
+    /**
+     * @description 生成po
+     * @return cn.edu.xmu.log.model.po.LogPo
+     * @author Xianwei Wang
+     * created at 11/18/20 2:59 PM
+     */
     public LogPo createPo() {
         LogPo logPo = new LogPo();
 
