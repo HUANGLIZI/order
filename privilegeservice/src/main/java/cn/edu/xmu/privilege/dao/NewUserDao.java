@@ -254,6 +254,9 @@ public class NewUserDao implements InitializingBean {
     public NewUserPo findNewUserById(Long Id) {
         logger.debug("findUserById: Id =" + Id);
         NewUserPo newUserPo = newUserPoMapper.selectByPrimaryKey(Id);
+        if (newUserPo == null) {
+            logger.error("getNewUser: 新用户数据库不存在该用户 userid=" + id);
+        }
         return newUserPo;
     }
 
