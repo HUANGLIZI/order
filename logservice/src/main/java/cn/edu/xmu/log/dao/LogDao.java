@@ -2,6 +2,13 @@ package cn.edu.xmu.log.dao;
 
 import cn.edu.xmu.log.mapper.LogPoMapper;
 import cn.edu.xmu.log.model.bo.Log;
+import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.ResponseCode;
+import cn.edu.xmu.ooad.util.ReturnObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 import cn.edu.xmu.log.model.po.LogPo;
 import cn.edu.xmu.log.model.po.LogPoExample;
 import cn.edu.xmu.ooad.model.VoObject;
@@ -27,6 +34,8 @@ import java.util.stream.Collectors;
 public class LogDao {
     @Autowired
     private LogPoMapper logPoMapper;
+
+    private static final Logger logger = LoggerFactory.getLogger(LogDao.class);
 
     public PageInfo<VoObject> selectLogs(Log logInfo, Integer pageNum, Integer pageSize) {
         LogPoExample example = new LogPoExample();
@@ -69,5 +78,20 @@ public class LogDao {
         returnObject.setTotal(logPagePos.getTotal());
 
         return returnObject;
+    }
+
+    /**
+     * @description 插入日志
+     * @param log 日志
+     * @return void
+     * @author Xianwei Wang
+     * created at 11/18/20 11:40 AM
+     */
+    public void insertLog(Log log) {
+        try {
+            logPoMapper.insert(log.createPo());
+        } catch (Exception e) {
+            logger.error("严重错误：" + e.getMessage());
+        }
     }
 }
