@@ -1,7 +1,9 @@
 package cn.edu.xmu.log.service;
 
 import cn.edu.xmu.log.LogServiceApplication;
+import cn.edu.xmu.log.dao.LogDao;
 import cn.edu.xmu.log.model.bo.Log;
+import cn.edu.xmu.log.service.mq.LogConsumerListener;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import io.lettuce.core.StrAlgoArgs;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -25,12 +27,11 @@ import java.time.LocalDateTime;
  */
 @SpringBootTest(classes = LogServiceApplication.class)   //标识本类是一个SpringBootTest
 @AutoConfigureMockMvc
-public class RocketMQServiceTest {
-    private static final Logger logger = LoggerFactory.getLogger(RocketMQService.class);
+public class LogConsumerListenerTest {
+    private static final Logger logger = LoggerFactory.getLogger(LogConsumerListener.class);
 
     @Resource
-    private RocketMQService rocketMQService;
-
+    private RocketMQTemplate rocketMQTemplate;
 
     /**
      * @description 插入日志测试
@@ -48,6 +49,9 @@ public class RocketMQServiceTest {
         log.setPrivilegeId(Long.valueOf(1));
         log.setSuccess(Byte.valueOf((byte) 1));
 
-        rocketMQService.sendLogMessage(log);
+        String json = JacksonUtil.toJson(log);
+        Message message = MessageBuilder.withPayload(json).build();
+        logger.info("sendLogMessage: message = " + message);
+        rocketMQTemplate.sendOneWay("log-topic", message);
     }
 }

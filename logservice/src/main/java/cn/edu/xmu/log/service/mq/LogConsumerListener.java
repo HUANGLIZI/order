@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
  * @author Xianwei Wang
  */
 @Service
-@RocketMQMessageListener(topic = "log-topic", selectorExpression = "1", consumeMode = ConsumeMode.CONCURRENTLY, consumeThreadMax = 10, consumerGroup = "log-group")
+@RocketMQMessageListener(topic = "log-topic", consumerGroup = "log-group")
 public class LogConsumerListener implements RocketMQListener<String>, RocketMQPushConsumerLifecycleListener {
 
     @Autowired
