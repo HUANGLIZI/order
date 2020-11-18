@@ -41,6 +41,7 @@ public class LogController {
     @ApiOperation(value = "log001: 查询日志",  produces="application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String",  name = "authorization", value ="用户token", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "userId", value = "用户ID", required = false),
             @ApiImplicitParam(paramType = "query", dataType = "int", name = "privilegeId", value = "权限ID", required = false),
             @ApiImplicitParam(paramType = "query", dataType = "bool", name = "success", value = "每页数目", required = false),
             @ApiImplicitParam(paramType = "query", dataType = "String", name = "beginTime", value = "开始时间", required = false),
@@ -54,7 +55,7 @@ public class LogController {
     @GetMapping("logs")
     @Audit
     public Object selectAllLogs(
-            @LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId,
+            @RequestParam(required = false) Long userId,
             @RequestParam(required = false) Long privilegeId,
             @RequestParam(required = false) Boolean success,
             @RequestParam(required = false) String beginTime,
@@ -65,6 +66,9 @@ public class LogController {
         Object object = null;
 
         LogVo vo = new LogVo();
+        if(userId != null){
+            vo.setUserId(userId);
+        }
         if(privilegeId != null){
             vo.setPrivilegeId(privilegeId);
         }
@@ -76,9 +80,6 @@ public class LogController {
         }
         if(endTime != null){
             vo.setEndDate(endTime);
-        }
-        if(userId != 0){
-            vo.setUserId(userId);
         }
         Log logInfo = vo.createBo();
         ReturnObject<PageInfo<VoObject>> returnObject = logService.selectAllLogs(logInfo, pageNum, pageSize);
