@@ -2,20 +2,27 @@ package cn.edu.xmu.privilege.util;
 
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import net.bytebuddy.asm.Advice;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class ImgHelper {
     /**
-     * 保存文件，直接以multipartFile形式
+     * 保存单个图片，直接以multipartFile形式
      *
      * @param multipartFile
      * @param path          文件保存路径
      * @return
      */
     public static ReturnObject saveImg(MultipartFile multipartFile, String path) throws IOException {
+
         File file = new File(path);
         if(file.exists()&&!file.canWrite())
             return new ReturnObject(ResponseCode.FILE_NO_WRITE_PERMISSION);
@@ -24,10 +31,15 @@ public class ImgHelper {
                 return new ReturnObject(ResponseCode.FILE_NO_WRITE_PERMISSION);
             }
         }
+        if(!isImg(multipartFile))
+            return new ReturnObject(ResponseCode.IMG_FORMAT_ERROR);
+
+
         InputStream fileInputStream = multipartFile.getInputStream();
 
-        String currentTime = String.valueOf(System.currentTimeMillis());
-        String fileName = getMD5(currentTime)+".png";
+        String suffix = multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf("."));
+        String fileName = UUID.randomUUID() + suffix;
+
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(path + File.separator + fileName));
         byte[] bs = new byte[1024];
         int len;
@@ -40,6 +52,54 @@ public class ImgHelper {
         return new ReturnObject(fileName);
     }
 
+    /**
+     * 保存单个图片并限制大小，直接以multipartFile形式
+     *
+     * @param multipartFile
+     * @param path          文件保存路径
+     * @return
+     */
+    public static ReturnObject saveImg(MultipartFile multipartFile, String path, int size) throws IOException {
+
+        File file = new File(path);
+
+        if(file.exists()&&!file.canWrite())
+            return new ReturnObject(ResponseCode.FILE_NO_WRITE_PERMISSION);
+        else if (!file.exists()) {
+            if(!file.mkdirs()){
+                return new ReturnObject(ResponseCode.FILE_NO_WRITE_PERMISSION);
+            }
+        }
+        if(!isImg(multipartFile))
+            return new ReturnObject(ResponseCode.IMG_FORMAT_ERROR);
+
+        if(multipartFile.getSize()>size*1024*1024){
+            return new ReturnObject(ResponseCode.IMG_SIZE_EXCEED);
+        }
+        InputStream fileInputStream = multipartFile.getInputStream();
+
+        String suffix = multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf("."));
+        String fileName = UUID.randomUUID() + suffix;
+
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(path + File.separator + fileName));
+        byte[] bs = new byte[1024];
+        int len;
+        while ((len = fileInputStream.read(bs)) != -1) {
+            bos.write(bs, 0, len);
+        }
+        bos.flush();
+        bos.close();
+
+        return new ReturnObject(fileName);
+    }
+
+    public static boolean isImg(MultipartFile multipartFile) throws IOException{
+        BufferedImage bi = ImageIO.read(multipartFile.getInputStream());
+        if(bi == null){
+            return false;
+        }
+        return true;
+    }
     /**
      * 删除文件
      *

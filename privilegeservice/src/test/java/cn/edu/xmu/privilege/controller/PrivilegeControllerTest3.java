@@ -44,12 +44,12 @@ public class PrivilegeControllerTest3 {
      * 上传成功
      */
     @Test
-    public void uploadFileSuccess() throws Exception{
-        String token = creatTestToken(1L, 0L, 100);
+    public void uploadFileSutccess() throws Exception{
+        String token = creatTestToken(1L,0L,100);
         File file = new File("."+File.separator + "src" + File.separator + "test" + File.separator+"resources" + File.separator + "img" + File.separator+"timg.png");
         MockMultipartFile firstFile = new MockMultipartFile("img", "timg.png" , "multipart/form-data", new FileInputStream(file));
         String responseString = mvc.perform(MockMvcRequestBuilders
-                .multipart("/privilege/adminusers/1/uploadImg")
+                .multipart("/privilege/adminusers/uploadImg")
                 .file(firstFile)
                 .header("authorization", token)
                 .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
@@ -63,15 +63,14 @@ public class PrivilegeControllerTest3 {
 
     /*
      * 上传失败（id不存在）
-     * （无权限和系统错误无法写成测试类）
      */
     @Test
-    public void UploadFileFail() throws Exception{
-        String token = creatTestToken(1L, 0L, 100);
+    public void UploadFileFail1() throws Exception{
+        String token = creatTestToken(1111L, 0L, 100);
         File file = new File("."+File.separator + "src" + File.separator +  "test" + File.separator + "resources" + File.separator + "img" +File.separator+"timg.png");
         MockMultipartFile firstFile = new MockMultipartFile("img", "timg.png" , "multipart/form-data", new FileInputStream(file));
         String responseString = mvc.perform(MockMvcRequestBuilders
-                .multipart("/privilege/adminusers/1111/uploadImg")
+                .multipart("/privilege/adminusers/uploadImg")
                 .file(firstFile)
                 .header("authorization", token)
                 .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
@@ -80,6 +79,69 @@ public class PrivilegeControllerTest3 {
                 .getResponse()
                 .getContentAsString();
         String expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    /*
+     * 上传失败（文件格式错误）
+     */
+    @Test
+    public void UploadFileFail2() throws Exception{
+        String token = creatTestToken(1L, 0L, 100);
+        File file = new File("."+File.separator + "src" + File.separator +  "test" + File.separator + "resources" + File.separator + "img" +File.separator+"文本文件.txt");
+        MockMultipartFile firstFile = new MockMultipartFile("img", "文本文件.txt" , "multipart/form-data", new FileInputStream(file));
+        String responseString = mvc.perform(MockMvcRequestBuilders
+                .multipart("/privilege/adminusers/uploadImg")
+                .file(firstFile)
+                .header("authorization", token)
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String expectedResponse = "{\"errno\":508,\"errmsg\":\"图片格式不正确\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    /*
+     * 上传失败（文件格式错误，伪装成图片）
+     */
+    @Test
+    public void UploadFileFail3() throws Exception{
+        String token = creatTestToken(1L, 0L, 100);
+        File file = new File("."+File.separator + "src" + File.separator +  "test" + File.separator + "resources" + File.separator + "img" +File.separator+"伪装的图片.png");
+        MockMultipartFile firstFile = new MockMultipartFile("img", "伪装的图片.png" , "multipart/form-data", new FileInputStream(file));
+        String responseString = mvc.perform(MockMvcRequestBuilders
+                .multipart("/privilege/adminusers/uploadImg")
+                .file(firstFile)
+                .header("authorization", token)
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String expectedResponse = "{\"errno\":508,\"errmsg\":\"图片格式不正确\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    /*
+     * 上传失败（文件格式错误）
+     */
+    @Test
+    public void UploadFileFail4() throws Exception{
+        String token = creatTestToken(1L, 0L, 100);
+        File file = new File("."+File.separator + "src" + File.separator +  "test" + File.separator + "resources" + File.separator + "img" +File.separator+"大小超限图片.jpg");
+        MockMultipartFile firstFile = new MockMultipartFile("img", "大小超限图片.jpg" , "multipart/form-data", new FileInputStream(file));
+        String responseString = mvc.perform(MockMvcRequestBuilders
+                .multipart("/privilege/adminusers/uploadImg")
+                .file(firstFile)
+                .header("authorization", token)
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String expectedResponse = "{\"errno\":509,\"errmsg\":\"图片大小超限\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 
@@ -96,7 +158,7 @@ public class PrivilegeControllerTest3 {
      */
     private final String creatTestToken(Long userId, Long departId, int expireTime) {
         String token = new JwtHelper().createToken(userId, departId, expireTime);
-        logger.debug(token);
+        logger.debug("token: " + token);
         return token;
     }
 }

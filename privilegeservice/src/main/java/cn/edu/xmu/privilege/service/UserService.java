@@ -396,9 +396,10 @@ public class UserService {
 
         ReturnObject returnObject = new ReturnObject();
         try{
-            returnObject = ImgHelper.saveImg(multipartFile,imgLocation);
-            //无写入权限
-            if(returnObject.getCode() == ResponseCode.FILE_NO_WRITE_PERMISSION){
+            returnObject = ImgHelper.saveImg(multipartFile,imgLocation,2);
+
+            //文件上传错误
+            if(returnObject.getCode()!=ResponseCode.OK){
                 logger.debug(returnObject.getErrmsg());
                 return returnObject;
             }

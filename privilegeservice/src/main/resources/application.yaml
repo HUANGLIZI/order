@@ -15,6 +15,13 @@ spring:
     name: privilege-service
   profiles:
     active: dev
+  servlet:
+    multipart:
+      #是否使用http上传
+      enabled: true
+      #最大请求文件的大小
+      max-request-size: 10MB
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
