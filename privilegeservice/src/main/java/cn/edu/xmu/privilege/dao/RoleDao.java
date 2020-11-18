@@ -36,15 +36,9 @@ import java.util.concurrent.TimeUnit;
  * modifiedBy 王纬策 2020/11/7 19:20
  **/
 @Repository
-public class RoleDao implements InitializingBean {
+public class RoleDao {
 
     private static final Logger logger = LoggerFactory.getLogger(RoleDao.class);
-
-    /**
-     * 是否初始化，生成signature和加密
-     */
-    @Value("${privilegeservice.initialization}")
-    private Boolean initialization;
 
     @Value("${privilegeservice.role.expiretime}")
     private long timeout;
@@ -142,13 +136,7 @@ public class RoleDao implements InitializingBean {
         return retIds;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-
-        if (!initialization){
-            return;
-        }
-
+    public void initialize() throws Exception {
         RolePrivilegePoExample example = new RolePrivilegePoExample();
         RolePrivilegePoExample.Criteria criteria = example.createCriteria();
         criteria.andSignatureIsNull();
