@@ -200,7 +200,7 @@ public class UserDao implements InitializingBean {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,
                     String.format("发生了严重的未知错误：%s", e.getMessage()));
         }
-        
+
         //清除缓存
         clearUserPrivCache(userRolePo.getUserId());
 
