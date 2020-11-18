@@ -3,6 +3,7 @@ package cn.edu.xmu.log.dao;
 import cn.edu.xmu.log.mapper.LogPoMapper;
 import cn.edu.xmu.log.model.bo.Log;
 import cn.edu.xmu.log.model.po.LogPoExample;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -38,6 +40,9 @@ public class LogsDao implements InitializingBean {
      */
     public ReturnObject<Object> deleteLogs(Log log, Long departId) {
         logger.debug("deleteLogs");
+        if(!isBiggerBegin(log)){
+            return new ReturnObject(ResponseCode.USERPROXY_BIGGER);
+        }
         ReturnObject<Object> retObj = new ReturnObject<>();
         LogPoExample example = new LogPoExample();
         LogPoExample.Criteria criteria = example.createCriteria();
@@ -50,6 +55,12 @@ public class LogsDao implements InitializingBean {
         return retObj;
     }
 
+
+    public boolean isBiggerBegin(Log log){
+        LocalDateTime nowBeginDate = log.getBeginTime();
+        LocalDateTime nowEndDate = log.getEndTime();
+        return nowEndDate.isAfter(nowBeginDate);
+    }
     @Override
     public void afterPropertiesSet() throws Exception {
 

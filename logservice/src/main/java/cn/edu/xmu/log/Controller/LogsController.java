@@ -1,4 +1,4 @@
-package cn.edu.xmu.log.controller;
+package cn.edu.xmu.log.Controller;
 
 import cn.edu.xmu.log.model.vo.LogVo;
 import cn.edu.xmu.log.service.LogsService;
