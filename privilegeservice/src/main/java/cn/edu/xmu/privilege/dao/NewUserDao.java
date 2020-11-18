@@ -247,7 +247,7 @@ public class NewUserDao implements InitializingBean {
 
     /**
      * ID获取用户信息
-     * @author XQChen
+     * @author Li Zihan 24320182203227
      * @param id
      * @return 用户
      */
