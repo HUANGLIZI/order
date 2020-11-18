@@ -31,6 +31,7 @@ CREATE TABLE `auth_log` (
   `privilege_id` bigint NOT NULL,
   `success` tinyint NOT NULL DEFAULT '1',
   `gmt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `depart_id` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -44,4 +45,4 @@ CREATE TABLE `auth_log` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-11-18  8:58:39
+-- Dump completed on 2020-11-18 18:36:37
