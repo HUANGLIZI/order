@@ -3,6 +3,7 @@ package cn.edu.xmu.log.service;
 import cn.edu.xmu.log.LogServiceApplication;
 import cn.edu.xmu.log.model.bo.Log;
 import cn.edu.xmu.ooad.util.JacksonUtil;
+import io.lettuce.core.StrAlgoArgs;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -18,7 +19,7 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 
 /**
- * @author Fiber W.
+ * @author Xianwen Wang
  * created at 11/18/20 10:10 AM
  * @detail cn.edu.xmu.log.service
  */
@@ -31,17 +32,22 @@ public class RocketMQServiceTest {
     private RocketMQService rocketMQService;
 
 
-
+    /**
+     * @description 插入日志测试
+     * @return void
+     * @author Xianwei Wang
+     * created at 11/18/20 1:08 PM
+     */
     @Test
     public void sendLogMessageTest(){
         Log log = new Log();
+        log.setUserId(Long.valueOf(1));
         log.setIp("127.0.0.1");
         log.setDescr("test");
         log.setGmtCreate(LocalDateTime.now());
         log.setPrivilegeId(Long.valueOf(1));
+        log.setSuccess(Byte.valueOf((byte) 1));
 
-        String json = JacksonUtil.toJson(log);
-        Message message = MessageBuilder.withPayload(json).build();
         rocketMQService.sendLogMessage(log);
     }
 }
