@@ -1064,15 +1064,20 @@ public class PrivilegeController {
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 404, message = "参数不合法")
     })
     @Audit // 需要认证
     @PutMapping("shops/{did}/adminusers/{id}/approve")
     public Object approveUser(@PathVariable Long id,@PathVariable Long did, BindingResult bindingResult,@RequestBody Boolean approve) {
         if (logger.isDebugEnabled()) {
-           logger.debug("approveUser: did = "+ did+" userid: id = "+ id+" opinion: "+approve);
+            logger.debug("approveUser: did = "+ did+" userid: id = "+ id+" opinion: "+approve);
         }
-        ReturnObject<Object> returnObject = userService.approveUser(id,approve);
-        return Common.decorateReturnObject(returnObject);
+        ReturnObject<Object> returnObject = newUserService.approveUser(id,did,approve);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return returnObject;
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
 }
