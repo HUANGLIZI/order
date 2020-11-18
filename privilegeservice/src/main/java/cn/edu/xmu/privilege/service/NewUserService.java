@@ -38,5 +38,15 @@ public class NewUserService {
     public ReturnObject register(NewUserVo vo) {
         return newUserDao.createNewUserByVo(vo);
     }
+    
+    @Transactional
+    public ReturnObject deleteNewUser(Long id) {
+        return newUserDao.physicallyDeleteUser(id);
+    }
+
+    @Transactional
+    public NewUserPo findNewUser(Long id) {
+        return newUserDao.findNewUserById(id);
+    }
 
 }
