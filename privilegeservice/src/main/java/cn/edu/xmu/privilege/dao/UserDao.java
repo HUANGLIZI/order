@@ -955,7 +955,7 @@ public class UserDao{
         userPo.setOpenId(po.getOpenId());
         userPo.setGmtCreate(LocalDateTime.now());
         returnObject=new ReturnObject<>(userPoMapper.insert(userPo));
-        logger.debug("success trying to insert newUser");
+        logger.debug("success insert User: "+userPo.getId());
         return returnObject;
     }
 
