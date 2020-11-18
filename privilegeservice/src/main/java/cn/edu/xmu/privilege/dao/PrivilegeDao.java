@@ -34,11 +34,6 @@ public class PrivilegeDao implements InitializingBean {
 
     private  static  final Logger logger = LoggerFactory.getLogger(PrivilegeDao.class);
 
-    /**
-     * 是否初始化，生成signature和加密
-     */
-    @Value("${privilegeservice.initialization}")
-    private Boolean initialization;
 
     @Autowired
     private PrivilegePoMapper poMapper;
@@ -56,26 +51,31 @@ public class PrivilegeDao implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         PrivilegePoExample example = new PrivilegePoExample();
-        PrivilegePoExample.Criteria criteria = example.createCriteria();
         List<PrivilegePo> privilegePos = poMapper.selectByExample(example);
-//        List<PrivilegePo> privilegePos =  mapper.selectAll();
         if (null == cache){
             cache = new HashMap<>(privilegePos.size());
         }
         for (PrivilegePo po : privilegePos){
             Privilege priv = new Privilege(po);
-            if (null == po.getSignature() && initialization){
+            if (priv.authetic()) {
+                logger.debug("afterPropertiesSet: key = " + priv.getKey() + " p = " + priv);
+                cache.put(priv.getKey(), priv.getId());
+            }else{
+                logger.error("afterPropertiesSet: Wrong Signature(auth_privilege): id = " + priv.getId());
+            }
+        }
+    }
+
+    public void initialize() {
+        PrivilegePoExample example = new PrivilegePoExample();
+        List<PrivilegePo> privilegePos = poMapper.selectByExample(example);
+        for (PrivilegePo po : privilegePos) {
+            Privilege priv = new Privilege(po);
+            if (null == po.getSignature()) {
                 PrivilegePo newPo = new PrivilegePo();
                 newPo.setId(po.getId());
                 newPo.setSignature(priv.getCacuSignature());
                 poMapper.updateByPrimaryKeySelective(newPo);
-            }else {
-                if (priv.authetic()) {
-                    logger.debug("afterPropertiesSet: key = " + priv.getKey() + " p = " + priv);
-                    cache.put(priv.getKey(), priv.getId());
-                }else{
-                    logger.error("afterPropertiesSet: Wrong Signature(auth_privilege): id = " + priv.getId());
-                }
             }
         }
     }
