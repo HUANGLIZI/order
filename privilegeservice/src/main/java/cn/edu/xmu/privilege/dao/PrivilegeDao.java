@@ -152,22 +152,28 @@ public class PrivilegeDao implements InitializingBean {
 
     /**
      * 修改权限
+     * @modifiedBy 24320182203266
      * @param id: 权限id
      * @return ReturnObject
      */
     public ReturnObject changePriv(Long id, PrivilegeVo vo){
         PrivilegePo po = this.poMapper.selectByPrimaryKey(id);
         logger.debug("changePriv: vo = "+ vo  + " po = "+ po);
-
+        /* 验证权限是否被篡改 */
         Privilege privilege = new Privilege(po);
         if(!privilege.getCacuSignature().equals(privilege.getSignature())){
             return new ReturnObject(ResponseCode.RESOURCE_FALSIFY, "该权限可能被篡改，请联系管理员处理");
         }
-        PrivilegePo newPo = privilege.createUpdatePo(vo);
-        if(po.getUrl().equals(newPo.getUrl()) && po.getRequestType().equals(newPo.getRequestType())){
-            return new ReturnObject(ResponseCode.URL_SAME, "URL与RequestType均重复");
-        }
+        /* 验证数据是否重复 */
+        PrivilegePoExample example = new PrivilegePoExample();
+        PrivilegePoExample.Criteria criteria = example.createCriteria();
+        criteria.andRequestTypeEqualTo(vo.getRequestType()).andUrlEqualTo(vo.getUrl());
 
+        if(!poMapper.selectByExample(example).isEmpty()){
+            return new ReturnObject(ResponseCode.URL_SAME, "URL和RequestType不得与已有的数据重复");
+        }
+        /* 开始更新 */
+        PrivilegePo newPo = privilege.createUpdatePo(vo);
         newPo.setId(po.getId()); // 这里设置要更新的权限的Id
 
         this.poMapper.updateByPrimaryKeySelective(newPo);

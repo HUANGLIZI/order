@@ -22,5 +22,5 @@ public class PrivilegeVo {
 
     @NotNull(message = "requestType不得为空")
     @Range(min = 0, max = 3, message = "错误的requestType数值")
-    private Integer requestType;
+    private Byte requestType;
 }
