@@ -386,72 +386,72 @@ public class RolePoExample {
         }
 
         public Criteria andDescrIsNull() {
-            addCriterion("descr is null");
+            addCriterion("`descr` is null");
             return (Criteria) this;
         }
 
         public Criteria andDescrIsNotNull() {
-            addCriterion("descr is not null");
+            addCriterion("`descr` is not null");
             return (Criteria) this;
         }
 
         public Criteria andDescrEqualTo(String value) {
-            addCriterion("descr =", value, "descr");
+            addCriterion("`descr` =", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrNotEqualTo(String value) {
-            addCriterion("descr <>", value, "descr");
+            addCriterion("`descr` <>", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrGreaterThan(String value) {
-            addCriterion("descr >", value, "descr");
+            addCriterion("`descr` >", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrGreaterThanOrEqualTo(String value) {
-            addCriterion("descr >=", value, "descr");
+            addCriterion("`descr` >=", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrLessThan(String value) {
-            addCriterion("descr <", value, "descr");
+            addCriterion("`descr` <", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrLessThanOrEqualTo(String value) {
-            addCriterion("descr <=", value, "descr");
+            addCriterion("`descr` <=", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrLike(String value) {
-            addCriterion("descr like", value, "descr");
+            addCriterion("`descr` like", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrNotLike(String value) {
-            addCriterion("descr not like", value, "descr");
+            addCriterion("`descr` not like", value, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrIn(List<String> values) {
-            addCriterion("descr in", values, "descr");
+            addCriterion("`descr` in", values, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrNotIn(List<String> values) {
-            addCriterion("descr not in", values, "descr");
+            addCriterion("`descr` not in", values, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrBetween(String value1, String value2) {
-            addCriterion("descr between", value1, value2, "descr");
+            addCriterion("`descr` between", value1, value2, "descr");
             return (Criteria) this;
         }
 
         public Criteria andDescrNotBetween(String value1, String value2) {
-            addCriterion("descr not between", value1, value2, "descr");
+            addCriterion("`descr` not between", value1, value2, "descr");
             return (Criteria) this;
         }
 
@@ -572,6 +572,66 @@ public class RolePoExample {
 
         public Criteria andGmtModifiedNotBetween(LocalDateTime value1, LocalDateTime value2) {
             addCriterion("`gmt_modified` not between", value1, value2, "gmtModified");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdIsNull() {
+            addCriterion("`depart_id` is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdIsNotNull() {
+            addCriterion("`depart_id` is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdEqualTo(Long value) {
+            addCriterion("`depart_id` =", value, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdNotEqualTo(Long value) {
+            addCriterion("`depart_id` <>", value, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdGreaterThan(Long value) {
+            addCriterion("`depart_id` >", value, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdGreaterThanOrEqualTo(Long value) {
+            addCriterion("`depart_id` >=", value, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdLessThan(Long value) {
+            addCriterion("`depart_id` <", value, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdLessThanOrEqualTo(Long value) {
+            addCriterion("`depart_id` <=", value, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdIn(List<Long> values) {
+            addCriterion("`depart_id` in", values, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdNotIn(List<Long> values) {
+            addCriterion("`depart_id` not in", values, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdBetween(Long value1, Long value2) {
+            addCriterion("`depart_id` between", value1, value2, "departId");
+            return (Criteria) this;
+        }
+
+        public Criteria andDepartIdNotBetween(Long value1, Long value2) {
+            addCriterion("`depart_id` not between", value1, value2, "departId");
             return (Criteria) this;
         }
     }

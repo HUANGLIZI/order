@@ -57,7 +57,7 @@ CREATE TABLE `auth_privilege` (
   `gmt_create` datetime DEFAULT NULL,
   `gmt_modified` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -74,6 +74,7 @@ CREATE TABLE `auth_role` (
   `descr` varchar(500) DEFAULT NULL COMMENT '角色描述',
   `gmt_create` datetime NOT NULL COMMENT '创建时间',
   `gmt_modified` datetime DEFAULT NULL COMMENT '修改时间',
+  `depart_id` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_role_name_uindex` (`name`),
   KEY `auth_role_creator_id_index` (`creator_id`)
@@ -152,6 +153,7 @@ CREATE TABLE `auth_user_proxy` (
   `gmt_create` datetime DEFAULT NULL,
   `signature` varchar(256) DEFAULT NULL,
   `valid` tinyint NOT NULL DEFAULT '1',
+  `depart_id` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `auth_user_proxy_user_a_id_valid_index` (`user_a_id`,`valid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
@@ -187,4 +189,4 @@ CREATE TABLE `auth_user_role` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-11-04 13:07:09
+-- Dump completed on 2020-11-18  9:02:53
