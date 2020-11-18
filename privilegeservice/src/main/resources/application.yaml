@@ -67,7 +67,7 @@ mybatis:
 
 privilegeservice:
   #是否对数据库中的未初始化的数据初始化
-  initialization: false
+  initialization: true
   #分布式锁失效时间（秒）
   lockerExpireTime: 30
   #图片存储位置

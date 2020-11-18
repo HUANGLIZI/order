@@ -31,6 +31,8 @@ public class Log implements VoObject {
     private LocalDateTime gmtCreate;
     private Byte success;
 
+    private LocalDateTime beginTime;
+    private LocalDateTime endTime;
     private String beginDate;
     private String endDate;
     /**
@@ -54,6 +56,10 @@ public class Log implements VoObject {
         this.setSuccess(vo.getSuccess());
         this.setBeginDate(vo.getBeginDate());
         this.setEndDate(vo.getEndDate());
+        
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        this.beginTime = LocalDateTime.parse(vo.getBeginTime(), df);
+        this.endTime = LocalDateTime.parse(vo.getEndTime(), df);
     }
 
     /**
