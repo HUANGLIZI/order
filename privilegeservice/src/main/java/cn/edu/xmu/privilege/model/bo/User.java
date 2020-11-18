@@ -209,12 +209,7 @@ public class User implements VoObject {
         return po;
     }
 
-    @Override
-    public Object createVo() {
-        return null;
-    }
-
-
+    
     /**
      * 创建SimpleVo
      * @return userSimpleRetVo
