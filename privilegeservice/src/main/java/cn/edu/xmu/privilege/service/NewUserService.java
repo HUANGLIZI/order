@@ -25,6 +25,8 @@ import java.time.LocalDateTime;
 public class NewUserService {
     private Logger logger = LoggerFactory.getLogger(NewUserService.class);
 
+    @Autowired
+    NewUserDao newUserDao;
 
     @Autowired
     NewUserDao newUserDao;
@@ -39,14 +41,6 @@ public class NewUserService {
         return newUserDao.createNewUserByVo(vo);
     }
     
-    @Transactional
-    public ReturnObject deleteNewUser(Long id) {
-        return newUserDao.physicallyDeleteUser(id);
-    }
-
-    @Transactional
-    public NewUserPo findNewUser(Long id) {
-        return newUserDao.findNewUserById(id);
-    }
+    
 
 }
