@@ -1,4 +1,4 @@
-package cn.edu.xmu.privilegegateway.model;
+package cn.edu.xmu.log.model;
 
 import lombok.Data;
 
@@ -11,5 +11,6 @@ public class Log  implements Serializable {
     private String ip;
     private String descr;
     private LocalDateTime gmtCreate;
-    private Long privId;
+    private Long privilegeId;
+    private Byte success;
 }

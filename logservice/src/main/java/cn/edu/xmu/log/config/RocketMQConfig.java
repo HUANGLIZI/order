@@ -1,4 +1,4 @@
-package cn.edu.xmu.privilegegateway.config;
+package cn.edu.xmu.log.config;
 
 import org.springframework.context.annotation.Configuration;
 

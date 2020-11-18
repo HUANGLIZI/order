@@ -1,6 +1,6 @@
-package cn.edu.xmu.privilegegateway.service;
+package cn.edu.xmu.log.service;
 
-import cn.edu.xmu.privilegegateway.model.Log;
+import cn.edu.xmu.log.model.Log;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;

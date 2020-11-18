@@ -1,7 +1,7 @@
-package cn.edu.xmu.privilegegateway.annotation;
+package cn.edu.xmu.log.annotation;
 
 import cn.edu.xmu.ooad.util.JwtHelper;
-import cn.edu.xmu.privilegegateway.model.Log;
+import cn.edu.xmu.log.model.Log;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.IpUtil;
 import cn.edu.xmu.ooad.util.JacksonUtil;
@@ -75,7 +75,7 @@ public class AutoLogAspect {
         //请求的方法名
         String className = joinPoint.getTarget().getClass().getName();
         String methodName = signature.getName();
-        sysLog.setMethod(className + "." + methodName + "()");
+
         log.info("请求{}.{}耗时{}毫秒",className,methodName,time);
         try {
             //请求的参数
@@ -85,7 +85,7 @@ public class AutoLogAspect {
                 params= JacksonUtil.toJson(args);
             }
 
-            sysLog.setParams(params);
+            
         } catch (Exception e) {
 
         }
