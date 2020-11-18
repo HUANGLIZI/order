@@ -7,7 +7,6 @@ import cn.edu.xmu.ooad.model.VoObject;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
  * 日志Bo
@@ -32,8 +31,8 @@ public class Log implements VoObject {
     private LocalDateTime gmtCreate;
     private Byte success;
 
-    private LocalDateTime beginDate;
-    private LocalDateTime endDate;
+    private String beginDate;
+    private String endDate;
     /**
      * 构造函数
      * @param po Po对象
@@ -53,24 +52,8 @@ public class Log implements VoObject {
         this.setIp(vo.getIp());
         this.setPrivilegeId(vo.getPrivilegeId());
         this.setSuccess(vo.getSuccess());
-
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        if(vo.getBeginDate() != null)
-        {
-            this.setBeginDate(LocalDateTime.parse(vo.getBeginDate(), df));
-        }
-        else
-        {
-            this.setBeginDate(null);
-        }
-        if(vo.getEndDate() != null)
-        {
-            this.setEndDate(LocalDateTime.parse(vo.getEndDate(), df));
-        }
-        else
-        {
-            this.setEndDate(null);
-        }
+        this.setBeginDate(vo.getBeginDate());
+        this.setEndDate(vo.getEndDate());
     }
 
     /**

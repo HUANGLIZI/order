@@ -4,13 +4,16 @@ import cn.edu.xmu.log.mapper.LogPoMapper;
 import cn.edu.xmu.log.model.bo.Log;
 import cn.edu.xmu.log.model.po.LogPo;
 import cn.edu.xmu.log.model.po.LogPoExample;
+import cn.edu.xmu.ooad.model.VoObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 日志服务类
@@ -25,7 +28,7 @@ public class LogDao {
     @Autowired
     private LogPoMapper logPoMapper;
 
-    public PageInfo<LogPo> selectLogs(Log logInfo, Integer pageNum, Integer pageSize) {
+    public PageInfo<VoObject> selectLogs(Log logInfo, Integer pageNum, Integer pageSize) {
         LogPoExample example = new LogPoExample();
         LogPoExample.Criteria criteria = example.createCriteria();
         if(logInfo.getUserId() != null){
@@ -46,17 +49,25 @@ public class LogDao {
         }
         if(logInfo.getBeginDate() != null){
             log.debug("selectLogs beginDate="+logInfo.getBeginDate());
-            criteria.andGmtCreateGreaterThan(logInfo.getBeginDate());
+            criteria.andGmtCreateGreaterThan(Timestamp.valueOf(logInfo.getBeginDate()).toLocalDateTime());
         }
         if(logInfo.getEndDate() != null){
             log.debug("selectLogs endDate="+logInfo.getEndDate());
-            criteria.andGmtCreateLessThan(logInfo.getEndDate());
+            criteria.andGmtCreateLessThan(Timestamp.valueOf(logInfo.getEndDate()).toLocalDateTime());
         }
         PageHelper.startPage(pageNum, pageSize);
         List<LogPo> logPos = logPoMapper.selectByExample(example);
-
         log.debug("selectLogs DAO:"+logPos);
 
-        return new PageInfo<>(logPos);
+        PageInfo<LogPo> logPagePos = new PageInfo<>(logPos);
+        List<VoObject> operationLogs = logPagePos.getList().stream().map(Log::new).collect(Collectors.toList());
+
+        PageInfo<VoObject> returnObject = new PageInfo<>(operationLogs);
+        returnObject.setPages(logPagePos.getPages());
+        returnObject.setPageNum(logPagePos.getPageNum());
+        returnObject.setPageSize(logPagePos.getPageSize());
+        returnObject.setTotal(logPagePos.getTotal());
+
+        return returnObject;
     }
 }
