@@ -37,6 +37,7 @@ public class Log implements VoObject {
 
     private LocalDateTime beginTime;
     private LocalDateTime endTime;
+
     /**
      * 构造函数
      * @param po Po对象

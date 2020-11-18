@@ -27,7 +27,6 @@ public class LogVo {
     @ApiModelProperty(name = "结束时间", value = "endTime")
     private String endTime;
 
-
     public Log createBo() {
         Log operationLog = new Log(this);
         return operationLog;
