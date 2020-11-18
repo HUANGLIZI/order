@@ -53,9 +53,24 @@ public class Log implements VoObject {
         this.setIp(vo.getIp());
         this.setPrivilegeId(vo.getPrivilegeId());
         this.setSuccess(vo.getSuccess());
+
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        this.setBeginDate(LocalDateTime.parse(vo.getBeginDate(), df));
-        this.setEndDate(LocalDateTime.parse(vo.getEndDate(), df));
+        if(vo.getBeginDate() != null)
+        {
+            this.setBeginDate(LocalDateTime.parse(vo.getBeginDate(), df));
+        }
+        else
+        {
+            this.setBeginDate(null);
+        }
+        if(vo.getEndDate() != null)
+        {
+            this.setEndDate(LocalDateTime.parse(vo.getEndDate(), df));
+        }
+        else
+        {
+            this.setEndDate(null);
+        }
     }
 
     /**

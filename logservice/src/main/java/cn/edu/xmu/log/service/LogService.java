@@ -34,10 +34,10 @@ public class LogService {
      * createdBy 王纬策 2020/11/04 13:57
      * modifiedBy 王纬策 2020/11/7 19:20
      */
-    public ReturnObject<PageInfo<VoObject>> selectAllLogs(Integer pageNum, Integer pageSize) {
+    public ReturnObject<PageInfo<VoObject>> selectAllLogs(Log logInfo, Integer pageNum, Integer pageSize) {
 
 
-        PageInfo<LogPo> logPos = logDao.selectLogs(pageNum, pageSize);
+        PageInfo<LogPo> logPos = logDao.selectLogs(logInfo, pageNum, pageSize);
 
         List<VoObject> operationLogs = logPos.getList().stream().map(Log::new).collect(Collectors.toList());
 

@@ -25,33 +25,33 @@ public class LogDao {
     @Autowired
     private LogPoMapper logPoMapper;
 
-    public PageInfo<LogPo> selectLogs(Integer pageNum, Integer pageSize) {
+    public PageInfo<LogPo> selectLogs(Log logInfo, Integer pageNum, Integer pageSize) {
         LogPoExample example = new LogPoExample();
         LogPoExample.Criteria criteria = example.createCriteria();
-//        if(logBo.getUserId() != null){
-//            log.debug("selectLogs userId="+logBo.getUserId());
-//            criteria.andUserIdEqualTo(logBo.getUserId());
-//        }
-//        if(logBo.getIp() != null){
-//            log.debug("selectLogs ip="+logBo.getIp());
-//            criteria.andIpEqualTo(logBo.getIp());
-//        }
-//        if(logBo.getPrivilegeId() != null){
-//            log.debug("selectLogs privilegeId="+logBo.getPrivilegeId());
-//            criteria.andPrivilegeIdEqualTo(logBo.getPrivilegeId());
-//        }
-//        if(logBo.getSuccess() != null){
-//            log.debug("selectLogs success="+logBo.getSuccess());
-//            criteria.andSuccessEqualTo(logBo.getSuccess());
-//        }
-//        if(logBo.getBeginDate() != null){
-//            log.debug("selectLogs beginDate="+logBo.getBeginDate());
-//            criteria.andGmtCreateGreaterThan(logBo.getBeginDate());
-//        }
-//        if(logBo.getEndDate() != null){
-//            log.debug("selectLogs endDate="+logBo.getEndDate());
-//            criteria.andGmtCreateLessThan(logBo.getEndDate());
-//        }
+        if(logInfo.getUserId() != null){
+            log.debug("selectLogs userId="+logInfo.getUserId());
+            criteria.andUserIdEqualTo(logInfo.getUserId());
+        }
+        if(logInfo.getIp() != null){
+            log.debug("selectLogs ip="+logInfo.getIp());
+            criteria.andIpEqualTo(logInfo.getIp());
+        }
+        if(logInfo.getPrivilegeId() != null){
+            log.debug("selectLogs privilegeId="+logInfo.getPrivilegeId());
+            criteria.andPrivilegeIdEqualTo(logInfo.getPrivilegeId());
+        }
+        if(logInfo.getSuccess() != null){
+            log.debug("selectLogs success="+logInfo.getSuccess());
+            criteria.andSuccessEqualTo(logInfo.getSuccess());
+        }
+        if(logInfo.getBeginDate() != null){
+            log.debug("selectLogs beginDate="+logInfo.getBeginDate());
+            criteria.andGmtCreateGreaterThan(logInfo.getBeginDate());
+        }
+        if(logInfo.getEndDate() != null){
+            log.debug("selectLogs endDate="+logInfo.getEndDate());
+            criteria.andGmtCreateLessThan(logInfo.getEndDate());
+        }
         PageHelper.startPage(pageNum, pageSize);
         List<LogPo> logPos = logPoMapper.selectByExample(example);
 

@@ -4,6 +4,7 @@ import cn.edu.xmu.log.model.bo.Log;
 import cn.edu.xmu.log.model.vo.LogVo;
 import cn.edu.xmu.log.service.LogService;
 import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -13,6 +14,7 @@ import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -46,8 +48,13 @@ public class LogController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    @GetMapping("logs/all")
+    @GetMapping("logs")
     public Object selectAllLogs(
+            @LoginUser @RequestParam(required = false, defaultValue = "0") Long userId,
+            @RequestParam(required = false) Long privilegeId,
+            @RequestParam(required = false) Boolean success,
+            @RequestParam(required = false) String beginTime,
+            @RequestParam(required = false) String endTime,
             @RequestParam(required = false, defaultValue = "1")  Integer pageNum,
             @RequestParam(required = false, defaultValue = "10")  Integer pageSize) {
 
@@ -58,7 +65,24 @@ public class LogController {
             object = Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
         } else {
             //字段合法
-            ReturnObject<PageInfo<VoObject>> returnObject = logService.selectAllLogs(pageNum, pageSize);
+            LogVo vo = new LogVo();
+            if(privilegeId != null){
+                vo.setPrivilegeId(privilegeId);
+            }
+            if(success != null){
+                vo.setSuccess((byte) (success ? 0x01 : 0x00));
+            }
+            if(beginTime != null){
+                vo.setBeginDate(beginTime);
+            }
+            if(endTime != null){
+                vo.setEndDate(endTime);
+            }
+            if(userId != 0){
+                vo.setUserId(userId);
+            }
+            Log logInfo = vo.createBo();
+            ReturnObject<PageInfo<VoObject>> returnObject = logService.selectAllLogs(logInfo, pageNum, pageSize);
             log.debug("selectAllLogs: getLogs = " + returnObject);
             object = Common.getPageRetObject(returnObject);
         }
