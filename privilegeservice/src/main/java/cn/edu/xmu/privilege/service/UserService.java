@@ -7,12 +7,9 @@ import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.dao.PrivilegeDao;
-import cn.edu.xmu.privilege.model.bo.Privilege;
-import cn.edu.xmu.privilege.model.bo.UserRole;
-import cn.edu.xmu.privilege.model.bo.User;
 import cn.edu.xmu.privilege.dao.UserDao;
 import cn.edu.xmu.privilege.model.vo.PrivilegeVo;
-import cn.edu.xmu.privilege.util.ImgHelper;
+import cn.edu.xmu.ooad.util.ImgHelper;
 import cn.edu.xmu.privilege.model.vo.UserVo;
 import cn.edu.xmu.privilege.model.vo.*;
 import com.github.pagehelper.PageHelper;
@@ -29,11 +26,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -55,6 +50,15 @@ public class UserService {
      **/
     @Value("${privilegeservice.imglocation}")
     private String imgLocation;
+
+    @Value("${privilegeservice.dav.username}")
+    private String username;
+
+    @Value("${privilegeservice.dav.password}")
+    private String password;
+
+    @Value("${privilegeservice.dav.baseUrl}")
+    private String baseUrl;
 
     @Autowired
     private PrivilegeDao privilegeDao;
@@ -396,7 +400,7 @@ public class UserService {
 
         ReturnObject returnObject = new ReturnObject();
         try{
-            returnObject = ImgHelper.saveImg(multipartFile,imgLocation,2);
+            returnObject = ImgHelper.remoteSaveImg(multipartFile,2,username,password,baseUrl);
 
             //文件上传错误
             if(returnObject.getCode()!=ResponseCode.OK){
@@ -410,18 +414,18 @@ public class UserService {
 
             //数据库更新失败，需删除新增的图片
             if(updateReturnObject.getCode()==ResponseCode.FIELD_NOTVALID){
-                ImgHelper.deleteImg(returnObject.getData().toString(),imgLocation);
+                ImgHelper.deleteRemoteImg(returnObject.getData().toString(),username,password,baseUrl);
                 return updateReturnObject;
             }
 
             //数据库更新成功需删除旧图片，未设置则不删除
             if(oldFilename!=null) {
-                ImgHelper.deleteImg(oldFilename, imgLocation);
+                ImgHelper.deleteRemoteImg(oldFilename, username,password,baseUrl);
             }
         }
         catch (IOException e){
-            logger.debug("uploadImg: I/O Error:" + imgLocation);
-            return new ReturnObject(ResponseCode.INTERNAL_SERVER_ERR);
+            logger.debug("uploadImg: I/O Error:" + baseUrl);
+            return new ReturnObject(ResponseCode.FILE_NO_WRITE_PERMISSION);
         }
         return returnObject;
     }
