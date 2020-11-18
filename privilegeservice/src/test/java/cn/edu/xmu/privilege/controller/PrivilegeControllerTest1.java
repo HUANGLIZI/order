@@ -174,7 +174,7 @@ public class PrivilegeControllerTest1 {
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
 
-        String expectedResponse = "{\"errno\":501,\"errmsg\":\"JWT不合法\"}";
+        String expectedResponse = "{\"errno\":502,\"errmsg\":\"JWT过期\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
 
         // 测试有关数据是否有真的改变
