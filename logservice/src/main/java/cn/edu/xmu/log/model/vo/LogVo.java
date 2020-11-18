@@ -19,6 +19,13 @@ public class LogVo {
     private String beginDate;
     private String endDate;
 
+    @ApiModelProperty(name = "开始时间", value = "beginTime")
+    private String beginTime;
+
+    @ApiModelProperty(name = "结束时间", value = "endTime")
+    private String endTime;
+
+
     public Log createBo() {
         Log operationLog = new Log(this);
         return operationLog;
