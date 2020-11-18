@@ -42,53 +42,25 @@ public class NewUserService {
     }
     
     /**
-     * auth014: 管理员审核新用户
+     * 新用户审核未通过，删除
      * @param id
-     * @param approve
+     * @return ReturnObject
      * @author 24320182203227 Li Zihan
      */
     @Transactional
-    public ReturnObject<Object> approveUser(Long id,Long did,Boolean approve)
-    {
-        ReturnObject returnObject=null;
-        if(approve==true && did==0)
-        {
-            NewUserPo newUserPo=newUserDao.findNewUserById(id);
-            returnObject=userDao.addUser(newUserPo);
-            newUserDao.physicallyDeleteUser(id);
-        }
-        else if(approve==true && did!=0)
-        {
-            NewUserPo newUserPo=newUserDao.findNewUserById(id);
-            if(newUserPo.getDepartId()==did)
-            {
-                returnObject=userDao.addUser(newUserPo);
-                newUserDao.physicallyDeleteUser(id);
-            }
-            else
-            {
-                logger.debug("did未匹配");
-                return returnObject;
-            }
-        }
-        else if(approve==false && did==0)
-        {
-            returnObject=newUserDao.physicallyDeleteUser(id);
-        }
-        else if(approve==false && did!=0)
-        {
-            NewUserPo newUserPo=newUserDao.findNewUserById(id);
-            if(newUserPo.getDepartId()==did)
-            {
-                returnObject=newUserDao.physicallyDeleteUser(id);
-            }
-            else
-            {
-                logger.debug("did未匹配");
-                return returnObject;
-            }
-        }
-        return returnObject;
+    public ReturnObject deleteNewUser(Long id) {
+        return newUserDao.physicallyDeleteUser(id);
+    }
+
+    /**
+     * 根据id查找新用户
+     * @param id
+     * @return NewUserPo
+     * @author 24320182203227 Li Zihan
+     */
+    @Transactional
+    public NewUserPo findNewUser(Long id) {
+        return newUserDao.findNewUserById(id);
     }
 
 }
