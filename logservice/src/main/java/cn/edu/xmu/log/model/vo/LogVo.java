@@ -2,6 +2,7 @@ package cn.edu.xmu.log.model.vo;
 
 import cn.edu.xmu.log.model.bo.Log;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
@@ -13,6 +14,7 @@ import lombok.Data;
 @ApiModel(description = "日志传值对象")
 public class LogVo {
     private Long userId;
+    private Long departId;
     private String ip;
     private Long privilegeId;
     private Byte success;

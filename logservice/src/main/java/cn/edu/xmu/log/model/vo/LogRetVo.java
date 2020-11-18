@@ -25,6 +25,9 @@ public class LogRetVo {
     @ApiModelProperty(value = "描述")
     private String desc;
 
+    @ApiModelProperty(value = "部门ID")
+    private Long departId;
+
     @ApiModelProperty(value = "权限ID")
     private Long privilegeId;
 
@@ -41,6 +44,7 @@ public class LogRetVo {
                 ", userId=" + userId +
                 ", ip='" + ip + '\'' +
                 ", desc='" + desc + '\'' +
+                ", departId=" + departId +
                 ", privilegeId=" + privilegeId +
                 ", success=" + success +
                 ", operationDate='" + operationDate + '\'' +
@@ -49,6 +53,7 @@ public class LogRetVo {
 
     public LogRetVo(Log bo) {
         this.setId(bo.getId());
+        this.setDepartId(bo.getDepartId());
         this.setUserId(bo.getUserId());
         this.setIp(bo.getIp());
         this.setDesc(bo.getDesc());

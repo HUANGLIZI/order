@@ -21,8 +21,8 @@
 
 LOCK TABLES `auth_log` WRITE;
 /*!40000 ALTER TABLE `auth_log` DISABLE KEYS */;
-INSERT INTO `oomall`.`auth_log` (`id`, `user_id`, `ip`, `descr`, `privilege_id`, `success`, `gmt_create`) VALUES ('1', '12', '192.168.1.1', 'lalala', '12', '1', '2020/11/18 10:00');
-INSERT INTO `oomall`.`auth_log` (`id`, `user_id`, `ip`, `descr`, `privilege_id`, `success`, `gmt_create`) VALUES ('2', '1', '192.168.2.1', 'lalala', '1', '0', '2020/11/15 10:00');
+INSERT INTO `oomall`.`auth_log` (`id`, `user_id`,`depart_id`, `ip`, `descr`, `privilege_id`, `success`, `gmt_create`) VALUES ('1', '12', '1', '192.168.1.1', 'lalala', '12', '1', '2020/11/18 10:00');
+INSERT INTO `oomall`.`auth_log` (`id`, `user_id`,`depart_id`, `ip`, `descr`, `privilege_id`, `success`, `gmt_create`) VALUES ('2', '1', '12','192.168.2.1', 'lalala', '1', '0', '2020/11/15 10:00');
 /*!40000 ALTER TABLE `auth_log` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

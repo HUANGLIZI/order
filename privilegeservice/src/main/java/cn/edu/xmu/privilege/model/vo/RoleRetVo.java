@@ -29,6 +29,9 @@ public class RoleRetVo {
     @ApiModelProperty(value = "创建者")
     private Long createdBy;
 
+    @ApiModelProperty(value = "部门id")
+    private Long departId;
+
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime gmtCreate;
 
@@ -49,6 +52,7 @@ public class RoleRetVo {
         this.name = role.getName();
         this.desc = role.getDescribe();
         this.createdBy = role.getCreatorId();
+        this.departId = role.getDepartId();
         this.gmtCreate = role.getGmtCreate();
         this.gmtModified = role.getGmtModified();
     }

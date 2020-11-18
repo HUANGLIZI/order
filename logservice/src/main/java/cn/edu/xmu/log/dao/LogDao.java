@@ -28,9 +28,26 @@ public class LogDao {
     @Autowired
     private LogPoMapper logPoMapper;
 
+    /**
+     * 查询日志
+     *
+     * @param logInfo log条件
+     * @param pageNum 页码
+     * @param pageSize 页面大小
+     *
+     * @author 王纬策
+     * @date Created in 2020/11/18 10:33
+     * @date Modified in 2020/11/18 19:32
+     **/
     public PageInfo<VoObject> selectLogs(Log logInfo, Integer pageNum, Integer pageSize) {
         LogPoExample example = new LogPoExample();
         LogPoExample.Criteria criteria = example.createCriteria();
+        if(logInfo.getDepartId() != null){
+            log.debug("selectLogs departId="+logInfo.getDepartId());
+            if(logInfo.getDepartId() != 0L) {
+                criteria.andDepartIdEqualTo(logInfo.getDepartId());
+            }
+        }
         if(logInfo.getUserId() != null){
             log.debug("selectLogs userId="+logInfo.getUserId());
             criteria.andUserIdEqualTo(logInfo.getUserId());
