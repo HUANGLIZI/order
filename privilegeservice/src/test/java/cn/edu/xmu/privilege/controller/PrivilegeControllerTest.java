@@ -83,7 +83,7 @@ public class PrivilegeControllerTest {
         ResultActions res = null;
 
         //Email未确认用户登录
-        requireJson = "{\"userName\":\"8131600001\",\"password\":\"123456\"}";
+        requireJson = "{\"userName\":\"5264500009\",\"password\":\"123456\"}";
         res = this.mvc.perform(post("/privilege/privileges/login")
                 .contentType("application/json;charset=UTF-8")
                 .content(requireJson));
@@ -311,7 +311,7 @@ public class PrivilegeControllerTest {
     public void changePriv1() throws Exception{
         PrivilegeVo vo = new PrivilegeVo();
         vo.setName("车市");
-        String json = "{\"name\":\"车市\", \"url\": \"/adminusers/{id}\", \"requestType\": \"3\"}";
+        String json = "{\"name\":\"车市\", \"url\": \"/adminusers/{id}/abcd\", \"requestType\": \"3\"}";
 
         String token = login("537300010","123456");
         String responseString = this.mvc.perform(put("/privilege/privileges/2").header("authorization",token).contentType("application/json;charset=UTF-8").content(json))
@@ -328,7 +328,7 @@ public class PrivilegeControllerTest {
                 .andExpect(jsonPath("$.errmsg").value("成功"))
                 .andExpect(jsonPath("$.data.list[0].id").value("2"))
                 .andExpect(jsonPath("$.data.list[0].name").value("车市"))
-                .andExpect(jsonPath("$.data.list[0].url").value("/adminusers/{id}"))
+                .andExpect(jsonPath("$.data.list[0].url").value("/adminusers/{id}/abcd"))
                 .andExpect(jsonPath("$.data.list[0].requestType").value("3"))
                 .andReturn().getResponse().getContentAsString();
 
@@ -354,7 +354,7 @@ public class PrivilegeControllerTest {
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
 
-        JSONAssert.assertEquals("{\"errno\":742,\"errmsg\":\"URL与RequestType均重复\"}", responseString, true);
+        JSONAssert.assertEquals("{\"errno\":742,\"errmsg\":\"URL和RequestType不得与已有的数据重复\"}", responseString, true);
         responseString = this.mvc.perform(get("/privilege/privileges").header("authorization",token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
