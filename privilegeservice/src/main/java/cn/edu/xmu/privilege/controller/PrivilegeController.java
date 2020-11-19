@@ -1064,22 +1064,22 @@ public class PrivilegeController {
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
-            @ApiResponse(code = 504, message = "操作的资源id不存在"),
+            @ApiResponse(code = 503, message = "字段不合法"),
             @ApiResponse(code = 705, message = "无权限访问")
     })
     @Audit // 需要认证
     @PutMapping("shops/{did}/adminusers/{id}/approve")
-    public Object approveUser(@PathVariable Long id,@PathVariable Long did, BindingResult bindingResult,@RequestBody Boolean approve,@Depart Long userdid) {
+    public Object approveUser(@PathVariable Long id,@PathVariable Long did, BindingResult bindingResult,@RequestBody Boolean approve,@Depart Long shopid) {
         logger.debug("approveUser: did = "+ did+" userid: id = "+ id+" opinion: "+approve);
         ReturnObject returnObject=null;
-        if(did==0||did==userdid)
+        if(did==0||did==shopid)
         {
             returnObject=newUserService.approveUser(approve,id);
         }
         else
         {
             logger.error("approveUser: 无权限查看此部门的用户 did=" + did);
-            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
         }
         return returnObject;
     }
