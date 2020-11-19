@@ -1072,14 +1072,14 @@ public class PrivilegeController {
     public Object approveUser(@PathVariable Long id,@PathVariable Long did, BindingResult bindingResult,@RequestBody Boolean approve,@Depart Long userdid) {
         logger.debug("approveUser: did = "+ did+" userid: id = "+ id+" opinion: "+approve);
         ReturnObject returnObject=null;
-        if(did!=0 && userdid!=did)
+        if(did==0||did==userdid)
         {
-            logger.error("approveUser: 无权限查看此部门的用户 did=" + did);
-            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
+            returnObject=newUserService.approveUser(approve,id);
         }
         else
         {
-            returnObject=newUserService.approveUser(approve,id);
+            logger.error("approveUser: 无权限查看此部门的用户 did=" + did);
+            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
         }
         return returnObject;
     }
