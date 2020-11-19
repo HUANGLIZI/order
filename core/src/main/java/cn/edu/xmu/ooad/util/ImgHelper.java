@@ -58,48 +58,6 @@ public class ImgHelper {
 
 
     /**
-     * 保存单个图片并限制大小在本地，直接以multipartFile形式
-     *
-     * @param multipartFile
-     * @param path          文件保存路径
-     * @return
-     */
-    public static ReturnObject localSaveImg(MultipartFile multipartFile, String path, int size) throws IOException {
-
-        if(!isImg(multipartFile))
-            return new ReturnObject(ResponseCode.IMG_FORMAT_ERROR);
-
-        if(multipartFile.getSize()>size*1024*1024){
-            return new ReturnObject(ResponseCode.IMG_SIZE_EXCEED);
-        }
-
-        File file = new File(path);
-
-        if(file.exists()&&!file.canWrite())
-            return new ReturnObject(ResponseCode.FILE_NO_WRITE_PERMISSION);
-        else if (!file.exists()) {
-            if(!file.mkdirs()){
-                return new ReturnObject(ResponseCode.FILE_NO_WRITE_PERMISSION);
-            }
-        }
-        InputStream fileInputStream = multipartFile.getInputStream();
-
-        String suffix = multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf("."));
-        String fileName = UUID.randomUUID() + suffix;
-
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(path + File.separator + fileName));
-        byte[] bs = new byte[1024];
-        int len;
-        while ((len = fileInputStream.read(bs)) != -1) {
-            bos.write(bs, 0, len);
-        }
-        bos.flush();
-        bos.close();
-
-        return new ReturnObject(fileName);
-    }
-
-    /**
      * 删除远程服务器文件
      *
      * @param filename 文件名
@@ -116,20 +74,6 @@ public class ImgHelper {
         }
         catch(IOException e){
             logger.error("delete fail: "+ filename);
-        }
-        return;
-    }
-
-    /**
-     * 删除文件
-     *
-     * @param filename 文件名
-     * @param path     文件路径
-     */
-    public static void deleteLocalImg(String filename, String path) {
-        File file = new File(path + File.separator + filename);
-        if (file.exists()) {
-            file.delete();
         }
         return;
     }

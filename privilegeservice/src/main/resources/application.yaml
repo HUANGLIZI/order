@@ -78,8 +78,6 @@ privilegeservice:
   initialization: true
   #分布式锁失效时间（秒）
   lockerExpireTime: 30
-  #图片存储位置
-  imglocation: img/
   #dav信息配置
   dav:
     username: oomall
