@@ -234,13 +234,25 @@ public class NewUserDao implements InitializingBean {
      */
     public ReturnObject<Object> physicallyDeleteUser(Long id) {
         ReturnObject<Object> retObj;
-        int ret = newUserPoMapper.deleteByPrimaryKey(id);
-        if (ret == 0) {
-            logger.info("用户不存在或已被删除：id = " + id);
-            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        } else {
-            logger.info("用户 id = " + id + " 已被永久删除");
-            retObj = new ReturnObject<>();
+        try {
+            int ret = newUserPoMapper.deleteByPrimaryKey(id);
+            if (ret == 0) {
+                logger.info("用户不存在或已被删除：id = " + id);
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            } else {
+                logger.info("用户 id = " + id + " 已被永久删除");
+                retObj = new ReturnObject<>();
+            }
+        }
+        catch (DataAccessException e)
+        {
+            logger.debug("sql exception : " + e.getMessage());
+            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
         return retObj;
     }
@@ -248,7 +260,7 @@ public class NewUserDao implements InitializingBean {
     /**
      * ID获取用户信息
      * @author Li Zihan 24320182203227
-     * @param id
+     * @param Id
      * @return 用户
      */
     public NewUserPo findNewUserById(Long id) {
