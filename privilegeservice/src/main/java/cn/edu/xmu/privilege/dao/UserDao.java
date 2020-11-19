@@ -943,19 +943,31 @@ public class UserDao{
      *
      * createdBy Li Zihan 243201822032227
      */
-    public ReturnObject createUser(NewUserPo po)
+    public ReturnObject addUser(NewUserPo po)
     {
-        UserPo userPo=new UserPo();
         ReturnObject returnObject = null;
-        userPo.setEmail(AES.encrypt(po.getEmail(), User.AESPASS));
-        userPo.setMobile(AES.encrypt(po.getMobile(),User.AESPASS));
-        userPo.setUserName(po.getUserName());
-        userPo.setAvatar(po.getAvatar());
-        userPo.setDepartId(po.getDepartId());
-        userPo.setOpenId(po.getOpenId());
-        userPo.setGmtCreate(LocalDateTime.now());
-        returnObject=new ReturnObject<>(userPoMapper.insert(userPo));
-        logger.debug("success insert User: "+userPo.getId());
+        try() {
+            UserPo userPo = new UserPo();
+            userPo.setEmail(AES.encrypt(po.getEmail(), User.AESPASS));
+            userPo.setMobile(AES.encrypt(po.getMobile(), User.AESPASS));
+            userPo.setUserName(po.getUserName());
+            userPo.setAvatar(po.getAvatar());
+            userPo.setDepartId(po.getDepartId());
+            userPo.setOpenId(po.getOpenId());
+            userPo.setGmtCreate(LocalDateTime.now());
+            returnObject = new ReturnObject<>(userPoMapper.insert(userPo));
+            logger.debug("success insert User: " + userPo.getId());
+        }
+        catch (DataAccessException e)
+        {
+            logger.debug("sql exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
         return returnObject;
     }
 
