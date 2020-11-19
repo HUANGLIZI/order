@@ -961,7 +961,7 @@ public class UserDao{
         catch (DataAccessException e)
         {
             if (Objects.requireNonNull(e.getMessage()).contains("auth_user.user_name_uindex")) {
-                //若有重复的角色名则修改失败
+                //若有重复名则修改失败
                 logger.debug("insertUser: have same user name = " + userPo.getName());
                 returnObject = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("用户名重复：" + userPo.getName()));
             } else {
