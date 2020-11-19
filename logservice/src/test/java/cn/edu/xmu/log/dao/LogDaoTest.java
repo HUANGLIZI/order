@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class LogDaoTest {
 
     @Autowired
-    private LogsDao logsDao;
+    private LogDao logDao;
 
     @Test
     public void deleteLogs() {
@@ -28,7 +28,7 @@ public class LogDaoTest {
         logVo.setBeginTime("2020-10-10 00:00:00");
         logVo.setEndTime("2020-10-11 00:00:00");
         Log bo = new Log(logVo);
-        ReturnObject returnObject = logsDao.deleteLogs(bo, departId);
+        ReturnObject returnObject = logDao.deleteLogs(bo, departId);
         assertEquals(0, returnObject.getCode().getCode());
     }
 

@@ -22,6 +22,7 @@ public class Role implements VoObject, Serializable {
     private Long id;
     private String name;
     private Long creatorId;
+    private Long departId;
     private String describe;
     private LocalDateTime gmtCreate;
     private LocalDateTime gmtModified;
@@ -42,6 +43,7 @@ public class Role implements VoObject, Serializable {
         this.id = po.getId();
         this.name = po.getName();
         this.creatorId = po.getCreatorId();
+        this.departId = po.getDepartId();
         this.describe = po.getDescr();
         this.gmtCreate = po.getGmtCreate();
         this.gmtModified = po.getGmtModified();
@@ -87,6 +89,7 @@ public class Role implements VoObject, Serializable {
         po.setId(this.getId());
         po.setName(vo.getName());
         po.setCreatorId(null);
+        po.setDepartId(null);
         po.setDescr(vo.getDescr());
         po.setGmtCreate(null);
         po.setGmtModified(LocalDateTime.now());
@@ -106,6 +109,7 @@ public class Role implements VoObject, Serializable {
         po.setId(this.getId());
         po.setName(this.getName());
         po.setCreatorId(this.getCreatorId());
+        po.setDepartId(this.getDepartId());
         po.setDescr(this.getDescribe());
         po.setGmtCreate(this.getGmtCreate());
         po.setGmtModified(this.getGmtModified());

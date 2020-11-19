@@ -5,6 +5,7 @@ import cn.edu.xmu.log.model.vo.LogRetVo;
 import cn.edu.xmu.log.model.vo.LogVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,16 +27,18 @@ public class Log implements VoObject {
      */
     private Long id;
     private Long userId;
+    private Long departId;
     private String ip;
     private String desc;
     private Long privilegeId;
     private LocalDateTime gmtCreate;
     private Byte success;
+    private String beginDate;
+    private String endDate;
 
     private LocalDateTime beginTime;
     private LocalDateTime endTime;
-    private String beginDate;
-    private String endDate;
+
     /**
      * 构造函数
      * @param po Po对象
@@ -43,6 +46,7 @@ public class Log implements VoObject {
     public Log(LogPo po){
         this.setId(po.getId());
         this.setUserId(po.getUserId());
+        this.setDepartId(po.getDepartId());
         this.setIp(po.getIp());
         this.setDesc(po.getDescr());
         this.setPrivilegeId(po.getPrivilegeId());
@@ -53,16 +57,21 @@ public class Log implements VoObject {
 
     }
     public Log(LogVo vo) {
+        this.setDepartId(vo.getDepartId());
         this.setUserId(vo.getUserId());
         this.setIp(vo.getIp());
         this.setPrivilegeId(vo.getPrivilegeId());
         this.setSuccess(vo.getSuccess());
         this.setBeginDate(vo.getBeginDate());
         this.setEndDate(vo.getEndDate());
-        
+
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        this.beginTime = LocalDateTime.parse(vo.getBeginTime(), df);
-        this.endTime = LocalDateTime.parse(vo.getEndTime(), df);
+        if(StringUtils.isNotBlank(vo.getBeginTime())){
+            this.beginTime = LocalDateTime.parse(vo.getBeginTime(), df);
+        }
+        if(StringUtils.isNotBlank(vo.getEndTime())){
+            this.endTime = LocalDateTime.parse(vo.getEndTime(), df);
+        }
     }
 
     /**
@@ -102,6 +111,7 @@ public class Log implements VoObject {
         logPo.setGmtCreate(this.gmtCreate);
         logPo.setPrivilegeId(this.privilegeId);
         logPo.setSuccess(this.success);
+        logPo.setDepartId(this.departId);
 
         return logPo;
     }

@@ -14,18 +14,19 @@ import lombok.Data;
 @ApiModel(description = "日志传值对象")
 public class LogVo {
     private Long userId;
+    private Long departId;
     private String ip;
     private Long privilegeId;
     private Byte success;
     private String beginDate;
     private String endDate;
-    
+
     @ApiModelProperty(name = "开始时间", value = "beginTime")
     private String beginTime;
 
     @ApiModelProperty(name = "结束时间", value = "endTime")
     private String endTime;
-    
+
     public Log createBo() {
         Log operationLog = new Log(this);
         return operationLog;
