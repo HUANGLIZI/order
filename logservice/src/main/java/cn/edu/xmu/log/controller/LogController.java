@@ -1,4 +1,4 @@
-package cn.edu.xmu.log.controller;
+package cn.edu.xmu.log.Controller;
 
 import cn.edu.xmu.log.model.bo.Log;
 import cn.edu.xmu.log.model.vo.LogVo;
@@ -13,7 +13,11 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -31,6 +35,8 @@ import javax.servlet.http.HttpServletResponse;
 public class LogController {
     @Autowired
     private LogService logService;
+
+    private static final Logger logger = LoggerFactory.getLogger(LogController.class);
 
     @Autowired
     private HttpServletResponse httpServletResponse;
@@ -58,7 +64,7 @@ public class LogController {
             @ApiImplicitParam(paramType = "path", dataType = "int", name = "did", value = "部门ID", required = true),
             @ApiImplicitParam(paramType = "query", dataType = "int", name = "userId", value = "用户ID", required = false),
             @ApiImplicitParam(paramType = "query", dataType = "int", name = "privilegeId", value = "权限ID", required = false),
-            @ApiImplicitParam(paramType = "query", dataType = "bool", name = "success", value = "是否成功", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "boolean", name = "success", value = "是否成功", required = false),
             @ApiImplicitParam(paramType = "query", dataType = "String", name = "beginTime", value = "开始时间", required = false),
             @ApiImplicitParam(paramType = "query", dataType = "String", name = "endTime", value = "结束时间", required = false),
             @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageNum", value = "页码", required = false),
@@ -111,4 +117,32 @@ public class LogController {
         }
 
     }
+
+    /**
+     * 清理日志
+     *
+     * @param departId 部门ID
+     * @return Object 清空结果
+     * createdBy 李狄翰 2020/11/18 10:57
+     * @author 24320182203221 李狄翰
+     */
+    @ApiOperation(value = "log003： 清理日志", produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(name="did", required = true, dataType="Long", paramType="path")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @DeleteMapping("shops/{did}/logs")
+    public Object deleteLogs(@Validated @RequestBody LogVo vo, BindingResult bindingResult, @PathVariable("did") Long departId) {
+        logger.debug("delete logs");
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            logger.info("validate fail");
+            return returnObject;
+        }
+        ReturnObject<Object> returnObjects = logService.deleteLogs(vo, departId);
+        return Common.decorateReturnObject(returnObjects);}
 }

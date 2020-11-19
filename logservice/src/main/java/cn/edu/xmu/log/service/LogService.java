@@ -1,9 +1,7 @@
 package cn.edu.xmu.log.service;
 
-import cn.edu.xmu.log.Controller.LogsController;
 import cn.edu.xmu.log.dao.LogDao;
 import cn.edu.xmu.log.model.bo.Log;
-import cn.edu.xmu.log.model.po.LogPo;
 import cn.edu.xmu.log.model.vo.LogVo;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
@@ -16,14 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 日志服务类
@@ -53,39 +50,18 @@ public class LogService {
         return new ReturnObject<>(returnObject);
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(LogsController.class);
-
-    @Autowired
-    private HttpServletResponse httpServletResponse;
-
-    @Autowired
-    private LogsService logsService;
-
     /**
      * 清理日志
      *
      * @param departId 部门ID
-     * @return Object 清空结果
+     * @return ReturnObject<Object> 返回视图
      * createdBy 李狄翰 2020/11/18 10:57
      * @author 24320182203221 李狄翰
      */
-    @ApiOperation(value = "log003： 清理日志", produces = "application/json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true)
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-    })
-    @Audit
-    @DeleteMapping
-    public Object deleteLogs(@Validated @RequestBody LogVo vo, BindingResult bindingResult, @Depart Long departId) {
-        logger.debug("delete logs");
-        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
-        if (null != returnObject) {
-            logger.info("validate fail");
-            return returnObject;
-        }
-        ReturnObject<Object> returnObjects = logsService.deleteLogs(vo, departId);
-        return Common.decorateReturnObject(returnObjects);
+    @Transactional
+    public ReturnObject<Object> deleteLogs(LogVo vo, Long departId) {
+        Log log = new Log(vo);
+        return logDao.deleteLogs(log, departId);
     }
+
 }

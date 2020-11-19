@@ -19,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -110,5 +112,47 @@ public class LogDao {
         } catch (Exception e) {
             logger.error("严重错误：" + e.getMessage());
         }
+    }
+
+    /**
+     * 清空日志
+     *
+     * @param departId 部门ID
+     * @return ReturnObject<Object> 删除结果
+     * createdBy 李狄翰 2020/11/18 10:57
+     * @author 24320182203221 李狄翰
+     */
+    public ReturnObject<Object> deleteLogs(Log log, Long departId) {
+        logger.debug("deleteLogs");
+        if(log.getBeginTime() == null){
+            return new ReturnObject(ResponseCode.Log_BEGIN_NULL);
+        }
+        if(log.getEndTime() == null){
+            return new ReturnObject(ResponseCode.Log_END_NULL);
+        }
+        if(!isBiggerBegin(log)){
+            return new ReturnObject(ResponseCode.Log_Bigger);
+        }
+
+        LogPoExample example = new LogPoExample();
+        LogPoExample.Criteria criteria = example.createCriteria();
+
+        criteria.andGmtCreateBetween(log.getBeginTime(), log.getEndTime());
+
+        //判断是否为管理员
+        if (!Objects.equals(departId, 0L)) {
+            criteria.andDepartIdEqualTo(departId);
+        }
+        int total = logPoMapper.deleteByExample(example);
+        ReturnObject<Object> retObj = new ReturnObject<>(total);
+        return retObj;
+    }
+
+
+
+    private boolean isBiggerBegin(Log log){
+        LocalDateTime nowBeginDate = log.getBeginTime();
+        LocalDateTime nowEndDate = log.getEndTime();
+        return nowEndDate.isAfter(nowBeginDate);
     }
 }

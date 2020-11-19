@@ -5,6 +5,7 @@ import cn.edu.xmu.log.model.vo.LogRetVo;
 import cn.edu.xmu.log.model.vo.LogVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -65,10 +66,10 @@ public class Log implements VoObject {
         this.setEndDate(vo.getEndDate());
 
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        if(this.beginTime != null){
+        if(StringUtils.isNotBlank(vo.getBeginTime())){
             this.beginTime = LocalDateTime.parse(vo.getBeginTime(), df);
         }
-        if(this.endTime != null){
+        if(StringUtils.isNotBlank(vo.getEndTime())){
             this.endTime = LocalDateTime.parse(vo.getEndTime(), df);
         }
     }
@@ -110,6 +111,7 @@ public class Log implements VoObject {
         logPo.setGmtCreate(this.gmtCreate);
         logPo.setPrivilegeId(this.privilegeId);
         logPo.setSuccess(this.success);
+        logPo.setDepartId(this.departId);
 
         return logPo;
     }

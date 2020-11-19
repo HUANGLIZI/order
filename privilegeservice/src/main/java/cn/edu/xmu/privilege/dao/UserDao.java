@@ -86,8 +86,8 @@ public class UserDao{
     @Autowired
     private RoleDao roleDao;
 
-//    @Autowired
-//    private JavaMailSender mailSender;
+    @Autowired
+    private JavaMailSender mailSender;
     /**
      * @author yue hao
      * @param id 用户ID
