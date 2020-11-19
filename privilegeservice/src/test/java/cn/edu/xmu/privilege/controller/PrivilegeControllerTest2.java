@@ -90,6 +90,33 @@ public class PrivilegeControllerTest2 {
     }
 
     /**
+     * 查询角色 失败 departId不匹配
+     *
+     * @author 24320182203253
+     * createdBy 钱秋妍 2020/11/18 23:50
+     * modifiedBy 钱秋妍 2020/11/18 23:50
+     */
+    @Test
+    public void selectRoleTestPrivilege() {
+        String responseString = null;
+        String token = creatTestToken(1L, 1L, 100);
+        try {
+            responseString = this.mvc.perform(get("/privilege/shops/0/roles?page=1&pageSize=2").header("authorization", token))
+                    .andExpect(status().isForbidden())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String expectedResponse = "{\"errno\":503,\"errmsg\":\"departId不匹配\"}";
+        try {
+            JSONAssert.assertEquals(expectedResponse, responseString, false);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * 插入角色 成功
      * @author 24320182203281 王纬策
      * createdBy 王纬策 2020/11/04 13:57
