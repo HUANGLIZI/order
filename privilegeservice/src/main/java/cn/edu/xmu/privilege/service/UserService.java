@@ -448,15 +448,6 @@ public class UserService {
         return userDao.modifyPassword(vo);
     }
 
-    /**
-     * auth014: 管理员增加用户
-     * @param po NewUserPo对象
-     * @author 24320182203227 Li Zian
-     * Created at 2020/11/19 06:32
-     */
-    @Transactional
-    public ReturnObject<Object> addUser(NewUserPo po) {
-        return userDao.addUser(po);
-    }
+    
     
 }
