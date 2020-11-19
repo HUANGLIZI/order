@@ -225,7 +225,52 @@ public class NewUserDao implements InitializingBean {
         List<UserPo> userPos=userPoMapper.selectByExample(example);
         return !userPos.isEmpty();
     }
+    /**
+     * (物理) 删除新用户
+     *
+     * @param id 用户 id
+     * @return 返回对象 ReturnObj
+     * @author 24320182203227 Li Zihan
+     */
+    public ReturnObject<Object> physicallyDeleteUser(Long id) {
+        ReturnObject<Object> retObj;
+        try {
+            int ret = newUserPoMapper.deleteByPrimaryKey(id);
+            if (ret == 0) {
+                logger.info("用户不存在或已被删除：id = " + id);
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            } else {
+                logger.info("用户 id = " + id + " 已被永久删除");
+                retObj = new ReturnObject<>();
+            }
+        }
+        catch (DataAccessException e)
+        {
+            logger.debug("sql exception : " + e.getMessage());
+            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+        return retObj;
+    }
 
+    /**
+     * ID获取用户信息
+     * @author Li Zihan 24320182203227
+     * @param Id
+     * @return 用户
+     */
+    public NewUserPo findNewUserById(Long id) {
+        logger.debug("findUserById: Id =" + id);
+        NewUserPo newUserPo = newUserPoMapper.selectByPrimaryKey(id);
+        if (newUserPo == null) {
+            logger.error("getNewUser: 新用户数据库不存在该用户 userid=" + id);
+        }
+        return newUserPo;
+    }
 
 }
 

@@ -25,7 +25,6 @@ import java.time.LocalDateTime;
 public class NewUserService {
     private Logger logger = LoggerFactory.getLogger(NewUserService.class);
 
-
     @Autowired
     NewUserDao newUserDao;
 
@@ -37,6 +36,27 @@ public class NewUserService {
     @Transactional
     public ReturnObject register(NewUserVo vo) {
         return newUserDao.createNewUserByVo(vo);
+    }
+    
+    /**
+     * 管理员审核用户
+     * @param id
+     * @param approve
+     * @return ReturnObject
+     * @author 24320182203227 Li Zihan
+     */
+    @Transactional
+    public ReturnObject approveUser(boolean approve, Long id) {
+        ReturnObject returnObject = null;
+        if (approve == true ) {
+            NewUserPo newUserPo = newUserDao.findNewUserById(id);
+            returnObject = userDao.addUser(newUserPo);
+            newUserDao.physicallyDeleteUser(id);
+        }
+        else if (approve == false ) {
+            returnObject=newUserDao.physicallyDeleteUser(id);
+        }
+        return returnObject;
     }
 
 }
