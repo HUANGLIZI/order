@@ -45,9 +45,9 @@ public class LogService {
      * @date Modified in 2020/11/18 19:32
      */
     public ReturnObject<PageInfo<VoObject>> selectAllLogs(Log logInfo, Integer pageNum, Integer pageSize) {
-        PageInfo<VoObject> returnObject = logDao.selectLogs(logInfo, pageNum, pageSize);
+        ReturnObject<PageInfo<VoObject>> returnObject = logDao.selectLogs(logInfo, pageNum, pageSize);
 
-        return new ReturnObject<>(returnObject);
+        return returnObject;
     }
 
     /**

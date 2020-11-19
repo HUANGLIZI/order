@@ -1044,9 +1044,6 @@ public class PrivilegeController {
         }
     }
 
-
-}
-
     /**
      * auth014: 管理员审核用户
      * @param id: 用户 id
@@ -1072,7 +1069,7 @@ public class PrivilegeController {
     public Object approveUser(@PathVariable Long id,@PathVariable Long did, BindingResult bindingResult,@RequestBody Boolean approve,@Depart Long shopid) {
         logger.debug("approveUser: did = "+ did+" userid: id = "+ id+" opinion: "+approve);
         ReturnObject returnObject=null;
-        if(did==0||did==shopid)
+        if(did==0|| did.equals(shopid))
         {
             returnObject=newUserService.approveUser(approve,id);
         }

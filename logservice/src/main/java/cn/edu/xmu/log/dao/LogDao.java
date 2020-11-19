@@ -8,6 +8,7 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 import cn.edu.xmu.log.model.po.LogPo;
 import cn.edu.xmu.log.model.po.LogPoExample;
@@ -50,7 +51,7 @@ public class LogDao {
      **/
     private static final Logger logger = LoggerFactory.getLogger(LogDao.class);
 
-    public PageInfo<VoObject> selectLogs(Log logInfo, Integer pageNum, Integer pageSize) {
+    public ReturnObject<PageInfo<VoObject>> selectLogs(Log logInfo, Integer pageNum, Integer pageSize) {
         LogPoExample example = new LogPoExample();
         LogPoExample.Criteria criteria = example.createCriteria();
         if(logInfo.getDepartId() != null){
@@ -83,20 +84,32 @@ public class LogDao {
             log.debug("selectLogs endDate="+logInfo.getEndDate());
             criteria.andGmtCreateLessThan(Timestamp.valueOf(logInfo.getEndDate()).toLocalDateTime());
         }
-        PageHelper.startPage(pageNum, pageSize);
-        List<LogPo> logPos = logPoMapper.selectByExample(example);
-        log.debug("selectLogs DAO:"+logPos);
 
-        PageInfo<LogPo> logPagePos = new PageInfo<>(logPos);
-        List<VoObject> operationLogs = logPagePos.getList().stream().map(Log::new).collect(Collectors.toList());
+        try {
+            PageHelper.startPage(pageNum, pageSize);
+            List<LogPo> logPos = logPoMapper.selectByExample(example);
+            log.debug("selectLogs DAO:"+logPos);
 
-        PageInfo<VoObject> returnObject = new PageInfo<>(operationLogs);
-        returnObject.setPages(logPagePos.getPages());
-        returnObject.setPageNum(logPagePos.getPageNum());
-        returnObject.setPageSize(logPagePos.getPageSize());
-        returnObject.setTotal(logPagePos.getTotal());
+            PageInfo<LogPo> logPagePos = new PageInfo<>(logPos);
+            List<VoObject> operationLogs = logPagePos.getList().stream().map(Log::new).collect(Collectors.toList());
 
-        return returnObject;
+            PageInfo<VoObject> returnObject = new PageInfo<>(operationLogs);
+            returnObject.setPages(logPagePos.getPages());
+            returnObject.setPageNum(logPagePos.getPageNum());
+            returnObject.setPageSize(logPagePos.getPageSize());
+            returnObject.setTotal(logPagePos.getTotal());
+
+            return new ReturnObject<>(returnObject);
+        }
+        catch (DataAccessException e){
+            logger.error("selectAllRole: DataAccessException:" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
     }
 
     /**

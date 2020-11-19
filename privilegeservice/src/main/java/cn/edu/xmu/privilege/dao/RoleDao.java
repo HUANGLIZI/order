@@ -175,11 +175,16 @@ public class RoleDao {
         try {
             //不加限定条件查询所有
             rolePos = roleMapper.selectByExample(example);
-        }catch (DataAccessException e){
+        }
+        catch (DataAccessException e){
             logger.error("selectAllRole: DataAccessException:" + e.getMessage());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
         }
-
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
         List<VoObject> ret = new ArrayList<>(rolePos.size());
         for (RolePo po : rolePos) {
             Role role = new Role(po);
