@@ -85,7 +85,7 @@ public class AuditAspect {
                 if(i+1<paths.length){
                     //找到路径上对应id 将其与string类型的departId比较
                     String pathId=paths[i+1];
-                    logger.debug("did ="+pathId.toString());
+                    logger.debug("did ="+pathId);
                     if(!pathId.equals(departId.toString())){
                         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                         return ResponseUtil.fail(ResponseCode.FIELD_NOTVALID, "departId不匹配");
