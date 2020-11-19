@@ -174,7 +174,11 @@ public class PrivilegeDao implements InitializingBean {
         }
         /* 开始更新 */
         PrivilegePo newPo = privilege.createUpdatePo(vo);
-        newPo.setId(po.getId()); // 这里设置要更新的权限的Id
+        try{
+            newPo.setId(po.getId()); // 这里设置要更新的权限的Id
+        } catch (Exception e) {
+            return new ReturnObject(ResponseCode.INTERNAL_SERVER_ERR);
+        }
 
         this.poMapper.updateByPrimaryKeySelective(newPo);
         return new ReturnObject();

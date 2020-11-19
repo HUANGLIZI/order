@@ -86,8 +86,8 @@ public class UserDao{
     @Autowired
     private RoleDao roleDao;
 
-//    @Autowired
-//    private JavaMailSender mailSender;
+    @Autowired
+    private JavaMailSender mailSender;
     /**
      * @author yue hao
      * @param id 用户ID
@@ -937,6 +937,45 @@ public class UserDao{
             uid = e.getUserId();
             clearUserPrivCache(uid);
         }
+    }
+     /**
+     * 创建user
+     *
+     * createdBy Li Zihan 243201822032227
+     */
+    public ReturnObject addUser(NewUserPo po)
+    {
+        ReturnObject returnObject = null;
+        UserPo userPo = new UserPo();
+        userPo.setEmail(AES.encrypt(po.getEmail(), User.AESPASS));
+        userPo.setMobile(AES.encrypt(po.getMobile(), User.AESPASS));
+        userPo.setUserName(po.getUserName());
+        userPo.setAvatar(po.getAvatar());
+        userPo.setDepartId(po.getDepartId());
+        userPo.setOpenId(po.getOpenId());
+        userPo.setGmtCreate(LocalDateTime.now());
+        try{
+            returnObject = new ReturnObject<>(userPoMapper.insert(userPo));
+            logger.debug("success insert User: " + userPo.getId());
+        }
+        catch (DataAccessException e)
+        {
+            if (Objects.requireNonNull(e.getMessage()).contains("auth_user.user_name_uindex")) {
+                //若有重复名则修改失败
+                logger.debug("insertUser: have same user name = " + userPo.getName());
+                returnObject = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("用户名重复：" + userPo.getName()));
+            } else {
+                logger.debug("sql exception : " + e.getMessage());
+                returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }
+        }
+
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+        return returnObject;
     }
 
 }
