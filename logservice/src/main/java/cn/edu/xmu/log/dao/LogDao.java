@@ -137,35 +137,30 @@ public class LogDao {
      */
     public ReturnObject<Object> deleteLogs(Log log, Long departId) {
         logger.debug("deleteLogs");
-        if(log.getBeginTime() == null){
-            return new ReturnObject(ResponseCode.Log_BEGIN_NULL);
-        }
-        if(log.getEndTime() == null){
-            return new ReturnObject(ResponseCode.Log_END_NULL);
-        }
-        if(!isBiggerBegin(log)){
-            return new ReturnObject(ResponseCode.Log_Bigger);
-        }
-
         LogPoExample example = new LogPoExample();
         LogPoExample.Criteria criteria = example.createCriteria();
-
         criteria.andGmtCreateBetween(log.getBeginTime(), log.getEndTime());
-
         //判断是否为管理员
         if (!Objects.equals(departId, 0L)) {
             criteria.andDepartIdEqualTo(departId);
         }
-        int total = logPoMapper.deleteByExample(example);
-        ReturnObject<Object> retObj = new ReturnObject<>(total);
-        return retObj;
+        try {
+            int total = logPoMapper.deleteByExample(example);
+            ReturnObject<Object> retObj = new ReturnObject<>(total);
+            return retObj;
+        }
+        catch (DataAccessException e){
+            logger.error("clearLog: DataAccessException:" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
     }
 
 
 
-    private boolean isBiggerBegin(Log log){
-        LocalDateTime nowBeginDate = log.getBeginTime();
-        LocalDateTime nowEndDate = log.getEndTime();
-        return nowEndDate.isAfter(nowBeginDate);
-    }
+
 }

@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * 日志控制器
@@ -143,6 +145,23 @@ public class LogController {
             logger.info("validate fail");
             return returnObject;
         }
+        if(vo.getBeginTime() == null){
+            return new ReturnObject(ResponseCode.Log_BEGIN_NULL);
+        }
+        if(vo.getEndTime() == null){
+            return new ReturnObject(ResponseCode.Log_END_NULL);
+        }
+        if(!isBiggerBegin(vo)){
+            return new ReturnObject(ResponseCode.Log_Bigger);
+        }
         ReturnObject<Object> returnObjects = logService.deleteLogs(vo, departId);
-        return Common.decorateReturnObject(returnObjects);}
+        return Common.decorateReturnObject(returnObjects);
+    }
+
+    private boolean isBiggerBegin(LogVo vo){
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime nowBeginDate = LocalDateTime.parse(vo.getBeginTime(), df);
+        LocalDateTime nowEndDate = LocalDateTime.parse(vo.getEndTime(), df);
+        return nowEndDate.isAfter(nowBeginDate);
+    }
 }
