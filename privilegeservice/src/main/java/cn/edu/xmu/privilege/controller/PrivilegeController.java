@@ -1069,47 +1069,17 @@ public class PrivilegeController {
     })
     @Audit // 需要认证
     @PutMapping("shops/{did}/adminusers/{id}/approve")
-    public Object approveUser(@PathVariable Long id,@PathVariable Long did, BindingResult bindingResult,@RequestBody Boolean approve) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("approveUser: did = "+ did+" userid: id = "+ id+" opinion: "+approve);
-        }
+    public Object approveUser(@PathVariable Long id,@PathVariable Long did, BindingResult bindingResult,@RequestBody Boolean approve,@Depart Long userdid) {
+        logger.debug("approveUser: did = "+ did+" userid: id = "+ id+" opinion: "+approve);
         ReturnObject returnObject=null;
-        if(approve==true && did==0)
+        if(did!=0 && userdid!=did)
         {
-            NewUserPo newUserPo=newUserService.findNewUser(id);
-            returnObject=userService.addUser(newUserPo);
-            newUserService.deleteNewUser(id);
+            logger.error("approveUser: 无权限查看此部门的用户 did=" + did);
+            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
         }
-        else if(approve==true && did!=0)
+        else
         {
-            NewUserPo newUserPo=newUserService.findNewUser(id);
-            if(newUserPo.getDepartId()==did)
-            {
-                returnObject=userService.addUser(newUserPo);
-                newUserService.deleteNewUser(id);
-            }
-            else
-            {
-                logger.error("approveUser: 无权限查看此部门的用户 did=" + did);
-                return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
-            }
-        }
-        else if(approve==false && did==0)
-        {
-            returnObject=newUserService.deleteNewUser(id);
-        }
-        else if(approve==false && did!=0)
-        {
-            NewUserPo newUserPo=newUserService.findNewUser(id);
-            if(newUserPo.getDepartId()==did)
-            {
-                newUserService.deleteNewUser(id);
-            }
-            else
-            {
-                logger.error("approveUser: 无权限查看此部门的用户 did=" + did);
-                return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
-            }
+            returnObject=newUserService.approveUser(approve,id);
         }
         return returnObject;
     }
