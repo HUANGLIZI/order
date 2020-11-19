@@ -81,6 +81,10 @@ public class AuditAspect {
         logger.debug("getPathInfo = "+ pathInfo);
         String paths[]=pathInfo.split("/");
         for(int i=0;i<paths.length;i++){
+            //如果departId为0,可以操作所有的shop
+            if(departId==0){
+                break;
+            }
             if(paths[i].equals("shops")){
                 if(i+1<paths.length){
                     //找到路径上对应id 将其与string类型的departId比较
