@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Li Zihan
  * @date Created at 2020/11/18 23:35
  */
-@SpringBootTest(classes = PrivilegeServiceApplication.class)   //±êÊ¶±¾ÀàÊÇÒ»¸öSpringBootTest
+@SpringBootTest(classes = PrivilegeServiceApplication.class)   //æ ‡è¯†æœ¬ç±»æ˜¯ä¸€ä¸ªSpringBootTest
 @AutoConfigureMockMvc
 @Transactional
 
@@ -32,7 +32,7 @@ public class PrivilegeControllerTest8 {
         return token;
     }
     /**
-     * ¹ÜÀíÔ±ÉóºËÓÃ»§Í¨¹ı
+     * ç®¡ç†å‘˜å®¡æ ¸ç”¨æˆ·é€šè¿‡
      * @author Li Zihan
      **/
     @Test
@@ -50,7 +50,7 @@ public class PrivilegeControllerTest8 {
         catch (Exception e) {
             e.printStackTrace();
         }
-        String expectedResponse = "{\"errno\":0,\"errmsg\":\"³É¹¦\"}";
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"æˆåŠŸ\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, true);
         } catch (JSONException e) {
@@ -58,7 +58,7 @@ public class PrivilegeControllerTest8 {
         }
     }
     /**
-     * ¹ÜÀíÔ±ÉóºËÓÃ»§²»Í¨¹ı
+     * ç®¡ç†å‘˜å®¡æ ¸ç”¨æˆ·ä¸é€šè¿‡
      * @author Li Zihan
      **/
     @Test
@@ -76,7 +76,7 @@ public class PrivilegeControllerTest8 {
         catch (Exception e) {
             e.printStackTrace();
         }
-        String expectedResponse = "{\"errno\":0,\"errmsg\":\"³É¹¦\"}";
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"æˆåŠŸ\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, true);
         } catch (JSONException e) {
@@ -84,7 +84,7 @@ public class PrivilegeControllerTest8 {
         }
     }
     /**
-     * ¹ÜÀíÔ±ÉóºËÓÃ»§ ÓÃ»§²»´æÔÚ»òÓÃ»§·ÇĞÂÓÃ»§
+     * ç®¡ç†å‘˜å®¡æ ¸ç”¨æˆ· ç”¨æˆ·ä¸å­˜åœ¨æˆ–ç”¨æˆ·éæ–°ç”¨æˆ·
      * @author Li Zihan
      **/
     @Test
@@ -102,7 +102,7 @@ public class PrivilegeControllerTest8 {
         catch (Exception e) {
             e.printStackTrace();
         }
-        String   expectedResponse = "{\"errno\":504,\"errmsg\":\"²Ù×÷µÄÓÃ»§id²»´æÔÚ\"}";
+        String   expectedResponse = "{\"errno\":504,\"errmsg\":\"æ“ä½œçš„ç”¨æˆ·idä¸å­˜åœ¨\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, true);
         } catch (JSONException e) {

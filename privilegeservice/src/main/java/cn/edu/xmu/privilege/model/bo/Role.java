@@ -71,7 +71,7 @@ public class Role implements VoObject, Serializable {
      * modifiedBy 王纬策 2020/11/7 19:20
      */
     @Override
-    public Object createSimpleVo() {
+    public RoleSimpleRetVo createSimpleVo() {
         return new RoleSimpleRetVo(this);
     }
 

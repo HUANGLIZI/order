@@ -200,16 +200,13 @@ public class PrivilegeControllerTest4 {
 
     /**
      * 创建测试用token
-     *
-     * @author 24320182203281 王纬策
+     * @author Xianwei Wang
      * @param userId
      * @param departId
      * @param expireTime
      * @return token
-     * createdBy 王纬策 2020/11/04 13:57
-     * modifiedBy 王纬策 2020/11/7 19:20
      */
-    private final String creatTestToken(Long userId, Long departId, int expireTime) {
+    private final String createTestToken(Long userId, Long departId, int expireTime) {
         String token = new JwtHelper().createToken(userId, departId, expireTime);
         logger.debug(token);
         return token;
@@ -224,11 +221,13 @@ public class PrivilegeControllerTest4 {
      */
     @Test
     public void revokeRoleTest() throws Exception {
-        String token = creatTestToken(1L, 0L, 100);
-        String responseString = this.mvc.perform(delete("/privilege/adminusersrole/90").header("authorization", token))
+        String token = createTestToken(1L, 0L, 10000);
+        String responseString = this.mvc.perform(delete("/privilege/shops/0/adminuserroles/90").header("authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
     /**
      * 赋予用户角色测试
@@ -237,13 +236,13 @@ public class PrivilegeControllerTest4 {
      */
     @Test
     public void assignRoleTest() throws Exception {
-        String token = creatTestToken(1L, 0L, 100);
-        String responseString = this.mvc.perform(post("/privilege/adminusers/47/roles/84?createid=47").header("authorization", token))
+        String token = createTestToken(1L, 0L, 100);
+        String responseString = this.mvc.perform(post("/privilege/shops/0/adminusers/47/roles/84").header("authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
 
-        String expectedResponse = "{\"errno\":0,\"data\":{\"id\":91,\"user\":{\"id\":47,\"userName\":\"2721900002\"},\"role\":{\"id\":84,\"name\":\"文案\",\"creatorId\":1,\"desc\":null,\"gmtCreate\":\"2020-11-01T09:48:24\",\"gmtModified\":\"2020-11-01T09:48:24\"},\"creator\":{\"id\":47,\"userName\":\"2721900002\"},\"gmtCreate\":\"\"},\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":{\"id\":91,\"user\":{\"id\":47,\"userName\":\"2721900002\"},\"role\":{\"id\":84,\"name\":\"文案\"},\"creator\":{\"id\":1,\"userName\":\"13088admin\"},\"gmtCreate\":\"2020-11-20T14:31:58.948174\"},\"errmsg\":\"成功\"}";
         //JSONAssert.assertEquals(expectedResponse, responseString, false);
 
     }
@@ -254,12 +253,13 @@ public class PrivilegeControllerTest4 {
      */
     @Test
     public void getUserRoleTest() throws Exception {
-        String token = creatTestToken(1L, 0L, 100);
-        String responseString = this.mvc.perform(get("/privilege/adminusers/47/roles").header("authorization", token))
+        String token = createTestToken(1L, 0L, 100);
+        logger.debug(token);
+        String responseString = this.mvc.perform(get("/privilege/shops/0/adminusers/47/roles").header("authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
-        String expectedResponse = "{\"errno\":0,\"data\":[{\"id\":78,\"user\":{\"id\":47,\"userName\":\"2721900002\"},\"role\":{\"id\":85,\"name\":\"总经办\",\"createdBy\":1,\"desc\":null,\"gmtCreate\":\"2020-11-01T09:48:24\",\"gmtModified\":\"2020-11-01T09:48:24\"},\"creator\":{\"id\":1,\"userName\":\"13088admin\"},\"gmtCreate\":\"2020-11-01T09:48:24\"}],\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":[{\"id\":78,\"user\":{\"id\":47,\"userName\":\"2721900002\"},\"role\":{\"id\":85,\"name\":\"总经办\"},\"creator\":{\"id\":1,\"userName\":\"13088admin\"},\"gmtCreate\":\"2020-11-01T09:48:24\"}],\"errmsg\":\"成功\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
 
     }
@@ -271,12 +271,12 @@ public class PrivilegeControllerTest4 {
      */
     @Test
     public void getSelfUserRoleTest() throws Exception {
-        String token = creatTestToken(47L, 0L, 100);
-        String responseString = this.mvc.perform(get("/privilege/adminusers/self/roles?id=47").header("authorization", token))
+        String token = createTestToken(1L, 0L, 100);
+        String responseString = this.mvc.perform(get("/privilege/adminusers/self/roles").header("authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
-        String expectedResponse = "{\"errno\":0,\"data\":[{\"id\":78,\"user\":{\"id\":47,\"userName\":\"2721900002\"},\"role\":{\"id\":85,\"name\":\"总经办\",\"createdBy\":1,\"desc\":null,\"gmtCreate\":\"2020-11-01T09:48:24\",\"gmtModified\":\"2020-11-01T09:48:24\"},\"creator\":{\"id\":1,\"userName\":\"13088admin\"},\"gmtCreate\":\"2020-11-01T09:48:24\"}],\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":[{\"id\":76,\"user\":{\"id\":1,\"userName\":\"13088admin\"},\"role\":{\"id\":23,\"name\":\"管理员\"},\"creator\":{\"id\":1,\"userName\":\"13088admin\"},\"gmtCreate\":\"2020-11-01T09:48:24\"}],\"errmsg\":\"成功\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
 

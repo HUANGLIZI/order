@@ -12,10 +12,7 @@ import cn.edu.xmu.privilege.mapper.UserPoMapper;
 import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
 import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
-import cn.edu.xmu.privilege.model.bo.Privilege;
-import cn.edu.xmu.privilege.model.bo.Role;
-import cn.edu.xmu.privilege.model.bo.User;
-import cn.edu.xmu.privilege.model.bo.UserRole;
+import cn.edu.xmu.privilege.model.bo.*;
 import cn.edu.xmu.privilege.model.po.*;
 import cn.edu.xmu.privilege.model.vo.*;
 
@@ -165,15 +162,20 @@ public class UserDao{
     /**
      * 取消用户角色
      * @param id 用户角色id
+     * @param did 部门id
      * @return ReturnObject<VoObject>
      * @author Xianwei Wang
      * */
-    public ReturnObject<VoObject> revokeRole(Long id){
+    public ReturnObject<VoObject> revokeRole(Long id, Long did){
         UserRolePo userRolePo = userRolePoMapper.selectByPrimaryKey(id);
         if (userRolePo == null){
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
 
+        //部门id错误
+        if (! checkUserDid(userRolePo.getUserId(), did)) {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
 
         try {
             int state = userRolePoMapper.deleteByPrimaryKey(id);
@@ -365,6 +367,43 @@ public class UserDao{
     }
 
 
+    /**
+     * @description 检查用户的departid是否与路径上的一致
+     * @param userid 用户id
+     * @param departid 路径上的departid
+     * @return boolean
+     * @author Xianwei Wang
+     * created at 11/20/20 1:48 PM
+     */
+    public boolean checkUserDid(Long userid, Long departid) {
+        UserPo userPo = userMapper.selectByPrimaryKey(userid);
+        if (userPo == null) {
+            return false;
+        }
+        if (userPo.getDepartId() != departid) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @description 检查角色的departid是否与路径上的一致
+     * @param roleid 角色id
+     * @param departid 路径上的departid
+     * @return boolean
+     * @author Xianwei Wang
+     * created at 11/20/20 1:51 PM
+     */
+    public boolean checkRoleDid(Long roleid, Long departid) {
+        RolePo rolePo = rolePoMapper.selectByPrimaryKey(roleid);
+        if (rolePo == null) {
+            return false;
+        }
+        if (rolePo.getDepartId() != departid) {
+            return false;
+        }
+        return true;
+    }
 
 
     /**

@@ -18,7 +18,7 @@ public class UserRoleRetVo {
 
     private UserSimpleRetVo user;
 
-    private RoleRetVo role;
+    private RoleSimpleRetVo role;
 
     private UserSimpleRetVo creator;
 

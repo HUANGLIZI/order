@@ -54,7 +54,7 @@ public class UserRole implements VoObject {
         userRoleRetVo.setId(this.id);
         userRoleRetVo.setUser(this.user.createSimpleVo());
         userRoleRetVo.setCreator(this.creator.createSimpleVo());
-        userRoleRetVo.setRole(new RoleRetVo(this.role));
+        userRoleRetVo.setRole(this.role.createSimpleVo());
         userRoleRetVo.setGmtCreate(this.gmtCreate.toString());
 
         return userRoleRetVo;

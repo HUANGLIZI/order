@@ -135,12 +135,13 @@ public class UserService {
     /**
      * 取消用户角色
      * @param id 用户角色id
+     * @param did departid
      * @return ReturnObject<VoObject>
      * @author Xianwei Wang
      * */
     @Transactional
-    public ReturnObject<VoObject> revokeRole(Long id){
-        return userDao.revokeRole(id);
+    public ReturnObject<VoObject> revokeRole(Long id, Long did){
+        return userDao.revokeRole(id, did);
     }
 
     /**
@@ -148,16 +149,22 @@ public class UserService {
      * @param createid 创建者id
      * @param userid 用户id
      * @param roleid 角色id
+     * @param did departid
      * @return UserRole
      * @author Xianwei Wang
      * */
     @Transactional
-    public ReturnObject<VoObject> assignRole(Long createid, Long userid, Long roleid){
-        return userDao.assignRole(createid, userid, roleid);
+    public ReturnObject<VoObject> assignRole(Long createid, Long userid, Long roleid, Long did){
+        if (userDao.checkUserDid(userid, did) && userDao.checkRoleDid(roleid, did)) {
+            return userDao.assignRole(createid, userid, roleid);
+        }
+        else {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
     }
 
     /**
-     * 查看用户的角色信息
+     * 查看自己的角色信息
      * @param id 用户id
      * @return 角色信息
      * @author Xianwei Wang
@@ -165,6 +172,22 @@ public class UserService {
     @Transactional
     public ReturnObject<List> getSelfUserRoles(Long id){
         return userDao.getUserRoles(id);
+    }
+
+    /**
+     * 查看角色信息
+     * @param id 用户id
+     * @param did departid
+     * @return 角色信息
+     * @author Xianwei Wang
+     * */
+    @Transactional
+    public ReturnObject<List> getUserRoles(Long id, Long did){
+        if (userDao.checkUserDid(id, did)) {
+            return userDao.getUserRoles(id);
+        } else {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
     }
 
 

@@ -64,12 +64,14 @@ public class PrivilegeController {
     /***
      * 取消用户权限
      * @param id 用户id
+     * @param did 部门id
      * @return
      */
     @ApiOperation(value = "取消用户权限")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(name="userid", value="用户id", required = true, dataType="Integer", paramType="path")
+            @ApiImplicitParam(name="id", value="角色id", required = true, dataType="Integer", paramType="path"),
+            @ApiImplicitParam(name="did", value="部门id", required = true, dataType="Integer", paramType="path")
 
     })
     @ApiResponses({
@@ -77,32 +79,35 @@ public class PrivilegeController {
             @ApiResponse(code = 504, message = "操作id不存在")
     })
     @Audit
-    @DeleteMapping("/adminusersrole/{id}")
-    public Object revokeRole(@PathVariable Long id){
-        return Common.decorateReturnObject(userService.revokeRole(id));
+    @DeleteMapping("/shops/{did}/adminuserroles/{id}")
+    public Object revokeRole(@PathVariable Long did, @PathVariable Long id){
+        return Common.decorateReturnObject(userService.revokeRole(id, did));
     }
 
     /***
      * 赋予用户权限
      * @param userid 用户id
      * @param roleid 角色id
+     * @param createid 创建者id
+     * @param did 部门id
      * @return
      */
     @ApiOperation(value = "赋予用户权限")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(name="userid", value="用户id", required = true, dataType="Integer", paramType="path"),
-            @ApiImplicitParam(name="roleid", value="角色id", required = true, dataType="Integer", paramType="path")
+            @ApiImplicitParam(name="roleid", value="角色id", required = true, dataType="Integer", paramType="path"),
+            @ApiImplicitParam(name="did", value="部门id", required = true, dataType="Integer", paramType="path")
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
     @Audit
-    @PostMapping("/adminusers/{userid}/roles/{roleid}")
-    public Object assignRole(@LoginUser Long createid, @PathVariable Long userid, @PathVariable Long roleid){
+    @PostMapping("/shops/{did}/adminusers/{userid}/roles/{roleid}")
+    public Object assignRole(@LoginUser Long createid, @PathVariable Long did, @PathVariable Long userid, @PathVariable Long roleid){
 
-        ReturnObject<VoObject> returnObject =  userService.assignRole(createid, userid, roleid);
+        ReturnObject<VoObject> returnObject =  userService.assignRole(createid, userid, roleid, did);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);
         } else {
@@ -127,7 +132,6 @@ public class PrivilegeController {
     @Audit
     @GetMapping("/adminusers/self/roles")
     public Object getUserSelfRole(@LoginUser Long id){
-
         ReturnObject<List> returnObject =  userService.getSelfUserRoles(id);
         return Common.getListRetObject(returnObject);
     }
@@ -135,20 +139,22 @@ public class PrivilegeController {
     /***
      * 获得所有人角色信息
      * @param id 用户id
+     * @param did 部门id
      * @return
      */
     @ApiOperation(value = "获得所有人角色信息")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(name="id", value="用户id", required = true, dataType="int", paramType="path")
+            @ApiImplicitParam(name="id", value="用户id", required = true, dataType="int", paramType="path"),
+            @ApiImplicitParam(name="did", value="部门id", required = true, dataType="int", paramType="path")
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
     @Audit
-    @GetMapping("/adminusers/{id}/roles")
-    public Object getSelfRole(@PathVariable Long id){
-        ReturnObject<List> returnObject =  userService.getSelfUserRoles(id);
+    @GetMapping("/shops/{did}/adminusers/{id}/roles")
+    public Object getSelfRole(@PathVariable Long did, @PathVariable Long id){
+        ReturnObject<List> returnObject =  userService.getUserRoles(id, did);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getListRetObject(returnObject);
         } else {
