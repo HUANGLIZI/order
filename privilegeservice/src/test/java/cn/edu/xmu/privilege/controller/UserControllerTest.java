@@ -34,7 +34,7 @@ public class UserControllerTest {
     @Test
     public void getUserPrivs() throws Exception{
         String token = this.login("13088admin", "123456");
-        String responseString = this.mvc.perform(get("/privilege/adminusers/1/privileges").header("authorization",token))
+        String responseString = this.mvc.perform(get("/privilege/shops/0/adminusers/1/privileges").header("authorization",token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -45,7 +45,7 @@ public class UserControllerTest {
 
     @Test
     public void getUserPriv2() throws Exception{
-        String responseString = this.mvc.perform(get("/privilege/adminusers/1/privileges"))
+        String responseString = this.mvc.perform(get("/privilege/shops/0/adminusers/1000/privileges"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();

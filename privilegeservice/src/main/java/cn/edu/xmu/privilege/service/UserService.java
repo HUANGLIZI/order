@@ -67,8 +67,8 @@ public class UserService {
      * @param id:用户id
      * @return 用户权限列表
      */
-    public ReturnObject<List> findPrivsByUserId(Long id){
-        return userDao.findPrivsByUserId(id);
+    public ReturnObject<List> findPrivsByUserId(Long id, Long did){
+        return userDao.findPrivsByUserId(id,did);
     }
 
     @Value("${privilegeservice.login.multiply}")
