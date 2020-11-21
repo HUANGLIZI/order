@@ -25,26 +25,26 @@ public class UserProxyService {
     @Autowired
     private UserProxyDao userProxyDao;
 
-    public ReturnObject usersProxy(Long userId, Long id, UserProxyVo vo) {
+    public ReturnObject usersProxy(Long userId, Long id, UserProxyVo vo,Long departid) {
         UserProxy bo=new UserProxy(vo);
-        return userProxyDao.usersProxy(userId, id, bo);
+        return userProxyDao.usersProxy(userId, id, bo,departid);
     }
 
-    public ReturnObject aUsersProxy(Long aid, Long bid, UserProxyVo vo) {
+    public ReturnObject aUsersProxy(Long aid, Long bid, UserProxyVo vo,Long departid) {
         UserProxy bo=new UserProxy(vo);
-        return userProxyDao.aUsersProxy(aid, bid, bo);
+        return userProxyDao.aUsersProxy(aid, bid, bo,departid);
     }
 
     public ReturnObject removeUserProxy(Long id, Long userId) {
         return userProxyDao.removeUserProxy(id, userId);
     }
 
-    public ReturnObject listProxies(Long aId, Long bId) {
-        return userProxyDao.listProxies(aId, bId);
+    public ReturnObject listProxies(Long aId, Long bId,Long did) {
+        return userProxyDao.listProxies(aId, bId,did);
     }
 
-    public ReturnObject removeAllProxies(Long id) {
-        return userProxyDao.removeAllProxies(id);
+    public ReturnObject removeAllProxies(Long id,Long did) {
+        return userProxyDao.removeAllProxies(id,did);
     }
 }
 

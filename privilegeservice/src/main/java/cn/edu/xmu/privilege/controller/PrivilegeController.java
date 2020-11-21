@@ -724,14 +724,14 @@ public class PrivilegeController {
     })
     @Audit
     @PostMapping("users/{id}/proxy")
-    public Object usersProxy(@LoginUser @ApiIgnore  Long userId, @PathVariable Long id, @Validated @RequestBody UserProxyVo vo, BindingResult bindingresult) {
+    public Object usersProxy(@LoginUser @ApiIgnore  Long userId,@Depart @ApiIgnore Long departid, @PathVariable Long id, @Validated @RequestBody UserProxyVo vo, BindingResult bindingresult) {
         logger.debug("usersProxy: id = " + id + " vo" + vo);
         Object returnObject = Common.processFieldErrors(bindingresult, httpServletResponse);
         if (null != returnObject) {
             logger.info("validate fail");
             return returnObject;
         }
-        ReturnObject retObject = userProxyService.usersProxy(userId, id, vo);
+        ReturnObject retObject = userProxyService.usersProxy(userId, id, vo,departid);
         return retObject;
     }
 
@@ -754,14 +754,14 @@ public class PrivilegeController {
             @ApiResponse(code = 0, message = "成功"),
     })
     @PostMapping("ausers/{aid}/busers/{bid}")
-    public Object aUsersProxy(@PathVariable Long aid, @PathVariable Long bid,@Validated @RequestBody UserProxyVo vo, BindingResult bindingresult) {
+    public Object aUsersProxy(@PathVariable Long aid, @PathVariable Long bid,@Validated @RequestBody UserProxyVo vo, BindingResult bindingresult,@Depart @ApiIgnore Long departid) {
         logger.debug("aUsersProxy: aid = " + aid + " bid" + bid + " vo" + vo);
         Object returnObject = Common.processFieldErrors(bindingresult, httpServletResponse);
         if (null != returnObject) {
             logger.info("validate fail");
             return returnObject;
         }
-        ReturnObject retObject = userProxyService.aUsersProxy(aid, bid, vo);
+        ReturnObject retObject = userProxyService.aUsersProxy(aid, bid, vo,departid);
         return retObject;
     }
 
@@ -804,10 +804,10 @@ public class PrivilegeController {
             @ApiResponse(code = 0, message = "成功"),
     })
     @Audit
-    @GetMapping("proxies")
-    public Object listProxies(Long aId, Long bId) {
+    @GetMapping("shops/{did}/proxies")
+    public Object listProxies(Long aId, Long bId,@PathVariable Long did) {
         logger.debug("listProxies: aId = " + aId + " bId = " + bId);
-        ReturnObject<List> returnObject = userProxyService.listProxies(aId, bId);
+        ReturnObject<List> returnObject = userProxyService.listProxies(aId, bId,did);
         return returnObject;
     }
 
@@ -827,10 +827,10 @@ public class PrivilegeController {
             @ApiResponse(code = 0, message = "成功"),
     })
     @Audit
-    @DeleteMapping("allproxie/{id}")
-    public Object removeAllProxies(@PathVariable Long id) {
+    @DeleteMapping("shops/{did}/allproxie/{id}")
+    public Object removeAllProxies(@PathVariable Long id,@PathVariable Long did) {
         logger.debug("removeAllProxies: id) = " + id);
-        ReturnObject returnObject = userProxyService.removeAllProxies(id);
+        ReturnObject returnObject = userProxyService.removeAllProxies(id,did);
         return returnObject;
     }
     /**

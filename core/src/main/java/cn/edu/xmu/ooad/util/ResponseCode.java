@@ -64,6 +64,8 @@ public enum ResponseCode {
     MOBILE_NOTVERIFIED(749,"电话号码未确认"),
     USERPROXY_BIGGER(750,"开始时间要小于失效时间"),
     USERPROXY_SELF(751,"自己不可以代理自己"),
+    USERPROXY_DEPART_CONFLICT(752,"两个代理双方的部门冲突"),
+    USERPROXY_DEPART_MANAGER_CONFLICT(753,"管理员无此部门权限"),
     /***************************************************
      *    订单模块错误码
      **************************************************/
