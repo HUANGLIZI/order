@@ -91,11 +91,16 @@ public class UserDao{
      * @return 用户的权限列表
      */
 
-    public ReturnObject<List> findPrivsByUserId(Long id) {
+    public ReturnObject<List> findPrivsByUserId(Long id, Long did) {
         //getRoleIdByUserId已经进行签名校验
         User user = getUserById(id.longValue()).getData();
         if (user == null) {//判断是否是由于用户不存在造成的
             logger.error("findPrivsByUserId: 数据库不存在该用户 userid=" + id);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        Long departId = user.getDepartId();
+        if(departId != did) {
+            logger.error("findPrivsByUserId: 店铺id不匹配 userid=" + id);
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         List<Long> roleIds = this.getRoleIdByUserId(id);

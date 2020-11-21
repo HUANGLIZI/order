@@ -242,16 +242,17 @@ public class PrivilegeController {
     @ApiOperation(value = "获得某一用户的权限")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
-            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path")
+            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path"),
+            @ApiImplicitParam(name="did", required = true, dataType="String", paramType="path"),
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
     @Audit // 需要认证
-    @GetMapping("adminusers/{id}/privileges")
-    public Object getPrivsByUserId(@PathVariable Long id){
-        ReturnObject<List> returnObject =  userService.findPrivsByUserId(id);
+    @GetMapping("/shops/{did}/adminusers/{id}/privileges")
+    public Object getPrivsByUserId(@PathVariable Long id, @PathVariable Long did){
+        ReturnObject<List> returnObject =  userService.findPrivsByUserId(id,did);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getListRetObject(returnObject);
         } else {
