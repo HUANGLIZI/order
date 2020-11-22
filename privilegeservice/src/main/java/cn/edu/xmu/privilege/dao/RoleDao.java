@@ -175,6 +175,13 @@ public class RoleDao {
         try {
             //不加限定条件查询所有
             rolePos = roleMapper.selectByExample(example);
+            List<VoObject> ret = new ArrayList<>(rolePos.size());
+            for (RolePo po : rolePos) {
+                Role role = new Role(po);
+                ret.add(role);
+            }
+            PageInfo<VoObject> rolePage = PageInfo.of(ret);
+            return new ReturnObject<>(rolePage);
         }
         catch (DataAccessException e){
             logger.error("selectAllRole: DataAccessException:" + e.getMessage());
@@ -185,13 +192,6 @@ public class RoleDao {
             logger.error("other exception : " + e.getMessage());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
-        List<VoObject> ret = new ArrayList<>(rolePos.size());
-        for (RolePo po : rolePos) {
-            Role role = new Role(po);
-            ret.add(role);
-        }
-        PageInfo<VoObject> rolePage = PageInfo.of(ret);
-        return new ReturnObject<>(rolePage);
     }
 
     /**
@@ -253,50 +253,61 @@ public class RoleDao {
         RolePoExample.Criteria criteriaDid = rolePoDid.createCriteria();
         criteriaDid.andIdEqualTo(id);
         criteriaDid.andDepartIdEqualTo(did);
-        int ret = roleMapper.deleteByExample(rolePoDid);
-        if (ret == 0) {
-            //删除角色表
-            logger.debug("deleteRole: id not exist = " + id);
-            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("角色id不存在：" + id));
-        } else {
-            //删除角色权限表
-            logger.debug("deleteRole: delete role id = " + id);
-            RolePrivilegePoExample exampleRP = new RolePrivilegePoExample();
-            RolePrivilegePoExample.Criteria criteriaRP = exampleRP.createCriteria();
-            criteriaRP.andRoleIdEqualTo(id);
-            List<RolePrivilegePo> rolePrivilegePos = rolePrivilegePoMapper.selectByExample(exampleRP);
-            logger.debug("deleteRole: delete role-privilege num = " + rolePrivilegePos.size());
-            for (RolePrivilegePo rolePrivilegePo : rolePrivilegePos) {
-                rolePrivilegePoMapper.deleteByPrimaryKey(rolePrivilegePo.getId());
-            }
-            //删除缓存中角色权限信息
-            redisTemplate.delete("r_" + id);
-            //删除用户角色表
-            UserRolePoExample exampleUR = new UserRolePoExample();
-            UserRolePoExample.Criteria criteriaUR = exampleUR.createCriteria();
-            criteriaUR.andRoleIdEqualTo(id);
-            List<UserRolePo> userRolePos = userRolePoMapper.selectByExample(exampleUR);
-            logger.debug("deleteRole: delete user-role num = " + userRolePos.size());
-            for (UserRolePo userRolePo : userRolePos) {
-                userRolePoMapper.deleteByPrimaryKey(userRolePo.getId());
-                //删除缓存中具有删除角色的用户权限
-                redisTemplate.delete("u_" + userRolePo.getUserId());
-                redisTemplate.delete("up_" + userRolePo.getUserId());
-                //查询当前所有有效的代理具有删除角色用户的代理用户
-                UserProxyPoExample example = new UserProxyPoExample();
-                UserProxyPoExample.Criteria criteria = example.createCriteria();
-                criteria.andUserBIdEqualTo(userRolePo.getUserId());
-                List<UserProxyPo> userProxyPos = userProxyPoMapper.selectByExample(example);
-                for(UserProxyPo userProxyPo : userProxyPos){
-                    //删除缓存中代理了具有删除角色的用户的代理用户
-                    redisTemplate.delete("u_" + userProxyPo.getUserAId());
-                    redisTemplate.delete("up_" + userProxyPo.getUserAId());
+        try {
+            int ret = roleMapper.deleteByExample(rolePoDid);
+            if (ret == 0) {
+                //删除角色表
+                logger.debug("deleteRole: id not exist = " + id);
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("角色id不存在：" + id));
+            } else {
+                //删除角色权限表
+                logger.debug("deleteRole: delete role id = " + id);
+                RolePrivilegePoExample exampleRP = new RolePrivilegePoExample();
+                RolePrivilegePoExample.Criteria criteriaRP = exampleRP.createCriteria();
+                criteriaRP.andRoleIdEqualTo(id);
+                List<RolePrivilegePo> rolePrivilegePos = rolePrivilegePoMapper.selectByExample(exampleRP);
+                logger.debug("deleteRole: delete role-privilege num = " + rolePrivilegePos.size());
+                for (RolePrivilegePo rolePrivilegePo : rolePrivilegePos) {
+                    rolePrivilegePoMapper.deleteByPrimaryKey(rolePrivilegePo.getId());
                 }
+                //删除缓存中角色权限信息
+                redisTemplate.delete("r_" + id);
+                //删除用户角色表
+                UserRolePoExample exampleUR = new UserRolePoExample();
+                UserRolePoExample.Criteria criteriaUR = exampleUR.createCriteria();
+                criteriaUR.andRoleIdEqualTo(id);
+                List<UserRolePo> userRolePos = userRolePoMapper.selectByExample(exampleUR);
+                logger.debug("deleteRole: delete user-role num = " + userRolePos.size());
+                for (UserRolePo userRolePo : userRolePos) {
+                    userRolePoMapper.deleteByPrimaryKey(userRolePo.getId());
+                    //删除缓存中具有删除角色的用户权限
+                    redisTemplate.delete("u_" + userRolePo.getUserId());
+                    redisTemplate.delete("up_" + userRolePo.getUserId());
+                    //查询当前所有有效的代理具有删除角色用户的代理用户
+                    UserProxyPoExample example = new UserProxyPoExample();
+                    UserProxyPoExample.Criteria criteria = example.createCriteria();
+                    criteria.andUserBIdEqualTo(userRolePo.getUserId());
+                    List<UserProxyPo> userProxyPos = userProxyPoMapper.selectByExample(example);
+                    for(UserProxyPo userProxyPo : userProxyPos){
+                        //删除缓存中代理了具有删除角色的用户的代理用户
+                        redisTemplate.delete("u_" + userProxyPo.getUserAId());
+                        redisTemplate.delete("up_" + userProxyPo.getUserAId());
+                    }
+                }
+                retObj = new ReturnObject<>();
             }
-            retObj = new ReturnObject<>();
-        }
 
-        return retObj;
+            return retObj;
+        }
+        catch (DataAccessException e){
+            logger.error("selectAllRole: DataAccessException:" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
     }
 
     /**
