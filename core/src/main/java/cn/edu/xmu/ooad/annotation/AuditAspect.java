@@ -102,6 +102,9 @@ public class AuditAspect {
                 }
             }
         }
+        else{
+            logger.error("the api path is null");
+        }
 
 
         logger.debug("around: userId ="+userId+" departId="+departId);
