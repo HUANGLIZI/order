@@ -78,27 +78,31 @@ public class AuditAspect {
 
         //检验/shop的api中传入token是否和departId一致
         String pathInfo=request.getPathInfo();
-        logger.debug("getPathInfo = "+ pathInfo);
-        String paths[]=pathInfo.split("/");
-        for(int i=0;i<paths.length;i++){
-            //如果departId为0,可以操作所有的shop
-            if(departId==0){
-                break;
-            }
-            if(paths[i].equals("shops")){
-                if(i+1<paths.length){
-                    //找到路径上对应id 将其与string类型的departId比较
-                    String pathId=paths[i+1];
-                    logger.debug("did ="+pathId);
-                    if(!pathId.equals(departId.toString())){
-                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                        return ResponseUtil.fail(ResponseCode.FIELD_NOTVALID, "departId不匹配");
-                    }
-                    logger.debug("success match Id!");
+        if(null!=pathInfo)
+        {
+            logger.debug("getPathInfo = "+ pathInfo);
+            String paths[]=pathInfo.split("/");
+            for(int i=0;i<paths.length;i++){
+                //如果departId为0,可以操作所有的shop
+                if(departId==0){
+                    break;
                 }
-                break;
+                if(paths[i].equals("shops")){
+                    if(i+1<paths.length){
+                        //找到路径上对应id 将其与string类型的departId比较
+                        String pathId=paths[i+1];
+                        logger.debug("did ="+pathId);
+                        if(!pathId.equals(departId.toString())){
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            return ResponseUtil.fail(ResponseCode.FIELD_NOTVALID, "departId不匹配");
+                        }
+                        logger.debug("success match Id!");
+                    }
+                    break;
+                }
             }
         }
+
 
         logger.debug("around: userId ="+userId+" departId="+departId);
         if (userId == null) {
