@@ -22,6 +22,8 @@ public enum ResponseCode {
     RESOURCE_ID_OUTSCOPE(505,"操作的资源id不是自己的对象"),
     FILE_NO_WRITE_PERMISSION(506,"目录文件夹没有写入的权限"),
     RESOURCE_FALSIFY(507, "信息签名不正确"),
+    IMG_FORMAT_ERROR(508,"图片格式不正确"),
+    IMG_SIZE_EXCEED(509,"图片大小超限"),
     //--------------------------------------------
 
 

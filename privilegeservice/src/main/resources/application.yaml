@@ -15,6 +15,13 @@ spring:
     name: privilege-service
   profiles:
     active: dev
+  servlet:
+    multipart:
+      #是否使用http上传
+      enabled: true
+      #最大请求文件的大小
+      max-request-size: 10MB
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
@@ -38,6 +45,7 @@ spring:
           slow-sql-millis: 100
       validation-query: select 1
     sql-script-encoding: UTF-8
+
   redis:
     # Redis数据库索引（默认为0）
     database: 0
@@ -70,8 +78,12 @@ privilegeservice:
   initialization: true
   #分布式锁失效时间（秒）
   lockerExpireTime: 30
-  #图片存储位置
-  imglocation: ./img
+  #dav信息配置
+  dav:
+    username: oomall
+    password: admin
+    baseUrl: http://192.168.148.131:8888/webdav/
+
   user:
     # user的权限字在Redis中失效秒数
     expiretime: 600
