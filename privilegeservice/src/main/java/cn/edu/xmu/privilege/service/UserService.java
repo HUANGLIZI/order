@@ -45,20 +45,20 @@ public class UserService {
     @Value("${privilegeservice.login.jwtExpire}")
     private Integer jwtExpireTime;
 
-    /**
-     * @author 24320182203218
-     **/
-    @Value("${privilegeservice.imglocation}")
-    private String imgLocation;
-
-    @Value("${privilegeservice.dav.sername}")
-    private String davUsername;
-
-    @Value("${privilegeservice.dav.password}")
-    private String davPassword;
-
-    @Value("${privilegeservice.dav.baseUrl}")
-    private String baseUrl;
+//    /**
+//     * @author 24320182203218
+//     **/
+//    @Value("${privilegeservice.imglocation}")
+//    private String imgLocation;
+//
+//    @Value("${privilegeservice.dav.sername}")
+//    private String davUsername;
+//
+//    @Value("${privilegeservice.dav.password}")
+//    private String davPassword;
+//
+//    @Value("${privilegeservice.dav.baseUrl}")
+//    private String baseUrl;
 
     @Autowired
     private PrivilegeDao privilegeDao;
@@ -412,46 +412,46 @@ public class UserService {
      * @param multipartFile: 文件
      * @return
      */
-    @Transactional
-    public ReturnObject uploadImg(Long id, MultipartFile multipartFile){
-        ReturnObject<User> userReturnObject = userDao.getUserById(id);
-
-        if(userReturnObject.getCode() == ResponseCode.RESOURCE_ID_NOTEXIST) {
-            return userReturnObject;
-        }
-        User user = userReturnObject.getData();
-
-        ReturnObject returnObject = new ReturnObject();
-        try{
-            returnObject = ImgHelper.remoteSaveImg(multipartFile,2,davUsername, davPassword,baseUrl);
-
-            //文件上传错误
-            if(returnObject.getCode()!=ResponseCode.OK){
-                logger.debug(returnObject.getErrmsg());
-                return returnObject;
-            }
-
-            String oldFilename = user.getAvatar();
-            user.setAvatar(returnObject.getData().toString());
-            ReturnObject updateReturnObject = userDao.updateUserAvatar(user);
-
-            //数据库更新失败，需删除新增的图片
-            if(updateReturnObject.getCode()==ResponseCode.FIELD_NOTVALID){
-                ImgHelper.deleteRemoteImg(returnObject.getData().toString(),davUsername, davPassword,baseUrl);
-                return updateReturnObject;
-            }
-
-            //数据库更新成功需删除旧图片，未设置则不删除
-            if(oldFilename!=null) {
-                ImgHelper.deleteRemoteImg(oldFilename, davUsername, davPassword,baseUrl);
-            }
-        }
-        catch (IOException e){
-            logger.debug("uploadImg: I/O Error:" + baseUrl);
-            return new ReturnObject(ResponseCode.FILE_NO_WRITE_PERMISSION);
-        }
-        return returnObject;
-    }
+//    @Transactional
+//    public ReturnObject uploadImg(Long id, MultipartFile multipartFile){
+//        ReturnObject<User> userReturnObject = userDao.getUserById(id);
+//
+//        if(userReturnObject.getCode() == ResponseCode.RESOURCE_ID_NOTEXIST) {
+//            return userReturnObject;
+//        }
+//        User user = userReturnObject.getData();
+//
+//        ReturnObject returnObject = new ReturnObject();
+//        try{
+//            returnObject = ImgHelper.remoteSaveImg(multipartFile,2,davUsername, davPassword,baseUrl);
+//
+//            //文件上传错误
+//            if(returnObject.getCode()!=ResponseCode.OK){
+//                logger.debug(returnObject.getErrmsg());
+//                return returnObject;
+//            }
+//
+//            String oldFilename = user.getAvatar();
+//            user.setAvatar(returnObject.getData().toString());
+//            ReturnObject updateReturnObject = userDao.updateUserAvatar(user);
+//
+//            //数据库更新失败，需删除新增的图片
+//            if(updateReturnObject.getCode()==ResponseCode.FIELD_NOTVALID){
+//                ImgHelper.deleteRemoteImg(returnObject.getData().toString(),davUsername, davPassword,baseUrl);
+//                return updateReturnObject;
+//            }
+//
+//            //数据库更新成功需删除旧图片，未设置则不删除
+//            if(oldFilename!=null) {
+//                ImgHelper.deleteRemoteImg(oldFilename, davUsername, davPassword,baseUrl);
+//            }
+//        }
+//        catch (IOException e){
+//            logger.debug("uploadImg: I/O Error:" + baseUrl);
+//            return new ReturnObject(ResponseCode.FILE_NO_WRITE_PERMISSION);
+//        }
+//        return returnObject;
+//    }
 
         /**
      * auth002: 用户重置密码

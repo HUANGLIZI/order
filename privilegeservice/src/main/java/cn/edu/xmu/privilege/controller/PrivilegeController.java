@@ -683,30 +683,30 @@ public class PrivilegeController {
         }
     }
 
-    /**
-     * @param userId
-     * @param multipartFile
-     * @return
-     * @author 24320182203218
-     **/
-    @ApiOperation(value = "用户上传图片",  produces="application/json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(paramType = "formData", dataType = "file", name = "img", value ="文件", required = true)
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-            @ApiResponse(code = 506, message = "该目录文件夹没有写入的权限"),
-            @ApiResponse(code = 508, message = "图片格式不正确"),
-            @ApiResponse(code = 509, message = "图片大小超限")
-    })
-    @Audit
-    @PostMapping("/adminusers/uploadImg")
-    public Object uploadImg(@RequestParam("img") MultipartFile multipartFile, @LoginUser @ApiIgnore Long userId){
-        logger.debug("uploadImg: id = "+ userId +" img :" + multipartFile.getOriginalFilename());
-        ReturnObject returnObject = userService.uploadImg(userId,multipartFile);
-        return Common.getNullRetObj(returnObject, httpServletResponse);
-    }
+//    /**
+//     * @param userId
+//     * @param multipartFile
+//     * @return
+//     * @author 24320182203218
+//     **/
+//    @ApiOperation(value = "用户上传图片",  produces="application/json")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+//            @ApiImplicitParam(paramType = "formData", dataType = "file", name = "img", value ="文件", required = true)
+//    })
+//    @ApiResponses({
+//            @ApiResponse(code = 0, message = "成功"),
+//            @ApiResponse(code = 506, message = "该目录文件夹没有写入的权限"),
+//            @ApiResponse(code = 508, message = "图片格式不正确"),
+//            @ApiResponse(code = 509, message = "图片大小超限")
+//    })
+//    @Audit
+//    @PostMapping("/adminusers/uploadImg")
+//    public Object uploadImg(@RequestParam("img") MultipartFile multipartFile, @LoginUser @ApiIgnore Long userId){
+//        logger.debug("uploadImg: id = "+ userId +" img :" + multipartFile.getOriginalFilename());
+//        ReturnObject returnObject = userService.uploadImg(userId,multipartFile);
+//        return Common.getNullRetObj(returnObject, httpServletResponse);
+//    }
 
 
     /**
