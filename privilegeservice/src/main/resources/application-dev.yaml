@@ -6,7 +6,7 @@ spring:
         url: http://localhost:8081
   datasource:
     url: jdbc:mysql://localhost:3306/oomall?serverTimezone=GMT%2B8
-    username: dbuser
+    username: root
     password: 123456
     druid:
       stat-view-servlet:
@@ -20,4 +20,4 @@ spring:
     # Redis服务器连接端口
     port: 6379
     # Redis服务器连接密码
-    password: 123456
+#    password: 123456
