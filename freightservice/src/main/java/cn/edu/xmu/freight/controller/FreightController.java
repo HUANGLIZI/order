@@ -13,7 +13,10 @@ public class FreightController {
 
     private  static  final Logger logger = LoggerFactory.getLogger(FreightController.class);
 
-    
+    /***
+     * 新建运费模板
+     */
+    @ApiOperation(value = "新建运费模板")
 
 }
 
