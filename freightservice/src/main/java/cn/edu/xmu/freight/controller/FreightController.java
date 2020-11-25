@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/privilege", produces = "application/json;charset=UTF-8")
 public class FreightController {
 
-    private  static  final Logger logger = LoggerFactory.getLogger(OrderController.class);
+    private  static  final Logger logger = LoggerFactory.getLogger(FreightController.class);
 
     
 
