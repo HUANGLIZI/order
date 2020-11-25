@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.*;
 @Api(value = "运费服务", tags = "freight")
 @RestController /*Restful的Controller对象*/
 @RequestMapping(value = "/privilege", produces = "application/json;charset=UTF-8")
-public class OrderController {
+public class FreightController {
 
     private  static  final Logger logger = LoggerFactory.getLogger(OrderController.class);
 
-    }
+    
 
 }
 
