@@ -17,7 +17,11 @@ public class FreightController {
 
     @Autowired
     FreightService freightService;
-    
+
+    /***
+     * 新建运费模板
+     */
+    @ApiOperation(value = "新建运费模板")
 
 }
 
