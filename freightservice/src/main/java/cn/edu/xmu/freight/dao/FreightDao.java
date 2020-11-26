@@ -1,5 +1,6 @@
 package cn.edu.xmu.freight.dao;
 
+import cn.edu.xmu.freight.mapper.FreightModelPoMapper;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.RandomCaptcha;
@@ -7,15 +8,6 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.ooad.util.encript.AES;
 import cn.edu.xmu.ooad.util.encript.SHA256;
-import cn.edu.xmu.privilege.mapper.RolePoMapper;
-import cn.edu.xmu.privilege.mapper.UserPoMapper;
-import cn.edu.xmu.privilege.mapper.UserProxyPoMapper;
-import cn.edu.xmu.privilege.mapper.UserRolePoMapper;
-import cn.edu.xmu.privilege.model.po.UserProxyPo;
-import cn.edu.xmu.privilege.model.po.UserProxyPoExample;
-import cn.edu.xmu.privilege.model.po.UserRolePo;
-import cn.edu.xmu.privilege.model.po.UserRolePoExample;
-import cn.edu.xmu.privilege.model.vo.UserVo;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +31,9 @@ import java.util.concurrent.TimeUnit;
 @Repository
 public class FreightDao{
 
+    private FreightModelPoMapper freightModelPoMapper;
+
+    private static final Logger logger = LoggerFactory.getLogger(FreightDao.class);
 
 }
 
