@@ -1,6 +1,6 @@
 package cn.edu.xmu.freight.model.vo;
 
-import cn.edu.xmu.ordermodule.model.bo.FreightModel;
+import cn.edu.xmu.freight.model.bo.FreightModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
