@@ -12,14 +12,12 @@ server:
 
 spring:
   application:
-    name: privilege-service
-  profiles:
-    active: dev
+    name: freight-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/oomall_order?serverTimezone=GMT%2B8
     username: root
-    password: 159156
+    password: 180607aa
     type: com.alibaba.druid.pool.DruidDataSource
     initialization-mode: always
     schema: classpath:schema.sql

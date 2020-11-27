@@ -38,4 +38,5 @@ public class RoleVo {
         role.setName(this.name);
         return role;
     }
+
 }
