@@ -6,6 +6,7 @@ import cn.edu.xmu.freight.model.bo.PieceFreightModel;
 import cn.edu.xmu.freight.model.bo.WeightFreightModel;
 import cn.edu.xmu.freight.model.po.FreightModelPo;
 import cn.edu.xmu.freight.model.vo.FreightModelVoo;
+import cn.edu.xmu.freight.model.vo.OrderItemVo;
 import cn.edu.xmu.freight.model.vo.PieceFreightModelVo;
 import cn.edu.xmu.freight.model.vo.WeightFreightModelVo;
 import cn.edu.xmu.freight.service.FreightService;
@@ -23,6 +24,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -139,7 +142,7 @@ public class FreightController {
 
 
     /**
-     * 店铺的运费模板
+     * 定义店铺的运费模板
      * @author 24320182203227 李子晗
      */
     @ApiOperation(value = "管理员定义店铺的运费模板")
@@ -169,13 +172,38 @@ public class FreightController {
         //httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return Common.decorateReturnObject(retObject);
     }
-
-
-
-
-
-
-
+    /**
+     * 计算运费
+     * @author 24320182203227 李子晗
+     */
+    @ApiOperation(value = "管理员定义店铺的运费模板")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "OrderItemVo", name = "vo", value = "可修改的用户信息", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "rid", value = "店铺id", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @PostMapping("/region/{rid}/price")
+    public Object calcuFreightPrice(@Validated @RequestBody List<OrderItemVo> vo, @PathVariable Long rid) {
+        logger.debug("calculate freight service by regionId:" + rid);
+        int listSize = vo.size();
+        List<Integer> count = new ArrayList<>();
+        List<String> skuId = new ArrayList<>();
+        //List<Integer>count=vo.getCount();
+        //List<String> skuId=vo.getSkuId();
+        for(int i=0;i<listSize;i++)
+        {
+            count.add(vo.get(i).getConut());
+            skuId.add(vo.get(i).getSkuId());
+        }
+        //System.out.println("1");
+        //httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        ReturnObject<Integer> retObject = freightService.calcuFreightPrice(count,skuId);
+        return Common.decorateReturnObject(retObject);
+    }
 
     /***
      * 管理员定义管理员定义重量模板明细
@@ -204,7 +232,6 @@ public class FreightController {
         ReturnObject<VoObject> retObject = freightService.insertWeightFreightModel(weightFreightModel);
         //httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return Common.decorateReturnObject(retObject);
-
     }
 
 

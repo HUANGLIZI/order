@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public class FreightService {
     //private Logger logger = LoggerFactory.getLogger(FreightService.class);
 
@@ -29,9 +31,9 @@ public class FreightService {
         ReturnObject<FreightModel> retObj = freightDao.putDefaultPieceFreight1(id,shopId);
         ReturnObject<VoObject> retFrei = null;
         if (retObj.getCode().equals(ResponseCode.OK)) {
-            retFrei = new ReturnObject<>(retObj.getData());
+            retFrei = new ReturnObject<>((VoObject)retObj.getData());
         } else {
-            retFrei = new ReturnObject<>(retObj.getCode(), retObj.getErrmsg());
+            retFrei = new ReturnObject(retObj.getCode(), retObj.getErrmsg());
         }
         return retFrei;
     }
@@ -44,9 +46,9 @@ public class FreightService {
         ReturnObject<PieceFreightModel> retObj = freightDao.insertPieceFreightModel(pieceFreightModel);
 
         if (retObj.getCode().equals(ResponseCode.OK)) {
-            retPieceFreightModel = new ReturnObject<>(retObj.getData());
+            retPieceFreightModel = new ReturnObject<>((VoObject)retObj.getData());
         } else {
-            retPieceFreightModel = new ReturnObject<>(retObj.getCode(), retObj.getErrmsg());
+            retPieceFreightModel = new ReturnObject(retObj.getCode(), retObj.getErrmsg());
         }
         return retPieceFreightModel;
     }
@@ -60,9 +62,9 @@ public class FreightService {
         ReturnObject<WeightFreightModel> retObj = freightDao.insertWeightFreightModel(weightFreightModel);
         ReturnObject<VoObject> retWeightFreightModel;
         if (retObj.getCode().equals(ResponseCode.OK)) {
-            retWeightFreightModel = new ReturnObject<>(retObj.getData());
+            retWeightFreightModel = new ReturnObject<>((VoObject)retObj.getData());
         } else {
-            retWeightFreightModel = new ReturnObject<>(retObj.getCode(), retObj.getErrmsg());
+            retWeightFreightModel = new ReturnObject(retObj.getCode(), retObj.getErrmsg());
         }
         return retWeightFreightModel;
     }
@@ -79,15 +81,25 @@ public class FreightService {
         if (retObj.getCode().equals(ResponseCode.OK)) {
             retFreightModel = new ReturnObject<>((VoObject) retObj.getData());
         } else {
-            retFreightModel = new ReturnObject<>( retObj.getCode(), retObj.getErrmsg());
+            retFreightModel = new ReturnObject( retObj.getCode(), retObj.getErrmsg());
         }
         return retFreightModel;
     }
 
-
-
-
-
-
+    /**
+     * 计算运费
+     * @author 24320182203227 李子晗
+     * @param count 数量
+     * @param skuId 对应的SkuId
+     * @return ReturnObject<VoObject> 运费模板返回视图
+     */
+    @Transactional
+    public ReturnObject<Integer> calcuFreightPrice(List<Integer> count, List<String> skuId) {
+        Integer freightPrice = null;
+        //根据skuId查询模板、重量,查询默认运费模板
+        //根据重量、count并比较算出freightPrice
+        ReturnObject<Integer> retFreightModel = new ReturnObject<>(freightPrice);
+        //retFreightModel = new ReturnObject(ResponseCode.OK);
+        return retFreightModel;
+    }
 }
-
