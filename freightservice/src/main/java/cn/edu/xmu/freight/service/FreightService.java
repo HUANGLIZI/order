@@ -76,7 +76,7 @@ public class FreightService {
     /**
      * 新增店铺的运费模板
      * @author 24320182203227 李子晗
-     * @param freightModelPo 运费模板视图
+     * @param freightModel 运费模板视图
      * @return ReturnObject<VoObject> 运费模板返回视图
      */
     @Transactional
