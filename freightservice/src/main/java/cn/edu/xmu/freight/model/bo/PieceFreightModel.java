@@ -38,6 +38,18 @@ public class PieceFreightModel implements VoObject, Serializable {
         this.regionId = vo.getRegionId();
     }
 
+    public PieceFreightModel(PieceFreightModelPo po) {
+        this.id=po.getId();
+        this.freightModelId=po.getFreightModelId();
+        this.firstItems = po.getFirstItems();
+        this.firstItemsPrice = po.getFirstItemsPrice();
+        this.additionalItems = po.getAdditionalItems();
+        this.additionalItemsPrice = po.getAdditionalItemsPrice();
+        this.regionId = po.getRegionId();
+        this.gmtCreated=po.getGmtCreated();
+        this.gmtModified=po.getGmtModified();
+    }
+    
     @Override
     public Object createVo() {
         return null;
