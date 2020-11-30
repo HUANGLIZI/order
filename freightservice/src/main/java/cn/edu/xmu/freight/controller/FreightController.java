@@ -178,13 +178,10 @@ public class FreightController {
         return Common.decorateReturnObject(returnObject);
     }
 
-    @Autowired
-    private HttpServletResponse httpServletResponse;
-
     /**
      * 修改运费模板
      */
-//    @Audit
+    @Audit
     @ApiOperation(value = "修改运费模板", produces="application/json")
     @ApiImplicitParams({
     })
@@ -197,13 +194,6 @@ public class FreightController {
                                      @PathVariable("id") Long id,
                                      @Validated  @RequestBody FreightModelChangeVo freightModelChangeVo)
     {
-        // 校验前端数据
-//        Object returnObj = Common.processFieldErrors(bindingResult, httpServletResponse);
-//        if(null != returnObj)
-//        {
-//            logger.debug("validate fail! shopName cannot be null!");
-//            return returnObj;
-//        }
 
         ReturnObject<Object> returnObject = freightService.changeFreightModel(id, freightModelChangeVo, shopId);
         return getNullRetObj(returnObject, httpServletResponse);
@@ -299,7 +289,6 @@ public class FreightController {
         pieceFreightModel.setGmtModified(LocalDateTime.now());
         pieceFreightModel.setId((long) 1);
         ReturnObject<VoObject> retObject = freightService.insertPieceFreightModel(pieceFreightModel);
-        //httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return Common.decorateReturnObject(retObject);
 
     }
@@ -324,18 +313,10 @@ public class FreightController {
     @ResponseBody
     public Object insertFreightModel(@Validated @RequestBody FreightModelVo vo, @PathVariable Long id) {
         logger.debug("insert freightmodel by shopId:" + id);
-        //校验前端数据
-//        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
-//        if (null != returnObject) {
-//            logger.debug("validate fail");
-//            return returnObject;
-//        }
         FreightModel freightModel = vo.createFreightModel();
         freightModel.setShopId(id);
         freightModel.setGmtCreated(LocalDateTime.now());
-        //System.out.println("1");
         ReturnObject<VoObject> retObject = freightService.insertFreightModel(freightModel);
-        //httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return Common.decorateReturnObject(retObject);
     }
     /**
@@ -359,15 +340,13 @@ public class FreightController {
         int listSize = vo.size();
         List<Integer> count = new ArrayList<>();
         List<String> skuId = new ArrayList<>();
-        //List<Integer>count=vo.getCount();
-        //List<String> skuId=vo.getSkuId();
+       
         for(int i=0;i<listSize;i++)
         {
             count.add(vo.get(i).getConut());
             skuId.add(vo.get(i).getSkuId());
         }
-        //System.out.println("1");
-        //httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        
         ReturnObject<Integer> retObject = freightService.calcuFreightPrice(count,skuId);
         return Common.decorateReturnObject(retObject);
     }
@@ -397,7 +376,6 @@ public class FreightController {
         weightFreightModel.setGmtCreated(LocalDateTime.now());
         weightFreightModel.setGmtModified(LocalDateTime.now());
         ReturnObject<VoObject> retObject = freightService.insertWeightFreightModel(weightFreightModel);
-        //httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return Common.decorateReturnObject(retObject);
     }
 }
