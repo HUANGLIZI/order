@@ -1,7 +1,12 @@
 package cn.edu.xmu.freight.model.po;
 
+import lombok.Data;
+import org.apache.ibatis.type.Alias;
+
 import java.time.LocalDateTime;
 
+@Data
+@Alias("WeightFreightModelPo")
 public class WeightFreightModelPo {
     /**
      *
