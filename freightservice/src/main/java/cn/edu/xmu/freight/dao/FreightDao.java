@@ -386,20 +386,7 @@ public class FreightDao{
             retObj = new ReturnObject<>(ResponseCode.FREIGHTMODEL_SHOP_NOTFIT);
         } else {
             retObj = new ReturnObject<>();
-    private static final Logger logger = LoggerFactory.getLogger(FreightDao.class);
-
-    @Autowired(required = false)
-    private  FreightModelPoMapper freightModelPoMapper;
-
-    @Autowired(required = false)
-    private  PieceFreightModelPoMapper pieceFreightModelPoMapper;
-
-    @Autowired(required = false)
-    private  WeightFreightModelPoMapper weightFreightModelPoMapper;
-
-
-    public FreightDao() {
-
+        }
     }
 
     /**
@@ -704,52 +691,4 @@ public class FreightDao{
         return retObj;
 
     }
-
-
-//    /**
-//     * 增加一个角色
-//     *
-//     * @author 24320182203281 王纬策
-//     * @param role 角色bo
-//     * @return ReturnObject<Role> 新增结果
-//     * createdBy 王纬策 2020/11/04 13:57
-//     * modifiedBy 王纬策 2020/11/7 19:20
-//     */
-//    public ReturnObject<FreightModel> insertRole(FreightModel role) {
-//        FreightModelPo rolePo = role.gotRolePo();
-//        ReturnObject<Role> retObj = null;
-//        try{
-//            int ret = roleMapper.insertSelective(rolePo);
-//            if (ret == 0) {
-//                //插入失败
-//                logger.debug("insertRole: insert role fail " + rolePo.toString());
-//                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + rolePo.getName()));
-//            } else {
-//                //插入成功
-//                logger.debug("insertRole: insert role = " + rolePo.toString());
-//                role.setId(rolePo.getId());
-//                retObj = new ReturnObject<>(role);
-//            }
-//        }
-//        catch (DataAccessException e) {
-//            if (Objects.requireNonNull(e.getMessage()).contains("auth_role.auth_role_name_uindex")) {
-//                //若有重复的角色名则新增失败
-//                logger.debug("updateRole: have same role name = " + rolePo.getName());
-//                retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("角色名重复：" + rolePo.getName()));
-//            } else {
-//                // 其他数据库错误
-//                logger.debug("other sql exception : " + e.getMessage());
-//                retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
-//            }
-//        }
-//        catch (Exception e) {
-//            // 其他Exception错误
-//            logger.error("other exception : " + e.getMessage());
-//            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
-//        }
-//        return retObj;
-//    }
-
-
-
 }
