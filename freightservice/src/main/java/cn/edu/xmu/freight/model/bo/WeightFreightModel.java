@@ -48,6 +48,22 @@ public class WeightFreightModel implements VoObject, Serializable {
 
     }
 
+     public WeightFreightModel(WeightFreightModelPo po){
+        this.id=po.getId();
+        this.freightModelId=po.getFreightModelId();
+        this.firstWeight=po.getFirstWeight();
+        this.firstWeightFreight=po.getFirstWeightFreight();
+        this.tenPrice=po.getTenPrice();
+        this.firstWeightFreight=po.getFirstWeightFreight();
+        this.tenPrice=po.getTenPrice();
+        this.hundredPrice=po.getHundredPrice();
+        this.trihunPrice=po.getTrihunPrice();
+        this.abovePrice=po.getAbovePrice();
+        this.regionId=po.getRegionId();
+        this.gmtCreated=po.getGmtCreated();
+        this.gmtModified=po.getGmtModified();
+    }
+    
     public WeightFreightModelPo gotWeightFreightModelPo() {
         WeightFreightModelPo po = new WeightFreightModelPo();
         po.setId(this.getId());
