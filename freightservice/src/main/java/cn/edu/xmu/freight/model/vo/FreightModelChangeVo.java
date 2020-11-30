@@ -32,4 +32,6 @@ public class FreightModelChangeVo {
 
         return freightModelChangeBo;
     }
+
+
 }

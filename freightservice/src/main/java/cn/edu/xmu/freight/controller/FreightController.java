@@ -4,20 +4,18 @@ import cn.edu.xmu.freight.model.vo.FreightModelChangeVo;
 import cn.edu.xmu.freight.model.vo.PieceFreightModelChangeVo;
 import cn.edu.xmu.freight.model.vo.WeightFreightModelChangeVo;
 import cn.edu.xmu.freight.service.FreightService;
-import cn.edu.xmu.freight.util.Common;
-import cn.edu.xmu.freight.util.ReturnObject;
-import cn.edu.xmu.ooad.annotation.LoginUser;
+import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.ooad.annotation.Audit;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 
-import static cn.edu.xmu.freight.util.Common.getNullRetObj;
+import static cn.edu.xmu.ooad.util.Common.getNullRetObj;
 
 
 @Api(value = "运费服务", tags = "freight")
@@ -36,6 +34,7 @@ public class FreightController {
     /**
      * 修改运费模板
      */
+//    @Audit
     @ApiOperation(value = "修改运费模板", produces="application/json")
     @ApiImplicitParams({
     })
@@ -55,11 +54,13 @@ public class FreightController {
 //            logger.debug("validate fail! shopName cannot be null!");
 //            return returnObj;
 //        }
+
         ReturnObject<Object> returnObject = freightService.changeFreightModel(id, freightModelChangeVo, shopId);
         return getNullRetObj(returnObject, httpServletResponse);
     }
 
 
+//    @Audit
     @ApiOperation(value = "修改重量运费模板明细", produces="application/json")
     @ApiImplicitParams({
     })
@@ -76,6 +77,7 @@ public class FreightController {
         return getNullRetObj(objectReturnObject, httpServletResponse);
     }
 
+//    @Audit
     @ApiOperation(value = "修改件数运费模板", produces = "application/json")
     @ApiImplicitParams({
     })

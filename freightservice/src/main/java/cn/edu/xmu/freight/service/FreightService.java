@@ -8,7 +8,7 @@ import cn.edu.xmu.freight.model.po.FreightModelPo;
 import cn.edu.xmu.freight.model.vo.FreightModelChangeVo;
 import cn.edu.xmu.freight.model.vo.PieceFreightModelChangeVo;
 import cn.edu.xmu.freight.model.vo.WeightFreightModelChangeVo;
-import cn.edu.xmu.freight.util.ReturnObject;
+import cn.edu.xmu.ooad.util.ReturnObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -20,7 +20,7 @@ public class PieceFreightModelChangeBo {
     {
         this.pieceFreightModelPo = new PieceFreightModelPo();
     }
-
+    
     public PieceFreightModelChangeBo(PieceFreightModelPo pieceFreightModelPo)
     {
         this.pieceFreightModelPo = pieceFreightModelPo;

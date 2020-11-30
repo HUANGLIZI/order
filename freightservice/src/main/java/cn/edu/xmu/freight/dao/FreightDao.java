@@ -8,8 +8,8 @@ import cn.edu.xmu.freight.model.bo.FreightModelChangeBo;
 import cn.edu.xmu.freight.model.bo.PieceFreightModelChangeBo;
 import cn.edu.xmu.freight.model.bo.WeightFreightModelChangeBo;
 import cn.edu.xmu.freight.model.po.*;
-import cn.edu.xmu.freight.util.ResponseCode;
-import cn.edu.xmu.freight.util.ReturnObject;
+import cn.edu.xmu.ooad.util.ResponseCode;
+import cn.edu.xmu.ooad.util.ReturnObject;
 import io.swagger.annotations.Example;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -50,7 +50,7 @@ public class FreightDao {
             criteria.andShopIdEqualTo(shopId);
             List<FreightModelPo> freightModelPoList = freightModelPoMapper.selectByExample(freightModelPoExample);
             if (freightModelPoList.size() > 0) {
-                retObj = new ReturnObject<>(ResponseCode.FREIGHTMODEL_NAME_HASEXISTED);
+                retObj = new ReturnObject<>(ResponseCode.FREIGHTNAME_SAME);
                 return retObj;
             }
         }
@@ -96,7 +96,7 @@ public class FreightDao {
                     weightCriteria.andRegionIdEqualTo(weightFreightModelChangeBo.getRegionId());
                     List<WeightFreightModelPo> weightFreightModelPoList = weightFreightModelPoMapper.selectByExample(weightFreightModelPoExample);
                     if (weightFreightModelPoList.size() > 0) {
-                        retObj = new ReturnObject<>(ResponseCode.FREIGHTMODEL_REGION_HASEXISTED);
+                        retObj = new ReturnObject<>(ResponseCode.REGION_SAME);
                         return retObj;
                     }
                 }
@@ -150,7 +150,7 @@ public class FreightDao {
                     pieceCriteria.andRegionIdEqualTo(pieceFreightModelChangeBo.getRegionId());
                     List<PieceFreightModelPo> pieceFreightModelPoList = pieceFreightModelPoMapper.selectByExample(pieceFreightModelPoExample);
                     if (pieceFreightModelPoList.size() > 0) {
-                        retObj = new ReturnObject<>(ResponseCode.FREIGHTMODEL_REGION_HASEXISTED);
+                        retObj = new ReturnObject<>(ResponseCode.REGION_SAME);
                         return retObj;
                     }
                 }
