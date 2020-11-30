@@ -341,6 +341,17 @@ public class FreightDao{
            returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }else {
             returnObject=new ReturnObject<>();
+            //删出对应的运费模板详细
+            WeightFreightModelPoExample weightFreightModelPoExample=new WeightFreightModelPoExample ();
+            WeightFreightModelPoExample.Criteria weightCriteria=weightFreightModelPoExample.createCriteria();
+            weightCriteria.andFreightModelIdEqualTo(id);
+            weightFreightModelPoMapper.deleteByExample(weightFreightModelPoExample);
+
+            PieceFreightModelPoExample pieceFreightModelPoExample=new PieceFreightModelPoExample ();
+            PieceFreightModelPoExample.Criteria pieceCriteria=pieceFreightModelPoExample.createCriteria();
+            pieceCriteria.andFreightModelIdEqualTo(id);
+            pieceFreightModelPoMapper.deleteByExample(pieceFreightModelPoExample);
+
         }
 
         return  returnObject;
