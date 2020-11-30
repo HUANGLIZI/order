@@ -1,5 +1,8 @@
 package cn.edu.xmu.freight.model.po;
 
+import cn.edu.xmu.ooad.model.VoObject;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 public class FreightModelPo {
@@ -266,4 +269,5 @@ public class FreightModelPo {
     public void setGmtModified(LocalDateTime gmtModified) {
         this.gmtModified = gmtModified;
     }
+
 }
