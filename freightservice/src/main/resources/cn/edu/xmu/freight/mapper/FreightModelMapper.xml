@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.xmu.freight.mapper.FreightModelMapper">
+    <update id="updateFreightModel" parameterType="FreightModelPo">
+        UPDATE oomall_order.freight_model
+        <set>
+            <if test="name!=null and name!=''">name = #{name}, </if>
+            <if test="unit!=null">unit = #{unit}, </if>
+        </set>
+        WHERE id = #{id} and shop_id = #{shopId}
+    </update>
+
+<!--    <update id="updateWeightFreightModel">-->
+    <update id="updateWeightFreightModel" parameterType="WeightFreightModelPo">
+        UPDATE oomall_order.weight_freight_model
+        <set>
+            <if test="firstWeight!=null">first_weight = #{firstWeight}, </if>
+            <if test="firstWeightFreight!=null">first_weight_freight = #{firstWeightFreight}, </if>
+            <if test="tenPrice!=null">ten_price = #{tenPrice}, </if>
+            <if test="fiftyPrice!=null">fifty_price = #{fiftyPrice}, </if>
+            <if test="hundredPrice!=null">hundred_price = #{hundredPrice}, </if>
+            <if test="trihunPrice!=null">trihun_price = #{trihunPrice}, </if>
+            <if test="abovePrice!=null">above_price = #{abovePrice}, </if>
+            <if test="regionId!=null">region_id = #{regionId}, </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updatePieceFreightModel" parameterType="PieceFreightModelPo">
+        UPDATE oomall_order.piece_freight_model
+        <set>
+            <if test="firstItems!=null">first_items = #{firstItems}, </if>
+            <if test="firstItemsPrice!=null">first_items_price = #{firstItemsPrice}, </if>
+            <if test="additionalItems!=null">additional_items = #{additionalItems}, </if>
+            <if test="additionalItemsPrice!=null">additional_items_price = #{additionalItemsPrice}, </if>
+            <if test="regionId!=null">region_id = #{regionId}, </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+</mapper>
