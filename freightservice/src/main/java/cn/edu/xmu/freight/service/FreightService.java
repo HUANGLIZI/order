@@ -62,10 +62,6 @@ public class FreightService {
         return retPieceFreightModel;
     }
 
-    //    public ReturnObject<VoObject> insertWeightFreightModel(WeightFreightModel weightFreightModel) {
-//
-//    }
-//
     @Transactional
     public ReturnObject<VoObject> insertWeightFreightModel(WeightFreightModel weightFreightModel) {
         ReturnObject<WeightFreightModel> retObj = freightDao.insertWeightFreightModel(weightFreightModel);
@@ -177,7 +173,7 @@ public class FreightService {
         }
 
         return returnObject;
- 
+    }
 
     public ReturnObject<Object> changeFreightModel(Long id, FreightModelChangeVo freightModelChangeVo,
                                                      Long shopId)
