@@ -1,6 +1,7 @@
 package cn.edu.xmu.freight.model.bo;
 
 import cn.edu.xmu.freight.model.po.FreightModelPo;
+import cn.edu.xmu.freight.model.vo.FreightModelRetVo;
 import cn.edu.xmu.freight.model.vo.FreightModelVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import lombok.Data;
@@ -47,28 +48,28 @@ public class FreightModel implements VoObject, Serializable {
     }
 
 
-    /**
-     * 用vo对象创建更新po对象
-     *
-     * @param vo vo对象
-     * @return po对象
-     */
-    public FreightModelPo createUpdatePo(FreightModelVo vo){
-        FreightModelPo po = new FreightModelPo();
-        po.setId(null);
-        po.setShopId(vo.getShopId());
-        po.setName(vo.getName());
-        po.setDefaultModel(vo.getDefaultModel());
-        po.setGmtCreated(vo.getGmtCreated());
-        po.setGmtModified(LocalDateTime.now());
-
-        return po;
-    }
+//    /**
+//     * 用vo对象创建更新po对象
+//     *
+//     * @param vo vo对象
+//     * @return po对象
+//     */
+//    public FreightModelPo createUpdatePo(FreightModelVo vo){
+//        FreightModelPo po = new FreightModelPo();
+//        po.setId(null);
+//        po.setShopId(vo.getShopId());
+//        po.setName(vo.getName());
+//        po.setDefaultModel(vo.getDefaultModel());
+//        po.setGmtCreated(vo.getGmtCreated());
+//        po.setGmtModified(LocalDateTime.now());
+//
+//        return po;
+//    }
 
 
     @Override
     public Object createVo() {
-        return null;
+        return new FreightModelRetVo(this);
     }
 
     @Override

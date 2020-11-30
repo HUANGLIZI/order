@@ -1,41 +1,35 @@
 package cn.edu.xmu.freight.model.vo;
 
 import cn.edu.xmu.freight.model.bo.FreightModel;
+import cn.edu.xmu.freight.model.po.FreightModelPo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import javax.validation.constraints.NotBlank;
 
-import java.time.LocalDateTime;
 
+@ApiModel(description = "运费模板信息视图对象1")
 @Data
-@ApiModel(description = "运费模板信息视图对象")
 public class FreightModelVo {
-
-    private Long shopId;
-
-    @ApiModelProperty(value = "模板名字")
+    @ApiModelProperty(name = "模板名")
     private String name;
 
-    @ApiModelProperty(value = "缺省模板")
-    private String defaultModel;
-
-    @ApiModelProperty(value = "模板类型")
+    @ApiModelProperty(name = "类型")
     private Byte type;
 
+    @ApiModelProperty(name = "计重单位")
     private Integer unit;
 
-    @ApiModelProperty(name = "创建时间", value = "gmtCreate")
-    private LocalDateTime gmtCreated;
-
-    @ApiModelProperty(name = "修改时间", value = "gmtModified")
-    private LocalDateTime gmtModified;
-
-
+    /**
+     * 构造函数
+     * @author 24320182203227 李子晗
+     * @return freightModelPo
+     */
     public FreightModel createFreightModel() {
         FreightModel freightModel = new FreightModel();
+        freightModel.setType(this.type);
         freightModel.setName(this.name);
-        //freightModel.setId(this.name);
+        freightModel.setUnit(this.unit);
         return freightModel;
     }
-
 }

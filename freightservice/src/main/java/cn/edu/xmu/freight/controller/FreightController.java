@@ -2,10 +2,11 @@ package cn.edu.xmu.freight.controller;
 
 
 
+import cn.edu.xmu.freight.model.bo.FreightModel;
 import cn.edu.xmu.freight.model.bo.PieceFreightModel;
 import cn.edu.xmu.freight.model.bo.WeightFreightModel;
 import cn.edu.xmu.freight.model.po.FreightModelPo;
-import cn.edu.xmu.freight.model.vo.FreightModelVoo;
+import cn.edu.xmu.freight.model.vo.FreightModelVo;
 import cn.edu.xmu.freight.model.vo.OrderItemVo;
 import cn.edu.xmu.freight.model.vo.PieceFreightModelVo;
 import cn.edu.xmu.freight.model.vo.WeightFreightModelVo;
@@ -20,6 +21,7 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -145,18 +147,20 @@ public class FreightController {
      * 定义店铺的运费模板
      * @author 24320182203227 李子晗
      */
-    @ApiOperation(value = "管理员定义店铺的运费模板")
+
+    @ApiOperation(value = "管理员定义店铺的运费模板", produces = "application/json;charset=UTF-8")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(paramType = "body", dataType = "FreightModelVoo", name = "vo", value = "可修改的用户信息", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "FreightModelVo", name = "vo", value = "可修改的用户信息", required = true),
             @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "店铺id", required = true)
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
     @Audit
-    @PostMapping("/shops/{id}/freightmodels")
-    public Object insertFreightModel(@Validated @RequestBody FreightModelVoo vo, @PathVariable Long id) {
+    @PostMapping(value = "/shops/{id}/freightmodels",produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public Object insertFreightModel(@Validated @RequestBody FreightModelVo vo, @PathVariable Long id) {
         logger.debug("insert freightmodel by shopId:" + id);
         //校验前端数据
 //        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
@@ -164,11 +168,11 @@ public class FreightController {
 //            logger.debug("validate fail");
 //            return returnObject;
 //        }
-        FreightModelPo freightModelPo = vo.createFreightModel();
-        freightModelPo.setShopId(id);
-        freightModelPo.setGmtCreated(LocalDateTime.now());
+        FreightModel freightModel = vo.createFreightModel();
+        freightModel.setShopId(id);
+        freightModel.setGmtCreated(LocalDateTime.now());
         //System.out.println("1");
-        ReturnObject<VoObject> retObject = freightService.insertFreightModel(freightModelPo);
+        ReturnObject<VoObject> retObject = freightService.insertFreightModel(freightModel);
         //httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return Common.decorateReturnObject(retObject);
     }
@@ -187,6 +191,7 @@ public class FreightController {
     })
     @Audit
     @PostMapping("/region/{rid}/price")
+    @ResponseBody
     public Object calcuFreightPrice(@Validated @RequestBody List<OrderItemVo> vo, @PathVariable Long rid) {
         logger.debug("calculate freight service by regionId:" + rid);
         int listSize = vo.size();

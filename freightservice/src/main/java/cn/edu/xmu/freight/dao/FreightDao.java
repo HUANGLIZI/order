@@ -44,13 +44,14 @@ public class FreightDao {
      * 增加一个店铺定义的运费模板
      *
      * @author 24320182203227 李子晗
-     * @param freightModelPo 运费模板po
+     * @param freightModel 运费模板po
      * @return ReturnObject<FreightModelPo> 新增结果
      */
-    public ReturnObject<FreightModelPo> insertFreightModel(FreightModelPo freightModelPo) {
-        ReturnObject<FreightModelPo> retObj;
+    public ReturnObject<FreightModel> insertFreightModel(FreightModel freightModel) {
+        ReturnObject<FreightModel> retObj;
         //InternalLogger logger = null;
         try{
+            FreightModelPo freightModelPo = freightModel.gotFreightModelPo();
             int ret = freightModelPoMapper.insertSelective(freightModelPo);
             if (ret == 0) {
                 //插入失败
@@ -60,7 +61,7 @@ public class FreightDao {
                 //插入成功
                 logger.debug("insertFreightModel: insert freightModel = " + freightModelPo.toString());
                 //role.setId(rolePo.getId());
-                retObj = new ReturnObject<>(freightModelPo);
+                retObj = new ReturnObject<>(freightModel);
             }
         }
         catch (DataAccessException e) {

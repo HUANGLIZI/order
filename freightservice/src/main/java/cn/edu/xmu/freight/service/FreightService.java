@@ -5,6 +5,7 @@ import cn.edu.xmu.freight.model.bo.FreightModel;
 import cn.edu.xmu.freight.model.bo.PieceFreightModel;
 import cn.edu.xmu.freight.model.bo.WeightFreightModel;
 import cn.edu.xmu.freight.model.po.FreightModelPo;
+import cn.edu.xmu.freight.model.vo.FreightModelRetVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -75,8 +76,8 @@ public class FreightService {
      * @return ReturnObject<VoObject> 运费模板返回视图
      */
     @Transactional
-    public ReturnObject<VoObject> insertFreightModel(FreightModelPo freightModelPo) {
-        ReturnObject<FreightModelPo> retObj = freightDao.insertFreightModel(freightModelPo);
+    public ReturnObject<VoObject> insertFreightModel(FreightModel freightModel) {
+        ReturnObject<FreightModel> retObj = freightDao.insertFreightModel(freightModel);
         ReturnObject<VoObject> retFreightModel;
         if (retObj.getCode().equals(ResponseCode.OK)) {
             retFreightModel = new ReturnObject<>((VoObject) retObj.getData());
