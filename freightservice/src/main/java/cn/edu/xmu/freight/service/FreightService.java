@@ -202,7 +202,7 @@ public class FreightService {
 
         return  freightDao.changePieceFreightModel(pieceFreightModelChangeBo, shopId);
     }
-}
+    
     /**
      * 计算运费
      * @author 24320182203227 李子晗
