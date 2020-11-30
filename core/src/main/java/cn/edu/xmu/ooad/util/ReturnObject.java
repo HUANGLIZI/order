@@ -68,5 +68,4 @@ public class ReturnObject<T> {
             return this.code.getMessage();
         }
     }
-
 }

@@ -3,6 +3,9 @@ package cn.edu.xmu.freight.model.po;
 import lombok.Data;
 import org.apache.ibatis.type.Alias;
 
+import cn.edu.xmu.ooad.model.VoObject;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
