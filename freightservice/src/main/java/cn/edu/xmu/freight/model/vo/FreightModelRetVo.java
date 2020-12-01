@@ -2,9 +2,10 @@ package cn.edu.xmu.freight.model.vo;
 
 import cn.edu.xmu.freight.model.bo.FreightModel;
 import io.swagger.annotations.ApiModelProperty;
-
+import lombok.Data;
 import java.time.LocalDateTime;
 
+@Data
 public class FreightModelRetVo {
     @ApiModelProperty(value = "模板id")
     private Long id;
