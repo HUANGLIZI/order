@@ -1,5 +1,6 @@
 package cn.edu.xmu.freight.dao;
 
+import cn.edu.xmu.freight.mapper.PieceFreightModelPoMapper;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.RandomCaptcha;
 import com.github.pagehelper.PageHelper;
@@ -387,6 +388,7 @@ public class FreightDao{
         } else {
             retObj = new ReturnObject<>();
         }
+        return retObj;
     }
 
     /**
