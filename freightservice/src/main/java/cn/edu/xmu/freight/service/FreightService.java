@@ -30,49 +30,8 @@ public class FreightService {
 
     private Logger logger = LoggerFactory.getLogger(FreightService.class);
 
-    public boolean createDefaultPieceFreight(Long id,Long shopId){
-        return freightDao.putDefaultPieceFreight(id,shopId);
-
-    }
-
-    @Transactional
-    public ReturnObject<VoObject> createDefaultPieceFreight1(Long id,Long shopId){
-        ReturnObject<FreightModel> retObj = freightDao.putDefaultPieceFreight1(id,shopId);
-        ReturnObject<VoObject> retFrei = null;
-        if (retObj.getCode().equals(ResponseCode.OK)) {
-            retFrei = new ReturnObject<>((VoObject)retObj.getData());
-        } else {
-            retFrei = new ReturnObject(retObj.getCode(), retObj.getErrmsg());
-        }
-        return retFrei;
-    }
 
 
-    @Transactional
-    public ReturnObject<VoObject> insertPieceFreightModel(PieceFreightModel pieceFreightModel) {
-        ReturnObject<VoObject> retPieceFreightModel;
-        //pieceFreightModel.setId((long) 1);
-        ReturnObject<PieceFreightModel> retObj = freightDao.insertPieceFreightModel(pieceFreightModel);
-
-        if (retObj.getCode().equals(ResponseCode.OK)) {
-            retPieceFreightModel = new ReturnObject<>((VoObject)retObj.getData());
-        } else {
-            retPieceFreightModel = new ReturnObject(retObj.getCode(), retObj.getErrmsg());
-        }
-        return retPieceFreightModel;
-    }
-
-    @Transactional
-    public ReturnObject<VoObject> insertWeightFreightModel(WeightFreightModel weightFreightModel) {
-        ReturnObject<WeightFreightModel> retObj = freightDao.insertWeightFreightModel(weightFreightModel);
-        ReturnObject<VoObject> retWeightFreightModel;
-        if (retObj.getCode().equals(ResponseCode.OK)) {
-            retWeightFreightModel = new ReturnObject<>((VoObject)retObj.getData());
-        } else {
-            retWeightFreightModel = new ReturnObject(retObj.getCode(), retObj.getErrmsg());
-        }
-        return retWeightFreightModel;
-    }
     /**
      * 新增店铺的运费模板
      * @author 24320182203227 李子晗
@@ -219,4 +178,63 @@ public class FreightService {
         //retFreightModel = new ReturnObject(ResponseCode.OK);
         return retFreightModel;
     }
+
+    /**
+     * 店家或管理员为商铺定义默认运费模板
+     * @author 24320182203196 洪晓杰
+     */
+    @Transactional
+    public ReturnObject<VoObject> createDefaultPieceFreight(Long id,Long shopId){
+        ReturnObject<VoObject> retFrei;
+        ReturnObject<FreightModel> retObj = freightDao.putDefaultPieceFreight(id,shopId);
+
+        if (retObj.getCode().equals(ResponseCode.OK)) {
+            retFrei = new ReturnObject<>(retObj.getData());
+        } else {
+            retFrei = new ReturnObject<>(retObj.getCode(), retObj.getErrmsg());
+        }
+        return retFrei;
+    }
+
+
+    /**
+     * 管理员定义件数模板明细
+     * @author 24320182203196 洪晓杰
+     */
+    @Transactional
+    public ReturnObject<VoObject> insertPieceFreightModel(PieceFreightModel pieceFreightModel) {
+        ReturnObject<VoObject> retPieceFreightModel;
+        //pieceFreightModel.setId((long) 1);
+        ReturnObject<PieceFreightModel> retObj = freightDao.insertPieceFreightModel(pieceFreightModel);
+
+        if (retObj.getCode().equals(ResponseCode.OK)) {
+            retPieceFreightModel = new ReturnObject<>(retObj.getData());
+        } else {
+            retPieceFreightModel = new ReturnObject<>(retObj.getCode(), retObj.getErrmsg());
+        }
+        return retPieceFreightModel;
+    }
+
+    /**
+     * 管理员定义管理员定义重量模板明细
+     * @author 24320182203196 洪晓杰
+     */
+    @Transactional
+    public ReturnObject<VoObject> insertWeightFreightModel(WeightFreightModel weightFreightModel) {
+        ReturnObject<WeightFreightModel> retObj = freightDao.insertWeightFreightModel(weightFreightModel);
+        ReturnObject<VoObject> retWeightFreightModel;
+        if (retObj.getCode().equals(ResponseCode.OK)) {
+            retWeightFreightModel = new ReturnObject<>(retObj.getData());
+        } else {
+            retWeightFreightModel = new ReturnObject<>(retObj.getCode(), retObj.getErrmsg());
+        }
+        return retWeightFreightModel;
+    }
+
+
+
+
+
+
+
 }

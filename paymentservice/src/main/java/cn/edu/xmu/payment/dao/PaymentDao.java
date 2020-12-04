@@ -99,4 +99,50 @@ public class PaymentDao {
         List<OrdersPo> ordersPos=ordersPoMapper.selectByExample(example);
         return !ordersPos.isEmpty();
     }
+
+
+    /**
+     * 买家通过aftersaleId查询自己的支付信息
+     * @author  洪晓杰
+     */
+    public ReturnObject queryPaymentByAftersaleIdForCus(Long aftersaleId) {
+        PaymentPoExample example=new PaymentPoExample();
+        PaymentPoExample.Criteria criteria=example.createCriteria();
+        criteria.andAftersaleIdEqualTo(aftersaleId);
+        List<PaymentPo> paymentPoS = paymentPoMapper.selectByExample(example);
+        //po对象为空，没查到
+        if (paymentPoS.size() == 0) {
+            logger.error(" queryPaymentByAftersaleId: 数据库不存在该支付单 aftersaleId="+aftersaleId);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        List<Payment> payments =new ArrayList<>(paymentPoS.size());
+        for(PaymentPo paymentPo:paymentPoS){
+            Payment payment = new Payment(paymentPo);
+            payments.add(payment);
+        }
+        return new ReturnObject<>(payments);
+    }
+
+    /**
+     * 买家通过aftersaleId、shopId查询自己的支付信息
+     * @author  洪晓杰
+     */
+    public ReturnObject queryPaymentByAftersaleIdForAdmin(Long shopId, Long aftersaleId) {
+        PaymentPoExample example=new PaymentPoExample();
+        PaymentPoExample.Criteria criteria=example.createCriteria();
+        criteria.andOrderIdEqualTo(aftersaleId);
+        List<PaymentPo> paymentPoS = paymentPoMapper.selectByExample(example);
+        //po对象为空，没查到
+        if (paymentPoS.size() == 0) {
+            logger.error(" queryPaymentById: 数据库不存在该支付单 orderId="+aftersaleId);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        List<Payment> payments =new ArrayList<>(paymentPoS.size());
+        for(PaymentPo paymentPo:paymentPoS){
+            Payment payment = new Payment(paymentPo);
+            payments.add(payment);
+        }
+        return new ReturnObject<>(payments);
+    }
+
 }

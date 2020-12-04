@@ -26,8 +26,6 @@ public class WeightFreightModelVo {
     private Long abovePrice;
     @ApiModelProperty(value = "抵达地区码")
     private Long regionId;
-    @ApiModelProperty(value = "创建时间")
-    private LocalDateTime gmtCreated;
-    @ApiModelProperty(value = "修改时间")
-    private LocalDateTime gmtModified;
+
+
 }

@@ -91,4 +91,62 @@ public class PaymentController {
     }
 
 
+
+
+    /**
+     * 买家查询自己的支付信息
+     *
+     * @author 24320182203196 洪晓杰
+     * @param aftersaleId 售后单id
+     * @return Object 查询结果
+     */
+    @ApiOperation(value = "买家查询自己的支付信息",produces = "application/json")
+    @ApiImplicitParams({
+            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "售后单id", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    //@Audit
+    @GetMapping("/orders/{id}/payments")
+    public Object customerQueryPaymentByAftersaleId(@PathVariable("id") Long aftersaleId){
+        ReturnObject returnObject =  paymentService.customerQueryPaymentByAftersaleId(aftersaleId);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getListRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+    }
+
+
+    /**
+     * 管理员查询售后单的支付信息
+     *
+     * @author 24320182203196 洪晓杰
+     * @param aftersaleId 订单id
+     * @param shopId 店铺id
+     */
+    @ApiOperation(value = "管理员查询售后单的支付信息",produces = "application/json")
+    @ApiImplicitParams({
+            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "shopId", value = "店铺id", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "售后id", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    //@Audit
+    @GetMapping("/shops/{shopId}/orders/{id}/payments")
+    public Object getPaymentByAftersaleId(@PathVariable("shopId") Long shopId,@PathVariable("id") Long aftersaleId){
+        ReturnObject returnObject =  paymentService.getPaymentByAftersaleId(shopId,aftersaleId);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getListRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+    }
+
 }
