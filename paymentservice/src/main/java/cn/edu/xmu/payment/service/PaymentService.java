@@ -31,4 +31,29 @@ public class PaymentService {
     public ReturnObject queryPayment(Long shopId, Long orderId) {
         return paymentDao.queryPayment(shopId,orderId);
     }
+
+
+
+    /**
+     * 买家查询自己的支付信息
+     *
+     * @author 24320182203196 洪晓杰
+     * @return ReturnObject 查询结果
+     */
+    public ReturnObject customerQueryPaymentByAftersaleId(Long aftersaleId) {
+        return paymentDao.queryPaymentByAftersaleIdForCus(aftersaleId);
+    }
+
+    /**
+     * 买家查询自己的支付信息
+     *
+     * @author 24320182203196 洪晓杰
+     * @return ReturnObject 查询结果
+     */
+    public ReturnObject getPaymentByAftersaleId(Long shopId, Long aftersaleId) {
+
+        return paymentDao.queryPaymentByAftersaleIdForAdmin(shopId,aftersaleId);
+
+    }
+
 }

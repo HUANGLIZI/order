@@ -237,64 +237,6 @@ public class FreightController {
 
 
     /**
-     * 店家或管理员为商铺定义默认运费模板。
-     */
-    @ApiOperation(value = "店家或管理员为商铺定义默认运费模板", produces = "application/json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="shopId", value="商户 ID", required = true, dataType="int", paramType="path"),
-            @ApiImplicitParam(name="id", value="id", required = true, dataType="int", paramType="path")
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-    })
-    @Audit
-    @PostMapping("/shops/{shopId}/freight_models/{id}/default")
-    public Object postDefaultPieceFreight(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id){
-        //Logger logger;
-        logger.debug("insert role by shopId:" + shopId+"and"+id);
-
-        //需要写service层
-        ReturnObject<VoObject> returnObject =  freightService.createDefaultPieceFreight1(id,shopId);
-        if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getRetObject(returnObject);
-        } else {
-            return Common.decorateReturnObject(returnObject);
-        }
-    }
-
-
-    /***
-     * 管理员定义件数模板明细
-     */
-    @ApiOperation(value = "管理员定义件数模板明细")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="shopId", value="商户 ID", required = true, dataType="int", paramType="path"),
-            @ApiImplicitParam(name="id", value="id", required = true, dataType="int", paramType="path"),
-            @ApiImplicitParam(name="vo", value="id", required = true, dataType="PieceFreightModelVo", paramType="body"),
-
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-    })
-    @Audit
-    @PostMapping("/shops/{shopId}/freightmodels/{id}/pieceItems")
-    public Object postPieceFreightModel(@PathVariable Long shopId, @PathVariable Long id,@Validated @RequestBody PieceFreightModelVo vo){
-
-        logger.debug("update role by shopId:" + shopId+"and id"+id);
-
-        PieceFreightModel pieceFreightModel = new PieceFreightModel(vo);
-
-        pieceFreightModel.setFreightModelId(id);
-        pieceFreightModel.setGmtCreated(LocalDateTime.now());
-        pieceFreightModel.setGmtModified(LocalDateTime.now());
-        pieceFreightModel.setId((long) 1);
-        ReturnObject<VoObject> retObject = freightService.insertPieceFreightModel(pieceFreightModel);
-        return Common.decorateReturnObject(retObject);
-
-    }
-
-
-    /**
      * 定义店铺的运费模板
      * @author 24320182203227 李子晗
      */
@@ -351,20 +293,91 @@ public class FreightController {
         return Common.decorateReturnObject(retObject);
     }
 
-    /***
-     * 管理员定义管理员定义重量模板明细
+    /**
+     * @Author:洪晓杰
+     * 店家或管理员为商铺定义默认运费模板。
      */
-    @ApiOperation(value = "管理员定义重量模板明细")
+    @ApiOperation(value = "店家或管理员为商铺定义默认运费模板", produces = "application/json")
     @ApiImplicitParams({
+            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(name="shopId", value="商户 ID", required = true, dataType="int", paramType="path"),
-            @ApiImplicitParam(name="id", value="id", required = true, dataType="int", paramType="path"),
-            @ApiImplicitParam(name="vo", value="id", required = true, dataType="WeightFreightModelVo", paramType="body"),
-
+            @ApiImplicitParam(name="id", value="id", required = true, dataType="int", paramType="path")
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    @Audit
+    //@Audit
+    @PostMapping("/shops/{shopId}/freight_models/{id}/default")
+    public Object postDefaultPieceFreight(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id){
+        //Logger logger;
+        logger.debug("insert role by shopId:" + shopId+"and"+id);
+
+        //需要写service层
+        ReturnObject<VoObject> returnObject =  freightService.createDefaultPieceFreight(id,shopId);
+
+        return Common.decorateReturnObject(returnObject);
+
+//        if (returnObject.getCode() == ResponseCode.OK) {
+//            return Common.getRetObject(returnObject);
+//        } else {
+//            return Common.decorateReturnObject(returnObject);
+//        }
+    }
+
+
+    /***
+     * @Author:洪晓杰
+     * 管理员定义件数模板明细
+     */
+    @ApiOperation(value = "管理员定义件数模板明细")
+    @ApiImplicitParams({
+            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(name="shopId", value="商户 ID", required = true, dataType="int", paramType="path"),
+            @ApiImplicitParam(name="id", value="id", required = true, dataType="int", paramType="path"),
+            @ApiImplicitParam(name="vo", value="id", required = true, dataType="PieceFreightModelVo", paramType="body"),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    //@Audit
+    @PostMapping("/shops/{shopId}/freightmodels/{id}/pieceItems")
+    public Object postPieceFreightModel(@PathVariable Long shopId, @PathVariable Long id,@Validated @RequestBody PieceFreightModelVo vo){
+
+        logger.debug("update role by shopId:" + shopId+"and id"+id);
+
+        //校验前端数据
+        //Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        PieceFreightModel pieceFreightModel = new PieceFreightModel(vo);
+//        if (null != returnObject) {
+//            logger.debug("validate fail");
+//            return returnObject;
+//        }
+        pieceFreightModel.setFreightModelId(id);
+        pieceFreightModel.setGmtCreated(LocalDateTime.now());
+        pieceFreightModel.setGmtModified(LocalDateTime.now());
+        pieceFreightModel.setId((long) 1);
+        ReturnObject<VoObject> retObject = freightService.insertPieceFreightModel(pieceFreightModel);
+        //httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        return Common.decorateReturnObject(retObject);
+
+    }
+
+
+    /***
+     * @Author:洪晓杰
+     * 管理员定义管理员定义重量模板明细
+     */
+    @ApiOperation(value = "管理员定义重量模板明细")
+    @ApiImplicitParams({
+            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(name="shopId", value="商户 ID", required = true, dataType="int", paramType="path"),
+            @ApiImplicitParam(name="id", value="id", required = true, dataType="int", paramType="path"),
+            @ApiImplicitParam(name="vo", value="id", required = true, dataType="WeightFreightModelVo", paramType="body"),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    //@Audit
     @PostMapping("/shops/{shopId}/freightmodels/{id}/weightItems")
     public Object postWeightFreightModel(@PathVariable Long shopId, @PathVariable Long id,@Validated @RequestBody WeightFreightModelVo vo){
 
@@ -376,6 +389,11 @@ public class FreightController {
         weightFreightModel.setGmtCreated(LocalDateTime.now());
         weightFreightModel.setGmtModified(LocalDateTime.now());
         ReturnObject<VoObject> retObject = freightService.insertWeightFreightModel(weightFreightModel);
+        //httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return Common.decorateReturnObject(retObject);
+
     }
+
+
+
 }

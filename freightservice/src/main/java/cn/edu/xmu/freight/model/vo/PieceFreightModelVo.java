@@ -20,10 +20,6 @@ public class PieceFreightModelVo {
     private Integer additionalItems;
     @ApiModelProperty(value = "规则续件运费")
     private Long additionalItemsPrice;
-    @ApiModelProperty(value = "创建时间")
-    private LocalDateTime gmtCreated;
-    @ApiModelProperty(value = "修改时间")
-    private LocalDateTime gmtModified;
 
 
 }
