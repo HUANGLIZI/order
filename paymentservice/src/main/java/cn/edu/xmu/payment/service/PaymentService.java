@@ -4,6 +4,7 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.payment.dao.PaymentDao;
+import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.bo.Refund;
 import cn.edu.xmu.payment.model.po.RefundPo;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -105,4 +107,32 @@ public class PaymentService {
         return retReund;
     }
 
+    /**
+     * 买家为订单创建支付单
+     *
+     * @author 24320182203327 张湘君
+     * @param payment 支付单
+     * @return Object 角色返回视图
+     * createdBy 张湘君 2020/12/3 20:12
+     * modifiedBy 张湘君 2020/12/3 20:12
+     */
+    public ReturnObject<VoObject> createPayment(Payment payment) {
+
+        LocalDateTime localDateTime = LocalDateTime.now();
+
+        payment.setBeginTime(localDateTime);
+        payment.setEndTime(localDateTime.plusHours(24));
+        //支付成功
+        payment.setState((byte)0);
+        payment.setPayTime(localDateTime);
+
+        payment.setGmtModified(localDateTime);
+
+        ReturnObject returnObject = paymentDao.insertPayment(payment);
+        if(returnObject.getCode().equals(ResponseCode.OK)){
+            return returnObject;
+        }else {
+            return new ReturnObject<>(returnObject.getCode(),returnObject.getErrmsg());
+        }
+    }
 }
