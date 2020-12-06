@@ -43,7 +43,7 @@
 
         <!--数据库链接URL，用户名、密码 -->
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
-                        connectionURL="jdbc:mysql://localhost:3306/oomall_order?serverTimezone=GMT%2B8" userId="root" password="180607aa">
+                        connectionURL="jdbc:mysql://localhost:3306/oomall_demo1?serverTimezone=GMT%2B8" userId="dbuser1" password="123456">
         </jdbcConnection>
         <javaTypeResolver>
             <!--
@@ -128,17 +128,9 @@
 
         注意，table里面很多参数都是对javaModelGenerator，context等元素的默认属性的一个复写；
         -->
-        <table tableName="freight_model" domainObjectName="FreightModelPo"
-               enableCountByExample="false" enableUpdateByExample="false"
-               enableDeleteByExample="true" enableSelectByExample="true"
-               selectByExampleQueryId="false">
-            <!-- 如果设置为true，生成的model类会直接使用column本身的名字，而不会再使用驼峰命名方法，比如BORN_DATE，生成的属性名字就是BORN_DATE,而不会是bornDate -->
-            <property name="useActualColumnNames" value="false"/>
-            <!--mysql 配置-->
-            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
-        </table>
+
         <table tableName="order_item" domainObjectName="OrderItemPo"
-               enableCountByExample="false" enableUpdateByExample="false"
+               enableCountByExample="false" enableUpdateByExample="true"
                enableDeleteByExample="true" enableSelectByExample="true"
                selectByExampleQueryId="false">
             <!-- 如果设置为true，生成的model类会直接使用column本身的名字，而不会再使用驼峰命名方法，比如BORN_DATE，生成的属性名字就是BORN_DATE,而不会是bornDate -->
@@ -146,50 +138,6 @@
             <!--mysql 配置-->
             <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
         </table>
-        <table tableName="payment" domainObjectName="PaymentPo"
-               enableCountByExample="false" enableUpdateByExample="false"
-               enableDeleteByExample="true" enableSelectByExample="true"
-               selectByExampleQueryId="false">
-            <!-- 如果设置为true，生成的model类会直接使用column本身的名字，而不会再使用驼峰命名方法，比如BORN_DATE，生成的属性名字就是BORN_DATE,而不会是bornDate -->
-            <property name="useActualColumnNames" value="false"/>
-            <!--mysql 配置-->
-            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
-        </table>
-        <table tableName="piece_freight_model" domainObjectName="PieceFreightModelPo"
-               enableCountByExample="false" enableUpdateByExample="false"
-               enableDeleteByExample="true" enableSelectByExample="true"
-               selectByExampleQueryId="false">
-            <!-- 如果设置为true，生成的model类会直接使用column本身的名字，而不会再使用驼峰命名方法，比如BORN_DATE，生成的属性名字就是BORN_DATE,而不会是bornDate -->
-            <property name="useActualColumnNames" value="false"/>
-            <!--mysql 配置-->
-            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
-        </table>
-        <table tableName="refund" domainObjectName="RefundPo"
-               enableCountByExample="false" enableUpdateByExample="false"
-               enableDeleteByExample="true" enableSelectByExample="true"
-               selectByExampleQueryId="false">
-            <!-- 如果设置为true，生成的model类会直接使用column本身的名字，而不会再使用驼峰命名方法，比如BORN_DATE，生成的属性名字就是BORN_DATE,而不会是bornDate -->
-            <property name="useActualColumnNames" value="false"/>
-            <!--mysql 配置-->
-            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
-        </table>
-        <table tableName="weight_freight_model" domainObjectName="WeightFreightModelPo"
-               enableCountByExample="false" enableUpdateByExample="false"
-               enableDeleteByExample="true" enableSelectByExample="true"
-               selectByExampleQueryId="false">
-            <!-- 如果设置为true，生成的model类会直接使用column本身的名字，而不会再使用驼峰命名方法，比如BORN_DATE，生成的属性名字就是BORN_DATE,而不会是bornDate -->
-            <property name="useActualColumnNames" value="false"/>
-            <!--mysql 配置-->
-            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
-        </table>
-        <table tableName="orders" domainObjectName="OrdersPo"
-               enableCountByExample="false" enableUpdateByExample="false"
-               enableDeleteByExample="true" enableSelectByExample="true"
-               selectByExampleQueryId="false">
-            <!-- 如果设置为true，生成的model类会直接使用column本身的名字，而不会再使用驼峰命名方法，比如BORN_DATE，生成的属性名字就是BORN_DATE,而不会是bornDate -->
-            <property name="useActualColumnNames" value="false"/>
-            <!--mysql 配置-->
-            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
-        </table>
+
     </context>
 </generatorConfiguration>
