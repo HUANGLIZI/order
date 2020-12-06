@@ -1695,63 +1695,63 @@ public class OrdersPoExample {
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedIsNull() {
-            addCriterion("gmt_created is null");
+        public Criteria andGmtCreateIsNull() {
+            addCriterion("gmt_create is null");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedIsNotNull() {
-            addCriterion("gmt_created is not null");
+        public Criteria andGmtCreateIsNotNull() {
+            addCriterion("gmt_create is not null");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedEqualTo(LocalDateTime value) {
-            addCriterion("gmt_created =", value, "gmtCreated");
+        public Criteria andGmtCreateEqualTo(LocalDateTime value) {
+            addCriterion("gmt_create =", value, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedNotEqualTo(LocalDateTime value) {
-            addCriterion("gmt_created <>", value, "gmtCreated");
+        public Criteria andGmtCreateNotEqualTo(LocalDateTime value) {
+            addCriterion("gmt_create <>", value, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedGreaterThan(LocalDateTime value) {
-            addCriterion("gmt_created >", value, "gmtCreated");
+        public Criteria andGmtCreateGreaterThan(LocalDateTime value) {
+            addCriterion("gmt_create >", value, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedGreaterThanOrEqualTo(LocalDateTime value) {
-            addCriterion("gmt_created >=", value, "gmtCreated");
+        public Criteria andGmtCreateGreaterThanOrEqualTo(LocalDateTime value) {
+            addCriterion("gmt_create >=", value, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedLessThan(LocalDateTime value) {
-            addCriterion("gmt_created <", value, "gmtCreated");
+        public Criteria andGmtCreateLessThan(LocalDateTime value) {
+            addCriterion("gmt_create <", value, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedLessThanOrEqualTo(LocalDateTime value) {
-            addCriterion("gmt_created <=", value, "gmtCreated");
+        public Criteria andGmtCreateLessThanOrEqualTo(LocalDateTime value) {
+            addCriterion("gmt_create <=", value, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedIn(List<LocalDateTime> values) {
-            addCriterion("gmt_created in", values, "gmtCreated");
+        public Criteria andGmtCreateIn(List<LocalDateTime> values) {
+            addCriterion("gmt_create in", values, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedNotIn(List<LocalDateTime> values) {
-            addCriterion("gmt_created not in", values, "gmtCreated");
+        public Criteria andGmtCreateNotIn(List<LocalDateTime> values) {
+            addCriterion("gmt_create not in", values, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedBetween(LocalDateTime value1, LocalDateTime value2) {
-            addCriterion("gmt_created between", value1, value2, "gmtCreated");
+        public Criteria andGmtCreateBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("gmt_create between", value1, value2, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedNotBetween(LocalDateTime value1, LocalDateTime value2) {
-            addCriterion("gmt_created not between", value1, value2, "gmtCreated");
+        public Criteria andGmtCreateNotBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("gmt_create not between", value1, value2, "gmtCreate");
             return (Criteria) this;
         }
 
@@ -1812,6 +1812,66 @@ public class OrdersPoExample {
 
         public Criteria andGmtModifiedNotBetween(LocalDateTime value1, LocalDateTime value2) {
             addCriterion("gmt_modified not between", value1, value2, "gmtModified");
+            return (Criteria) this;
+        }
+
+        public Criteria andGrouponIdIsNull() {
+            addCriterion("groupon_id is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andGrouponIdIsNotNull() {
+            addCriterion("groupon_id is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andGrouponIdEqualTo(Long value) {
+            addCriterion("groupon_id =", value, "grouponId");
+            return (Criteria) this;
+        }
+
+        public Criteria andGrouponIdNotEqualTo(Long value) {
+            addCriterion("groupon_id <>", value, "grouponId");
+            return (Criteria) this;
+        }
+
+        public Criteria andGrouponIdGreaterThan(Long value) {
+            addCriterion("groupon_id >", value, "grouponId");
+            return (Criteria) this;
+        }
+
+        public Criteria andGrouponIdGreaterThanOrEqualTo(Long value) {
+            addCriterion("groupon_id >=", value, "grouponId");
+            return (Criteria) this;
+        }
+
+        public Criteria andGrouponIdLessThan(Long value) {
+            addCriterion("groupon_id <", value, "grouponId");
+            return (Criteria) this;
+        }
+
+        public Criteria andGrouponIdLessThanOrEqualTo(Long value) {
+            addCriterion("groupon_id <=", value, "grouponId");
+            return (Criteria) this;
+        }
+
+        public Criteria andGrouponIdIn(List<Long> values) {
+            addCriterion("groupon_id in", values, "grouponId");
+            return (Criteria) this;
+        }
+
+        public Criteria andGrouponIdNotIn(List<Long> values) {
+            addCriterion("groupon_id not in", values, "grouponId");
+            return (Criteria) this;
+        }
+
+        public Criteria andGrouponIdBetween(Long value1, Long value2) {
+            addCriterion("groupon_id between", value1, value2, "grouponId");
+            return (Criteria) this;
+        }
+
+        public Criteria andGrouponIdNotBetween(Long value1, Long value2) {
+            addCriterion("groupon_id not between", value1, value2, "grouponId");
             return (Criteria) this;
         }
     }
