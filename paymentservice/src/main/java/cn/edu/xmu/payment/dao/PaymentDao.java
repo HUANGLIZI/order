@@ -6,17 +6,17 @@ import cn.edu.xmu.payment.mapper.FreightModelPoMapper;
 import cn.edu.xmu.payment.mapper.OrdersPoMapper;
 import cn.edu.xmu.payment.mapper.PaymentPoMapper;
 import cn.edu.xmu.payment.model.bo.Payment;
-import cn.edu.xmu.payment.model.po.OrdersPo;
-import cn.edu.xmu.payment.model.po.OrdersPoExample;
-import cn.edu.xmu.payment.model.po.PaymentPo;
-import cn.edu.xmu.payment.model.po.PaymentPoExample;
+import cn.edu.xmu.payment.model.bo.Refund;
+import cn.edu.xmu.payment.model.po.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class PaymentDao {
@@ -143,6 +143,79 @@ public class PaymentDao {
             payments.add(payment);
         }
         return new ReturnObject<>(payments);
+    }
+
+    /**
+     * 根据OrderId获取退款信息
+     * @author Li Zihan 24320182203227
+     * @param id
+     * @return 用户
+     */
+    public List<RefundPo> getOrdersRefundsByOrderId(Long id) {
+        logger.debug("findRefundByOrderId: Id =" + id);
+        RefundPoExample refundPoExample=new RefundPoExample();
+        RefundPoExample.Criteria criteria=refundPoExample.createCriteria();
+        criteria.andOrderIdEqualTo(id);
+        List<RefundPo> refundPos=refundPoMapper.selectByExample(refundPoExample);
+        if (refundPos == null) {
+            logger.error("getNewUser: 数据库不存在该Order的退款信息 orderId=" + id);
+        }
+        return refundPos;
+    }
+    /**
+     * 根据AftersaleId获取退款信息
+     * @author Li Zihan 24320182203227
+     * @param id
+     * @return 用户
+     */
+    public List<RefundPo> getOrdersRefundsByAftersaleId(Long id) {
+        logger.debug("findRefundByAftersaleId: Id =" + id);
+        RefundPoExample refundPoExample=new RefundPoExample();
+        RefundPoExample.Criteria criteria=refundPoExample.createCriteria();
+        criteria.andAftersaleIdEqualTo(id);
+        List<RefundPo> refundPos=refundPoMapper.selectByExample(refundPoExample);
+        if (refundPos == null) {
+            logger.error("getNewUser: 数据库不存在该Order的退款信息 orderId=" + id);
+        }
+        return refundPos;
+    }
+    /**
+     * 增加一个退款信息
+     * @author 24320182203227 李子晗
+     */
+    public ReturnObject<Refund> insertRefunds(Refund refund) {
+        RefundPo refundPo = refund.gotRefundPo();
+        ReturnObject<Refund> retObj = null;
+        try{
+            int ret = refundPoMapper.insertSelective(refundPo);
+            if (ret == 0) {
+                //插入失败
+                logger.debug("insertRefund: insert refund fail " + refundPo.toString());
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + refundPo.getPaySn()));
+            } else {
+                //插入成功
+                logger.debug("insertRefund: insert refund = " + refundPo.toString());
+                refund.setId(refundPo.getId());
+                retObj = new ReturnObject<>(refund);
+            }
+        }
+        catch (DataAccessException e) {
+            if (Objects.requireNonNull(e.getMessage()).contains("refund.pay_sn_uindex")) {
+                //若有重复的角色名则新增失败
+                logger.debug("updateRole: have same PaySn = " + refundPo.getPaySn());
+                retObj = new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("支付号重复：" + refundPo.getPaySn()));
+            } else {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+        return retObj;
     }
 
 }
