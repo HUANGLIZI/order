@@ -108,14 +108,14 @@ public class PaymentController {
      */
     @ApiOperation(value = "买家查询自己的支付信息",produces = "application/json")
     @ApiImplicitParams({
-            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "售后单id", required = true)
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/aftersales/{id}/payments")
     public Object customerQueryPaymentByAftersaleId(@PathVariable("id") Long aftersaleId){
         ReturnObject returnObject =  paymentService.customerQueryPaymentByAftersaleId(aftersaleId);
@@ -136,7 +136,7 @@ public class PaymentController {
      */
     @ApiOperation(value = "管理员查询售后单的支付信息",produces = "application/json")
     @ApiImplicitParams({
-            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(paramType = "path", dataType = "int", name = "shopId", value = "店铺id", required = true),
             @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "售后id", required = true)
     })
@@ -144,7 +144,7 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/shops/{shopId}/aftersales/{id}/payments")
     public Object getPaymentByAftersaleId(@PathVariable("shopId") Long shopId,@PathVariable("id") Long aftersaleId){
         ReturnObject returnObject =  paymentService.getPaymentByAftersaleId(shopId,aftersaleId);
@@ -274,6 +274,48 @@ public class PaymentController {
 
         Payment payment = vo.createPayment();
         payment.setOrderId(orderId);
+        payment.setGmtCreated(LocalDateTime.now());
+
+        ReturnObject<VoObject> retObject = paymentService.createPayment(payment);
+        httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        if (retObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(retObject);
+        } else {
+            return Common.decorateReturnObject(retObject);
+        }
+
+    }
+
+
+    /**
+     * 买家为售后单创建支付单
+     *
+     * @author 24320182203196  洪晓杰
+     */
+    @ApiOperation(value = "买家为售后单创建支付单", produces = "application/json")
+    @ApiImplicitParams({
+            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "int", name="id",value = "售后单id",required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "PaymentVo", name = "vo", value = "支付信息", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    //@Audit
+    @PostMapping("/aftersales/{id}/payments")
+    public Object createPaymentByAftersaleId(@Validated @RequestBody PaymentVo vo, BindingResult bindingResult,
+                                @PathVariable("id") Long aftersaleId){
+        logger.debug("createPayment: aftersaleId=" + aftersaleId);
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            logger.debug("validate fail");
+            return returnObject;
+        }
+
+        //需要通过aftersaleId从其他模块的aftersale表中获取orderid等信息
+        Payment payment = vo.createPayment();
+        payment.setAftersaleId(aftersaleId);
         payment.setGmtCreated(LocalDateTime.now());
 
         ReturnObject<VoObject> retObject = paymentService.createPayment(payment);
