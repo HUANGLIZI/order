@@ -5,6 +5,7 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.payment.mapper.FreightModelPoMapper;
 import cn.edu.xmu.payment.mapper.OrdersPoMapper;
 import cn.edu.xmu.payment.mapper.PaymentPoMapper;
+import cn.edu.xmu.payment.mapper.RefundPoMapper;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.bo.Refund;
 import cn.edu.xmu.payment.model.po.*;
@@ -28,6 +29,9 @@ public class PaymentDao {
 
     @Autowired
     OrdersPoMapper ordersPoMapper;
+
+    @Autowired
+    RefundPoMapper refundPoMapper;
 
     /**
      * 买家查询自己的支付信息
@@ -218,4 +222,38 @@ public class PaymentDao {
         return retObj;
     }
 
+    public ReturnObject insertPayment(Payment payment) {
+        PaymentPo paymentPo = payment.getPaymentPo();
+        ReturnObject returnObject;
+        try{
+            int ret = paymentPoMapper.insertSelective(paymentPo);
+            if (ret == 0) {
+                //插入失败
+                logger.debug("insertPayment: insert Payment fail " + paymentPo.toString());
+                returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + paymentPo.toString()));
+            } else {
+                //插入成功
+                logger.debug("insertPayment: insert Payment  = " + paymentPo.toString());
+                payment.setId(paymentPo.getId());
+                returnObject = new ReturnObject<>(payment);
+            }
+        }
+        catch (DataAccessException e) {
+            if (Objects.requireNonNull(e.getMessage()).contains("payment.pay_sn_uindex")) {
+                //若有重复的流水号则新增失败
+                logger.debug("updateRole: have same paySn = " + paymentPo.getPaySn());
+                returnObject = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("流水号重复：" + paymentPo.toString()));
+            } else {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            returnObject  = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+        return returnObject ;
+    }
 }

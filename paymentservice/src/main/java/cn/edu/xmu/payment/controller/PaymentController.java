@@ -6,7 +6,9 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.bo.Refund;
+import cn.edu.xmu.payment.model.vo.PaymentVo;
 import cn.edu.xmu.payment.model.vo.amountVo;
 import cn.edu.xmu.payment.service.PaymentService;
 import io.swagger.annotations.*;
@@ -114,7 +116,7 @@ public class PaymentController {
             @ApiResponse(code = 504, message = "操作id不存在")
     })
     //@Audit
-    @GetMapping("/orders/{id}/payments")
+    @GetMapping("/aftersales/{id}/payments")
     public Object customerQueryPaymentByAftersaleId(@PathVariable("id") Long aftersaleId){
         ReturnObject returnObject =  paymentService.customerQueryPaymentByAftersaleId(aftersaleId);
         if (returnObject.getCode() == ResponseCode.OK) {
@@ -143,7 +145,7 @@ public class PaymentController {
             @ApiResponse(code = 504, message = "操作id不存在")
     })
     //@Audit
-    @GetMapping("/shops/{shopId}/orders/{id}/payments")
+    @GetMapping("/shops/{shopId}/aftersales/{id}/payments")
     public Object getPaymentByAftersaleId(@PathVariable("shopId") Long shopId,@PathVariable("id") Long aftersaleId){
         ReturnObject returnObject =  paymentService.getPaymentByAftersaleId(shopId,aftersaleId);
         if (returnObject.getCode() == ResponseCode.OK) {
@@ -238,4 +240,49 @@ public class PaymentController {
         return Common.decorateReturnObject(retObject);
     }
 
+    /**
+     * 买家为订单创建支付单
+     *
+     * @author 24320182203327 张湘君
+     * @param vo 支付单视图
+     * @param bindingResult 校验错误
+     * @param orderId 订单id
+     * @return Object 角色返回视图
+     * createdBy 张湘君 2020/12/3 20:12
+     * modifiedBy 张湘君 2020/12/3 20:12
+     */
+    @ApiOperation(value = "买家为订单创建支付单", produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "int", name="id",value = "订单id",required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "PaymentVo", name = "vo", value = "支付信息", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @Audit
+    @PostMapping("/orders/{id}/payments")
+    public Object createPayment(@Validated @RequestBody PaymentVo vo, BindingResult bindingResult,
+                                @PathVariable("id") Long orderId){
+        logger.debug("createPayment: orderId=" + orderId);
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            logger.debug("validate fail");
+            return returnObject;
+        }
+
+        Payment payment = vo.createPayment();
+        payment.setOrderId(orderId);
+        payment.setGmtCreated(LocalDateTime.now());
+
+        ReturnObject<VoObject> retObject = paymentService.createPayment(payment);
+        httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        if (retObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(retObject);
+        } else {
+            return Common.decorateReturnObject(retObject);
+        }
+
+    }
 }

@@ -67,6 +67,29 @@ public class Payment implements VoObject, Serializable {
         this.state=po.getState();
     }
 
+    /**
+     * 获得po
+     *
+     * @return Payment
+     */
+    public PaymentPo getPaymentPo(){
+        PaymentPo paymentPo = new PaymentPo();
+        paymentPo.setId(this.id);
+        paymentPo.setActualAmount(this.actualAmount);
+        paymentPo.setAmout(this.amout);
+        paymentPo.setBeginTime(this.beginTime);
+        paymentPo.setEndTime(this.endTime);
+        paymentPo.setOrderId(this.orderId);
+        paymentPo.setPaymentPattern(this.paymentPattern);
+        paymentPo.setPaySn(this.paySn);
+        paymentPo.setPayTime(this.payTime);
+        paymentPo.setGmtCreated(this.gmtCreated);
+        paymentPo.setGmtModified(this.gmtModified);
+        paymentPo.setState(this.state);
+
+        return paymentPo;
+    }
+
     @Override
     public Object createVo() {
         return new PaymentRetVo(this);
