@@ -1,5 +1,6 @@
 package cn.edu.xmu.order.controller;
 
+import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
@@ -8,6 +9,8 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.model.bo.Orders;
 import cn.edu.xmu.order.model.vo.AftersaleOrderVo;
+import cn.edu.xmu.order.model.vo.FreightSnVo;
+import cn.edu.xmu.order.model.vo.MessageVo;
 import cn.edu.xmu.order.model.vo.OrderSimpleVo;
 import cn.edu.xmu.order.service.OrderService;
 import io.swagger.annotations.*;
@@ -214,6 +217,94 @@ public class OrderController {
         return Common.decorateReturnObject(retObject);
     }
 
+
+    /**
+     * 店家修改订单 (留言)
+     *
+     * @author 24320182203327 张湘君
+     * @param orderId 订单id
+     * @param vo 留言视图
+     * @param bindingResult 校验数据
+     * @param userId 当前用户id
+     * @return Object 订单返回视图
+     */
+    @ApiOperation(value = "买家修改本人名下订单。", produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "shopId", value = "店铺id", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "MessageVo", name = "vo", value = "可修改的留言", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    @Audit
+    @PutMapping("/shops/{shopId}/orders/{id}")
+    public Object shopUpdateOrder(@PathVariable("id") Long orderId, @Validated @RequestBody MessageVo vo, BindingResult bindingResult,
+                                  @LoginUser @ApiIgnore Long userId,
+                                  @Depart @ApiIgnore Long sId,
+                                  @PathVariable("shopId") Long shopId){
+
+        logger.debug("shopUpdateOrder orderId:" + orderId);
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            return returnObject;
+        }
+
+        if (shopId.equals(sId)){
+            Orders orders=vo.createOrder();
+            orders.setId(orderId);
+            orders.setShopId(shopId);
+            ReturnObject<Object> retObject = orderService.shopUpdateOrder(orders);
+            return Common.decorateReturnObject(retObject);
+        }
+        else{
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + sId)), httpServletResponse);
+        }
+
+    }
+
+    /**
+     * 店家对订单标记发货
+     *
+     * @author 24320182203327 张湘君
+     * @param orderId 订单id
+     * @param userId 当前用户id
+     * @return Object 订单返回视图
+     */
+    @ApiOperation(value = "店家对订单标记发货", produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "shopId", value = "店铺id", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "FreightSnVo", name = "vo", value = "", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    @Audit
+    @PutMapping("/shops/{shopId}/orders/{id}/deliver")
+    public Object shopDeliverOrder(@PathVariable("id") Long orderId, @Validated @RequestBody FreightSnVo vo, BindingResult bindingResult,
+                                   @LoginUser @ApiIgnore Long userId,
+                                   @Depart @ApiIgnore Long sId,
+                                   @PathVariable("shopId") Long shopId){
+
+        logger.debug("customerConfirmOrder orderId:" + orderId);
+        if(shopId.equals(sId)){
+            Orders orders=vo.createOrder();
+            orders.setId(orderId);
+            orders.setShopId(shopId);
+            ReturnObject<Object> retObject = orderService.shopDeliverOrder(orders);
+            return Common.decorateReturnObject(retObject);
+        }
+        else{
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + sId)), httpServletResponse);
+        }
+
+    }
 
 
 }
