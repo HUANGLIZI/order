@@ -2,7 +2,6 @@ package cn.edu.xmu.payment.dao;
 
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.payment.mapper.FreightModelPoMapper;
 import cn.edu.xmu.payment.mapper.OrdersPoMapper;
 import cn.edu.xmu.payment.mapper.PaymentPoMapper;
 import cn.edu.xmu.payment.mapper.RefundPoMapper;

@@ -54,10 +54,10 @@ public class Payment implements VoObject, Serializable {
      */
     public Payment(PaymentPo po){
         this.actualAmount=po.getActualAmount();
-        this.amout=po.getAmout();
+        this.amout=po.getAmount();
         this.beginTime=po.getBeginTime();
         this.endTime=po.getEndTime();
-        this.gmtCreated=po.getGmtCreated();
+        this.gmtCreated=po.getGmtCreate();
         this.gmtModified=po.getGmtModified();
         this.id=po.getId();
         this.orderId=po.getOrderId();
@@ -76,14 +76,14 @@ public class Payment implements VoObject, Serializable {
         PaymentPo paymentPo = new PaymentPo();
         paymentPo.setId(this.id);
         paymentPo.setActualAmount(this.actualAmount);
-        paymentPo.setAmout(this.amout);
+        paymentPo.setAmount(this.amout);
         paymentPo.setBeginTime(this.beginTime);
         paymentPo.setEndTime(this.endTime);
         paymentPo.setOrderId(this.orderId);
         paymentPo.setPaymentPattern(this.paymentPattern);
         paymentPo.setPaySn(this.paySn);
         paymentPo.setPayTime(this.payTime);
-        paymentPo.setGmtCreated(this.gmtCreated);
+        paymentPo.setGmtCreate(this.gmtCreated);
         paymentPo.setGmtModified(this.gmtModified);
         paymentPo.setState(this.state);
 
