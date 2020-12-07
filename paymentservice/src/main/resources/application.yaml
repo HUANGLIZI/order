@@ -5,7 +5,7 @@ management:
         include: "*"
 
 server:
-  port: 8085
+  port: 8080
   tomcat:
     threads:
       max: 1000
@@ -41,10 +41,10 @@ spring:
           #慢SQL执行时间
           slow-sql-millis: 100
       validation-query: select 1
-      url: jdbc:mysql://localhost:3306/oomall_demo1?serverTimezone=GMT%2B8
+      url: jdbc:mysql://localhost:3306/oomall_order?serverTimezone=GMT%2B8
     sql-script-encoding: UTF-8
     username: root
-    password:
+    password: 123456
   redis:
     # Redis数据库索引（默认为0）
     database: 0
