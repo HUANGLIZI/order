@@ -96,4 +96,31 @@ public class OrderService<OrdersPo> {
 
     }
 
+    /**
+     * 店家修改订单
+     * @param orders
+     * @return
+     */
+    public ReturnObject<Object> shopUpdateOrder(Orders orders) {
+        ReturnObject returnObject = orderDao.shopUpdateOrder(orders);
+        if(returnObject.getCode().equals(ResponseCode.OK)){
+            return returnObject;
+        }else {
+            return new ReturnObject<>(returnObject.getCode(),returnObject.getErrmsg());
+        }
+    }
+
+    /**
+     * 店家对订单标记发货
+     * @param orders
+     * @return
+     */
+    public ReturnObject<Object> shopDeliverOrder(Orders orders) {
+        ReturnObject returnObject = orderDao.shopDeliverOrder(orders);
+        if(returnObject.getCode().equals(ResponseCode.OK)){
+            return returnObject;
+        }else {
+            return new ReturnObject<>(returnObject.getCode(),returnObject.getErrmsg());
+        }
+    }
 }

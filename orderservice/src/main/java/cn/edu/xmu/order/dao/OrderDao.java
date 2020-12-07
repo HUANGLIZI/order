@@ -115,4 +115,105 @@ public class OrderDao {
     }
 
 
+    public ReturnObject shopUpdateOrder(Orders orders) {
+        OrdersPo ordersPo=orders.gotOrdersPo();
+        //如果该店铺不拥有这个order则查不到
+        if(!isOrderBelongToShop(orders.getShopId(),orders.getId())){
+            logger.error(" shopUpdateOrder: 数据库不存在该支订单 orderId="+orders.getId());
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        try{
+            int ret = ordersPoMapper.updateByPrimaryKeySelective(ordersPo);
+            if (ret == 0) {
+                //修改失败
+                logger.error("shopUpdateOrder:shop update order fail : " + ordersPo.toString());
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("订单id不存在：" + ordersPo.getId()));
+            } else {
+                //修改成功
+                logger.debug("shopUpdateOrder:shop update order : " + ordersPo.toString());
+                return new ReturnObject<>();
+            }
+        }
+        catch (DataAccessException e) {
+
+            // 其他数据库错误
+            logger.error("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
+
+    //判断order是否属于shop
+    private boolean isOrderBelongToShop(Long shopId, Long orderId){
+        OrdersPoExample example=new OrdersPoExample ();
+        OrdersPoExample.Criteria criteria=example.createCriteria();
+        criteria.andIdEqualTo(orderId);
+        criteria.andShopIdEqualTo(shopId);
+
+
+        List<OrdersPo> ordersPos=ordersPoMapper.selectByExample(example);
+        return !ordersPos.isEmpty();
+    }
+
+
+    public ReturnObject shopDeliverOrder(Orders orders) {
+
+        OrdersPoExample example=new OrdersPoExample ();
+        OrdersPoExample.Criteria criteria=example.createCriteria();
+        criteria.andIdEqualTo(orders.getId());
+        criteria.andShopIdEqualTo(orders.getShopId());
+
+        List<OrdersPo> ordersPos=ordersPoMapper.selectByExample(example);
+
+
+        //如果该用户不拥有这个order则查不到
+        if(ordersPos.isEmpty()){
+            logger.error(" shopDeliverOrder: 数据库不存在该支订单 orderId="+orders.getId());
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        //按id搜索应该只有一个po对象
+        OrdersPo ordersPo=ordersPos.get(0);
+
+        //订单未处于已支付状态，则不允许改变
+        if(ordersPo.getState()!=(byte)10&&ordersPo.getState()!=(byte)11&&ordersPo.getState()!=(byte)12){
+            //修改失败
+            logger.error("shopDeliverOrder:Error Order State : " + ordersPo.toString());
+            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW, String.format("订单状态无法转换为发货中：state=" + ordersPo.getState()));
+        }
+
+        //改为发货中状态
+        ordersPo.setState((byte) 16);
+        //设置运输sn
+        ordersPo.setShipmentSn(orders.getShipmentSn());
+
+        try{
+            int ret = ordersPoMapper.updateByPrimaryKeySelective(ordersPo);
+            if (ret == 0) {
+                //修改失败
+                logger.error("shopDeliverOrder:shop Deliver Order fail : " + ordersPo.toString());
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("订单id不存在：" + ordersPo.getId()));
+            } else {
+                //修改成功
+                logger.debug("shopDeliverOrder:shop Deliver Order : " + ordersPo.toString());
+                return new ReturnObject<>();
+            }
+        }
+        catch (DataAccessException e) {
+
+            // 其他数据库错误
+            logger.error("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
 }
