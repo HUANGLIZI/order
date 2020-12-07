@@ -8,6 +8,7 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.model.bo.Orders;
 import cn.edu.xmu.order.model.vo.AftersaleOrderVo;
+import cn.edu.xmu.order.model.vo.OrderSimpleVo;
 import cn.edu.xmu.order.service.OrderService;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -122,4 +123,97 @@ public class OrderController {
         retObject = orderService.transOrder(id);
         return Common.decorateReturnObject(retObject);
     }
+
+
+    /**
+     * 买家修改本人名下订单
+     *
+     * @author 24320182203196 洪晓杰
+     * @param id 订单id
+     * @param vo 订单视图
+     * @param bindingResult 校验数据
+     * @return Object 返回视图
+     */
+    @ApiOperation(value = "买家修改本人名下订单", produces = "application/json")
+    @ApiImplicitParams({
+            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "OrderSimpleVo", name = "vo", value = "操作字段 (状态)", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    //@Audit
+    @PutMapping("/orders3/{id}")
+    public Object updateOrder(@PathVariable("id") Long id, @Validated @RequestBody OrderSimpleVo vo, BindingResult bindingResult) {
+        logger.debug("update order by orderId:" + id);
+        //校验前端数据-----暂时还没写
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            return returnObject;
+        }
+        Orders orders=vo.createOrders();
+        orders.setId(id);
+        orders.setGmtModified(LocalDateTime.now());
+        ReturnObject<Object> retObject = orderService.updateOders(orders);
+        return Common.decorateReturnObject(retObject);
+    }
+
+    /**
+     * 买家标记确认收货
+     *
+     * @author 24320182203196 洪晓杰
+     * @param id 订单id
+     */
+    @ApiOperation(value = "买家标记确认收货", produces = "application/json")
+    @ApiImplicitParams({
+            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    //@Audit
+    @PutMapping("/orders2/{id}/confirm")
+    public Object updateOrderStateToConfirm( @PathVariable("id") Long id) {
+        logger.debug("update orders by orderId:" + id);
+        //校验前端数据-----暂时还没写
+        Orders orders=new Orders();
+        orders.setId(id);
+        orders.setState((byte) 2);//2表示为确认收货状态
+        orders.setGmtModified(LocalDateTime.now());
+        ReturnObject<Object> retObject = orderService.updateOders(orders);
+        return Common.decorateReturnObject(retObject);
+    }
+
+
+    /**
+     * 买家取消，逻辑删除本人名下订单
+     *
+     * @author 24320182203196 洪晓杰
+     * @param id 订单id
+     */
+    @ApiOperation(value = "买家取消，逻辑删除本人名下订单", produces = "application/json")
+    @ApiImplicitParams({
+            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    //@Audit
+    @PutMapping("/orders1/{id}")
+    public Object logicDeleteOrder( @PathVariable("id") Long id) {
+        logger.debug("logicDelete order by orderId:" + id);
+        //校验前端数据-----暂时还没写
+        Orders orders=new Orders();
+        orders.setId(id);
+        orders.setBeDeleted((byte)1);
+        orders.setGmtModified(LocalDateTime.now());
+        ReturnObject<Object> retObject = orderService.updateOders(orders);
+        return Common.decorateReturnObject(retObject);
+    }
+
+
+
 }

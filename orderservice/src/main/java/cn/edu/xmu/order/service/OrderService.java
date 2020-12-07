@@ -76,4 +76,24 @@ public class OrderService<OrdersPo> {
         }
         return returnObject;
     }
+
+
+    /**
+     * 买家修改本人名下订单
+     *
+     * @author 24320182203196 洪晓杰
+     */
+    @Transactional
+    public ReturnObject<Object> updateOders(Orders orders) {
+        ReturnObject<Orders> retObj = orderDao.updateOrder(orders);
+        ReturnObject<Object> retOrder;
+        if (retObj.getCode().equals(ResponseCode.OK)) {
+            retOrder = new ReturnObject<>(retObj.getData());
+        } else {
+            retOrder = new ReturnObject<>(retObj.getCode(), retObj.getErrmsg());
+        }
+        return retOrder;
+
+    }
+
 }

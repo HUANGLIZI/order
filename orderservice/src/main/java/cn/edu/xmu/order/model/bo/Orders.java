@@ -71,7 +71,7 @@ public class Orders implements VoObject, Serializable {
         this.shipmentSn=po.getShipmentSn();
         this.beDeleted = po.getBeDeleted();
         this.state=po.getState();
-        this.gmtCreated = po.getGmtCreated();
+        this.gmtCreated = po.getGmtCreate();
         this.gmtModified = po.getGmtModified();
         this.presaleId=po.getPresaleId();
         this.substate=po.getSubstate();
@@ -112,7 +112,7 @@ public class Orders implements VoObject, Serializable {
         po.setState(state);
         po.setSubstate(substate);
         po.setBeDeleted(beDeleted);
-        po.setGmtCreated(gmtCreated);
+        po.setGmtCreate(gmtCreated);
         po.setGmtModified(gmtModified);
         return po;
     }
