@@ -25,6 +25,7 @@
         <module>paymentservice</module>
         <module>freightservice</module>
         <module>order-client</module>
+        <module>other-client</module>
     </modules>
     <name>roleprivilege</name>
     <description>the role base privilege mangament systems</description>
