@@ -2,6 +2,7 @@ package cn.edu.xmu.payment.controller;
 
 
 import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -11,6 +12,7 @@ import cn.edu.xmu.payment.model.bo.Refund;
 import cn.edu.xmu.payment.model.vo.PaymentVo;
 import cn.edu.xmu.payment.model.vo.amountVo;
 import cn.edu.xmu.payment.service.PaymentService;
+import cn.edu.xmu.payment.service.PaymentServiceI;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,9 @@ import java.time.LocalDateTime;
 public class PaymentController {
     @Autowired
     private PaymentService paymentService;
+
+    @Autowired
+    private PaymentServiceI paymentServiceI;
 
     @Autowired
     private HttpServletResponse httpServletResponse;
@@ -175,12 +180,8 @@ public class PaymentController {
     //@Audit
     @GetMapping("/shops/{shopId}/orders/{id}/refunds")
     public Object getOrdersRefundsByOrderId(@PathVariable("id") Long id,@PathVariable("shopId") Long shopId){
-        ReturnObject returnObject =  paymentService.getOrdersRefundsByOrderId(id,shopId);
-        if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getRetObject(returnObject);
-        } else {
-            return Common.decorateReturnObject(returnObject);
-        }
+        ReturnObject returnObject =  paymentServiceI.getOrdersRefundsByOrderId(id,shopId);
+        return returnObject;
     }
     /**
      * 通过AfterSaleId查询订单的退款信息
@@ -202,12 +203,8 @@ public class PaymentController {
     @Audit
     @GetMapping("/shops/{shopId}/aftersales/{id}/refunds")
     public Object getOrdersRefundsByAftersaleId(@PathVariable("id") Long id,@PathVariable("shopId") Long shopId){
-        ReturnObject returnObject =  paymentService.getOrdersRefundsByAftersaleId(id,shopId);
-        if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getRetObject(returnObject);
-        } else {
-            return Common.decorateReturnObject(returnObject);
-        }
+        ReturnObject returnObject =  paymentServiceI.getOrdersRefundsByAftersaleId(id,shopId);
+        return returnObject;
     }
 
     /**
@@ -327,4 +324,51 @@ public class PaymentController {
         }
 
     }
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-06 23:18
+     */
+    //    @Audit
+    @ApiOperation(value = "买家查询自己的退款信息",produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    @GetMapping("/orders/{id}/refunds")
+    public Object queryUserRefundsByOrderId(@LoginUser Long userId, @PathVariable("id") Long orderId) {
+//        System.out.println("userId" + userId);
+        ReturnObject<VoObject> returnObject = paymentServiceI.userQueryRefundsByOrderId(orderId, userId);
+        return returnObject;
+    }
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-06 23:18
+     */
+    //    @Audit
+    @ApiOperation(value = "买家查询自己的退款信息",produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "支付单id", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    @GetMapping("/aftersales/{id}/refunds")
+    public Object queryUserRefundsByAftersaleId(@LoginUser Long userId, @PathVariable("id") Long aftersaleId) {
+//        System.out.println("userId" + userId);
+        ReturnObject<VoObject> returnObject = paymentServiceI.userQueryRefundsByAftersaleId(aftersaleId, userId);
+        return returnObject;
+    }
+
 }

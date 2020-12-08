@@ -2,10 +2,13 @@ package cn.edu.xmu.order.model.bo;
 
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.order.model.po.OrdersPo;
+import cn.edu.xmu.order.model.vo.OrderRetVo;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 订单Bo类
@@ -79,7 +82,7 @@ public class Orders implements VoObject, Serializable {
 
     @Override
     public Object createVo() {
-        return null;
+        return new OrderRetVo(this);
     }
 
     @Override
@@ -116,4 +119,59 @@ public class Orders implements VoObject, Serializable {
         po.setGmtModified(gmtModified);
         return po;
     }
+
+    /**
+     * 后台用户状态
+     */
+    public enum State {
+        CANCEL(0, "订单取消"),
+        DEPOSIT_TO_BE_PAID(1, "待支付定金"),
+        TO_BE_PAID(2, "待支付"),
+        TO_BE_GROUP(3, "待参团"),
+        DEPOSIT_HAS_PAID(4, "已支付定金"),
+        REST_TO_BE_PAID(5, "待支付尾款"),
+        CREATE_ORDER(6, "创建订单"),
+        PRESALE_SUSPENSION(7, "预售中止"),
+        HAS_JOIN_GROUP(8, "已参团"),
+        GROUP_NOT_REACHED_THRESHOLD(9, "团购未达到门槛"),
+        GROUP_HAS_FORMED(10, "已成团"),
+        HAS_PAID(11, "已支付"),
+        REST_HAS_PAID(12, "已支付尾款"),
+        HAS_REFUNDED(13, "已退款"),
+        ORDER_SUSPENSION(14, "订单中止"),
+        AFTERSALE_ORDER_TO_BE_DELIVERED(15, "售后单待发货"),
+        DELIVERING(16, "发货中"),
+        ARRIVED(17, "到货"),
+        HAS_SIGNED_IN(18, "已签收");
+
+        private static final Map<Integer, State> stateMap;
+
+        static { //由类加载机制，静态块初始加载对应的枚举属性到map中，而不用每次取属性时，遍历一次所有枚举值
+            stateMap = new HashMap();
+            for (Orders.State enum1 : values()) {
+                stateMap.put(enum1.code, enum1);
+            }
+        }
+
+        private int code;
+        private String description;
+
+        State(int code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public static Orders.State getTypeByCode(Integer code) {
+            return stateMap.get(code);
+        }
+
+        public Integer getCode() {
+            return code;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
+
 }

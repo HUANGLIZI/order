@@ -71,4 +71,34 @@ public class OrderRetVo {
         this.substate=orders.getSubstate();
         this.orderItems=orderItemPos;
     }
+
+
+    public OrderRetVo(Orders orders) {
+        this.id = orders.getId();
+        this.customerId=orders.getCustomerId();
+        this.shopId=orders.getShopId();
+        this.orderSn=orders.getOrderSn();
+        this.pid=orders.getPid();
+        this.consignee = orders.getConsignee();
+        this.regionId=orders.getRegionId();
+        this.address = orders.getAddress();
+        this.mobile=orders.getMobile();
+        this.message=orders.getMessage();
+        this.orderType=orders.getOrderType();
+        this.freightPrice=orders.getFreightPrice();
+        this.couponId=orders.getCouponId();
+        this.couponActivityId=orders.getCouponActivityId();
+        this.discountPrice=orders.getDiscountPrice();
+        this.originPrice=orders.getOriginPrice();
+        this.grouponDiscount=orders.getGrouponDiscount();
+        this.rebateNum=orders.getRebateNum();
+        this.confirmTime = orders.getConfirmTime();
+        this.shipmentSn=orders.getShipmentSn();
+        this.beDeleted = orders.getBeDeleted();
+        this.state=orders.getState();
+        this.gmtCreated = orders.getGmtCreated();
+        this.gmtModified = orders.getGmtModified();
+        this.presaleId=orders.getPresaleId();
+        this.substate=orders.getSubstate();
+    }
 }

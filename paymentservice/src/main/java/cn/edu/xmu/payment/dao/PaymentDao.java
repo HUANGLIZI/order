@@ -7,6 +7,7 @@ import cn.edu.xmu.payment.mapper.PaymentPoMapper;
 import cn.edu.xmu.payment.mapper.RefundPoMapper;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.bo.Refund;
+import cn.edu.xmu.payment.model.bo.RefundBo;
 import cn.edu.xmu.payment.model.po.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,7 +155,7 @@ public class PaymentDao {
      * @param id
      * @return 用户
      */
-    public List<RefundPo> getOrdersRefundsByOrderId(Long id) {
+    public ReturnObject<List<RefundBo>> getOrdersRefundsByOrderId(Long id) {
         logger.debug("findRefundByOrderId: Id =" + id);
         RefundPoExample refundPoExample=new RefundPoExample();
         RefundPoExample.Criteria criteria=refundPoExample.createCriteria();
@@ -163,7 +164,14 @@ public class PaymentDao {
         if (refundPos == null) {
             logger.error("getNewUser: 数据库不存在该Order的退款信息 orderId=" + id);
         }
-        return refundPos;
+        List<RefundBo> refundBoList = new ArrayList<>(refundPos.size());
+        for (RefundPo po: refundPos)
+        {
+            RefundBo refundBo = new RefundBo(po);
+            refundBoList.add(refundBo);
+        }
+
+        return new ReturnObject<>(refundBoList);
     }
     /**
      * 根据AftersaleId获取退款信息
@@ -171,7 +179,7 @@ public class PaymentDao {
      * @param id
      * @return 用户
      */
-    public List<RefundPo> getOrdersRefundsByAftersaleId(Long id) {
+    public ReturnObject<List<RefundBo>> getOrdersRefundsByAftersaleId(Long id) {
         logger.debug("findRefundByAftersaleId: Id =" + id);
         RefundPoExample refundPoExample=new RefundPoExample();
         RefundPoExample.Criteria criteria=refundPoExample.createCriteria();
@@ -180,7 +188,14 @@ public class PaymentDao {
         if (refundPos == null) {
             logger.error("getNewUser: 数据库不存在该Order的退款信息 orderId=" + id);
         }
-        return refundPos;
+        List<RefundBo> refundBoList = new ArrayList<>(refundPos.size());
+        for (RefundPo po: refundPos)
+        {
+            RefundBo refundBo = new RefundBo(po);
+            refundBoList.add(refundBo);
+        }
+
+        return new ReturnObject<>(refundBoList);
     }
     /**
      * 增加一个退款信息
@@ -255,4 +270,58 @@ public class PaymentDao {
         }
         return returnObject ;
     }
+
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-06 22:53
+     */
+    public ReturnObject<List<RefundBo>> findRefundsInfoByOrderId(Long orderId)
+    {
+        RefundPoExample refundPoExample = new RefundPoExample();
+        RefundPoExample.Criteria criteria = refundPoExample.createCriteria();
+        criteria.andOrderIdEqualTo(orderId);
+        List<RefundPo> refundPoList = refundPoMapper.selectByExample(refundPoExample);
+
+        if (refundPoList.size() == 0)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        List<RefundBo> refundBoList = new ArrayList<>(refundPoList.size());
+        for (RefundPo po: refundPoList)
+        {
+            RefundBo refundBo = new RefundBo(po);
+            refundBoList.add(refundBo);
+        }
+
+        return new ReturnObject<>(refundBoList);
+    }
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-06 22:53
+     */
+    public ReturnObject<List<RefundBo>> findRefundsInfoByAfterSaleId(Long afterSaleId)
+    {
+        RefundPoExample refundPoExample = new RefundPoExample();
+        RefundPoExample.Criteria criteria = refundPoExample.createCriteria();
+        criteria.andOrderIdEqualTo(afterSaleId);
+        List<RefundPo> refundPoList = refundPoMapper.selectByExample(refundPoExample);
+
+        if (refundPoList.size() == 0)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        List<RefundBo> refundBoList = new ArrayList<>(refundPoList.size());
+        for (RefundPo po: refundPoList)
+        {
+            RefundBo refundBo = new RefundBo(po);
+            refundBoList.add(refundBo);
+        }
+
+        return new ReturnObject<>(refundBoList);
+    }
+
 }
