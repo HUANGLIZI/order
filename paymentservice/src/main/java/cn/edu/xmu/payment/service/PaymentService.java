@@ -66,36 +66,6 @@ public class PaymentService {
     }
 
     @Transactional
-    public ReturnObject<VoObject> getOrdersRefundsByOrderId(Long id, Long shopId){
-        List<RefundPo> retObj = paymentDao.getOrdersRefundsByOrderId(id);//if(retObj.getOrderId())
-        ReturnObject<VoObject> retRefund = null;
-        for(int i=0;i<retObj.size();i++) {
-            ReturnObject<RefundPo> retObj2=new ReturnObject<>(retObj.get(i));
-            if (retObj2.getCode().equals(ResponseCode.OK)) {
-                retRefund = new ReturnObject<>((VoObject) retObj2.getData());
-            } else {
-                retRefund = new ReturnObject(retObj2.getCode(), retObj2.getErrmsg());
-            }
-        }
-        return retRefund;
-    }
-
-    @Transactional
-    public ReturnObject<VoObject> getOrdersRefundsByAftersaleId(Long id, Long shopId){
-        List<RefundPo> retObj = paymentDao.getOrdersRefundsByAftersaleId(id);//if(retObj.getOrderId())
-        ReturnObject<VoObject> retRefund = null;
-        for(int i=0;i<retObj.size();i++) {
-            ReturnObject<RefundPo> retObj2=new ReturnObject<>(retObj.get(i));
-            if (retObj2.getCode().equals(ResponseCode.OK)) {
-                retRefund = new ReturnObject<>((VoObject) retObj2.getData());
-            } else {
-                retRefund = new ReturnObject(retObj2.getCode(), retObj2.getErrmsg());
-            }
-        }
-        return retRefund;
-    }
-
-    @Transactional
     public ReturnObject<VoObject> insertRefunds(Refund refund, Long shopId){
         ReturnObject<Refund> retObj = paymentDao.insertRefunds(refund);
         ReturnObject<VoObject> retReund = null;

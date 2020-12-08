@@ -1,7 +1,9 @@
 package cn.edu.xmu.order.dao;
 
+import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.order.model.OrderDTO;
 import cn.edu.xmu.order.mapper.OrderItemPoMapper;
 import cn.edu.xmu.order.mapper.OrdersPoMapper;
 import cn.edu.xmu.order.model.bo.Orders;
@@ -9,12 +11,17 @@ import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderItemPoExample;
 import cn.edu.xmu.order.model.po.OrdersPo;
 import cn.edu.xmu.order.model.po.OrdersPoExample;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -216,4 +223,88 @@ public class OrderDao {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
     }
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-06 21:14
+     */
+    public ReturnObject<OrderDTO> getUserIdbyOrderId(Long orderId)
+    {
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
+
+//        ordersPoMapper.selectByExample()
+        OrderDTO orderDTO;
+        if (ordersPo != null)
+            orderDTO  = new OrderDTO(ordersPo.getShopId(),ordersPo.getCustomerId());
+        else
+            orderDTO  = new OrderDTO(null, null);
+        return new ReturnObject<>(orderDTO);
+    }
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-07 13:17
+     */
+    public ReturnObject<OrderDTO> getShopIdbyOrderId(Long orderId)
+    {
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
+        OrderDTO orderDTO;
+        if (ordersPo != null)
+            orderDTO  = new OrderDTO(ordersPo.getShopId(),ordersPo.getCustomerId());
+        else
+            orderDTO  = new OrderDTO(null, null);
+        return new ReturnObject<>(orderDTO);
+    }
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-06 21:13
+     */
+    public ReturnObject<PageInfo<VoObject>> getOrdersByUserId(Long userId, Integer pageNum, Integer pageSize,
+                                                              String orderSn, Byte state,
+                                                              String beginTime, String endTime) {
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        OrdersPoExample ordersPoExample = new OrdersPoExample();
+        OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
+        criteria.andCustomerIdEqualTo(userId);
+        // 被逻辑删除的订单不能被返回
+        Byte beDeleted = 0;
+        criteria.andBeDeletedEqualTo(beDeleted);
+        if (orderSn != null)
+            criteria.andOrderSnEqualTo(orderSn);
+        if (state != null)
+            criteria.andStateEqualTo(state);
+        if (beginTime != null)
+            criteria.andGmtCreateGreaterThanOrEqualTo(LocalDateTime.parse(beginTime, df));
+        if (endTime != null)
+            criteria.andGmtCreateLessThanOrEqualTo(LocalDateTime.parse(endTime, df));
+        //分页查询
+        PageHelper.startPage(pageNum, pageSize);
+        logger.debug("page = " + pageNum + "pageSize = " + pageSize);
+        List<OrdersPo> ordersPos = null;
+        try {
+            //不加限定条件查询所有
+            ordersPos = ordersPoMapper.selectByExample(ordersPoExample);
+            List<VoObject> ret = new ArrayList<>(ordersPos.size());
+            for (OrdersPo po : ordersPos) {
+                Orders order = new Orders(po);
+                ret.add(order);
+            }
+            PageInfo<VoObject> orderPage = PageInfo.of(ret);
+            return new ReturnObject<>(orderPage);
+        } catch (DataAccessException e) {
+            logger.error("selectAllRole: DataAccessException:" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        } catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
+
 }

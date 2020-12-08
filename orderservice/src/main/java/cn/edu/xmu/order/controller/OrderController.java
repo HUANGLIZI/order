@@ -6,13 +6,12 @@ import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
+import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.model.bo.Orders;
-import cn.edu.xmu.order.model.vo.AftersaleOrderVo;
-import cn.edu.xmu.order.model.vo.FreightSnVo;
-import cn.edu.xmu.order.model.vo.MessageVo;
-import cn.edu.xmu.order.model.vo.OrderSimpleVo;
+import cn.edu.xmu.order.model.vo.*;
 import cn.edu.xmu.order.service.OrderService;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +24,8 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Api(value = "支付服务", tags = "payment")
@@ -306,5 +307,62 @@ public class OrderController {
 
     }
 
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-06 12:54
+     */
+    @Audit
+    @ApiOperation(value="获得订单的所有状态")
+    @ApiResponses({
+            @ApiResponse(code = 0,message = "成功")
+    })
+    @GetMapping("/orders/states")
+    public Object getOrderState()
+    {
+        Orders.State[] states=Orders.State.class.getEnumConstants();
+        List<StateVo> stateVos=new ArrayList<StateVo>();
+        for(int i=0;i<states.length;i++){
+            stateVos.add(new StateVo(states[i]));
+        }
+        return ResponseUtil.ok(new ReturnObject<List>(stateVos).getData());
+    }
+
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-06 21:15
+     */
+//    @Audit
+    @ApiOperation(value = "查询用户订单", produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "page", value = "页码", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageSize", value = "每页数目", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "String", name = "orderSn", value = "订单编号", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "Byte", name = "state", value = "订单状态", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "LocalDateTime", name = "beginTime", value = "开始时间", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "LocalDateTime", name = "endTime", value = "结束时间", required = false)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @GetMapping("/orders")
+    public Object selectAllRoles(
+            @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String orderSn,
+            @RequestParam(required = false) Byte state,
+            @RequestParam(required = false) String beginTime,
+            @RequestParam(required = false) String endTime) {
+        logger.debug("selectAllRoles: page = " + page + "  pageSize =" + pageSize);
+//        Long userId = 1L;
+        ReturnObject<PageInfo<VoObject>> returnObject = orderService.selectOrders(userId, page, pageSize, orderSn, state, beginTime, endTime);
+        return Common.getPageRetObject(returnObject);
+    }
 
 }

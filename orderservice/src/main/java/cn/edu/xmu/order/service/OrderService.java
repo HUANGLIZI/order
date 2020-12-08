@@ -3,10 +3,13 @@ package cn.edu.xmu.order.service;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.order.model.OrderDTO;
+import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.model.bo.Orders;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.vo.OrderRetVo;
+import com.github.pagehelper.PageInfo;
 import io.lettuce.core.StrAlgoArgs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class OrderService<OrdersPo> {
+public class OrderService<OrdersPo> implements IOrderService {
     @Autowired
     private OrderDao orderDao;
 
@@ -122,5 +125,35 @@ public class OrderService<OrdersPo> {
         }else {
             return new ReturnObject<>(returnObject.getCode(),returnObject.getErrmsg());
         }
+    }
+
+
+    /**
+     * 通过订单Id查找用户Id
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-06 21:14
+     */
+    @Override
+    public ReturnObject<OrderDTO> findUserIdbyOrderId(Long orderId)
+    {
+        return orderDao.getUserIdbyOrderId(orderId);
+    }
+
+    @Override
+    public ReturnObject<OrderDTO> findShopIdbyOrderId(Long orderId) { return orderDao.getShopIdbyOrderId(orderId); }
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-06 21:13
+     */
+    public ReturnObject<PageInfo<VoObject>> selectOrders(Long userId, Integer pageNum, Integer pageSize,
+                                                         String orderSn, Byte state,
+                                                         String beginTimeStr, String endTimeStr) {
+        ReturnObject<PageInfo<VoObject>> returnObject = orderDao.getOrdersByUserId(userId, pageNum, pageSize,
+                orderSn, state, beginTimeStr, endTimeStr);
+        return returnObject;
     }
 }
