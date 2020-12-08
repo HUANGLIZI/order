@@ -19,7 +19,12 @@
         <module>privilegegateway</module>
         <module>core</module>
         <module>logservice</module>
-        <module>ordermodule</module>
+        <module>goods-client</module>
+        <module>order-client</module>
+        <module>orderservice</module>
+        <module>paymentservice</module>
+        <module>freightservice</module>
+        <module>order-client</module>
     </modules>
     <name>roleprivilege</name>
     <description>the role base privilege mangament systems</description>
