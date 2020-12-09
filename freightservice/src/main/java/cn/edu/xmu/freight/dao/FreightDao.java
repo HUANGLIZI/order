@@ -700,9 +700,27 @@ public class FreightDao{
         return retObj;
     }
 
-
-
-
-
+    /**
+     * 通过shopId获得该店铺默认运费模板
+     *
+     * @author 24320182203227 李子晗
+     * @param shopId 运费模板id
+     * @return ReturnObject运费模板查询结果
+     * createdBy 李子晗 2020/12/9 20:12
+     * modifiedBy 李子晗 2020/12/9 20:12
+     */
+    public ReturnObject getDefaultFreightModelByshopId(Long shopId) {
+        FreightModelPoExample freightModelPoExample = new FreightModelPoExample();
+        FreightModelPoExample.Criteria criteria = freightModelPoExample.createCriteria();
+        criteria.andShopIdEqualTo(shopId);
+        criteria.andDefaultModelEqualTo((byte) 1);
+        List<FreightModelPo> freightModelPo= freightModelPoMapper.selectByExample(freightModelPoExample);
+        //po对象为空，没查到
+        if (freightModelPo.size() == 0) {
+            logger.error("getFreightModelById: 数据库不存在该默认运费模板 freightmodel_id=");
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        return new ReturnObject<>(freightModelPo.get(0));
+    }
 
 }
