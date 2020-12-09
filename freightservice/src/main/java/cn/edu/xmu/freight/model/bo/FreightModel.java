@@ -17,13 +17,13 @@ public class FreightModel implements VoObject, Serializable {
 
     private String name;
 
-    private String defaultModel;
+    private Byte defaultModel;
 
     private Byte type;
 
     private Integer unit;
 
-    private LocalDateTime gmtCreated;
+    private LocalDateTime gmtCreate;
 
     private LocalDateTime gmtModified;
 
@@ -43,7 +43,7 @@ public class FreightModel implements VoObject, Serializable {
         this.defaultModel = po.getDefaultModel();
         this.type = po.getType();
         this.unit = po.getUnit();
-        this.gmtCreated = po.getGmtCreated();
+        this.gmtCreate = po.getGmtCreate();
         this.gmtModified = po.getGmtModified();
     }
 
@@ -83,7 +83,7 @@ public class FreightModel implements VoObject, Serializable {
         po.setId(this.getId());
         po.setShopId(this.getShopId());
         po.setName(this.getName());
-        po.setGmtCreated(this.getGmtCreated());
+        po.setGmtCreate(this.getGmtCreate());
         po.setGmtModified(this.getGmtModified());
         return po;
     }

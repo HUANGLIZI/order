@@ -30,8 +30,9 @@
     <result column="state" jdbcType="TINYINT" property="state" />
     <result column="substate" jdbcType="TINYINT" property="substate" />
     <result column="be_deleted" jdbcType="TINYINT" property="beDeleted" />
-    <result column="gmt_created" jdbcType="TIMESTAMP" property="gmtCreated" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
     <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+    <result column="groupon_id" jdbcType="BIGINT" property="grouponId" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--
@@ -74,7 +75,7 @@
     id, customer_id, shop_id, order_sn, pid, consignee, region_id, address, mobile, message, 
     order_type, freight_price, coupon_id, coupon_activity_id, discount_price, origin_price, 
     presale_id, groupon_discount, rebate_num, confirm_time, shipment_sn, state, substate, 
-    be_deleted, gmt_created, gmt_modified
+    be_deleted, gmt_create, gmt_modified, groupon_id
   </sql>
   <select id="selectByExample" parameterType="cn.edu.xmu.freight.model.po.OrdersPoExample" resultMap="BaseResultMap">
     <!--
@@ -138,8 +139,8 @@
       coupon_activity_id, discount_price, origin_price, 
       presale_id, groupon_discount, rebate_num, 
       confirm_time, shipment_sn, state, 
-      substate, be_deleted, gmt_created, 
-      gmt_modified)
+      substate, be_deleted, gmt_create, 
+      gmt_modified, groupon_id)
     values (#{customerId,jdbcType=BIGINT}, #{shopId,jdbcType=BIGINT}, #{orderSn,jdbcType=VARCHAR}, 
       #{pid,jdbcType=BIGINT}, #{consignee,jdbcType=VARCHAR}, #{regionId,jdbcType=BIGINT}, 
       #{address,jdbcType=VARCHAR}, #{mobile,jdbcType=VARCHAR}, #{message,jdbcType=VARCHAR}, 
@@ -147,8 +148,8 @@
       #{couponActivityId,jdbcType=BIGINT}, #{discountPrice,jdbcType=BIGINT}, #{originPrice,jdbcType=BIGINT}, 
       #{presaleId,jdbcType=BIGINT}, #{grouponDiscount,jdbcType=BIGINT}, #{rebateNum,jdbcType=INTEGER}, 
       #{confirmTime,jdbcType=TIMESTAMP}, #{shipmentSn,jdbcType=VARCHAR}, #{state,jdbcType=TINYINT}, 
-      #{substate,jdbcType=TINYINT}, #{beDeleted,jdbcType=TINYINT}, #{gmtCreated,jdbcType=TIMESTAMP}, 
-      #{gmtModified,jdbcType=TIMESTAMP})
+      #{substate,jdbcType=TINYINT}, #{beDeleted,jdbcType=TINYINT}, #{gmtCreate,jdbcType=TIMESTAMP}, 
+      #{gmtModified,jdbcType=TIMESTAMP}, #{grouponId,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="cn.edu.xmu.freight.model.po.OrdersPo">
     <!--
@@ -229,11 +230,14 @@
       <if test="beDeleted != null">
         be_deleted,
       </if>
-      <if test="gmtCreated != null">
-        gmt_created,
+      <if test="gmtCreate != null">
+        gmt_create,
       </if>
       <if test="gmtModified != null">
         gmt_modified,
+      </if>
+      <if test="grouponId != null">
+        groupon_id,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -306,11 +310,14 @@
       <if test="beDeleted != null">
         #{beDeleted,jdbcType=TINYINT},
       </if>
-      <if test="gmtCreated != null">
-        #{gmtCreated,jdbcType=TIMESTAMP},
+      <if test="gmtCreate != null">
+        #{gmtCreate,jdbcType=TIMESTAMP},
       </if>
       <if test="gmtModified != null">
         #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="grouponId != null">
+        #{grouponId,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -390,11 +397,14 @@
       <if test="beDeleted != null">
         be_deleted = #{beDeleted,jdbcType=TINYINT},
       </if>
-      <if test="gmtCreated != null">
-        gmt_created = #{gmtCreated,jdbcType=TIMESTAMP},
+      <if test="gmtCreate != null">
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
       </if>
       <if test="gmtModified != null">
         gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="grouponId != null">
+        groupon_id = #{grouponId,jdbcType=BIGINT},
       </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
@@ -428,8 +438,9 @@
       state = #{state,jdbcType=TINYINT},
       substate = #{substate,jdbcType=TINYINT},
       be_deleted = #{beDeleted,jdbcType=TINYINT},
-      gmt_created = #{gmtCreated,jdbcType=TIMESTAMP},
-      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP}
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      groupon_id = #{grouponId,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

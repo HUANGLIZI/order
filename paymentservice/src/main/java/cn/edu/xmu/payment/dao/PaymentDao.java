@@ -56,9 +56,6 @@ public class PaymentDao {
         List<Payment> payments =new ArrayList<>(paymentPoS.size());
         for(PaymentPo paymentPo:paymentPoS){
             Payment payment = new Payment(paymentPo);
-            //通过调用其它模块的售后服务获得售后单id
-            payment.setAftersaleId((long) 0x75bcd15);
-
             payments.add(payment);
         }
         return new ReturnObject<>(payments);

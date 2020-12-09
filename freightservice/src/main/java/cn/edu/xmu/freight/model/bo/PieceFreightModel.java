@@ -26,7 +26,7 @@ public class PieceFreightModel implements VoObject, Serializable {
 
     private Long regionId;
 
-    private LocalDateTime gmtCreated;
+    private LocalDateTime gmtCreate;
 
     private LocalDateTime gmtModified;
 
@@ -46,7 +46,7 @@ public class PieceFreightModel implements VoObject, Serializable {
         this.additionalItems = po.getAdditionalItems();
         this.additionalItemsPrice = po.getAdditionalItemsPrice();
         this.regionId = po.getRegionId();
-        this.gmtCreated=po.getGmtCreated();
+        this.gmtCreate=po.getGmtCreate();
         this.gmtModified=po.getGmtModified();
     }
     
@@ -69,7 +69,7 @@ public class PieceFreightModel implements VoObject, Serializable {
         po.setFirstItems(this.getFirstItems());
         po.setFirstItemsPrice(this.getFirstItemsPrice());
         po.setFreightModelId(this.getFreightModelId());
-        po.setGmtCreated(this.getGmtCreated());
+        po.setGmtCreate(this.getGmtCreate());
         po.setGmtModified(this.getGmtModified());
         return po;
 

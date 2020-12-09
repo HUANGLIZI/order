@@ -64,7 +64,7 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/orders/{id}/payments")
     public Object userQueryPayment(@PathVariable("id") Long orderId){
         ReturnObject returnObject =  paymentService.userQueryPayment(orderId);
@@ -95,7 +95,7 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/shops/{shopId}/orders/{id}/payments")
     public Object queryPayment(@PathVariable("shopId") Long shopId,@PathVariable("id") Long orderId){
         ReturnObject returnObject =  paymentService.queryPayment(shopId,orderId);
@@ -276,7 +276,7 @@ public class PaymentController {
 
         Payment payment = vo.createPayment();
         payment.setOrderId(orderId);
-        payment.setGmtCreated(LocalDateTime.now());
+        payment.setGmtCreate(LocalDateTime.now());
 
         ReturnObject<VoObject> retObject = paymentService.createPayment(payment);
         httpServletResponse.setStatus(HttpStatus.CREATED.value());

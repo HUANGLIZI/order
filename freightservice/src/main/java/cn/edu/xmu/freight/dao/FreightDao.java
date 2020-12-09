@@ -125,10 +125,20 @@ public class FreightDao{
     public ReturnObject insertCloneFreightModel(Long shopId, long id) {
 
         ReturnObject<FreightModel> retObj;
-
+        FreightModelPoExample example=new FreightModelPoExample ();
+        FreightModelPoExample.Criteria criteria=example.createCriteria();
+        criteria.andShopIdEqualTo(shopId);
+        criteria.andIdEqualTo(id);
         //根据id先找到对应的模板
-        FreightModelPo cloneFreightModelPo=freightModelPoMapper.selectByPrimaryKey(id);
+        List<FreightModelPo> cloneFreightModelPoS=freightModelPoMapper.selectByExample(example);
+        if(cloneFreightModelPoS.isEmpty()){
+            //资源不存在
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"运费模板不属于该店铺");
+            return retObj;
+        }
 
+        //获得模板
+        FreightModelPo cloneFreightModelPo=cloneFreightModelPoS.get(0);
         //id置为null
         cloneFreightModelPo.setId(null);
 
@@ -142,8 +152,8 @@ public class FreightDao{
             cloneFreightModelPo.setName(cloneFreightModelPo.getName()+ RandomCaptcha.getRandomString(6));
         }
 
-        cloneFreightModelPo.setDefaultModel("false");
-        cloneFreightModelPo.setGmtCreated(LocalDateTime.now());
+        cloneFreightModelPo.setDefaultModel((byte) 0);
+        cloneFreightModelPo.setGmtCreate(LocalDateTime.now());
         cloneFreightModelPo.setGmtModified(LocalDateTime.now());
 
         try {
@@ -165,7 +175,7 @@ public class FreightDao{
             if (Objects.requireNonNull(e.getMessage()).contains("name_uindex")) {
                 //若有重复的角色名则新增失败
                 logger.debug("insertCloneFreightModel: have same freight_model name = " + cloneFreightModelPo.getName());
-                retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, "角色名重复：" + cloneFreightModelPo.getName());
+                retObj = new ReturnObject<>(ResponseCode.FREIGHTNAME_SAME, "运费模板名重复：" + cloneFreightModelPo.getName());
             } else {
                 // 其他数据库错误
                 logger.debug("other sql exception : " + e.getMessage());
@@ -204,7 +214,7 @@ public class FreightDao{
      * @author 24320182203327 张湘君
      * @param oldId 旧rid
      * @param newId 新id
-     * @param type 末班类型
+     * @param type 模板类型
      * @return Object 返回clone出来的对象
      * createdBy 张湘君 2020/11/27 20:12
      * modifiedBy 张湘君 2020/11/27 20:12
@@ -233,7 +243,7 @@ public class FreightDao{
                 //运费模板id置为新的
                 cloneWeightFreightModelPo.setFreightModelId(newId);
 
-                cloneWeightFreightModelPo.setGmtCreated(LocalDateTime.now());
+                cloneWeightFreightModelPo.setGmtCreate(LocalDateTime.now());
                 cloneWeightFreightModelPo.setGmtModified(LocalDateTime.now());
 
                 try {
@@ -286,7 +296,7 @@ public class FreightDao{
                 //运费模板id置为新的
                 clonePieceFreightModelPo.setFreightModelId(newId);
 
-                clonePieceFreightModelPo.setGmtCreated(LocalDateTime.now());
+                clonePieceFreightModelPo.setGmtCreate(LocalDateTime.now());
                 clonePieceFreightModelPo.setGmtModified(LocalDateTime.now());
 
                 try {
@@ -342,7 +352,7 @@ public class FreightDao{
         int ret = freightModelPoMapper.deleteByExample(example);
         if(ret==0){
            //资源不存在
-           returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+           returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"运费模板不属于该店铺");
         }else {
             returnObject=new ReturnObject<>();
             //删出对应的运费模板详细
