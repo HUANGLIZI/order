@@ -6,17 +6,22 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.order.model.OrderDTO;
 import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.order.dao.OrderDao;
+import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
 import cn.edu.xmu.order.model.po.OrderItemPo;
+import cn.edu.xmu.order.model.vo.OrderItemsCreateVo;
 import cn.edu.xmu.order.model.vo.OrderRetVo;
+import cn.edu.xmu.order.model.vo.OrdersVo;
 import com.github.pagehelper.PageInfo;
 import io.lettuce.core.StrAlgoArgs;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -36,10 +41,16 @@ public class OrderService<OrdersPo> implements IOrderService {
         ReturnObject<VoObject> returnObject = null;
         Orders orders=orderDao.findOrderById(id);
         List<OrderItemPo> orderItemPos=orderDao.findOrderItemById(id);
+        List<OrderItems> orderItemsList = new ArrayList<OrderItems>();
+        for (OrderItemPo po: orderItemPos)
+        {
+            OrderItems orderItems = new OrderItems(po);
+            orderItemsList.add(orderItems);
+        }
         if(orders != null) {
             logger.debug("findOrdersById : " + returnObject);
             //OrderRetVo orderRetVo=new orderRetVo();
-            returnObject = new ReturnObject(new OrderRetVo(orders,orderItemPos));
+            returnObject = new ReturnObject(new OrderRetVo(orders,orderItemsList));
         } else {
             logger.debug("findOrdersById: Not Found");
             returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);

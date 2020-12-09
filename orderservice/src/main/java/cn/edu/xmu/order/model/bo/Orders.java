@@ -8,6 +8,7 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,8 +40,10 @@ public class Orders implements VoObject, Serializable {
     private Byte state;
     private Byte substate;
     private Byte beDeleted;
+    private Long grouponId;
     private LocalDateTime gmtCreated;
     private LocalDateTime gmtModified;
+    private List<OrderItems> orderItemsList;
 
     public Orders() {
     }
@@ -91,6 +94,7 @@ public class Orders implements VoObject, Serializable {
     }
     public OrdersPo gotOrdersPo() {
         OrdersPo po = new OrdersPo();
+        po.setGrouponId(grouponId);
         po.setId(id);
         po.setCustomerId(customerId);
         po.setShopId(shopId);

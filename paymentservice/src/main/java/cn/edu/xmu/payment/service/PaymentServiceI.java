@@ -73,9 +73,9 @@ public class PaymentServiceI {
     @Transactional
     public ReturnObject<VoObject> userQueryRefundsByAftersaleId(Long aftersaleId, Long userId)
     {
-        ReturnObject<AftersaleDTO> aftersaleDTO = iAftersaleService.findUserIdbyAftersaleId(aftersaleId);
+        Long retUserId = iAftersaleService.findUserIdbyAftersaleId(aftersaleId).getData();
 //        if (!retUserId.equals(1L))
-        Long retUserId = aftersaleDTO.getData().getCustomerId();
+//        Long retUserId = aftersaleDTO.getData().getCustomerId();
         if (retUserId == null)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         if (!retUserId.equals(userId))
@@ -98,10 +98,10 @@ public class PaymentServiceI {
 
     @Transactional
     public ReturnObject<List<Object>> getOrdersRefundsByAftersaleId(Long aftersaleId, Long shopId){
-        ReturnObject<AftersaleDTO> aftersaleDTO = iAftersaleService.findShopIdbyAftersaleId(aftersaleId);
-        if (aftersaleDTO == null)
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        Long retShopId = aftersaleDTO.getData().getShopId();
+        Long retShopId = iAftersaleService.findShopIdbyAftersaleId(aftersaleId).getData();
+//        if (aftersaleDTO == null)
+//            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+//        Long retShopId = aftersaleDTO.getData().getShopId();
         if (retShopId == null)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         if (!retShopId.equals(shopId))

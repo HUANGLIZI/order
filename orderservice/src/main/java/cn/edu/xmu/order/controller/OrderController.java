@@ -11,6 +11,7 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.model.bo.Orders;
 import cn.edu.xmu.order.model.vo.*;
 import cn.edu.xmu.order.service.OrderService;
+import cn.edu.xmu.order.service.OrderServiceI;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -35,6 +36,9 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private OrderServiceI orderServiceI;
 
     @Autowired
     private HttpServletResponse httpServletResponse;
@@ -336,7 +340,7 @@ public class OrderController {
      * @author Cai Xinlu
      * @date 2020-12-06 21:15
      */
-//    @Audit
+    @Audit
     @ApiOperation(value = "查询用户订单", produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
@@ -351,7 +355,7 @@ public class OrderController {
             @ApiResponse(code = 0, message = "成功"),
     })
     @GetMapping("/orders")
-    public Object selectAllRoles(
+    public Object selectAllOrders(
             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
             @RequestParam(required = false, defaultValue = "1") Integer page,
             @RequestParam(required = false, defaultValue = "10") Integer pageSize,
@@ -360,12 +364,30 @@ public class OrderController {
             @RequestParam(required = false) String beginTime,
             @RequestParam(required = false) String endTime) {
         logger.debug("selectAllRoles: page = " + page + "  pageSize =" + pageSize);
+//        System.out.println(userId);
 //        Long userId = 1L;
         ReturnObject<PageInfo<VoObject>> returnObject = orderService.selectOrders(userId, page, pageSize, orderSn, state, beginTime, endTime);
         return Common.getPageRetObject(returnObject);
     }
 
 
+//    @Audit
+    @ApiOperation(value = "查询用户订单", produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "OrdersVo", name = "ordersVo", value = "创建订单信息", required = true),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @PostMapping("/orders")
+    public Object createOrders(
+            @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+            @Validated @RequestBody OrdersVo ordersVo) {
+//        System.out.println(ordersVo);
+        ReturnObject orders = orderServiceI.createOrders(userId, ordersVo);
+        return new ReturnObject<>(orders);
+    }
     /**
      * 店家查询商户所有订单 (概要)
      *

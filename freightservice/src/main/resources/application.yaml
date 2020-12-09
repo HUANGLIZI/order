@@ -103,5 +103,21 @@ pagehelper:
   helper-dialect: mysql
 
 
-
+#    配置服务信息
+dubbo:
+  application:
+    name: payment-service
+    qos-enable: false
+    qos-accept-foreign-ip: false
+  #    配置注册中心
+  registry:
+    address: nacos://127.0.0.1:8848
+  #    设置协议-协议由提供方指定消费方被动接受
+  protocol:
+    name: dubbo
+    port: 20880
+  #    设置超时时间
+  consumer:
+    timeout: 4000
+    check: false
 

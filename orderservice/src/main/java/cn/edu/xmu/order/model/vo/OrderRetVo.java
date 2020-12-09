@@ -1,5 +1,6 @@
 package cn.edu.xmu.order.model.vo;
 
+import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import io.swagger.annotations.ApiModel;
@@ -37,12 +38,12 @@ public class OrderRetVo {
     private Byte beDeleted;
     private LocalDateTime gmtCreated;
     private LocalDateTime gmtModified;
-    private List<OrderItemPo> orderItems;
+    private List<OrderItems> orderItems;
 
     /**
      * 用Order对象建立Vo对象
      */
-    public OrderRetVo(Orders orders,List<OrderItemPo> orderItemPos) {
+    public OrderRetVo(Orders orders,List<OrderItems> orderItems) {
         this.id = orders.getId();
         this.customerId=orders.getCustomerId();
         this.shopId=orders.getShopId();
@@ -69,7 +70,7 @@ public class OrderRetVo {
         this.gmtModified = orders.getGmtModified();
         this.presaleId=orders.getPresaleId();
         this.substate=orders.getSubstate();
-        this.orderItems=orderItemPos;
+        this.orderItems=orderItems;
     }
 
 
@@ -100,5 +101,6 @@ public class OrderRetVo {
         this.gmtModified = orders.getGmtModified();
         this.presaleId=orders.getPresaleId();
         this.substate=orders.getSubstate();
+        this.orderItems = orders.getOrderItemsList();
     }
 }
