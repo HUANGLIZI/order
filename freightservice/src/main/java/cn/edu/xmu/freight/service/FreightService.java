@@ -116,7 +116,7 @@ public class FreightService {
      * 删除运费模板，需同步删除与商品的
      *
      * @author 24320182203327 张湘君
-     * @param shopId 店铺rid
+     * @param shopId 店铺id
      * @param id 模板id
      * @return ReturnObject<Object> 删除结果
      * createdBy 张湘君 2020/11/28 20:12

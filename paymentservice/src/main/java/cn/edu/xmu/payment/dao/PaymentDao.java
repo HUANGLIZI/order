@@ -56,9 +56,6 @@ public class PaymentDao {
         List<Payment> payments =new ArrayList<>(paymentPoS.size());
         for(PaymentPo paymentPo:paymentPoS){
             Payment payment = new Payment(paymentPo);
-            //通过调用其它模块的售后服务获得售后单id
-            payment.setAftersaleId((long) 0x75bcd15);
-
             payments.add(payment);
         }
         return new ReturnObject<>(payments);
@@ -78,7 +75,7 @@ public class PaymentDao {
         //如果该商店不拥有这个order则查不到
         if(!isOrderBelongToShop(shopId,orderId)){
             logger.error(" queryPaymentById: 数据库不存在该支付单 orderId="+orderId);
-            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
 
 
@@ -256,7 +253,7 @@ public class PaymentDao {
             if (Objects.requireNonNull(e.getMessage()).contains("payment.pay_sn_uindex")) {
                 //若有重复的流水号则新增失败
                 logger.debug("updateRole: have same paySn = " + paymentPo.getPaySn());
-                returnObject = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("流水号重复：" + paymentPo.toString()));
+                returnObject = new ReturnObject<>(ResponseCode.PAYSN_SAME, String.format("流水号重复：" + paymentPo.toString()));
             } else {
                 // 其他数据库错误
                 logger.debug("other sql exception : " + e.getMessage());

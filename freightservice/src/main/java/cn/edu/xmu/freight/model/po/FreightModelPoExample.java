@@ -395,62 +395,52 @@ public class FreightModelPoExample {
             return (Criteria) this;
         }
 
-        public Criteria andDefaultModelEqualTo(String value) {
+        public Criteria andDefaultModelEqualTo(Byte value) {
             addCriterion("default_model =", value, "defaultModel");
             return (Criteria) this;
         }
 
-        public Criteria andDefaultModelNotEqualTo(String value) {
+        public Criteria andDefaultModelNotEqualTo(Byte value) {
             addCriterion("default_model <>", value, "defaultModel");
             return (Criteria) this;
         }
 
-        public Criteria andDefaultModelGreaterThan(String value) {
+        public Criteria andDefaultModelGreaterThan(Byte value) {
             addCriterion("default_model >", value, "defaultModel");
             return (Criteria) this;
         }
 
-        public Criteria andDefaultModelGreaterThanOrEqualTo(String value) {
+        public Criteria andDefaultModelGreaterThanOrEqualTo(Byte value) {
             addCriterion("default_model >=", value, "defaultModel");
             return (Criteria) this;
         }
 
-        public Criteria andDefaultModelLessThan(String value) {
+        public Criteria andDefaultModelLessThan(Byte value) {
             addCriterion("default_model <", value, "defaultModel");
             return (Criteria) this;
         }
 
-        public Criteria andDefaultModelLessThanOrEqualTo(String value) {
+        public Criteria andDefaultModelLessThanOrEqualTo(Byte value) {
             addCriterion("default_model <=", value, "defaultModel");
             return (Criteria) this;
         }
 
-        public Criteria andDefaultModelLike(String value) {
-            addCriterion("default_model like", value, "defaultModel");
-            return (Criteria) this;
-        }
-
-        public Criteria andDefaultModelNotLike(String value) {
-            addCriterion("default_model not like", value, "defaultModel");
-            return (Criteria) this;
-        }
-
-        public Criteria andDefaultModelIn(List<String> values) {
+        public Criteria andDefaultModelIn(List<Byte> values) {
             addCriterion("default_model in", values, "defaultModel");
             return (Criteria) this;
         }
 
-        public Criteria andDefaultModelNotIn(List<String> values) {
+        public Criteria andDefaultModelNotIn(List<Byte> values) {
             addCriterion("default_model not in", values, "defaultModel");
             return (Criteria) this;
         }
 
-        public Criteria andDefaultModelBetween(String value1, String value2) {
+        public Criteria andDefaultModelBetween(Byte value1, Byte value2) {
             addCriterion("default_model between", value1, value2, "defaultModel");
             return (Criteria) this;
         }
 
-        public Criteria andDefaultModelNotBetween(String value1, String value2) {
+        public Criteria andDefaultModelNotBetween(Byte value1, Byte value2) {
             addCriterion("default_model not between", value1, value2, "defaultModel");
             return (Criteria) this;
         }
@@ -575,63 +565,63 @@ public class FreightModelPoExample {
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedIsNull() {
-            addCriterion("gmt_created is null");
+        public Criteria andGmtCreateIsNull() {
+            addCriterion("gmt_create is null");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedIsNotNull() {
-            addCriterion("gmt_created is not null");
+        public Criteria andGmtCreateIsNotNull() {
+            addCriterion("gmt_create is not null");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedEqualTo(LocalDateTime value) {
-            addCriterion("gmt_created =", value, "gmtCreated");
+        public Criteria andGmtCreateEqualTo(LocalDateTime value) {
+            addCriterion("gmt_create =", value, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedNotEqualTo(LocalDateTime value) {
-            addCriterion("gmt_created <>", value, "gmtCreated");
+        public Criteria andGmtCreateNotEqualTo(LocalDateTime value) {
+            addCriterion("gmt_create <>", value, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedGreaterThan(LocalDateTime value) {
-            addCriterion("gmt_created >", value, "gmtCreated");
+        public Criteria andGmtCreateGreaterThan(LocalDateTime value) {
+            addCriterion("gmt_create >", value, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedGreaterThanOrEqualTo(LocalDateTime value) {
-            addCriterion("gmt_created >=", value, "gmtCreated");
+        public Criteria andGmtCreateGreaterThanOrEqualTo(LocalDateTime value) {
+            addCriterion("gmt_create >=", value, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedLessThan(LocalDateTime value) {
-            addCriterion("gmt_created <", value, "gmtCreated");
+        public Criteria andGmtCreateLessThan(LocalDateTime value) {
+            addCriterion("gmt_create <", value, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedLessThanOrEqualTo(LocalDateTime value) {
-            addCriterion("gmt_created <=", value, "gmtCreated");
+        public Criteria andGmtCreateLessThanOrEqualTo(LocalDateTime value) {
+            addCriterion("gmt_create <=", value, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedIn(List<LocalDateTime> values) {
-            addCriterion("gmt_created in", values, "gmtCreated");
+        public Criteria andGmtCreateIn(List<LocalDateTime> values) {
+            addCriterion("gmt_create in", values, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedNotIn(List<LocalDateTime> values) {
-            addCriterion("gmt_created not in", values, "gmtCreated");
+        public Criteria andGmtCreateNotIn(List<LocalDateTime> values) {
+            addCriterion("gmt_create not in", values, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedBetween(LocalDateTime value1, LocalDateTime value2) {
-            addCriterion("gmt_created between", value1, value2, "gmtCreated");
+        public Criteria andGmtCreateBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("gmt_create between", value1, value2, "gmtCreate");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreatedNotBetween(LocalDateTime value1, LocalDateTime value2) {
-            addCriterion("gmt_created not between", value1, value2, "gmtCreated");
+        public Criteria andGmtCreateNotBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("gmt_create not between", value1, value2, "gmtCreate");
             return (Criteria) this;
         }
 

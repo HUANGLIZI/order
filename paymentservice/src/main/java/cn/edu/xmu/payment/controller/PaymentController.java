@@ -6,10 +6,13 @@ import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
+import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.bo.Refund;
+import cn.edu.xmu.payment.model.vo.PayPatternVo;
 import cn.edu.xmu.payment.model.vo.PaymentVo;
+import cn.edu.xmu.payment.model.vo.StateVo;
 import cn.edu.xmu.payment.model.vo.amountVo;
 import cn.edu.xmu.payment.service.PaymentService;
 import cn.edu.xmu.payment.service.PaymentServiceI;
@@ -24,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Api(value = "支付服务", tags = "payment")
 @RestController /*Restful的Controller对象*/
@@ -59,7 +64,7 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/orders/{id}/payments")
     public Object userQueryPayment(@PathVariable("id") Long orderId){
         ReturnObject returnObject =  paymentService.userQueryPayment(orderId);
@@ -90,7 +95,7 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/shops/{shopId}/orders/{id}/payments")
     public Object queryPayment(@PathVariable("shopId") Long shopId,@PathVariable("id") Long orderId){
         ReturnObject returnObject =  paymentService.queryPayment(shopId,orderId);
@@ -271,7 +276,7 @@ public class PaymentController {
 
         Payment payment = vo.createPayment();
         payment.setOrderId(orderId);
-        payment.setGmtCreated(LocalDateTime.now());
+        payment.setGmtCreate(LocalDateTime.now());
 
         ReturnObject<VoObject> retObject = paymentService.createPayment(payment);
         httpServletResponse.setStatus(HttpStatus.CREATED.value());
@@ -369,6 +374,55 @@ public class PaymentController {
 //        System.out.println("userId" + userId);
         ReturnObject<VoObject> returnObject = paymentServiceI.userQueryRefundsByAftersaleId(aftersaleId, userId);
         return returnObject;
+    }
+
+
+
+    /**
+     * 获得支付单的所有状态
+     *
+     * @author 24320182203323 李明明
+     */
+    @ApiOperation(value = "获得支付单的所有状态",produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    //@Audit
+    @GetMapping("/states")
+    public Object getAllPaymentsStates()
+    {
+        Payment.State[] states = Payment.State.class.getEnumConstants();
+        List<StateVo> stateVos=new ArrayList<StateVo>();
+        for(int i=0;i<states.length;i++){
+            stateVos.add(new StateVo(states[i]));
+        }
+        return ResponseUtil.ok(new ReturnObject<List>(stateVos).getData());
+    }
+
+    /**
+     * 获得支付渠道，目前只返回002 模拟支付渠道
+     *
+     * @author 24320182203323 李明明
+     */
+    @ApiOperation(value = "获得支付渠道，目前只返回002 模拟支付渠道",produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    //@Audit
+    @GetMapping("/patterns")
+    public Object userQueryPayment()
+    {
+        List<PayPatternVo> payPatternVos=new ArrayList<PayPatternVo>();
+        payPatternVos.add(new PayPatternVo("002","模拟支付渠道"));
+        return ResponseUtil.ok(new ReturnObject<List>(payPatternVos).getData());
     }
 
 }

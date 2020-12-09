@@ -1,6 +1,5 @@
 package cn.edu.xmu.freight.model.po;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -196,243 +195,63 @@ public class PaymentPoExample {
             criteria.add(new Criterion(condition, value1, value2));
         }
 
-        public Criteria andPaymentIdIsNull() {
-            addCriterion("payment_id is null");
+        public Criteria andIdIsNull() {
+            addCriterion("id is null");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentIdIsNotNull() {
-            addCriterion("payment_id is not null");
+        public Criteria andIdIsNotNull() {
+            addCriterion("id is not null");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentIdEqualTo(Short value) {
-            addCriterion("payment_id =", value, "paymentId");
+        public Criteria andIdEqualTo(Long value) {
+            addCriterion("id =", value, "id");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentIdNotEqualTo(Short value) {
-            addCriterion("payment_id <>", value, "paymentId");
+        public Criteria andIdNotEqualTo(Long value) {
+            addCriterion("id <>", value, "id");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentIdGreaterThan(Short value) {
-            addCriterion("payment_id >", value, "paymentId");
+        public Criteria andIdGreaterThan(Long value) {
+            addCriterion("id >", value, "id");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentIdGreaterThanOrEqualTo(Short value) {
-            addCriterion("payment_id >=", value, "paymentId");
+        public Criteria andIdGreaterThanOrEqualTo(Long value) {
+            addCriterion("id >=", value, "id");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentIdLessThan(Short value) {
-            addCriterion("payment_id <", value, "paymentId");
+        public Criteria andIdLessThan(Long value) {
+            addCriterion("id <", value, "id");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentIdLessThanOrEqualTo(Short value) {
-            addCriterion("payment_id <=", value, "paymentId");
+        public Criteria andIdLessThanOrEqualTo(Long value) {
+            addCriterion("id <=", value, "id");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentIdIn(List<Short> values) {
-            addCriterion("payment_id in", values, "paymentId");
+        public Criteria andIdIn(List<Long> values) {
+            addCriterion("id in", values, "id");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentIdNotIn(List<Short> values) {
-            addCriterion("payment_id not in", values, "paymentId");
+        public Criteria andIdNotIn(List<Long> values) {
+            addCriterion("id not in", values, "id");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentIdBetween(Short value1, Short value2) {
-            addCriterion("payment_id between", value1, value2, "paymentId");
+        public Criteria andIdBetween(Long value1, Long value2) {
+            addCriterion("id between", value1, value2, "id");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentIdNotBetween(Short value1, Short value2) {
-            addCriterion("payment_id not between", value1, value2, "paymentId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCustomerIdIsNull() {
-            addCriterion("customer_id is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andCustomerIdIsNotNull() {
-            addCriterion("customer_id is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andCustomerIdEqualTo(Short value) {
-            addCriterion("customer_id =", value, "customerId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCustomerIdNotEqualTo(Short value) {
-            addCriterion("customer_id <>", value, "customerId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCustomerIdGreaterThan(Short value) {
-            addCriterion("customer_id >", value, "customerId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCustomerIdGreaterThanOrEqualTo(Short value) {
-            addCriterion("customer_id >=", value, "customerId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCustomerIdLessThan(Short value) {
-            addCriterion("customer_id <", value, "customerId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCustomerIdLessThanOrEqualTo(Short value) {
-            addCriterion("customer_id <=", value, "customerId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCustomerIdIn(List<Short> values) {
-            addCriterion("customer_id in", values, "customerId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCustomerIdNotIn(List<Short> values) {
-            addCriterion("customer_id not in", values, "customerId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCustomerIdBetween(Short value1, Short value2) {
-            addCriterion("customer_id between", value1, value2, "customerId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCustomerIdNotBetween(Short value1, Short value2) {
-            addCriterion("customer_id not between", value1, value2, "customerId");
-            return (Criteria) this;
-        }
-
-        public Criteria andStaffIdIsNull() {
-            addCriterion("staff_id is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andStaffIdIsNotNull() {
-            addCriterion("staff_id is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andStaffIdEqualTo(Byte value) {
-            addCriterion("staff_id =", value, "staffId");
-            return (Criteria) this;
-        }
-
-        public Criteria andStaffIdNotEqualTo(Byte value) {
-            addCriterion("staff_id <>", value, "staffId");
-            return (Criteria) this;
-        }
-
-        public Criteria andStaffIdGreaterThan(Byte value) {
-            addCriterion("staff_id >", value, "staffId");
-            return (Criteria) this;
-        }
-
-        public Criteria andStaffIdGreaterThanOrEqualTo(Byte value) {
-            addCriterion("staff_id >=", value, "staffId");
-            return (Criteria) this;
-        }
-
-        public Criteria andStaffIdLessThan(Byte value) {
-            addCriterion("staff_id <", value, "staffId");
-            return (Criteria) this;
-        }
-
-        public Criteria andStaffIdLessThanOrEqualTo(Byte value) {
-            addCriterion("staff_id <=", value, "staffId");
-            return (Criteria) this;
-        }
-
-        public Criteria andStaffIdIn(List<Byte> values) {
-            addCriterion("staff_id in", values, "staffId");
-            return (Criteria) this;
-        }
-
-        public Criteria andStaffIdNotIn(List<Byte> values) {
-            addCriterion("staff_id not in", values, "staffId");
-            return (Criteria) this;
-        }
-
-        public Criteria andStaffIdBetween(Byte value1, Byte value2) {
-            addCriterion("staff_id between", value1, value2, "staffId");
-            return (Criteria) this;
-        }
-
-        public Criteria andStaffIdNotBetween(Byte value1, Byte value2) {
-            addCriterion("staff_id not between", value1, value2, "staffId");
-            return (Criteria) this;
-        }
-
-        public Criteria andRentalIdIsNull() {
-            addCriterion("rental_id is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andRentalIdIsNotNull() {
-            addCriterion("rental_id is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andRentalIdEqualTo(Integer value) {
-            addCriterion("rental_id =", value, "rentalId");
-            return (Criteria) this;
-        }
-
-        public Criteria andRentalIdNotEqualTo(Integer value) {
-            addCriterion("rental_id <>", value, "rentalId");
-            return (Criteria) this;
-        }
-
-        public Criteria andRentalIdGreaterThan(Integer value) {
-            addCriterion("rental_id >", value, "rentalId");
-            return (Criteria) this;
-        }
-
-        public Criteria andRentalIdGreaterThanOrEqualTo(Integer value) {
-            addCriterion("rental_id >=", value, "rentalId");
-            return (Criteria) this;
-        }
-
-        public Criteria andRentalIdLessThan(Integer value) {
-            addCriterion("rental_id <", value, "rentalId");
-            return (Criteria) this;
-        }
-
-        public Criteria andRentalIdLessThanOrEqualTo(Integer value) {
-            addCriterion("rental_id <=", value, "rentalId");
-            return (Criteria) this;
-        }
-
-        public Criteria andRentalIdIn(List<Integer> values) {
-            addCriterion("rental_id in", values, "rentalId");
-            return (Criteria) this;
-        }
-
-        public Criteria andRentalIdNotIn(List<Integer> values) {
-            addCriterion("rental_id not in", values, "rentalId");
-            return (Criteria) this;
-        }
-
-        public Criteria andRentalIdBetween(Integer value1, Integer value2) {
-            addCriterion("rental_id between", value1, value2, "rentalId");
-            return (Criteria) this;
-        }
-
-        public Criteria andRentalIdNotBetween(Integer value1, Integer value2) {
-            addCriterion("rental_id not between", value1, value2, "rentalId");
+        public Criteria andIdNotBetween(Long value1, Long value2) {
+            addCriterion("id not between", value1, value2, "id");
             return (Criteria) this;
         }
 
@@ -446,173 +265,723 @@ public class PaymentPoExample {
             return (Criteria) this;
         }
 
-        public Criteria andAmountEqualTo(BigDecimal value) {
+        public Criteria andAmountEqualTo(Long value) {
             addCriterion("amount =", value, "amount");
             return (Criteria) this;
         }
 
-        public Criteria andAmountNotEqualTo(BigDecimal value) {
+        public Criteria andAmountNotEqualTo(Long value) {
             addCriterion("amount <>", value, "amount");
             return (Criteria) this;
         }
 
-        public Criteria andAmountGreaterThan(BigDecimal value) {
+        public Criteria andAmountGreaterThan(Long value) {
             addCriterion("amount >", value, "amount");
             return (Criteria) this;
         }
 
-        public Criteria andAmountGreaterThanOrEqualTo(BigDecimal value) {
+        public Criteria andAmountGreaterThanOrEqualTo(Long value) {
             addCriterion("amount >=", value, "amount");
             return (Criteria) this;
         }
 
-        public Criteria andAmountLessThan(BigDecimal value) {
+        public Criteria andAmountLessThan(Long value) {
             addCriterion("amount <", value, "amount");
             return (Criteria) this;
         }
 
-        public Criteria andAmountLessThanOrEqualTo(BigDecimal value) {
+        public Criteria andAmountLessThanOrEqualTo(Long value) {
             addCriterion("amount <=", value, "amount");
             return (Criteria) this;
         }
 
-        public Criteria andAmountIn(List<BigDecimal> values) {
+        public Criteria andAmountIn(List<Long> values) {
             addCriterion("amount in", values, "amount");
             return (Criteria) this;
         }
 
-        public Criteria andAmountNotIn(List<BigDecimal> values) {
+        public Criteria andAmountNotIn(List<Long> values) {
             addCriterion("amount not in", values, "amount");
             return (Criteria) this;
         }
 
-        public Criteria andAmountBetween(BigDecimal value1, BigDecimal value2) {
+        public Criteria andAmountBetween(Long value1, Long value2) {
             addCriterion("amount between", value1, value2, "amount");
             return (Criteria) this;
         }
 
-        public Criteria andAmountNotBetween(BigDecimal value1, BigDecimal value2) {
+        public Criteria andAmountNotBetween(Long value1, Long value2) {
             addCriterion("amount not between", value1, value2, "amount");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentDateIsNull() {
-            addCriterion("payment_date is null");
+        public Criteria andActualAmountIsNull() {
+            addCriterion("actual_amount is null");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentDateIsNotNull() {
-            addCriterion("payment_date is not null");
+        public Criteria andActualAmountIsNotNull() {
+            addCriterion("actual_amount is not null");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentDateEqualTo(LocalDateTime value) {
-            addCriterion("payment_date =", value, "paymentDate");
+        public Criteria andActualAmountEqualTo(Long value) {
+            addCriterion("actual_amount =", value, "actualAmount");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentDateNotEqualTo(LocalDateTime value) {
-            addCriterion("payment_date <>", value, "paymentDate");
+        public Criteria andActualAmountNotEqualTo(Long value) {
+            addCriterion("actual_amount <>", value, "actualAmount");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentDateGreaterThan(LocalDateTime value) {
-            addCriterion("payment_date >", value, "paymentDate");
+        public Criteria andActualAmountGreaterThan(Long value) {
+            addCriterion("actual_amount >", value, "actualAmount");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentDateGreaterThanOrEqualTo(LocalDateTime value) {
-            addCriterion("payment_date >=", value, "paymentDate");
+        public Criteria andActualAmountGreaterThanOrEqualTo(Long value) {
+            addCriterion("actual_amount >=", value, "actualAmount");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentDateLessThan(LocalDateTime value) {
-            addCriterion("payment_date <", value, "paymentDate");
+        public Criteria andActualAmountLessThan(Long value) {
+            addCriterion("actual_amount <", value, "actualAmount");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentDateLessThanOrEqualTo(LocalDateTime value) {
-            addCriterion("payment_date <=", value, "paymentDate");
+        public Criteria andActualAmountLessThanOrEqualTo(Long value) {
+            addCriterion("actual_amount <=", value, "actualAmount");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentDateIn(List<LocalDateTime> values) {
-            addCriterion("payment_date in", values, "paymentDate");
+        public Criteria andActualAmountIn(List<Long> values) {
+            addCriterion("actual_amount in", values, "actualAmount");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentDateNotIn(List<LocalDateTime> values) {
-            addCriterion("payment_date not in", values, "paymentDate");
+        public Criteria andActualAmountNotIn(List<Long> values) {
+            addCriterion("actual_amount not in", values, "actualAmount");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentDateBetween(LocalDateTime value1, LocalDateTime value2) {
-            addCriterion("payment_date between", value1, value2, "paymentDate");
+        public Criteria andActualAmountBetween(Long value1, Long value2) {
+            addCriterion("actual_amount between", value1, value2, "actualAmount");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentDateNotBetween(LocalDateTime value1, LocalDateTime value2) {
-            addCriterion("payment_date not between", value1, value2, "paymentDate");
+        public Criteria andActualAmountNotBetween(Long value1, Long value2) {
+            addCriterion("actual_amount not between", value1, value2, "actualAmount");
             return (Criteria) this;
         }
 
-        public Criteria andLastUpdateIsNull() {
-            addCriterion("last_update is null");
+        public Criteria andPaymentPatternIsNull() {
+            addCriterion("payment_pattern is null");
             return (Criteria) this;
         }
 
-        public Criteria andLastUpdateIsNotNull() {
-            addCriterion("last_update is not null");
+        public Criteria andPaymentPatternIsNotNull() {
+            addCriterion("payment_pattern is not null");
             return (Criteria) this;
         }
 
-        public Criteria andLastUpdateEqualTo(LocalDateTime value) {
-            addCriterion("last_update =", value, "lastUpdate");
+        public Criteria andPaymentPatternEqualTo(Byte value) {
+            addCriterion("payment_pattern =", value, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andLastUpdateNotEqualTo(LocalDateTime value) {
-            addCriterion("last_update <>", value, "lastUpdate");
+        public Criteria andPaymentPatternNotEqualTo(Byte value) {
+            addCriterion("payment_pattern <>", value, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andLastUpdateGreaterThan(LocalDateTime value) {
-            addCriterion("last_update >", value, "lastUpdate");
+        public Criteria andPaymentPatternGreaterThan(Byte value) {
+            addCriterion("payment_pattern >", value, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andLastUpdateGreaterThanOrEqualTo(LocalDateTime value) {
-            addCriterion("last_update >=", value, "lastUpdate");
+        public Criteria andPaymentPatternGreaterThanOrEqualTo(Byte value) {
+            addCriterion("payment_pattern >=", value, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andLastUpdateLessThan(LocalDateTime value) {
-            addCriterion("last_update <", value, "lastUpdate");
+        public Criteria andPaymentPatternLessThan(Byte value) {
+            addCriterion("payment_pattern <", value, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andLastUpdateLessThanOrEqualTo(LocalDateTime value) {
-            addCriterion("last_update <=", value, "lastUpdate");
+        public Criteria andPaymentPatternLessThanOrEqualTo(Byte value) {
+            addCriterion("payment_pattern <=", value, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andLastUpdateIn(List<LocalDateTime> values) {
-            addCriterion("last_update in", values, "lastUpdate");
+        public Criteria andPaymentPatternIn(List<Byte> values) {
+            addCriterion("payment_pattern in", values, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andLastUpdateNotIn(List<LocalDateTime> values) {
-            addCriterion("last_update not in", values, "lastUpdate");
+        public Criteria andPaymentPatternNotIn(List<Byte> values) {
+            addCriterion("payment_pattern not in", values, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andLastUpdateBetween(LocalDateTime value1, LocalDateTime value2) {
-            addCriterion("last_update between", value1, value2, "lastUpdate");
+        public Criteria andPaymentPatternBetween(Byte value1, Byte value2) {
+            addCriterion("payment_pattern between", value1, value2, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andLastUpdateNotBetween(LocalDateTime value1, LocalDateTime value2) {
-            addCriterion("last_update not between", value1, value2, "lastUpdate");
+        public Criteria andPaymentPatternNotBetween(Byte value1, Byte value2) {
+            addCriterion("payment_pattern not between", value1, value2, "paymentPattern");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayTimeIsNull() {
+            addCriterion("pay_time is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayTimeIsNotNull() {
+            addCriterion("pay_time is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayTimeEqualTo(LocalDateTime value) {
+            addCriterion("pay_time =", value, "payTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayTimeNotEqualTo(LocalDateTime value) {
+            addCriterion("pay_time <>", value, "payTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayTimeGreaterThan(LocalDateTime value) {
+            addCriterion("pay_time >", value, "payTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayTimeGreaterThanOrEqualTo(LocalDateTime value) {
+            addCriterion("pay_time >=", value, "payTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayTimeLessThan(LocalDateTime value) {
+            addCriterion("pay_time <", value, "payTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayTimeLessThanOrEqualTo(LocalDateTime value) {
+            addCriterion("pay_time <=", value, "payTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayTimeIn(List<LocalDateTime> values) {
+            addCriterion("pay_time in", values, "payTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayTimeNotIn(List<LocalDateTime> values) {
+            addCriterion("pay_time not in", values, "payTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayTimeBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("pay_time between", value1, value2, "payTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayTimeNotBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("pay_time not between", value1, value2, "payTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaySnIsNull() {
+            addCriterion("pay_sn is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaySnIsNotNull() {
+            addCriterion("pay_sn is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaySnEqualTo(String value) {
+            addCriterion("pay_sn =", value, "paySn");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaySnNotEqualTo(String value) {
+            addCriterion("pay_sn <>", value, "paySn");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaySnGreaterThan(String value) {
+            addCriterion("pay_sn >", value, "paySn");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaySnGreaterThanOrEqualTo(String value) {
+            addCriterion("pay_sn >=", value, "paySn");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaySnLessThan(String value) {
+            addCriterion("pay_sn <", value, "paySn");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaySnLessThanOrEqualTo(String value) {
+            addCriterion("pay_sn <=", value, "paySn");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaySnLike(String value) {
+            addCriterion("pay_sn like", value, "paySn");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaySnNotLike(String value) {
+            addCriterion("pay_sn not like", value, "paySn");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaySnIn(List<String> values) {
+            addCriterion("pay_sn in", values, "paySn");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaySnNotIn(List<String> values) {
+            addCriterion("pay_sn not in", values, "paySn");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaySnBetween(String value1, String value2) {
+            addCriterion("pay_sn between", value1, value2, "paySn");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaySnNotBetween(String value1, String value2) {
+            addCriterion("pay_sn not between", value1, value2, "paySn");
+            return (Criteria) this;
+        }
+
+        public Criteria andBeginTimeIsNull() {
+            addCriterion("begin_time is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andBeginTimeIsNotNull() {
+            addCriterion("begin_time is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andBeginTimeEqualTo(LocalDateTime value) {
+            addCriterion("begin_time =", value, "beginTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andBeginTimeNotEqualTo(LocalDateTime value) {
+            addCriterion("begin_time <>", value, "beginTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andBeginTimeGreaterThan(LocalDateTime value) {
+            addCriterion("begin_time >", value, "beginTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andBeginTimeGreaterThanOrEqualTo(LocalDateTime value) {
+            addCriterion("begin_time >=", value, "beginTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andBeginTimeLessThan(LocalDateTime value) {
+            addCriterion("begin_time <", value, "beginTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andBeginTimeLessThanOrEqualTo(LocalDateTime value) {
+            addCriterion("begin_time <=", value, "beginTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andBeginTimeIn(List<LocalDateTime> values) {
+            addCriterion("begin_time in", values, "beginTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andBeginTimeNotIn(List<LocalDateTime> values) {
+            addCriterion("begin_time not in", values, "beginTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andBeginTimeBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("begin_time between", value1, value2, "beginTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andBeginTimeNotBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("begin_time not between", value1, value2, "beginTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeIsNull() {
+            addCriterion("end_time is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeIsNotNull() {
+            addCriterion("end_time is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeEqualTo(LocalDateTime value) {
+            addCriterion("end_time =", value, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeNotEqualTo(LocalDateTime value) {
+            addCriterion("end_time <>", value, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeGreaterThan(LocalDateTime value) {
+            addCriterion("end_time >", value, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeGreaterThanOrEqualTo(LocalDateTime value) {
+            addCriterion("end_time >=", value, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeLessThan(LocalDateTime value) {
+            addCriterion("end_time <", value, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeLessThanOrEqualTo(LocalDateTime value) {
+            addCriterion("end_time <=", value, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeIn(List<LocalDateTime> values) {
+            addCriterion("end_time in", values, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeNotIn(List<LocalDateTime> values) {
+            addCriterion("end_time not in", values, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("end_time between", value1, value2, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andEndTimeNotBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("end_time not between", value1, value2, "endTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andOrderIdIsNull() {
+            addCriterion("order_id is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andOrderIdIsNotNull() {
+            addCriterion("order_id is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andOrderIdEqualTo(Long value) {
+            addCriterion("order_id =", value, "orderId");
+            return (Criteria) this;
+        }
+
+        public Criteria andOrderIdNotEqualTo(Long value) {
+            addCriterion("order_id <>", value, "orderId");
+            return (Criteria) this;
+        }
+
+        public Criteria andOrderIdGreaterThan(Long value) {
+            addCriterion("order_id >", value, "orderId");
+            return (Criteria) this;
+        }
+
+        public Criteria andOrderIdGreaterThanOrEqualTo(Long value) {
+            addCriterion("order_id >=", value, "orderId");
+            return (Criteria) this;
+        }
+
+        public Criteria andOrderIdLessThan(Long value) {
+            addCriterion("order_id <", value, "orderId");
+            return (Criteria) this;
+        }
+
+        public Criteria andOrderIdLessThanOrEqualTo(Long value) {
+            addCriterion("order_id <=", value, "orderId");
+            return (Criteria) this;
+        }
+
+        public Criteria andOrderIdIn(List<Long> values) {
+            addCriterion("order_id in", values, "orderId");
+            return (Criteria) this;
+        }
+
+        public Criteria andOrderIdNotIn(List<Long> values) {
+            addCriterion("order_id not in", values, "orderId");
+            return (Criteria) this;
+        }
+
+        public Criteria andOrderIdBetween(Long value1, Long value2) {
+            addCriterion("order_id between", value1, value2, "orderId");
+            return (Criteria) this;
+        }
+
+        public Criteria andOrderIdNotBetween(Long value1, Long value2) {
+            addCriterion("order_id not between", value1, value2, "orderId");
+            return (Criteria) this;
+        }
+
+        public Criteria andStateIsNull() {
+            addCriterion("state is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andStateIsNotNull() {
+            addCriterion("state is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andStateEqualTo(Byte value) {
+            addCriterion("state =", value, "state");
+            return (Criteria) this;
+        }
+
+        public Criteria andStateNotEqualTo(Byte value) {
+            addCriterion("state <>", value, "state");
+            return (Criteria) this;
+        }
+
+        public Criteria andStateGreaterThan(Byte value) {
+            addCriterion("state >", value, "state");
+            return (Criteria) this;
+        }
+
+        public Criteria andStateGreaterThanOrEqualTo(Byte value) {
+            addCriterion("state >=", value, "state");
+            return (Criteria) this;
+        }
+
+        public Criteria andStateLessThan(Byte value) {
+            addCriterion("state <", value, "state");
+            return (Criteria) this;
+        }
+
+        public Criteria andStateLessThanOrEqualTo(Byte value) {
+            addCriterion("state <=", value, "state");
+            return (Criteria) this;
+        }
+
+        public Criteria andStateIn(List<Byte> values) {
+            addCriterion("state in", values, "state");
+            return (Criteria) this;
+        }
+
+        public Criteria andStateNotIn(List<Byte> values) {
+            addCriterion("state not in", values, "state");
+            return (Criteria) this;
+        }
+
+        public Criteria andStateBetween(Byte value1, Byte value2) {
+            addCriterion("state between", value1, value2, "state");
+            return (Criteria) this;
+        }
+
+        public Criteria andStateNotBetween(Byte value1, Byte value2) {
+            addCriterion("state not between", value1, value2, "state");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtCreateIsNull() {
+            addCriterion("gmt_create is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtCreateIsNotNull() {
+            addCriterion("gmt_create is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtCreateEqualTo(LocalDateTime value) {
+            addCriterion("gmt_create =", value, "gmtCreate");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtCreateNotEqualTo(LocalDateTime value) {
+            addCriterion("gmt_create <>", value, "gmtCreate");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtCreateGreaterThan(LocalDateTime value) {
+            addCriterion("gmt_create >", value, "gmtCreate");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtCreateGreaterThanOrEqualTo(LocalDateTime value) {
+            addCriterion("gmt_create >=", value, "gmtCreate");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtCreateLessThan(LocalDateTime value) {
+            addCriterion("gmt_create <", value, "gmtCreate");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtCreateLessThanOrEqualTo(LocalDateTime value) {
+            addCriterion("gmt_create <=", value, "gmtCreate");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtCreateIn(List<LocalDateTime> values) {
+            addCriterion("gmt_create in", values, "gmtCreate");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtCreateNotIn(List<LocalDateTime> values) {
+            addCriterion("gmt_create not in", values, "gmtCreate");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtCreateBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("gmt_create between", value1, value2, "gmtCreate");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtCreateNotBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("gmt_create not between", value1, value2, "gmtCreate");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtModifiedIsNull() {
+            addCriterion("gmt_modified is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtModifiedIsNotNull() {
+            addCriterion("gmt_modified is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtModifiedEqualTo(LocalDateTime value) {
+            addCriterion("gmt_modified =", value, "gmtModified");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtModifiedNotEqualTo(LocalDateTime value) {
+            addCriterion("gmt_modified <>", value, "gmtModified");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtModifiedGreaterThan(LocalDateTime value) {
+            addCriterion("gmt_modified >", value, "gmtModified");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtModifiedGreaterThanOrEqualTo(LocalDateTime value) {
+            addCriterion("gmt_modified >=", value, "gmtModified");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtModifiedLessThan(LocalDateTime value) {
+            addCriterion("gmt_modified <", value, "gmtModified");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtModifiedLessThanOrEqualTo(LocalDateTime value) {
+            addCriterion("gmt_modified <=", value, "gmtModified");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtModifiedIn(List<LocalDateTime> values) {
+            addCriterion("gmt_modified in", values, "gmtModified");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtModifiedNotIn(List<LocalDateTime> values) {
+            addCriterion("gmt_modified not in", values, "gmtModified");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtModifiedBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("gmt_modified between", value1, value2, "gmtModified");
+            return (Criteria) this;
+        }
+
+        public Criteria andGmtModifiedNotBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("gmt_modified not between", value1, value2, "gmtModified");
+            return (Criteria) this;
+        }
+
+        public Criteria andAftersaleIdIsNull() {
+            addCriterion("aftersale_id is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAftersaleIdIsNotNull() {
+            addCriterion("aftersale_id is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAftersaleIdEqualTo(Long value) {
+            addCriterion("aftersale_id =", value, "aftersaleId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAftersaleIdNotEqualTo(Long value) {
+            addCriterion("aftersale_id <>", value, "aftersaleId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAftersaleIdGreaterThan(Long value) {
+            addCriterion("aftersale_id >", value, "aftersaleId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAftersaleIdGreaterThanOrEqualTo(Long value) {
+            addCriterion("aftersale_id >=", value, "aftersaleId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAftersaleIdLessThan(Long value) {
+            addCriterion("aftersale_id <", value, "aftersaleId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAftersaleIdLessThanOrEqualTo(Long value) {
+            addCriterion("aftersale_id <=", value, "aftersaleId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAftersaleIdIn(List<Long> values) {
+            addCriterion("aftersale_id in", values, "aftersaleId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAftersaleIdNotIn(List<Long> values) {
+            addCriterion("aftersale_id not in", values, "aftersaleId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAftersaleIdBetween(Long value1, Long value2) {
+            addCriterion("aftersale_id between", value1, value2, "aftersaleId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAftersaleIdNotBetween(Long value1, Long value2) {
+            addCriterion("aftersale_id not between", value1, value2, "aftersaleId");
             return (Criteria) this;
         }
     }
