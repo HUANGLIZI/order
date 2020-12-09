@@ -6,11 +6,13 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.order.model.OrderDTO;
 import cn.edu.xmu.order.mapper.OrderItemPoMapper;
 import cn.edu.xmu.order.mapper.OrdersPoMapper;
+import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderItemPoExample;
 import cn.edu.xmu.order.model.po.OrdersPo;
 import cn.edu.xmu.order.model.po.OrdersPoExample;
+import cn.edu.xmu.order.model.vo.OrderItemsCreateVo;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import java.util.List;
 public class OrderDao {
     @Autowired
     OrdersPoMapper ordersPoMapper;
+
     @Autowired
     OrderItemPoMapper orderItemPoMapper;
 
@@ -237,9 +240,12 @@ public class OrderDao {
 //        ordersPoMapper.selectByExample()
         OrderDTO orderDTO;
         if (ordersPo != null)
-            orderDTO  = new OrderDTO(ordersPo.getShopId(),ordersPo.getCustomerId());
+        {
+            orderDTO  = new OrderDTO();
+            orderDTO.setCustomerId(ordersPo.getCustomerId());
+        }
         else
-            orderDTO  = new OrderDTO(null, null);
+            orderDTO  = new OrderDTO();
         return new ReturnObject<>(orderDTO);
     }
 
@@ -254,9 +260,12 @@ public class OrderDao {
         OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
         OrderDTO orderDTO;
         if (ordersPo != null)
-            orderDTO  = new OrderDTO(ordersPo.getShopId(),ordersPo.getCustomerId());
+        {
+            orderDTO  = new OrderDTO();
+            orderDTO.setShopId(ordersPo.getShopId());
+        }
         else
-            orderDTO  = new OrderDTO(null, null);
+            orderDTO  = new OrderDTO();
         return new ReturnObject<>(orderDTO);
     }
     /**
@@ -271,6 +280,8 @@ public class OrderDao {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         OrdersPoExample ordersPoExample = new OrdersPoExample();
         OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
+        if (userId == null)
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
         criteria.andCustomerIdEqualTo(userId);
         // 被逻辑删除的订单不能被返回
         Byte beDeleted = 0;
@@ -307,4 +318,32 @@ public class OrderDao {
         }
     }
 
+    // 通过skuId查shopId
+    public ReturnObject<Orders> createOrders(Orders orders, List<OrderItems> orderItemsList)
+    {
+        OrdersPo ordersPo = orders.gotOrdersPo();
+        ReturnObject<Orders> retObj = null;
+        int ret = ordersPoMapper.insertSelective(ordersPo);
+        if (ret == 0) {
+            //插入失败
+            logger.debug("insertRefund: insert refund fail " + ordersPo.toString());
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + ordersPo.getOrderSn()));
+        } else {
+            //插入成功
+            logger.debug("insertRefund: insert refund = " + ordersPo.toString());
+            Long insertOrderId = ordersPo.getId();
+            orders.setId(insertOrderId);
+            for (OrderItems bo: orderItemsList)
+            {
+                bo.setOrderId(insertOrderId);
+                OrderItemPo orderItemPo = bo.gotOrderItemPo();
+                int orderItemRet = orderItemPoMapper.insertSelective(orderItemPo);
+                if (orderItemRet == 0)
+                    return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + orderItemPo.getName()));
+            }
+            orders.setOrderItemsList(orderItemsList);
+            retObj = new ReturnObject<>(orders);
+        }
+        return retObj;
+    }
 }

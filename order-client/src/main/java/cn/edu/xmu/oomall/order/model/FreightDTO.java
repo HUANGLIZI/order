@@ -8,13 +8,16 @@ import java.io.Serializable;
 
 /**
  * @author Caixin
- * @date 2020-12-07 20:38
+ * @date 2020-12-09 17:12
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderDTO implements Serializable {
-    private Long shopId;
+public class FreightDTO implements Serializable {
 
-    private Long customerId;
+    private Integer quantity;
+
+    private Long regionId;
+
+    private Long skuId;
 }
