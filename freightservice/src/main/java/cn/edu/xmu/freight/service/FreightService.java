@@ -239,7 +239,7 @@ public class FreightService {
      * @return ReturnObject
      */
     @Transactional
-    public ReturnObject<VoObject> getWeightItemsByFreightModelId(Long shopId, Long id)
+    public ReturnObject<List> getWeightItemsByFreightModelId(Long shopId, Long id)
     {
         return freightDao.getWeightItemByFreightModelId(shopId, id);
     }
@@ -252,7 +252,7 @@ public class FreightService {
      * @return ReturnObject
      */
     @Transactional
-    public ReturnObject<VoObject> getPieceItemsByFreightModelId(Long shopId, Long id)
+    public ReturnObject<List> getPieceItemsByFreightModelId(Long shopId, Long id)
     {
         return freightDao.getPieceItemByFreightModelId(shopId,id);
     }

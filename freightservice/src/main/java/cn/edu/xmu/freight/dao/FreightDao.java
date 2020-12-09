@@ -708,7 +708,7 @@ public class FreightDao{
      * @param id 重量运费模板明细id
      * @return ReturnObject
      */
-    public ReturnObject<VoObject> getWeightItemByFreightModelId(Long shopId, Long id) {
+    public ReturnObject<List> getWeightItemByFreightModelId(Long shopId, Long id) {
         WeightFreightModelPoExample example = new WeightFreightModelPoExample();
         WeightFreightModelPoExample.Criteria criteria = example.createCriteria();
         criteria.andFreightModelIdEqualTo(id);
@@ -717,9 +717,13 @@ public class FreightDao{
         if (null == weightFreightModelPos || weightFreightModelPos.isEmpty()) {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
         } else {
-            WeightFreightModel weightFreightModel = new WeightFreightModel(weightFreightModelPos.get(0));
-
-            return new ReturnObject<>(weightFreightModel);
+            List<WeightFreightModel> weightFreightModels = null;
+            for (WeightFreightModelPo weightFreightModelPo:weightFreightModelPos)
+            {
+                WeightFreightModel weightFreightModel = new WeightFreightModel(weightFreightModelPo);
+                weightFreightModels.add(weightFreightModel);
+            }
+            return new ReturnObject<>(weightFreightModels);
         }
     }
 
@@ -730,7 +734,7 @@ public class FreightDao{
      * @param id 件数运费模板明细id
      * @return ReturnObject
      */
-    public ReturnObject<VoObject> getPieceItemByFreightModelId(Long shopId, Long id) {
+    public ReturnObject<List> getPieceItemByFreightModelId(Long shopId, Long id) {
         PieceFreightModelPoExample example = new PieceFreightModelPoExample();
         PieceFreightModelPoExample.Criteria criteria = example.createCriteria();
         criteria.andFreightModelIdEqualTo(id);
@@ -739,8 +743,13 @@ public class FreightDao{
         if (null == pieceFreightModelPos || pieceFreightModelPos.isEmpty()) {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
         } else {
-            PieceFreightModel pieceFreightModel = new PieceFreightModel(pieceFreightModelPos.get(0));
-            return new ReturnObject<>(pieceFreightModel);
+            List<PieceFreightModel> pieceFreightModels = null;
+            for (PieceFreightModelPo pieceFreightModelPo:pieceFreightModelPos)
+            {
+                PieceFreightModel pieceFreightModel = new PieceFreightModel(pieceFreightModelPo);
+                pieceFreightModels.add(pieceFreightModel);
+            }
+            return new ReturnObject<>(pieceFreightModels);
         }
     }
 

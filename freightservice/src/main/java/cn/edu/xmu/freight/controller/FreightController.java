@@ -434,13 +434,15 @@ public class FreightController {
     })
     //@Audit
     @GetMapping("/shops/{shopId}/freightmodels/{id}/weightItems")
-    public Object findWeightItemByFreightModelId(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id, HttpServletRequest request)
+    public Object findWeightItemByFreightModelId(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id)
     {
-
-        ReturnObject<VoObject> returnObject = freightService.getWeightItemsByFreightModelId(shopId,id);
-        if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getRetObject(returnObject);
-        } else {
+        ReturnObject<List> returnObject = freightService.getWeightItemsByFreightModelId(shopId,id);
+        if(returnObject.getCode() == ResponseCode.OK)
+        {
+            return Common.getListRetObject(returnObject);
+        }
+        else
+        {
             return Common.decorateReturnObject(returnObject);
         }
     }
@@ -467,9 +469,9 @@ public class FreightController {
     @GetMapping("/shops/{shopId}/freightmodels/{id}/pieceItems")
     public Object findPieceItemByFreightModelId(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id)
     {
-        ReturnObject<VoObject> returnObject = freightService.getPieceItemsByFreightModelId(shopId, id);
+        ReturnObject<List> returnObject = freightService.getPieceItemsByFreightModelId(shopId, id);
         if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getRetObject(returnObject);
+            return Common.getListRetObject(returnObject);
         } else {
             return Common.decorateReturnObject(returnObject);
         }
