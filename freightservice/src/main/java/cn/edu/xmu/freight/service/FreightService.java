@@ -231,7 +231,55 @@ public class FreightService {
         return retWeightFreightModel;
     }
 
+    /**
+     * 查询某个重量运费模板明细
+     * @author li mingming
+     * @param shopId 店铺Id
+     * @param id 重量运费模板明细id
+     * @return ReturnObject
+     */
+    @Transactional
+    public ReturnObject<VoObject> getWeightItemsByFreightModelId(Long shopId, Long id)
+    {
+        return freightDao.getWeightItemByFreightModelId(shopId, id);
+    }
 
+    /**
+     * 查询某个件数运费模板明细
+     * @author li mingming
+     * @param shopId 店铺Id
+     * @param id 件数运费模板明细id
+     * @return ReturnObject
+     */
+    @Transactional
+    public ReturnObject<VoObject> getPieceItemsByFreightModelId(Long shopId, Long id)
+    {
+        return freightDao.getPieceItemByFreightModelId(shopId,id);
+    }
+
+    /**
+     * 删除某个重量运费模板明细
+     * @author li mingming
+     * @param id 重量运费模板明细id
+     * @return ReturnObject
+     */
+    @Transactional
+    public ReturnObject<VoObject> delWeightItemById(Long shopId, Long id)
+    {
+        return freightDao.delWeightItemById(shopId, id);
+    }
+
+    /**
+     * 删除某个件数运费模板明细
+     * @author li mingming
+     * @param id 件数运费模板明细id
+     * @return ReturnObject
+     */
+    @Transactional
+    public ReturnObject<VoObject> delPieceItemById(Long shopId, Long id)
+    {
+        return freightDao.delPieceItemById(shopId, id);
+    }
 
 
 
