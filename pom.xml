@@ -19,6 +19,9 @@
         <module>privilegegateway</module>
         <module>core</module>
         <module>logservice</module>
+        <module>order-client</module>
+        <module>other-client</module>
+        <module>goods-client</module>
     </modules>
     <name>roleprivilege</name>
     <description>the role base privilege mangament systems</description>
