@@ -156,4 +156,48 @@ public class OrderService<OrdersPo> implements IOrderService {
                 orderSn, state, beginTimeStr, endTimeStr);
         return returnObject;
     }
+
+
+    /**
+     * 店家查询商户所有订单 (概要)
+     *
+     * @author 24320182203323  李明明
+     * @param page 页数
+     * @param pageSize 每页大小
+     * @return Object 查询结果
+     */
+    public ReturnObject<PageInfo<VoObject>> getShopAllOrders(Long shopId, Long customerId, String orderSn, String beginTime, String endTime, Integer page, Integer pageSize)
+    {
+        ReturnObject<PageInfo<VoObject>> returnObject = orderDao.getShopAllOrders(shopId,customerId, orderSn, beginTime, endTime, page, pageSize);
+        return returnObject;
+    }
+
+    /**
+     * 店家查询店内订单完整信息（普通，团购，预售）
+     *
+     * @author 24320182203323  李明明
+     * @return Object 查询结果
+     */
+    public ReturnObject getOrderById(Long shopId, Long id)
+    {
+        return orderDao.getOrderById(shopId, id);
+    }
+
+    /**
+     * 管理员取消本店铺订单
+     *
+     * @author 24320182203323  李明明
+     * @return Object 查询结果
+     */
+    @Transactional
+    public ReturnObject<VoObject> cancelOrderById(Long shopId,Long id)
+    {
+        ReturnObject<VoObject> returnObject;
+        ReturnObject<Orders> returnObject1 = orderDao.cancelOrderById(shopId, id);
+        if(returnObject1.getCode() == ResponseCode.OK)
+            returnObject = new ReturnObject<>(returnObject1.getData());
+        else
+            returnObject = new ReturnObject<>(returnObject1.getCode(),returnObject1.getErrmsg());
+        return returnObject;
+    }
 }

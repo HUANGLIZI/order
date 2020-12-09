@@ -307,4 +307,116 @@ public class OrderDao {
         }
     }
 
+
+
+    /**
+     * 店家查询商户所有订单 (概要)
+     *
+     * @author 24320182203323  李明明
+     * @param page 页数
+     * @param pageSize 每页大小
+     * @return Object 查询结果
+     */
+    public ReturnObject<PageInfo<VoObject>> getShopAllOrders(Long shopId, Long customerId, String orderSn, String beginTime, String endTime, Integer page, Integer pageSize)
+    {
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        OrdersPoExample ordersPoExample = new OrdersPoExample();
+        OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
+        criteria.andCustomerIdEqualTo(shopId);
+        // 被逻辑删除的订单不能被返回
+        Byte beDeleted = 0;
+        criteria.andBeDeletedEqualTo(beDeleted);
+        if(customerId != null)
+            criteria.andCustomerIdEqualTo(customerId);
+        if(orderSn != null)
+            criteria.andOrderSnEqualTo(orderSn);
+        if(beginTime != null)
+            criteria.andGmtCreateGreaterThanOrEqualTo(LocalDateTime.parse(beginTime, df));
+            //criteria.andGmtCreatedGreaterThanOrEqualTo(LocalDateTime.parse(beginTime, df));
+        if(endTime != null)
+            criteria.andGmtCreateLessThanOrEqualTo(LocalDateTime.parse(endTime, df));
+            //criteria.andGmtCreatedLessThanOrEqualTo(LocalDateTime.parse(endTime, df));
+        //分页查询
+        PageHelper.startPage(page, pageSize);
+        logger.debug("page = " + page + "pageSize = " + pageSize);
+        List<OrdersPo> ordersPos = null;
+        try {
+            ordersPos = ordersPoMapper.selectByExample(ordersPoExample);
+            List<VoObject> ret = new ArrayList<>(ordersPos.size());
+            for (OrdersPo po : ordersPos) {
+                Orders order = new Orders(po);
+                ret.add(order);
+            }
+            PageInfo<VoObject> orderPage = PageInfo.of(ret);
+            return new ReturnObject<>(orderPage);
+        }
+        catch (DataAccessException e){
+            logger.error("selectAllRole: DataAccessException:" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
+
+    /**
+     * 店家查询店内订单完整信息（普通，团购，预售）
+     *
+     * @author 24320182203323  李明明
+     * @return Object 查询结果
+     */
+    public ReturnObject getOrderById(Long shopId, Long id)
+    {
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(id);
+        if(ordersPo == null)
+        {
+            logger.error("getOrderById: 数据库不存在该订单 order_id=" + id);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        Orders orders = new Orders(ordersPo);
+        return new ReturnObject<>(orders);
+    }
+
+    /**
+     * 管理员取消本店铺订单
+     *
+     * @author 24320182203323  李明明
+     * @return Object 查询结果
+     */
+    public ReturnObject<Orders> cancelOrderById(Long shopId, Long id)
+    {
+        ReturnObject<Orders> ordersReturnObject = null;
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(id);
+        if(ordersPo == null)
+        {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("不存在对应的订单id" ));
+        }
+        else if(ordersPo.getShopId() != shopId)
+        {
+            logger.debug("cancelOrderById: update Order fail " + ordersPo.toString() );
+            return new ReturnObject<>(ResponseCode.DEFAULTMODEL_EXISTED, String.format("该订单不属于该店铺" ));
+        }
+        else
+        {
+            Byte type = 0;
+            ordersPo.setState(type);
+            ordersPo.setGmtModified(LocalDateTime.now());
+            int ret = ordersPoMapper.updateByPrimaryKey(ordersPo);
+            if(ret == 0)
+            {
+                logger.debug("cancelOrderById: update Order fail " + ordersPo.toString() );
+                ordersReturnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + ordersPo.getId()));
+            }
+            else
+            {
+                logger.debug("cancelOrderById: update Order = " + ordersPo.toString());
+                ordersReturnObject = new ReturnObject<>();
+            }
+
+        }
+        return ordersReturnObject;
+    }
+
 }
