@@ -2,7 +2,6 @@ package cn.edu.xmu.payment.mapper;
 
 import cn.edu.xmu.payment.model.po.PaymentPo;
 import cn.edu.xmu.payment.model.po.PaymentPoExample;
-
 import java.util.List;
 
 public interface PaymentPoMapper {

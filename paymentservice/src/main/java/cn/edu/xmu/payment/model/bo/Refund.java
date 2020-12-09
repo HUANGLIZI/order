@@ -15,10 +15,9 @@ public class Refund implements VoObject, Serializable {
     private Long id;
     private Long paymentId;
     private Long amount;
-    private String paySn;
     private Long orderId;
     private Byte state;
-    private LocalDateTime gmtCreated;
+    private LocalDateTime gmtCreate;
     private LocalDateTime gmtModified;
     private Long aftersaleId;
 
@@ -32,10 +31,9 @@ public class Refund implements VoObject, Serializable {
         this.id = po.getId();
         this.paymentId = po.getPaymentId();
         this.amount = po.getAmount();
-        this.paySn = po.getPaySn();
         this.orderId = po.getOrderId();
         this.state=po.getState();
-        this.gmtCreated = po.getGmtCreated();
+        this.gmtCreate = po.getGmtCreate();
         this.gmtModified = po.getGmtModified();
         this.aftersaleId=po.getAftersaleId();
     }
@@ -54,11 +52,10 @@ public class Refund implements VoObject, Serializable {
         po.setId(id);
         po.setPaymentId(paymentId);
         po.setAmount(amount);
-        po.setPaySn(paySn);
         po.setOrderId(orderId);
         po.setState(state);
         po.setGmtModified(gmtModified);
-        po.setGmtCreated(gmtCreated);
+        po.setGmtCreate(gmtCreate);
         po.setAftersaleId(aftersaleId);
         return po;
     }

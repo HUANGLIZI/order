@@ -24,9 +24,6 @@ public class PaymentRetVo {
     @ApiModelProperty(value = "支付时间")
     private LocalDateTime payTime;
 
-    @ApiModelProperty(value = "支付编号")
-    private String paySn;
-
     @ApiModelProperty(value = "开始支付时间")
     private LocalDateTime beginTime;
 
@@ -53,12 +50,11 @@ public class PaymentRetVo {
         this.amout=payment.getAmout();
         this.beginTime=payment.getBeginTime();
         this.endTime=payment.getEndTime();
-        this.gmtCreated=payment.getGmtCreated();
+        this.gmtCreated=payment.getGmtCreate();
         this.gmtModified=payment.getGmtModified();
         this.id=payment.getId();
         this.orderId=payment.getOrderId();
         this.paymentPattern=payment.getPaymentPattern();
-        this.paySn=payment.getPaySn();
         this.payTime=payment.getPayTime();
         this.state=payment.getState();
         this.aftersaleId=payment.getAftersaleId();
