@@ -318,7 +318,7 @@ public class PaymentController {
         //需要通过aftersaleId从其他模块的aftersale表中获取orderid等信息
         Payment payment = vo.createPayment();
         payment.setAftersaleId(aftersaleId);
-        payment.setGmtCreated(LocalDateTime.now());
+        payment.setGmtCreate(LocalDateTime.now());
 
         ReturnObject<VoObject> retObject = paymentService.createPayment(payment);
         httpServletResponse.setStatus(HttpStatus.CREATED.value());
