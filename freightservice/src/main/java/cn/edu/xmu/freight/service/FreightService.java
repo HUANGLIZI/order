@@ -174,6 +174,7 @@ public class FreightService {
         Integer freightPrice = null;
         //根据skuId查询模板、重量,查询默认运费模板
         //根据重量、count并比较算出freightPrice
+
         ReturnObject<Integer> retFreightModel = new ReturnObject<>(freightPrice);
         //retFreightModel = new ReturnObject(ResponseCode.OK);
         return retFreightModel;
