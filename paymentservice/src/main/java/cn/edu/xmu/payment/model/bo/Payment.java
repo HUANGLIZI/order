@@ -39,6 +39,7 @@ public class Payment implements VoObject, Serializable {
     private LocalDateTime gmtCreate;
 
     private LocalDateTime gmtModified;
+
     public Payment(){
 
     }
@@ -87,7 +88,6 @@ public class Payment implements VoObject, Serializable {
         paymentPo.setAftersaleId(this.aftersaleId);
         return paymentPo;
     }
-
     @Override
     public Object createVo() {
         return new PaymentRetVo(this);
@@ -132,4 +132,6 @@ public class Payment implements VoObject, Serializable {
             return description;
         }
     }
+
+
 }

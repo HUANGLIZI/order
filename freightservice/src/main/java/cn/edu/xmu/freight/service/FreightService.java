@@ -1,7 +1,9 @@
 package cn.edu.xmu.freight.service;
 
 import cn.edu.xmu.freight.dao.FreightDao;
+import cn.edu.xmu.oomall.goods.service.GoodsService;
 import com.github.pagehelper.PageInfo;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
 import cn.edu.xmu.freight.model.bo.FreightModelChangeBo;
 import cn.edu.xmu.freight.model.bo.PieceFreightModelChangeBo;
@@ -27,6 +29,9 @@ import java.util.List;
 public class FreightService {
     @Autowired
     private FreightDao freightDao;
+
+    @DubboReference
+    private GoodsService goodsService;
 
     private Logger logger = LoggerFactory.getLogger(FreightService.class);
 
@@ -128,6 +133,7 @@ public class FreightService {
         if (returnObject.getCode() == ResponseCode.OK) {
 
             //在这里调用商品模块的api修改相应商品的freight_id
+            goodsService.updateSpuFreightId(id);
             
         }
 

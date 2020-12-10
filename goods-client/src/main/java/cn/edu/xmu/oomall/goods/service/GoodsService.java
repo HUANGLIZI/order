@@ -73,4 +73,9 @@ public interface GoodsService {
      * @return GoodsFreightDTO
      */
     ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId);
+
+    /**
+     *将所有运费模板值为freightId的spu改为默认运费模板
+     */
+    ReturnObject<Boolean> updateSpuFreightId(Long freightModelId);
 }

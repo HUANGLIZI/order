@@ -27,9 +27,6 @@ public class PaymentDao {
     PaymentPoMapper paymentPoMapper;
 
     @Autowired
-    OrdersPoMapper ordersPoMapper;
-
-    @Autowired
     RefundPoMapper refundPoMapper;
 
     /**
@@ -71,13 +68,6 @@ public class PaymentDao {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
 
-        //如果该商店不拥有这个order则查不到
-        if(!isOrderBelongToShop(shopId,orderId)){
-            logger.error(" queryPaymentById: 数据库不存在该支付单 orderId="+orderId);
-            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
-        }
-
-
         List<Payment> payments =new ArrayList<>(paymentPoS.size());
         for(PaymentPo paymentPo:paymentPoS){
             Payment payment = new Payment(paymentPo);
@@ -87,17 +77,6 @@ public class PaymentDao {
             payments.add(payment);
         }
         return new ReturnObject<>(payments);
-    }
-
-    private boolean isOrderBelongToShop(Long shopId, Long orderId){
-        OrdersPoExample example=new OrdersPoExample ();
-        OrdersPoExample.Criteria criteria=example.createCriteria();
-        criteria.andIdEqualTo(orderId);
-        criteria.andShopIdEqualTo(shopId);
-
-
-        List<OrdersPo> ordersPos=ordersPoMapper.selectByExample(example);
-        return !ordersPos.isEmpty();
     }
 
 
@@ -231,6 +210,7 @@ public class PaymentDao {
         }
         return retObj;
     }
+
 
     public ReturnObject insertPayment(Payment payment) {
         PaymentPo paymentPo = payment.getPaymentPo();
