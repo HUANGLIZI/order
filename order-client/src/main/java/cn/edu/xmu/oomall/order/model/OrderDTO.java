@@ -6,15 +6,17 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * @author Caixin
- * @date 2020-12-07 20:38
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDTO implements Serializable {
+    private Long orderId;
+    private String orderSn;
+    private Long skuId;
+    private String skuName;
     private Long shopId;
-
-    private Long customerId;
+    /**
+     * 订单详情中的商品单价
+     */
+    private Long price;
 }

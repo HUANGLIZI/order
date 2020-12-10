@@ -4,6 +4,7 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.order.model.OrderDTO;
+import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
 import cn.edu.xmu.order.mapper.OrderItemPoMapper;
 import cn.edu.xmu.order.mapper.OrdersPoMapper;
 import cn.edu.xmu.order.model.bo.OrderItems;
@@ -12,9 +13,9 @@ import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderItemPoExample;
 import cn.edu.xmu.order.model.po.OrdersPo;
 import cn.edu.xmu.order.model.po.OrdersPoExample;
-import cn.edu.xmu.order.model.vo.OrderItemsCreateVo;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.mysql.cj.x.protobuf.MysqlxCrud;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -233,20 +234,20 @@ public class OrderDao {
      * @author Cai Xinlu
      * @date 2020-12-06 21:14
      */
-    public ReturnObject<OrderDTO> getUserIdbyOrderId(Long orderId)
+    public ReturnObject<OrderInnerDTO> getUserIdbyOrderId(Long orderId)
     {
         OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
 
 //        ordersPoMapper.selectByExample()
-        OrderDTO orderDTO;
+        OrderInnerDTO orderInnerDTO;
         if (ordersPo != null)
         {
-            orderDTO  = new OrderDTO();
-            orderDTO.setCustomerId(ordersPo.getCustomerId());
+            orderInnerDTO = new OrderInnerDTO();
+            orderInnerDTO.setCustomerId(ordersPo.getCustomerId());
         }
         else
-            orderDTO  = new OrderDTO();
-        return new ReturnObject<>(orderDTO);
+            orderInnerDTO = new OrderInnerDTO();
+        return new ReturnObject<>(orderInnerDTO);
     }
 
     /**
@@ -255,18 +256,18 @@ public class OrderDao {
      * @author Cai Xinlu
      * @date 2020-12-07 13:17
      */
-    public ReturnObject<OrderDTO> getShopIdbyOrderId(Long orderId)
+    public ReturnObject<OrderInnerDTO> getShopIdbyOrderId(Long orderId)
     {
         OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
-        OrderDTO orderDTO;
+        OrderInnerDTO orderInnerDTO;
         if (ordersPo != null)
         {
-            orderDTO  = new OrderDTO();
-            orderDTO.setShopId(ordersPo.getShopId());
+            orderInnerDTO = new OrderInnerDTO();
+            orderInnerDTO.setShopId(ordersPo.getShopId());
         }
         else
-            orderDTO  = new OrderDTO();
-        return new ReturnObject<>(orderDTO);
+            orderInnerDTO = new OrderInnerDTO();
+        return new ReturnObject<>(orderInnerDTO);
     }
     /**
      * @param
@@ -345,5 +346,45 @@ public class OrderDao {
             retObj = new ReturnObject<>(orders);
         }
         return retObj;
+    }
+
+    public ReturnObject<OrderDTO> getOrderItemsForOther(Long userId, Long orderItemId)
+    {
+        OrderItemPo orderItemPo = orderItemPoMapper.selectByPrimaryKey(orderItemId);
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderItemPo.getOrderId());
+        if (orderItemPo == null || ordersPo == null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if (!ordersPo.getCustomerId().equals(userId))
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        OrderDTO orderDTO = new OrderDTO();
+        orderDTO.setShopId(ordersPo.getShopId());
+        orderDTO.setOrderId(orderItemPo.getOrderId());
+        orderDTO.setOrderSn(ordersPo.getOrderSn());
+        orderDTO.setPrice(orderItemPo.getPrice());
+        orderDTO.setSkuId(orderItemPo.getGoodsSkuId());
+        orderDTO.setSkuName(orderItemPo.getName());
+
+        return new ReturnObject<>(orderDTO);
+    }
+
+    public ReturnObject<List<Long>> getOrderItemsIdForOther(Long userId, Long skuId)
+    {
+        OrdersPoExample ordersPoExample = new OrdersPoExample();
+        OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
+        criteria.andCustomerIdEqualTo(userId);
+        List<OrdersPo> ordersPos = ordersPoMapper.selectByExample(ordersPoExample);
+        OrderItemPoExample orderItemPoExample = new OrderItemPoExample();
+        List<Long> orderItemsIdList = new ArrayList<Long>();
+        for (OrdersPo ordersPo: ordersPos)
+        {
+            OrderItemPoExample.Criteria orderItemCriteria = orderItemPoExample.createCriteria();
+            orderItemCriteria.andGoodsSkuIdEqualTo(skuId);
+            orderItemCriteria.andOrderIdEqualTo(ordersPo.getId());
+            List<OrderItemPo> orderItemPos = orderItemPoMapper.selectByExample(orderItemPoExample);
+            for (OrderItemPo orderItemPo: orderItemPos)
+                orderItemsIdList.add(orderItemPo.getId());
+        }
+
+        return new ReturnObject<>(orderItemsIdList);
     }
 }

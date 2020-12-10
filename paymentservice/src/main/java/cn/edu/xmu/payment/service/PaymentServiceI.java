@@ -3,9 +3,8 @@ package cn.edu.xmu.payment.service;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.oomall.order.model.OrderDTO;
+import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
 import cn.edu.xmu.oomall.order.service.IOrderService;
-import cn.edu.xmu.oomall.other.model.AftersaleDTO;
 import cn.edu.xmu.oomall.other.service.IAftersaleService;
 import cn.edu.xmu.payment.dao.PaymentDao;
 import cn.edu.xmu.payment.model.bo.RefundBo;
@@ -42,7 +41,7 @@ public class PaymentServiceI {
     @Transactional
     public ReturnObject<VoObject> userQueryRefundsByOrderId(Long orderId, Long userId)
     {
-        ReturnObject<OrderDTO> orderDTO = iOrderService.findUserIdbyOrderId(orderId);
+        ReturnObject<OrderInnerDTO> orderDTO = iOrderService.findUserIdbyOrderId(orderId);
         Long retUserId = orderDTO.getData().getCustomerId();
         if (retUserId == null)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
@@ -126,7 +125,7 @@ public class PaymentServiceI {
 
     @Transactional
     public ReturnObject<List<Object>> getOrdersRefundsByOrderId(Long id, Long shopId){
-        ReturnObject<OrderDTO> orderDTO = iOrderService.findShopIdbyOrderId(id);
+        ReturnObject<OrderInnerDTO> orderDTO = iOrderService.findShopIdbyOrderId(id);
         Long retShopId = orderDTO.getData().getShopId();
         if (retShopId == null)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);

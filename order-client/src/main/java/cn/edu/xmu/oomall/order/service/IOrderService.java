@@ -2,6 +2,9 @@ package cn.edu.xmu.oomall.order.service;
 
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.order.model.OrderDTO;
+import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
+
+import java.util.List;
 
 /**
  * @author Caixin
@@ -16,7 +19,11 @@ public interface IOrderService {
      * @author Cai Xinlu
      * @date 2020-12-05 21:38
      */
-    ReturnObject<OrderDTO> findUserIdbyOrderId(Long orderId);
+    ReturnObject<OrderInnerDTO> findUserIdbyOrderId(Long orderId);
 
-    ReturnObject<OrderDTO> findShopIdbyOrderId(Long orderId);
+    ReturnObject<OrderInnerDTO> findShopIdbyOrderId(Long orderId);
+
+    ReturnObject<OrderDTO> getSelectOrderInfo(Long userId, Long orderItemId);
+
+    ReturnObject<List<Long>> listUserSelectOrderItemId(Long userId, Long skuId);
 }

@@ -4,17 +4,14 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.order.model.OrderDTO;
+import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
 import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
 import cn.edu.xmu.order.model.po.OrderItemPo;
-import cn.edu.xmu.order.model.vo.OrderItemsCreateVo;
 import cn.edu.xmu.order.model.vo.OrderRetVo;
-import cn.edu.xmu.order.model.vo.OrdersVo;
 import com.github.pagehelper.PageInfo;
-import io.lettuce.core.StrAlgoArgs;
-import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,13 +144,13 @@ public class OrderService<OrdersPo> implements IOrderService {
      * @date 2020-12-06 21:14
      */
     @Override
-    public ReturnObject<OrderDTO> findUserIdbyOrderId(Long orderId)
+    public ReturnObject<OrderInnerDTO> findUserIdbyOrderId(Long orderId)
     {
         return orderDao.getUserIdbyOrderId(orderId);
     }
 
     @Override
-    public ReturnObject<OrderDTO> findShopIdbyOrderId(Long orderId) { return orderDao.getShopIdbyOrderId(orderId); }
+    public ReturnObject<OrderInnerDTO> findShopIdbyOrderId(Long orderId) { return orderDao.getShopIdbyOrderId(orderId); }
     /**
      * @param
      * @return
@@ -168,5 +165,21 @@ public class OrderService<OrdersPo> implements IOrderService {
         return returnObject;
     }
 
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-09 23:28
+     */
+    @Override
+    public ReturnObject<OrderDTO> getSelectOrderInfo(Long userId, Long orderItemId)
+    {
+        return orderDao.getOrderItemsForOther(userId, orderItemId);
+    }
 
+    @Override
+    public ReturnObject<List<Long>> listUserSelectOrderItemId(Long userId, Long skuId)
+    {
+        return orderDao.getOrderItemsIdForOther(userId, skuId);
+    }
 }

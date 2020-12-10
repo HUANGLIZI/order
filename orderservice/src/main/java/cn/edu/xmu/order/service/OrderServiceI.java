@@ -1,5 +1,6 @@
 package cn.edu.xmu.order.service;
 
+import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
@@ -16,6 +17,7 @@ import cn.edu.xmu.order.model.vo.*;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -84,6 +86,8 @@ public class OrderServiceI {
 
         // 算discountPrice
 
+        // 算orderSn
+        ordersBo.setOrderSn(Common.genSeqNum().substring(0,13));
 
         // 设置订单类型
         Byte orderType = 0;
@@ -98,15 +102,12 @@ public class OrderServiceI {
         ordersBo.setState(state.getCode().byteValue());
 
         ordersBo.setGmtCreated(LocalDateTime.now());
-        ReturnObject<Orders> orders = orderDao.createOrders(ordersBo, orderItemsList);
-        OrderCreateRetVo orderCreateRetVo = new OrderCreateRetVo(orders.getData());
 
         CustomerDTO customerDTO = aftersaleServiceI.findCustomerByUserId(userId).getData();
         CustomerRetVo customerRetVo = new CustomerRetVo();
         customerRetVo.setId(userId);
         customerRetVo.setName(customerDTO.getName());
         customerRetVo.setUserName(customerDTO.getUserName());
-        orderCreateRetVo.setCustomerRetVo(customerRetVo);
 
         ShopDetailDTO shopDetailDTO = goodsService.getShopInfoBySkuId(orderItemsVo.get(0).getGoodsSkuId()).getData();
         ShopRetVo shopRetVo = new ShopRetVo();
@@ -115,6 +116,12 @@ public class OrderServiceI {
         shopRetVo.setGmtModified(shopDetailDTO.getGmtModified());
         shopRetVo.setName(shopDetailDTO.getName());
         shopRetVo.setState(shopDetailDTO.getState());
+
+        ordersBo.setCustomerId(userId);
+        ordersBo.setShopId(shopDetailDTO.getShopId());
+        ReturnObject<Orders> orders = orderDao.createOrders(ordersBo, orderItemsList);
+        OrderCreateRetVo orderCreateRetVo = new OrderCreateRetVo(orders.getData());
+        orderCreateRetVo.setCustomerRetVo(customerRetVo);
         orderCreateRetVo.setShopRetVo(shopRetVo);
 
         return new ReturnObject<>(orderCreateRetVo);
