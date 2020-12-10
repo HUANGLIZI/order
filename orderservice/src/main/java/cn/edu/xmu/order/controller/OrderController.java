@@ -173,15 +173,26 @@ public class OrderController {
      * @author 24320182203196 洪晓杰
      * @param id 订单id
      */
-       @ApiOperation(value = "买家标记确认收货", produces = "application/json")
-              @ApiImplicitParams({
-                                 //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-                                                @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true),
-              })…       orders.setState((byte) 2);//2表示为确认收货状态
-                         orders.setGmtModified(LocalDateTime.now());
-                                    ReturnObject<Object> retObject = orderService.updateOders(orders);
-                                               return Common.decorateReturnObject(retObject);
-              })
+    @ApiOperation(value = "买家标记确认收货", produces = "application/json")
+   @ApiImplicitParams({
+           //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+           @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true),
+   })
+   @ApiResponses({
+           @ApiResponse(code = 0, message = "成功"),
+   })
+   //@Audit
+   @PutMapping("/orders2/{id}/confirm")
+   public Object updateOrderStateToConfirm( @PathVariable("id") Long id) {
+       logger.debug("update orders by orderId:" + id);
+       //校验前端数据-----暂时还没写
+       Orders orders=new Orders();
+       orders.setId(id);
+       orders.setState((byte) 2);//2表示为确认收货状态
+       orders.setGmtModified(LocalDateTime.now());
+       ReturnObject<Object> retObject = orderService.updateOders(orders);
+       return Common.decorateReturnObject(retObject);
+   }
 
 
     /**
