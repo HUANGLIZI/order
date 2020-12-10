@@ -3,10 +3,12 @@ package cn.edu.xmu.payment.service;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.payment.dao.PaymentDao;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.bo.Refund;
 import cn.edu.xmu.payment.model.po.RefundPo;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,9 @@ public class PaymentService {
 
     @Autowired
     private PaymentDao paymentDao;
+
+    @DubboReference
+    private IOrderService iOrderService;
 
     private Logger logger = LoggerFactory.getLogger(PaymentService.class);
 
@@ -38,6 +43,12 @@ public class PaymentService {
     }
 
     public ReturnObject queryPayment(Long shopId, Long orderId) {
+
+        //如果该商店不拥有这个order则查不到
+        if(!((iOrderService.isOrderBelongToShop(shopId,orderId)).getData())&&shopId!=0){
+            logger.error(" queryPaymentById: 数据库不存在该支付单 orderId="+orderId);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
         return paymentDao.queryPayment(shopId,orderId);
     }
 

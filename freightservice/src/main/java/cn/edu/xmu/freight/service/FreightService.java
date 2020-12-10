@@ -135,6 +135,7 @@ public class FreightService {
         if (returnObject.getCode() == ResponseCode.OK) {
 
             //在这里调用商品模块的api修改相应商品的freight_id
+            goodsService.updateSpuFreightId(id);
             
         }
 
