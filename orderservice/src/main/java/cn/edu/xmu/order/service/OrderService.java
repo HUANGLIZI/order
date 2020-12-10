@@ -235,6 +235,22 @@ public class OrderService<OrdersPo> implements IOrderService {
     @Override
     public ReturnObject<List<Long>> listUserSelectOrderItemId(Long userId, Long skuId)
     {
-        return orderDao.getOrderItemsIdForOther(userId, skuId);
+        return orderDao.listUserSelectOrderItemId(userId, skuId);
+    }
+
+    /**
+     * @auther zxj
+     * @param shopId
+     * @param skuId
+     * @return
+     */
+    @Override
+    public ReturnObject<List<Long>> listAdminSelectOrderItemId(Long shopId, Long skuId) {
+        return orderDao.listAdminSelectOrderItemId(shopId, skuId);
+    }
+
+    @Override
+    public ReturnObject<Boolean> isOrderBelongToShop(Long shopId, Long orderId) {
+        return new ReturnObject<>(orderDao.isOrderBelongToShop(shopId, orderId));
     }
 }

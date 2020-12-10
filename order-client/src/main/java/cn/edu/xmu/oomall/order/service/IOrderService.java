@@ -27,4 +27,7 @@ public interface IOrderService {
 
     ReturnObject<List<Long>> listUserSelectOrderItemId(Long userId, Long skuId);
 
+    ReturnObject<List<Long>> listAdminSelectOrderItemId(Long shopId,Long skuId);
+
+    ReturnObject<Boolean> isOrderBelongToShop(Long shopId, Long orderId);
 }
