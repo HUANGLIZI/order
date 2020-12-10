@@ -193,14 +193,14 @@ public class FreightService {
      * @return ReturnObject<VoObject> 运费模板返回视图
      */
     @Transactional
-    public ReturnObject<Integer> calcuFreightPrice(List<Integer> count, List<Long> skuId,Long regionId) {
-        Integer freightPrice = 0;
+    public ReturnObject<Long> calcuFreightPrice(List<Integer> count, List<Long> skuId,Long regionId) {
+        Long freightPrice = 0L;
         //根据skuId查询模板、重量,查询默认运费模板
         //根据重量、count并比较算出freightPrice
         List<GoodsFreightDTO> goodsFreightDTO = null;
         List<Long> freightModelId = null;
         List<FreightModelPo> freightModelPos = null;//运费模板列表
-        Integer weightSum = 0;
+        Long weightSum = 0L;
         Integer countSum=0;
         for (int i=0;i<skuId.size();i++) {
             goodsFreightDTO.add(goodsService.getGoodsFreightDetailBySkuId(skuId.get(i)).getData());
@@ -219,7 +219,7 @@ public class FreightService {
         }
         for (int i=0;i<freightModelPos.size();i++) {
             FreightModelPo freightModelPo_temp=freightModelPos.get(i);
-            Integer price_temp=0;
+            Long price_temp=0L;
             if (freightModelPo_temp.getType() == 1)//获得按件数计算的运费模板明细
             {
                 PieceFreightModel pieceFreightModel_temp=freightDao.getPieceItemByFreightModelIdRegionId(freightModelPo_temp.getShopId(),freightModelPo_temp.getId(),regionId);
@@ -234,20 +234,20 @@ public class FreightService {
                 if(weightSum<=weightFreightModel.getFirstWeight())
                     price_temp=weightFreightModel.getFirstWeightFreight();
                 else if(weightSum>weightFreightModel.getFirstWeight()&&weightSum<=10)
-                    price_temp=weightFreightModel.getFirstWeightFreight()+(int)weightFreightModel.getTenPrice()*Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5);
+                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)(Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5));
                 else if(weightSum>10&&weightSum<=50)
-                    price_temp=weightFreightModel.getFirstWeightFreight()+(int)weightFreightModel.getTenPrice()*Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*Math.ceil((weightSum-10)/0.5);
+                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10)/0.5);
                 else if(weightSum>50&&weightSum<=100)
-                    price_temp=weightFreightModel.getFirstWeightFreight()+(int)weightFreightModel.getTenPrice()*Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*Math.ceil((weightSum-10)/0.5)+weightFreightModel.getHundredPrice()*Math.ceil((weightSum-50)/0.5);
+                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10)/0.5)+weightFreightModel.getHundredPrice()*(long)Math.ceil((weightSum-50)/0.5);
                 else if(weightSum>100&&weightSum<=300)
-                    price_temp=weightFreightModel.getFirstWeightFreight()+(int)weightFreightModel.getTenPrice()*Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*Math.ceil((weightSum-10)/0.5)+weightFreightModel.getHundredPrice()*Math.ceil((weightSum-50)/0.5)+weightFreightModel.getTrihunPrice()*Math.ceil((weightSum-100)/0.5);
+                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10)/0.5)+weightFreightModel.getHundredPrice()*(long)Math.ceil((weightSum-50)/0.5)+weightFreightModel.getTrihunPrice()*(long)Math.ceil((weightSum-100)/0.5);
                 else if(weightSum>300)
-                    price_temp=weightFreightModel.getFirstWeightFreight()+(int)weightFreightModel.getTenPrice()*Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*Math.ceil((weightSum-10)/0.5)+weightFreightModel.getHundredPrice()*Math.ceil((weightSum-50)/0.5)+weightFreightModel.getTrihunPrice()*Math.ceil((weightSum-100)/0.5)+weightFreightModel.getAbovePrice()*Math.ceil((weightSum-300)/0.5);
+                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10)/0.5)+weightFreightModel.getHundredPrice()*(long)Math.ceil((weightSum-50)/0.5)+weightFreightModel.getTrihunPrice()*(long)Math.ceil((weightSum-100)/0.5)+weightFreightModel.getAbovePrice()*(long)Math.ceil((weightSum-300)/0.5);
                 if(price_temp>freightPrice)
                     freightPrice=price_temp;
             }
         }
-        ReturnObject<Integer> retFreightModel = new ReturnObject<>(freightPrice);
+        ReturnObject<Long> retFreightModel = new ReturnObject<>(freightPrice);
         //retFreightModel = new ReturnObject(ResponseCode.OK);
         return retFreightModel;
     }

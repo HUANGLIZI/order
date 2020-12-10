@@ -319,7 +319,7 @@ public class FreightController {
             count.add(vo.get(i).getConut());
             skuId.add(vo.get(i).getSkuId());
         }
-        ReturnObject<Integer> retObject = freightService.calcuFreightPrice(count,skuId,rid);
+        ReturnObject<Long> retObject = freightService.calcuFreightPrice(count,skuId,rid);
         return Common.decorateReturnObject(retObject);
     }
 
