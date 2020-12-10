@@ -447,6 +447,11 @@ public class FreightDao{
         return retObj;
     }
 
+    /**
+     * 修改重量运费模板
+     * @author Cai Xinlu
+     * @date 2020-12-10 9:40
+     */
     public ReturnObject<Object> changeWeightFreightModel(WeightFreightModelChangeBo weightFreightModelChangeBo,
                                                          Long shopId) {
         ReturnObject<Object> retObj = null;
@@ -500,6 +505,11 @@ public class FreightDao{
         return retObj;
     }
 
+    /**
+     * 修改件数运费模板
+     * @author Cai Xinlu
+     * @date 2020-12-10 9:40
+     */
     public ReturnObject<Object> changePieceFreightModel(PieceFreightModelChangeBo pieceFreightModelChangeBo,
                                                         Long shopId) {
         ReturnObject<Object> retObj = null;

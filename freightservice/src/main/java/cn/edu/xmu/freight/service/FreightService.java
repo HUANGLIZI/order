@@ -134,6 +134,11 @@ public class FreightService {
         return returnObject;
     }
 
+    /**
+     * 修改运费模板
+     * @author Cai Xinlu
+     * @date 2020-12-10 9:40
+     */
     public ReturnObject<Object> changeFreightModel(Long id, FreightModelChangeVo freightModelChangeVo,
                                                      Long shopId)
     {
@@ -144,6 +149,11 @@ public class FreightService {
         return freightDao.changeFreightModel(freightModelChangeBo);
     }
 
+    /**
+     * 修改重量运费模板明细
+     * @author Cai Xinlu
+     * @date 2020-12-10 9:40
+     */
     public ReturnObject<Object> changeWeightFreightModel(Long id, WeightFreightModelChangeVo weightFreightModelChangeVo,
                                                          Long shopId)
     {
@@ -153,6 +163,11 @@ public class FreightService {
         return freightDao.changeWeightFreightModel(weightFreightModelChangeBo, shopId);
     }
 
+    /**
+     * 修改件数运费模板
+     * @author Cai Xinlu
+     * @date 2020-12-10 9:40
+     */
     public ReturnObject<Object> changePieceFreightModel(Long id, PieceFreightModelChangeVo pieceFreightModelChangeVo,
                                                         Long shopId)
     {

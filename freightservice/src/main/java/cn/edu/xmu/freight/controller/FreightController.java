@@ -199,6 +199,8 @@ public class FreightController {
 
     /**
      * 修改运费模板
+     * @author Cai Xinlu
+     * @date 2020-12-10 9:40
      */
     @Audit
     @ApiOperation(value = "修改运费模板", produces="application/json")
@@ -208,7 +210,7 @@ public class FreightController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 802, message = "运费模板名重复"),
     })
-    @PutMapping("{shopId}/freightmodels/{id}")
+    @PutMapping("/shops/{shopId}/freightmodels/{id}")
     public Object changeFreightModel(@PathVariable("shopId") Long shopId,
                                      @PathVariable("id") Long id,
                                      @Validated  @RequestBody FreightModelChangeVo freightModelChangeVo)
@@ -219,6 +221,11 @@ public class FreightController {
     }
 
 
+    /**
+     * 修改重量运费模板明细
+     * @author Cai Xinlu
+     * @date 2020-12-10 9:40
+     */
     @Audit
     @ApiOperation(value = "修改重量运费模板明细", produces="application/json")
     @ApiImplicitParams({
@@ -227,7 +234,7 @@ public class FreightController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 803, message = "运费模板中该地区已经定义"),
     })
-    @PutMapping("{shopId}/weightItems/{id}")
+    @PutMapping("/shops/{shopId}/weightItems/{id}")
     public Object changeWeightFreightModel(@PathVariable("shopId") Long shopId,
                                            @PathVariable("id") Long id,
                                            @RequestBody WeightFreightModelChangeVo weightFreightModelChangeVo)
@@ -236,6 +243,11 @@ public class FreightController {
         return getNullRetObj(objectReturnObject, httpServletResponse);
     }
 
+    /**
+     * 修改件数运费模板
+     * @author Cai Xinlu
+     * @date 2020-12-10 9:40
+     */
     @Audit
     @ApiOperation(value = "修改件数运费模板", produces = "application/json")
     @ApiImplicitParams({
@@ -244,7 +256,7 @@ public class FreightController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 803, message = "运费模板中该地区已经定义"),
     })
-    @PutMapping("{shopId}/pieceItems/{id}")
+    @PutMapping("/shops/{shopId}/pieceItems/{id}")
     public Object changePieceFreightModel(@PathVariable("shopId") Long shopId,
                                           @PathVariable("id") Long id,
                                           @RequestBody PieceFreightModelChangeVo pieceFreightModelChangeVo)
@@ -325,7 +337,7 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @PostMapping("/shops/{shopId}/freight_models/{id}/default")
     public Object postDefaultPieceFreight(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id){
         //Logger logger;
@@ -358,7 +370,7 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @PostMapping("/shops/{shopId}/freightmodels/{id}/pieceItems")
     public Object postPieceFreightModel(@PathVariable Long shopId, @PathVariable Long id,@Validated @RequestBody PieceFreightModelVo vo){
 
@@ -396,7 +408,7 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @PostMapping("/shops/{shopId}/freightmodels/{id}/weightItems")
     public Object postWeightFreightModel(@PathVariable Long shopId, @PathVariable Long id,@Validated @RequestBody WeightFreightModelVo vo){
 
@@ -432,7 +444,7 @@ public class FreightController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/shops/{shopId}/freightmodels/{id}/weightItems")
     public Object findWeightItemByFreightModelId(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id)
     {
@@ -465,7 +477,7 @@ public class FreightController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/shops/{shopId}/freightmodels/{id}/pieceItems")
     public Object findPieceItemByFreightModelId(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id)
     {

@@ -4,6 +4,7 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.order.model.OrderDTO;
+import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
 import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.model.bo.OrderItems;
@@ -147,13 +148,13 @@ public class OrderService<OrdersPo> implements IOrderService {
      * @date 2020-12-06 21:14
      */
     @Override
-    public ReturnObject<OrderDTO> findUserIdbyOrderId(Long orderId)
+    public ReturnObject<OrderInnerDTO> findUserIdbyOrderId(Long orderId)
     {
         return orderDao.getUserIdbyOrderId(orderId);
     }
 
     @Override
-    public ReturnObject<OrderDTO> findShopIdbyOrderId(Long orderId) { return orderDao.getShopIdbyOrderId(orderId); }
+    public ReturnObject<OrderInnerDTO> findShopIdbyOrderId(Long orderId) { return orderDao.getShopIdbyOrderId(orderId); }
     /**
      * @param
      * @return
@@ -210,5 +211,30 @@ public class OrderService<OrdersPo> implements IOrderService {
         else
             returnObject = new ReturnObject<>(returnObject1.getCode(),returnObject1.getErrmsg());
         return returnObject;
+    }
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-09 23:28
+     */
+    @Override
+    public ReturnObject<OrderDTO> getSelectOrderInfo(Long userId, Long orderItemId)
+    {
+        return orderDao.getOrderItemsForOther(userId, orderItemId);
+    }
+
+    /**
+     * @param userId
+     * @param skuId
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-10 10:49
+     */
+    @Override
+    public ReturnObject<List<Long>> listUserSelectOrderItemId(Long userId, Long skuId)
+    {
+        return orderDao.getOrderItemsIdForOther(userId, skuId);
     }
 }
