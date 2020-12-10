@@ -312,15 +312,14 @@ public class FreightController {
         logger.debug("calculate freight service by regionId:" + rid);
         int listSize = vo.size();
         List<Integer> count = new ArrayList<>();
-        List<String> skuId = new ArrayList<>();
-       
+        List<Long> skuId = new ArrayList<>();
+
         for(int i=0;i<listSize;i++)
         {
             count.add(vo.get(i).getConut());
             skuId.add(vo.get(i).getSkuId());
         }
-        
-        ReturnObject<Integer> retObject = freightService.calcuFreightPrice(count,skuId);
+        ReturnObject<Integer> retObject = freightService.calcuFreightPrice(count,skuId,rid);
         return Common.decorateReturnObject(retObject);
     }
 

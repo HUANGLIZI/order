@@ -1,6 +1,7 @@
 package cn.edu.xmu.freight.service;
 
 import cn.edu.xmu.freight.dao.FreightDao;
+import cn.edu.xmu.oomall.goods.model.GoodsFreightDTO;
 import cn.edu.xmu.oomall.goods.service.GoodsService;
 import com.github.pagehelper.PageInfo;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -32,6 +33,7 @@ public class FreightService {
 
     @DubboReference
     private GoodsService goodsService;
+
 
     private Logger logger = LoggerFactory.getLogger(FreightService.class);
 
@@ -182,7 +184,7 @@ public class FreightService {
 
         return  freightDao.changePieceFreightModel(pieceFreightModelChangeBo, shopId);
     }
-    
+
     /**
      * 计算运费
      * @author 24320182203227 李子晗
@@ -191,11 +193,60 @@ public class FreightService {
      * @return ReturnObject<VoObject> 运费模板返回视图
      */
     @Transactional
-    public ReturnObject<Integer> calcuFreightPrice(List<Integer> count, List<String> skuId) {
-        Integer freightPrice = null;
+    public ReturnObject<Integer> calcuFreightPrice(List<Integer> count, List<Long> skuId,Long regionId) {
+        Integer freightPrice = 0;
         //根据skuId查询模板、重量,查询默认运费模板
         //根据重量、count并比较算出freightPrice
-
+        List<GoodsFreightDTO> goodsFreightDTO = null;
+        List<Long> freightModelId = null;
+        List<FreightModelPo> freightModelPos = null;//运费模板列表
+        Integer weightSum = 0;
+        Integer countSum=0;
+        for (int i=0;i<skuId.size();i++) {
+            goodsFreightDTO.add(goodsService.getGoodsFreightDetailBySkuId(skuId.get(i)).getData());
+            weightSum+=goodsFreightDTO.get(i).getWeight();//计算总重量
+            countSum+=count.get(i);//计算总件数
+            if(goodsFreightDTO.get(i).getFreightModelId()==null) {//如果没有单品运费模板,采用默认模板
+                Long shopId=goodsFreightDTO.get(i).getShopId();
+                FreightModelPo defaultFreightModel = freightDao.getDefaultFreightModelByshopId(shopId);
+                freightModelId.add(defaultFreightModel.getId());//获得默认运费模板id
+                freightModelPos.add(defaultFreightModel);//将默认运费模板加入运费模板列表
+            }
+            else{
+                freightModelId.add(goodsFreightDTO.get(i).getFreightModelId());//获得单品运费模板id列表
+                freightModelPos.add((FreightModelPo)(freightDao.getFreightModelById(goodsFreightDTO.get(i).getFreightModelId()).getData()));//将单品运费模板加入运费模板列表
+            }
+        }
+        for (int i=0;i<freightModelPos.size();i++) {
+            FreightModelPo freightModelPo_temp=freightModelPos.get(i);
+            Integer price_temp=0;
+            if (freightModelPo_temp.getType() == 1)//获得按件数计算的运费模板明细
+            {
+                PieceFreightModel pieceFreightModel_temp=freightDao.getPieceItemByFreightModelIdRegionId(freightModelPo_temp.getShopId(),freightModelPo_temp.getId(),regionId);
+                price_temp= pieceFreightModel_temp.getFirstItemsPrice()+pieceFreightModel_temp.getAdditionalItemsPrice()*(countSum-1);
+                if(price_temp>freightPrice) {
+                    freightPrice=price_temp;
+                }
+            }
+            else if (freightModelPo_temp.getType() == 0)//获得按重量计算的运费模板明细
+            {
+                WeightFreightModel weightFreightModel=freightDao.getWeightItemByFreightModelIdRegionId(freightModelPo_temp.getShopId(),freightModelPo_temp.getId(),regionId);
+                if(weightSum<=weightFreightModel.getFirstWeight())
+                    price_temp=weightFreightModel.getFirstWeightFreight();
+                else if(weightSum>weightFreightModel.getFirstWeight()&&weightSum<=10)
+                    price_temp=weightFreightModel.getFirstWeightFreight()+(int)weightFreightModel.getTenPrice()*Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5);
+                else if(weightSum>10&&weightSum<=50)
+                    price_temp=weightFreightModel.getFirstWeightFreight()+(int)weightFreightModel.getTenPrice()*Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*Math.ceil((weightSum-10)/0.5);
+                else if(weightSum>50&&weightSum<=100)
+                    price_temp=weightFreightModel.getFirstWeightFreight()+(int)weightFreightModel.getTenPrice()*Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*Math.ceil((weightSum-10)/0.5)+weightFreightModel.getHundredPrice()*Math.ceil((weightSum-50)/0.5);
+                else if(weightSum>100&&weightSum<=300)
+                    price_temp=weightFreightModel.getFirstWeightFreight()+(int)weightFreightModel.getTenPrice()*Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*Math.ceil((weightSum-10)/0.5)+weightFreightModel.getHundredPrice()*Math.ceil((weightSum-50)/0.5)+weightFreightModel.getTrihunPrice()*Math.ceil((weightSum-100)/0.5);
+                else if(weightSum>300)
+                    price_temp=weightFreightModel.getFirstWeightFreight()+(int)weightFreightModel.getTenPrice()*Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*Math.ceil((weightSum-10)/0.5)+weightFreightModel.getHundredPrice()*Math.ceil((weightSum-50)/0.5)+weightFreightModel.getTrihunPrice()*Math.ceil((weightSum-100)/0.5)+weightFreightModel.getAbovePrice()*Math.ceil((weightSum-300)/0.5);
+                if(price_temp>freightPrice)
+                    freightPrice=price_temp;
+            }
+        }
         ReturnObject<Integer> retFreightModel = new ReturnObject<>(freightPrice);
         //retFreightModel = new ReturnObject(ResponseCode.OK);
         return retFreightModel;
