@@ -41,7 +41,11 @@ spring:
           #慢SQL执行时间
           slow-sql-millis: 100
       validation-query: select 1
+      username: root
+      password: 159156
+
     sql-script-encoding: UTF-8
+    url: jdbc:mysql://localhost:3306/oomall_order?serverTimezone=GMT%2B8
   redis:
     # Redis数据库索引（默认为0）
     database: 0
@@ -99,5 +103,21 @@ pagehelper:
   helper-dialect: mysql
 
 
-
+#    配置服务信息
+dubbo:
+  application:
+    name: payment-service
+    qos-enable: false
+    qos-accept-foreign-ip: false
+  #    配置注册中心
+  registry:
+    address: nacos://127.0.0.1:8848
+  #    设置协议-协议由提供方指定消费方被动接受
+  protocol:
+    name: dubbo
+    port: 20880
+  #    设置超时时间
+  consumer:
+    timeout: 4000
+    check: false
 

@@ -17,7 +17,7 @@ public class FreightModelRetVo {
     private String name;
 
     @ApiModelProperty(value = "默认模板")
-    private String defaultModel;
+    private Byte defaultModel;
 
     @ApiModelProperty(value = "修改时间")
     private LocalDateTime gmtModified;
