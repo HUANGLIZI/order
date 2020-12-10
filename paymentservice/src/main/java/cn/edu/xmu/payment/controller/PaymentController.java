@@ -236,7 +236,7 @@ public class PaymentController {
         Refund refund=new Refund();
         refund.setPaymentId(id);
         refund.setAmount(amount.getAmount());
-        refund.setGmtCreated(LocalDateTime.now());
+        refund.setGmtCreate(LocalDateTime.now());
         ReturnObject<VoObject> retObject = paymentService.insertRefunds(refund,shopId);
         httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return Common.decorateReturnObject(retObject);
@@ -336,7 +336,7 @@ public class PaymentController {
      * @author Cai Xinlu
      * @date 2020-12-06 23:18
      */
-    //    @Audit
+    @Audit
     @ApiOperation(value = "买家查询自己的退款信息",produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
@@ -359,7 +359,7 @@ public class PaymentController {
      * @author Cai Xinlu
      * @date 2020-12-06 23:18
      */
-    //    @Audit
+    @Audit
     @ApiOperation(value = "买家查询自己的退款信息",produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),

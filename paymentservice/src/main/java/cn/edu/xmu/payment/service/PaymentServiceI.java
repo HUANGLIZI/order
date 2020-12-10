@@ -4,6 +4,7 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.order.model.OrderDTO;
+import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
 import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.oomall.other.model.AftersaleDTO;
 import cn.edu.xmu.oomall.other.service.IAftersaleService;
@@ -42,8 +43,8 @@ public class PaymentServiceI {
     @Transactional
     public ReturnObject<VoObject> userQueryRefundsByOrderId(Long orderId, Long userId)
     {
-        ReturnObject<OrderDTO> orderDTO = iOrderService.findUserIdbyOrderId(orderId);
-        Long retUserId = orderDTO.getData().getCustomerId();
+        ReturnObject<OrderInnerDTO> orderInnerDTO = iOrderService.findUserIdbyOrderId(orderId);
+        Long retUserId = orderInnerDTO.getData().getCustomerId();
         if (retUserId == null)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 //        if (!retUserId.equals(1L))
@@ -75,7 +76,6 @@ public class PaymentServiceI {
     {
         Long retUserId = iAftersaleService.findUserIdbyAftersaleId(aftersaleId).getData();
 //        if (!retUserId.equals(1L))
-//        Long retUserId = aftersaleDTO.getData().getCustomerId();
         if (retUserId == null)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         if (!retUserId.equals(userId))
@@ -99,9 +99,6 @@ public class PaymentServiceI {
     @Transactional
     public ReturnObject<List<Object>> getOrdersRefundsByAftersaleId(Long aftersaleId, Long shopId){
         Long retShopId = iAftersaleService.findShopIdbyAftersaleId(aftersaleId).getData();
-//        if (aftersaleDTO == null)
-//            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-//        Long retShopId = aftersaleDTO.getData().getShopId();
         if (retShopId == null)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         if (!retShopId.equals(shopId))
@@ -119,15 +116,14 @@ public class PaymentServiceI {
             } else {
                 retRefund = new ReturnObject(retObj.getCode(), retObj.getErrmsg());
             }
-//        }
         return retRefund;
     }
 
 
     @Transactional
     public ReturnObject<List<Object>> getOrdersRefundsByOrderId(Long id, Long shopId){
-        ReturnObject<OrderDTO> orderDTO = iOrderService.findShopIdbyOrderId(id);
-        Long retShopId = orderDTO.getData().getShopId();
+        ReturnObject<OrderInnerDTO> orderInnerDTO = iOrderService.findShopIdbyOrderId(id);
+        Long retShopId = orderInnerDTO.getData().getShopId();
         if (retShopId == null)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         if (!retShopId.equals(shopId))

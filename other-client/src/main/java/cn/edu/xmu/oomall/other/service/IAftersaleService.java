@@ -26,5 +26,11 @@ public interface IAftersaleService {
      */
     ReturnObject<CustomerDTO> findCustomerByUserId(Long userId);
 
-    ReturnObject<Boolean> judgeRegionIdValid(Long regionId);
+    /**
+     * @author 洪晓杰
+     * 通过aftersaleId查找orderItemId
+     */
+    ReturnObject<Long> findOrderItemIdbyAftersaleId(Long aftersaleId);
+
+
 }

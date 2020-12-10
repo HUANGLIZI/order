@@ -994,66 +994,6 @@ public class PaymentPoExample {
             addCriterion("aftersale_id not between", value1, value2, "aftersaleId");
             return (Criteria) this;
         }
-
-        public Criteria andIfDepositIsNull() {
-            addCriterion("if_deposit is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andIfDepositIsNotNull() {
-            addCriterion("if_deposit is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andIfDepositEqualTo(Byte value) {
-            addCriterion("if_deposit =", value, "ifDeposit");
-            return (Criteria) this;
-        }
-
-        public Criteria andIfDepositNotEqualTo(Byte value) {
-            addCriterion("if_deposit <>", value, "ifDeposit");
-            return (Criteria) this;
-        }
-
-        public Criteria andIfDepositGreaterThan(Byte value) {
-            addCriterion("if_deposit >", value, "ifDeposit");
-            return (Criteria) this;
-        }
-
-        public Criteria andIfDepositGreaterThanOrEqualTo(Byte value) {
-            addCriterion("if_deposit >=", value, "ifDeposit");
-            return (Criteria) this;
-        }
-
-        public Criteria andIfDepositLessThan(Byte value) {
-            addCriterion("if_deposit <", value, "ifDeposit");
-            return (Criteria) this;
-        }
-
-        public Criteria andIfDepositLessThanOrEqualTo(Byte value) {
-            addCriterion("if_deposit <=", value, "ifDeposit");
-            return (Criteria) this;
-        }
-
-        public Criteria andIfDepositIn(List<Byte> values) {
-            addCriterion("if_deposit in", values, "ifDeposit");
-            return (Criteria) this;
-        }
-
-        public Criteria andIfDepositNotIn(List<Byte> values) {
-            addCriterion("if_deposit not in", values, "ifDeposit");
-            return (Criteria) this;
-        }
-
-        public Criteria andIfDepositBetween(Byte value1, Byte value2) {
-            addCriterion("if_deposit between", value1, value2, "ifDeposit");
-            return (Criteria) this;
-        }
-
-        public Criteria andIfDepositNotBetween(Byte value1, Byte value2) {
-            addCriterion("if_deposit not between", value1, value2, "ifDeposit");
-            return (Criteria) this;
-        }
     }
 
     /**

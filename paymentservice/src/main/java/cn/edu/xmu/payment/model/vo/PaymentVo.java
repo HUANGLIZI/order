@@ -29,7 +29,7 @@ public class PaymentVo {
      */
     public Payment createPayment(){
         Payment payment = new Payment();
-        payment.setAmout(this.price);
+        payment.setAmount(this.price);
         payment.setActualAmount(this.price);
         payment.setPaymentPattern(this.paymentPattern);
 

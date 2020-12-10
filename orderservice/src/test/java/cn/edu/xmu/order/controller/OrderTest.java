@@ -114,6 +114,13 @@ public class OrderTest {
         JSONAssert.assertEquals(expectedResponse,new String(responseString, StandardCharsets.UTF_8),false);
     }
 
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-10 17:39
+     */
     @Test
     public String createOrdersTest() throws Exception
     {
@@ -144,5 +151,6 @@ public class OrderTest {
                 .andReturn().getResponse().getContentAsString();
 
         return  JacksonUtil.parseString(response, "data");
+
     }
 }
