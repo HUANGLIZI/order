@@ -19,7 +19,7 @@ public class PaymentRetVo {
     private Long actualAmount;
 
     @ApiModelProperty(value = "支付方式")
-    private Byte paymentPattern;
+    private String paymentPattern;
 
     @ApiModelProperty(value = "支付时间")
     private LocalDateTime payTime;
@@ -47,7 +47,7 @@ public class PaymentRetVo {
 
     public PaymentRetVo(Payment payment) {
         this.actualAmount=payment.getActualAmount();
-        this.amout=payment.getAmout();
+        this.amout=payment.getAmount();
         this.beginTime=payment.getBeginTime();
         this.endTime=payment.getEndTime();
         this.gmtCreated=payment.getGmtCreate();

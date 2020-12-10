@@ -16,12 +16,9 @@ public class Payment implements VoObject, Serializable {
 
     private Long id;
 
-
-    private Long amout;
-
+    private Long amount;
 
     private Long actualAmount;
-
 
     private String paymentPattern;
 
@@ -39,8 +36,6 @@ public class Payment implements VoObject, Serializable {
 
     private Byte state;
 
-    private Byte ifDeposit;
-
     private LocalDateTime gmtCreate;
 
     private LocalDateTime gmtModified;
@@ -56,7 +51,7 @@ public class Payment implements VoObject, Serializable {
      */
     public Payment(PaymentPo po){
         this.actualAmount=po.getActualAmount();
-        this.amout=po.getAmount();
+        this.amount=po.getAmount();
         this.beginTime=po.getBeginTime();
         this.endTime=po.getEndTime();
         this.gmtCreate=po.getGmtCreate();
@@ -68,7 +63,6 @@ public class Payment implements VoObject, Serializable {
         this.payTime=po.getPayTime();
         this.state=po.getState();
         this.aftersaleId=po.getAftersaleId();
-        this.ifDeposit=po.getIfDeposit();
     }
 
     /**
@@ -80,7 +74,7 @@ public class Payment implements VoObject, Serializable {
         PaymentPo paymentPo = new PaymentPo();
         paymentPo.setId(this.id);
         paymentPo.setActualAmount(this.actualAmount);
-        paymentPo.setAmount(this.amout);
+        paymentPo.setAmount(this.amount);
         paymentPo.setBeginTime(this.beginTime);
         paymentPo.setEndTime(this.endTime);
         paymentPo.setOrderId(this.orderId);
@@ -91,7 +85,6 @@ public class Payment implements VoObject, Serializable {
         paymentPo.setGmtModified(this.gmtModified);
         paymentPo.setState(this.state);
         paymentPo.setAftersaleId(this.aftersaleId);
-        paymentPo.setIfDeposit(this.ifDeposit);
         return paymentPo;
     }
 
