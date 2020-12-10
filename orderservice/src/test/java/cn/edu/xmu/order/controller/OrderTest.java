@@ -29,7 +29,7 @@ public class OrderTest {
     private MockMvc mvc;
     public OrderTest(){
         this.webTestClient = WebTestClient.bindToServer()
-                .baseUrl("http://localhost:8080")
+                .baseUrl("http://localhost:8087")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
     }

@@ -44,7 +44,7 @@ public class FreightModelRetVo {
         //this.shopId = freightModel.getShopId();
         this.defaultModel = freightModel.getDefaultModel();
         this.type = freightModel.getType();
-        this.gmtCreated = freightModel.getGmtCreated();
+        this.gmtCreated = freightModel.getGmtCreate();
         this.gmtModified = freightModel.getGmtModified();
         this.unit=freightModel.getUnit();
     }

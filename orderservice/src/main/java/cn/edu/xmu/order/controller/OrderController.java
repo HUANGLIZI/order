@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@Api(value = "支付服务", tags = "payment")
+@Api(value = "订单服务", tags = "order")
 @RestController /*Restful的Controller对象*/
 @RequestMapping(value = "", produces = "application/json;charset=UTF-8")
 public class OrderController {
@@ -142,30 +142,30 @@ public class OrderController {
      * @param bindingResult 校验数据
      * @return Object 返回视图
      */
-    @ApiOperation(value = "买家修改本人名下订单", produces = "application/json")
-    @ApiImplicitParams({
-            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true),
-            @ApiImplicitParam(paramType = "body", dataType = "OrderSimpleVo", name = "vo", value = "操作字段 (状态)", required = true)
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-    })
-    //@Audit
-    @PutMapping("/orders3/{id}")
-    public Object updateOrder(@PathVariable("id") Long id, @Validated @RequestBody OrderSimpleVo vo, BindingResult bindingResult) {
-        logger.debug("update order by orderId:" + id);
-        //校验前端数据-----暂时还没写
-        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
-        if (null != returnObject) {
-            return returnObject;
-        }
-        Orders orders=vo.createOrders();
-        orders.setId(id);
-        orders.setGmtModified(LocalDateTime.now());
-        ReturnObject<Object> retObject = orderService.updateOders(orders);
-        return Common.decorateReturnObject(retObject);
-    }
+//    @ApiOperation(value = "买家修改本人名下订单", produces = "application/json")
+//    @ApiImplicitParams({
+//            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+//            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true),
+//            @ApiImplicitParam(paramType = "body", dataType = "OrderSimpleVo", name = "vo", value = "操作字段 (状态)", required = true)
+//    })
+//    @ApiResponses({
+//            @ApiResponse(code = 0, message = "成功"),
+//    })
+//    //@Audit
+//    @PutMapping("/orders3/{id}")
+//    public Object updateOrder(@PathVariable("id") Long id, @Validated @RequestBody OrderSimpleVo vo, BindingResult bindingResult) {
+//        logger.debug("update order by orderId:" + id);
+//        //校验前端数据-----暂时还没写
+//        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+//        if (null != returnObject) {
+//            return returnObject;
+//        }
+//        Orders orders=vo.createOrders();
+//        orders.setId(id);
+//        orders.setGmtModified(LocalDateTime.now());
+//        ReturnObject<Object> retObject = orderService.updateOders(orders);
+//        return Common.decorateReturnObject(retObject);
+//    }
 
     /**
      * 买家标记确认收货
@@ -173,26 +173,26 @@ public class OrderController {
      * @author 24320182203196 洪晓杰
      * @param id 订单id
      */
-    @ApiOperation(value = "买家标记确认收货", produces = "application/json")
-    @ApiImplicitParams({
-            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true),
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-    })
-    //@Audit
-    @PutMapping("/orders2/{id}/confirm")
-    public Object updateOrderStateToConfirm( @PathVariable("id") Long id) {
-        logger.debug("update orders by orderId:" + id);
-        //校验前端数据-----暂时还没写
-        Orders orders=new Orders();
-        orders.setId(id);
-        orders.setState((byte) 2);//2表示为确认收货状态
-        orders.setGmtModified(LocalDateTime.now());
-        ReturnObject<Object> retObject = orderService.updateOders(orders);
-        return Common.decorateReturnObject(retObject);
-    }
+//    @ApiOperation(value = "买家标记确认收货", produces = "application/json")
+//    @ApiImplicitParams({
+//            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+//            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true),
+//    })
+//    @ApiResponses({
+//            @ApiResponse(code = 0, message = "成功"),
+//    })
+//    //@Audit
+//    @PutMapping("/orders2/{id}/confirm")
+//    public Object updateOrderStateToConfirm( @PathVariable("id") Long id) {
+//        logger.debug("update orders by orderId:" + id);
+//        //校验前端数据-----暂时还没写
+//        Orders orders=new Orders();
+//        orders.setId(id);
+//        orders.setState((byte) 2);//2表示为确认收货状态
+//        orders.setGmtModified(LocalDateTime.now());
+//        ReturnObject<Object> retObject = orderService.updateOders(orders);
+//        return Common.decorateReturnObject(retObject);
+//    }
 
 
     /**
@@ -371,8 +371,13 @@ public class OrderController {
     }
 
 
+    /**
+     * 用户创建订单
+     * @author Cai Xinlu
+     * @date 2020-12-10 10:46
+     */
 //    @Audit
-    @ApiOperation(value = "查询用户订单", produces = "application/json")
+    @ApiOperation(value = "用户创建订单", produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(paramType = "body", dataType = "OrdersVo", name = "ordersVo", value = "创建订单信息", required = true),
@@ -388,6 +393,8 @@ public class OrderController {
         ReturnObject orders = orderServiceI.createOrders(userId, ordersVo);
         return new ReturnObject<>(orders);
     }
+
+
     /**
      * 店家查询商户所有订单 (概要)
      *
@@ -473,7 +480,7 @@ public class OrderController {
             @ApiResponse(code = 504, message = "操作id不存在")
     })
     //@Audit
-    @PutMapping("/shops/{shopId}/orders/{id}")
+    @DeleteMapping("/shops/{shopId}/orders/{id}")
     public Object cancelOrderById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id)
     {
         logger.debug("Cancel Order by orderId:" +id);

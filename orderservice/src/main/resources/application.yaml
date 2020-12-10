@@ -105,7 +105,7 @@ pagehelper:
 #    配置服务信息
 dubbo:
   application:
-    name: payment-service
+    name: order-service
     qos-enable: false
     qos-accept-foreign-ip: false
   #    配置注册中心

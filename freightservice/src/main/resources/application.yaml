@@ -15,17 +15,20 @@ server:
 
 
 spring:
-  application:
-    name: order-service
-  profiles:
-    active: dev
+  boot:
+    admin:
+      client:
+        url: http://localhost:8081
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    type: com.alibaba.druid.pool.DruidDataSource
-#    initialization-mode: always
-#    schema: classpath:schema.sql
-#    data: classpath:testdata.sql
+    url: jdbc:mysql://localhost:3306/oomall_order?serverTimezone=GMT%2B8
+    username: root
+    password: 12345678
     druid:
+      stat-view-servlet:
+        login-username: admin
+        login-password: 123456
+        enabled: true
+        url-pattern: /druid/*
       #初始化时建立物理连接的个数
       initial-size: 30
       #最小连接池数量
@@ -41,11 +44,7 @@ spring:
           #慢SQL执行时间
           slow-sql-millis: 100
       validation-query: select 1
-      username: root
-      password: 159156
-
     sql-script-encoding: UTF-8
-    url: jdbc:mysql://localhost:3306/oomall_order?serverTimezone=GMT%2B8
   redis:
     # Redis数据库索引（默认为0）
     database: 0
@@ -106,7 +105,7 @@ pagehelper:
 #    配置服务信息
 dubbo:
   application:
-    name: payment-service
+    name: freight-service
     qos-enable: false
     qos-accept-foreign-ip: false
   #    配置注册中心
