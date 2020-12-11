@@ -488,4 +488,30 @@ public class OrderController {
         return Common.decorateReturnObject(returnObject);
     }
 
+    /**
+     * 管理员创建本店铺售后订单
+     *
+     * @author 24320182203227  李子晗
+     * @return Object 查询结果
+     */
+    @ApiOperation(value = "管理员创建本店铺售后订单",produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "Long", name = "shopId", value = "商户id (店员只能查询本商铺)", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "Long", name = "id", value = "订单id", required = true)
+
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    //@Audit
+    @PostMapping("/shops/{userId}/{shopId}/{orderItemId}/{quantity}")
+    public Object CreatOrderById(@PathVariable("shopId") Long shopId, @PathVariable("userId") Long userId,@PathVariable("orderItemId") Long orderItemId,@PathVariable("quantity") Integer quantity)
+    {
+        logger.debug("Cancel Order by orderId:" +userId);
+        ReturnObject<VoObject> returnObject = orderService.getAdminHandleRefund(userId,shopId,orderItemId,quantity);
+        return Common.decorateReturnObject(returnObject);
+    }
+
 }
