@@ -4,8 +4,10 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
+import cn.edu.xmu.oomall.order.service.IOrderItemService;
 import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.oomall.order.service.IPaymentService;
+import cn.edu.xmu.oomall.other.service.IAftersaleService;
 import cn.edu.xmu.payment.dao.PaymentDao;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.bo.Refund;
@@ -28,6 +30,12 @@ public class PaymentService implements IPaymentService {
 
     @DubboReference
     private IOrderService iOrderService;
+
+    @DubboReference
+    private IOrderItemService iOrderItemService;
+
+    @DubboReference
+    private IAftersaleService iAftersaleService;
 
     private Logger logger = LoggerFactory.getLogger(PaymentService.class);
 
@@ -144,4 +152,76 @@ public class PaymentService implements IPaymentService {
 
         return paymentDao.createRefund(refundBo);
     }
+
+    /**
+     * 维修api，产生orderItemId的新支付单，refund为付款数，正数
+     * @auther 洪晓杰
+     * @return
+     */
+    @Override
+    public ReturnObject<ResponseCode> getAdminHandleRepair(Long userId, Long shopId,Long orderItemId,Long refund,Long aftersaleId){
+
+        //跨域获取orderId
+        Long orderId=iOrderItemService.getOrderIdByOrderItemId(orderItemId).getData();
+
+        Payment payment=new Payment();
+
+        payment.setOrderId(orderId);
+        payment.setAmount(refund);
+        payment.setActualAmount(refund);
+        payment.setPayTime(LocalDateTime.now());
+        payment.setState((byte) 0);
+        payment.setAftersaleId(aftersaleId);
+        payment.setGmtCreate(LocalDateTime.now());
+
+        return paymentDao.insertPayment(payment);
+    }
+
+
+
+
+    /**
+     * 买家为售后单创建支付单
+     *
+     * @author 24320182203196 洪晓杰
+     * @param payment 支付单，aftersaleId
+     * @return Object 返回视图对象
+     */
+    @Transactional
+    public ReturnObject<VoObject> createPaymentByAftersaleId(Payment payment,Long aftersaleId) {
+
+        Long retOrderItemId = iAftersaleService.findOrderItemIdbyAftersaleId(aftersaleId).getData();
+
+        if (retOrderItemId == null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //跨域获取orderId
+        Long retorderId=iOrderItemService.getOrderIdByOrderItemId(retOrderItemId).getData();
+
+
+        //Long retOrderID=iOrderItemService
+
+//        OrderItemPo orderItemPo=orderItemPoMapper.selectByPrimaryKey(retOrderItemId);
+//        payment.setOrderId(orderItemPo.getOrderId());
+
+        LocalDateTime localDateTime = LocalDateTime.now();
+
+        payment.setAftersaleId(aftersaleId);
+        payment.setOrderId(retorderId);
+        payment.setBeginTime(LocalDateTime.now());
+        payment.setEndTime(localDateTime.plusHours(24));
+        //支付成功
+        payment.setState((byte)0);
+        payment.setPayTime(localDateTime);
+
+        payment.setGmtModified(localDateTime);
+
+        ReturnObject returnObject = paymentDao.insertPayment(payment);
+        if(returnObject.getCode().equals(ResponseCode.OK)){
+            return returnObject;
+        }else {
+            return new ReturnObject<>(returnObject.getCode(),returnObject.getErrmsg());
+        }
+    }
+
 }
