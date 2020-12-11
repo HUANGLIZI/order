@@ -555,7 +555,7 @@ public class OrderDao {
         return new ReturnObject<>(orderInnerDTO);
     }
 
-    /*
+    /**
      * @author Li Zihan
      * @date 2020-12-10 10:50
      */
@@ -569,4 +569,16 @@ public class OrderDao {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         return new ReturnObject<>(orderItemPo);
     }
+
+    /**
+     * 获取orderId通过orderItemId
+     * @auther 洪晓杰
+     * @return
+     */
+    public ReturnObject<Long> getOrderIdByOrderItemId(Long orderItemId) {
+        OrderItemPo orderItemPo=orderItemPoMapper.selectByPrimaryKey(orderItemId);
+        if(orderItemPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        return new ReturnObject<>(orderItemPo.getOrderId());
+    }
+
 }
