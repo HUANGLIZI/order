@@ -55,7 +55,6 @@ public class OrdersVo {
         orders.setAddress(this.address);
         orders.setMobile(this.mobile);
         orders.setMessage(this.message);
-
         return orders;
     }
 }

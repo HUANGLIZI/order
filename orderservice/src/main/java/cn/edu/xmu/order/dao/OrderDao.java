@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class OrderDao {
@@ -160,7 +161,7 @@ public class OrderDao {
     }
 
     //判断order是否属于shop
-    private boolean isOrderBelongToShop(Long shopId, Long orderId){
+    public boolean isOrderBelongToShop(Long shopId, Long orderId){
         OrdersPoExample example=new OrdersPoExample ();
         OrdersPoExample.Criteria criteria=example.createCriteria();
         criteria.andIdEqualTo(orderId);
@@ -498,11 +499,29 @@ public class OrderDao {
      * @author Cai Xinlu
      * @date 2020-12-10 10:50
      */
-    public ReturnObject<List<Long>> getOrderItemsIdForOther(Long userId, Long skuId)
+    public ReturnObject<List<Long>> listUserSelectOrderItemId(Long userId, Long skuId)
     {
         OrdersPoExample ordersPoExample = new OrdersPoExample();
         OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
         criteria.andCustomerIdEqualTo(userId);
+        return getOrderItemsIdForOther(skuId, ordersPoExample);
+    }
+
+    /**
+     * @auther zxj
+     * @param shopId
+     * @param skuId
+     * @return
+     */
+    public ReturnObject<List<Long>> listAdminSelectOrderItemId(Long shopId, Long skuId) {
+        OrdersPoExample ordersPoExample = new OrdersPoExample();
+        OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
+        criteria.andShopIdEqualTo(shopId);
+
+        return getOrderItemsIdForOther(skuId, ordersPoExample);
+    }
+
+    private ReturnObject<List<Long>> getOrderItemsIdForOther(Long skuId, OrdersPoExample ordersPoExample) {
         List<OrdersPo> ordersPos = ordersPoMapper.selectByExample(ordersPoExample);
         OrderItemPoExample orderItemPoExample = new OrderItemPoExample();
         List<Long> orderItemsIdList = new ArrayList<Long>();
@@ -537,4 +556,17 @@ public class OrderDao {
     }
 
 
+     * @author Li Zihan
+     * @date 2020-12-10 10:50
+     */
+    public ReturnObject<OrderItemPo> getOrderItems(Long userId, Long orderItemId)
+    {
+        OrderItemPo orderItemPo = orderItemPoMapper.selectByPrimaryKey(orderItemId);
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderItemPo.getOrderId());
+        if (orderItemPo == null || ordersPo == null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if (!ordersPo.getCustomerId().equals(userId))
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        return new ReturnObject<>(orderItemPo);
+    }
 }

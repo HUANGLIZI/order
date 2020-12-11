@@ -127,6 +127,12 @@
             <artifactId>nacos-client</artifactId>
             <version>1.4.0</version>
         </dependency>
+        <dependency>
+            <groupId>cn.edu.xmu</groupId>
+            <artifactId>goods-client</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 

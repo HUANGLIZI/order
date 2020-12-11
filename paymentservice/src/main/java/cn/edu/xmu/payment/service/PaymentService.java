@@ -45,6 +45,12 @@ public class PaymentService implements IPaymentService {
     }
 
     public ReturnObject queryPayment(Long shopId, Long orderId) {
+
+        //如果该商店不拥有这个order则查不到
+        if(!((iOrderService.isOrderBelongToShop(shopId,orderId)).getData())&&shopId!=0){
+            logger.error(" queryPaymentById: 数据库不存在该支付单 orderId="+orderId);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
         return paymentDao.queryPayment(shopId,orderId);
     }
 
