@@ -537,4 +537,21 @@ public class OrderDao {
 
         return new ReturnObject<>(orderItemsIdList);
     }
+
+    /**
+     * @param
+     * @return
+     * @author Li Zihan
+     * @date 2020-12-10 10:50
+     */
+    public ReturnObject<OrderItemPo> getOrderItems(Long userId, Long orderItemId)
+    {
+        OrderItemPo orderItemPo = orderItemPoMapper.selectByPrimaryKey(orderItemId);
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderItemPo.getOrderId());
+        if (orderItemPo == null || ordersPo == null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if (!ordersPo.getCustomerId().equals(userId))
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        return new ReturnObject<>(orderItemPo);
+    }
 }

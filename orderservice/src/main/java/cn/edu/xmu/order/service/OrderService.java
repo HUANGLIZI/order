@@ -10,6 +10,8 @@ import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
 import cn.edu.xmu.order.model.po.OrderItemPo;
+import cn.edu.xmu.order.model.po.OrdersPo;
+import cn.edu.xmu.order.model.vo.OrderCreateRetVo;
 import cn.edu.xmu.order.model.vo.OrderItemsCreateVo;
 import cn.edu.xmu.order.model.vo.OrderRetVo;
 import cn.edu.xmu.order.model.vo.OrdersVo;
@@ -252,5 +254,24 @@ public class OrderService<OrdersPo> implements IOrderService {
     @Override
     public ReturnObject<Boolean> isOrderBelongToShop(Long shopId, Long orderId) {
         return new ReturnObject<>(orderDao.isOrderBelongToShop(shopId, orderId));
+    }
+
+    @Override
+    public  ReturnObject<ResponseCode> getAdminHandleRefund(Long userId, Long shopId, Long orderItemId, Integer quantity){
+        OrderItemPo orderItemPo=orderDao.getOrderItems(userId,orderItemId).getData();
+        List<OrderItems> orderItemsList = new ArrayList();
+        OrderItems orderItems=new OrderItems(orderItemPo);
+        Orders orders=(Orders) orderDao.getOrderById(shopId,orderItemPo.getOrderId()).getData();
+        orders.setId(null);
+        orderItemPo.setId(null);
+        orderItemPo.setQuantity(quantity);
+        orderItemsList.add(0,orderItems);
+        ReturnObject<ResponseCode> returnObject;
+        returnObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
+        if(orders.getState()==6) {
+            orderDao.createOrders(orders,orderItemsList);
+            returnObject=new ReturnObject<>(ResponseCode.OK);
+        }
+        return returnObject;
     }
 }
