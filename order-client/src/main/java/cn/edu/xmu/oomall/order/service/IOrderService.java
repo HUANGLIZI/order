@@ -24,6 +24,8 @@ public interface IOrderService {
 
     ReturnObject<OrderInnerDTO> findShopIdbyOrderId(Long orderId);
 
+    ReturnObject<OrderInnerDTO> findOrderIdbyOrderItemId(Long orderItemId);
+
     ReturnObject<OrderDTO> getSelectOrderInfo(Long userId, Long orderItemId);
 
     ReturnObject<List<Long>> listUserSelectOrderItemId(Long userId, Long skuId);

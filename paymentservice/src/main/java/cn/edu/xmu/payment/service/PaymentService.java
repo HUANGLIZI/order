@@ -3,7 +3,9 @@ package cn.edu.xmu.payment.service;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
 import cn.edu.xmu.oomall.order.service.IOrderService;
+import cn.edu.xmu.oomall.order.service.IPaymentService;
 import cn.edu.xmu.payment.dao.PaymentDao;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.bo.Refund;
@@ -19,7 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class PaymentService {
+public class PaymentService implements IPaymentService {
 
     @Autowired
     private PaymentDao paymentDao;
@@ -115,5 +117,31 @@ public class PaymentService {
         }else {
             return new ReturnObject<>(returnObject.getCode(),returnObject.getErrmsg());
         }
+    }
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-11 10:20
+     */
+    // 通过 orderItemId 查找 orderId
+    // 找 paymentId
+    @Override
+    public ReturnObject<ResponseCode> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Long refund, Long aftersaleId)
+    {
+        OrderInnerDTO orderInnerDTO = iOrderService.findOrderIdbyOrderItemId(orderItemId).getData();
+        if (!orderInnerDTO.getCustomerId().equals(userId) || !orderInnerDTO.getShopId().equals(shopId))
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        Long paymentId = paymentDao.getPaymentIdByOrderId(orderInnerDTO.getOrderId()).getData();
+        Refund refundBo = new Refund();
+        refundBo.setAftersaleId(aftersaleId);
+        refundBo.setAmount(Math.abs(refund));
+        refundBo.setOrderId(orderInnerDTO.getOrderId());
+        refundBo.setPaymentId(paymentId);
+        Refund.State state = Refund.State.TO_BE_REFUND;
+        refundBo.setState(state.getCode().byteValue());
+
+        return paymentDao.createRefund(refundBo);
     }
 }

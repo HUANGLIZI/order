@@ -27,8 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@DubboService
 public class OrderService<OrdersPo> implements IOrderService {
+
     @Autowired
     private OrderDao orderDao;
 
@@ -273,5 +274,11 @@ public class OrderService<OrdersPo> implements IOrderService {
             returnObject=new ReturnObject<>(ResponseCode.OK);
         }
         return returnObject;
+    }
+
+    @Override
+    public ReturnObject<OrderInnerDTO> findOrderIdbyOrderItemId(Long orderItemId)
+    {
+        return orderDao.getOrderIdbyOrderItemId(orderItemId);
     }
 }

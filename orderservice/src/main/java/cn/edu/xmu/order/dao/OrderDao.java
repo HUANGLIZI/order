@@ -541,6 +541,21 @@ public class OrderDao {
     /**
      * @param
      * @return
+     * @author Cai Xinlu
+     * @date 2020-12-11 10:42
+     */
+    public ReturnObject<OrderInnerDTO> getOrderIdbyOrderItemId(Long orderItemId)
+    {
+        Long orderId = orderItemPoMapper.selectByPrimaryKey(orderItemId).getOrderId();
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
+        OrderInnerDTO orderInnerDTO = new OrderInnerDTO();
+        orderInnerDTO.setCustomerId(ordersPo.getCustomerId());
+        orderInnerDTO.setOrderId(orderId);
+        orderInnerDTO.setShopId(ordersPo.getShopId());
+        return new ReturnObject<>(orderInnerDTO);
+    }
+
+
      * @author Li Zihan
      * @date 2020-12-10 10:50
      */

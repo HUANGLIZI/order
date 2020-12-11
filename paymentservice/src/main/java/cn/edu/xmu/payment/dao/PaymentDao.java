@@ -300,4 +300,44 @@ public class PaymentDao {
         return new ReturnObject<>(refundBoList);
     }
 
+    /**
+     * 通过orderId查找paymentId
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-11 11:10
+     */
+    public ReturnObject<Long> getPaymentIdByOrderId(Long orderId)
+    {
+        PaymentPoExample paymentPoExample = new PaymentPoExample();
+        PaymentPoExample.Criteria criteria = paymentPoExample.createCriteria();
+        criteria.andOrderIdEqualTo(orderId);
+        PaymentPo paymentPo = paymentPoMapper.selectByExample(paymentPoExample).get(0);
+        Long paymentPoId = paymentPo.getId();
+        return new ReturnObject<>(paymentPoId);
+    }
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-11 11:30
+     */
+    public ReturnObject<ResponseCode> createRefund(Refund refund)
+    {
+        RefundPo refundPo = refund.gotRefundPo();
+        ReturnObject<ResponseCode> retObj = null;
+        int ret = refundPoMapper.insertSelective(refundPo);
+        if (ret == 0) {
+            //插入失败
+            logger.debug("insertRefund: insert refund fail " + refundPo.toString());
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + refundPo.toString()));
+        } else {
+            //插入成功
+            logger.debug("insertRefund: insert refund = " + refundPo.toString());
+//            Refund refundRet = new Refund(refundPo);
+            retObj = new ReturnObject<>(ResponseCode.OK);
+        }
+        return retObj;
+    }
 }

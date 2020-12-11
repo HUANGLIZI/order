@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
@@ -347,7 +348,9 @@ public class PaymentController {
             @ApiResponse(code = 504, message = "操作id不存在")
     })
     @GetMapping("/orders/{id}/refunds")
-    public Object queryUserRefundsByOrderId(@LoginUser Long userId, @PathVariable("id") Long orderId) {
+    public Object queryUserRefundsByOrderId(
+            @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+            @PathVariable("id") Long orderId) {
 //        System.out.println("userId" + userId);
         ReturnObject<VoObject> returnObject = paymentServiceI.userQueryRefundsByOrderId(orderId, userId);
         return returnObject;
@@ -359,7 +362,7 @@ public class PaymentController {
      * @author Cai Xinlu
      * @date 2020-12-06 23:18
      */
-    @Audit
+//    @Audit
     @ApiOperation(value = "买家查询自己的退款信息",produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
@@ -370,7 +373,9 @@ public class PaymentController {
             @ApiResponse(code = 504, message = "操作id不存在")
     })
     @GetMapping("/aftersales/{id}/refunds")
-    public Object queryUserRefundsByAftersaleId(@LoginUser Long userId, @PathVariable("id") Long aftersaleId) {
+    public Object queryUserRefundsByAftersaleId(
+            @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+            @PathVariable("id") Long aftersaleId) {
 //        System.out.println("userId" + userId);
         ReturnObject<VoObject> returnObject = paymentServiceI.userQueryRefundsByAftersaleId(aftersaleId, userId);
         return returnObject;
