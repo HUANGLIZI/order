@@ -25,8 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@DubboService
 public class OrderService<OrdersPo> implements IOrderService {
+
     @Autowired
     private OrderDao orderDao;
 
@@ -236,5 +237,11 @@ public class OrderService<OrdersPo> implements IOrderService {
     public ReturnObject<List<Long>> listUserSelectOrderItemId(Long userId, Long skuId)
     {
         return orderDao.getOrderItemsIdForOther(userId, skuId);
+    }
+
+    @Override
+    public ReturnObject<OrderInnerDTO> findOrderIdbyOrderItemId(Long orderItemId)
+    {
+        return orderDao.getOrderIdbyOrderItemId(orderItemId);
     }
 }

@@ -251,6 +251,7 @@ public class OrderController {
                                   @Depart @ApiIgnore Long sId,
                                   @PathVariable("shopId") Long shopId){
 
+        System.out.println(userId);
         logger.debug("shopUpdateOrder orderId:" + orderId);
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);

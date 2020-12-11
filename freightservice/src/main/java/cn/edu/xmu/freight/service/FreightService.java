@@ -140,8 +140,10 @@ public class FreightService {
      * @date 2020-12-10 9:40
      */
     public ReturnObject<Object> changeFreightModel(Long id, FreightModelChangeVo freightModelChangeVo,
-                                                     Long shopId)
+                                                     Long shopId, Long sId)
     {
+        if (!shopId.equals(sId))
+            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
         FreightModelChangeBo freightModelChangeBo = freightModelChangeVo.createFreightModelBo();
         freightModelChangeBo.setShopId(shopId);
         freightModelChangeBo.setId(id);
@@ -155,8 +157,10 @@ public class FreightService {
      * @date 2020-12-10 9:40
      */
     public ReturnObject<Object> changeWeightFreightModel(Long id, WeightFreightModelChangeVo weightFreightModelChangeVo,
-                                                         Long shopId)
+                                                         Long shopId, Long sId)
     {
+        if (!shopId.equals(sId))
+            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
         WeightFreightModelChangeBo weightFreightModelChangeBo = weightFreightModelChangeVo.createWeightFreightModelBo();
         weightFreightModelChangeBo.setId(id);
 
@@ -169,8 +173,10 @@ public class FreightService {
      * @date 2020-12-10 9:40
      */
     public ReturnObject<Object> changePieceFreightModel(Long id, PieceFreightModelChangeVo pieceFreightModelChangeVo,
-                                                        Long shopId)
+                                                        Long shopId, Long sId)
     {
+        if (!shopId.equals(sId))
+            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
         PieceFreightModelChangeBo pieceFreightModelChangeBo = pieceFreightModelChangeVo.createPieceFreightModelChangeBo();
         pieceFreightModelChangeBo.setId(id);
 

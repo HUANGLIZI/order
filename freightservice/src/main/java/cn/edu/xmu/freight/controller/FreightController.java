@@ -211,12 +211,13 @@ public class FreightController {
             @ApiResponse(code = 802, message = "运费模板名重复"),
     })
     @PutMapping("/shops/{shopId}/freightmodels/{id}")
-    public Object changeFreightModel(@PathVariable("shopId") Long shopId,
+    public Object changeFreightModel(@Depart @ApiIgnore Long sId,
+                                     @PathVariable("shopId") Long shopId,
                                      @PathVariable("id") Long id,
                                      @Validated  @RequestBody FreightModelChangeVo freightModelChangeVo)
     {
 
-        ReturnObject<Object> returnObject = freightService.changeFreightModel(id, freightModelChangeVo, shopId);
+        ReturnObject<Object> returnObject = freightService.changeFreightModel(id, freightModelChangeVo, shopId, sId);
         return getNullRetObj(returnObject, httpServletResponse);
     }
 
@@ -235,11 +236,12 @@ public class FreightController {
             @ApiResponse(code = 803, message = "运费模板中该地区已经定义"),
     })
     @PutMapping("/shops/{shopId}/weightItems/{id}")
-    public Object changeWeightFreightModel(@PathVariable("shopId") Long shopId,
+    public Object changeWeightFreightModel(@Depart @ApiIgnore Long sId,
+                                           @PathVariable("shopId") Long shopId,
                                            @PathVariable("id") Long id,
                                            @RequestBody WeightFreightModelChangeVo weightFreightModelChangeVo)
     {
-        ReturnObject<Object> objectReturnObject = freightService.changeWeightFreightModel(id, weightFreightModelChangeVo, shopId);
+        ReturnObject<Object> objectReturnObject = freightService.changeWeightFreightModel(id, weightFreightModelChangeVo, shopId, sId);
         return getNullRetObj(objectReturnObject, httpServletResponse);
     }
 
@@ -257,12 +259,13 @@ public class FreightController {
             @ApiResponse(code = 803, message = "运费模板中该地区已经定义"),
     })
     @PutMapping("/shops/{shopId}/pieceItems/{id}")
-    public Object changePieceFreightModel(@PathVariable("shopId") Long shopId,
+    public Object changePieceFreightModel(@Depart @ApiIgnore Long sId,
+                                          @PathVariable("shopId") Long shopId,
                                           @PathVariable("id") Long id,
                                           @RequestBody PieceFreightModelChangeVo pieceFreightModelChangeVo)
     {
         System.out.println(pieceFreightModelChangeVo);
-        ReturnObject<Object> objectReturnObject = freightService.changePieceFreightModel(id, pieceFreightModelChangeVo, shopId);
+        ReturnObject<Object> objectReturnObject = freightService.changePieceFreightModel(id, pieceFreightModelChangeVo, shopId, sId);
         return getNullRetObj(objectReturnObject, httpServletResponse);
     }
 
