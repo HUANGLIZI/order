@@ -385,52 +385,62 @@ public class PaymentPoExample {
             return (Criteria) this;
         }
 
-        public Criteria andPaymentPatternEqualTo(Byte value) {
+        public Criteria andPaymentPatternEqualTo(String value) {
             addCriterion("payment_pattern =", value, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentPatternNotEqualTo(Byte value) {
+        public Criteria andPaymentPatternNotEqualTo(String value) {
             addCriterion("payment_pattern <>", value, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentPatternGreaterThan(Byte value) {
+        public Criteria andPaymentPatternGreaterThan(String value) {
             addCriterion("payment_pattern >", value, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentPatternGreaterThanOrEqualTo(Byte value) {
+        public Criteria andPaymentPatternGreaterThanOrEqualTo(String value) {
             addCriterion("payment_pattern >=", value, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentPatternLessThan(Byte value) {
+        public Criteria andPaymentPatternLessThan(String value) {
             addCriterion("payment_pattern <", value, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentPatternLessThanOrEqualTo(Byte value) {
+        public Criteria andPaymentPatternLessThanOrEqualTo(String value) {
             addCriterion("payment_pattern <=", value, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentPatternIn(List<Byte> values) {
+        public Criteria andPaymentPatternLike(String value) {
+            addCriterion("payment_pattern like", value, "paymentPattern");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaymentPatternNotLike(String value) {
+            addCriterion("payment_pattern not like", value, "paymentPattern");
+            return (Criteria) this;
+        }
+
+        public Criteria andPaymentPatternIn(List<String> values) {
             addCriterion("payment_pattern in", values, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentPatternNotIn(List<Byte> values) {
+        public Criteria andPaymentPatternNotIn(List<String> values) {
             addCriterion("payment_pattern not in", values, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentPatternBetween(Byte value1, Byte value2) {
+        public Criteria andPaymentPatternBetween(String value1, String value2) {
             addCriterion("payment_pattern between", value1, value2, "paymentPattern");
             return (Criteria) this;
         }
 
-        public Criteria andPaymentPatternNotBetween(Byte value1, Byte value2) {
+        public Criteria andPaymentPatternNotBetween(String value1, String value2) {
             addCriterion("payment_pattern not between", value1, value2, "paymentPattern");
             return (Criteria) this;
         }

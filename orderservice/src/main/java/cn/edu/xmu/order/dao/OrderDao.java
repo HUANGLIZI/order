@@ -13,9 +13,9 @@ import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderItemPoExample;
 import cn.edu.xmu.order.model.po.OrdersPo;
 import cn.edu.xmu.order.model.po.OrdersPoExample;
+import cn.edu.xmu.order.model.vo.OrderItemsCreateVo;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.mysql.cj.x.protobuf.MysqlxCrud;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class OrderDao {
@@ -160,7 +161,7 @@ public class OrderDao {
     }
 
     //判断order是否属于shop
-    private boolean isOrderBelongToShop(Long shopId, Long orderId){
+    public boolean isOrderBelongToShop(Long shopId, Long orderId){
         OrdersPoExample example=new OrdersPoExample ();
         OrdersPoExample.Criteria criteria=example.createCriteria();
         criteria.andIdEqualTo(orderId);
@@ -246,7 +247,7 @@ public class OrderDao {
             orderInnerDTO.setCustomerId(ordersPo.getCustomerId());
         }
         else
-            orderInnerDTO = new OrderInnerDTO();
+            orderInnerDTO  = new OrderInnerDTO();
         return new ReturnObject<>(orderInnerDTO);
     }
 
@@ -262,11 +263,11 @@ public class OrderDao {
         OrderInnerDTO orderInnerDTO;
         if (ordersPo != null)
         {
-            orderInnerDTO = new OrderInnerDTO();
+            orderInnerDTO  = new OrderInnerDTO();
             orderInnerDTO.setShopId(ordersPo.getShopId());
         }
         else
-            orderInnerDTO = new OrderInnerDTO();
+            orderInnerDTO  = new OrderInnerDTO();
         return new ReturnObject<>(orderInnerDTO);
     }
     /**
@@ -319,7 +320,14 @@ public class OrderDao {
         }
     }
 
-    // 通过skuId查shopId
+    /**
+     * 创建订单
+     * @param orders
+     * @param orderItemsList
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-10 10:43
+     */
     public ReturnObject<Orders> createOrders(Orders orders, List<OrderItems> orderItemsList)
     {
         OrdersPo ordersPo = orders.gotOrdersPo();
@@ -346,6 +354,117 @@ public class OrderDao {
             retObj = new ReturnObject<>(orders);
         }
         return retObj;
+    }
+
+
+    /**
+     * 店家查询商户所有订单 (概要)
+     *
+     * @author 24320182203323  李明明
+     * @param page 页数
+     * @param pageSize 每页大小
+     * @return Object 查询结果
+     */
+    public ReturnObject<PageInfo<VoObject>> getShopAllOrders(Long shopId, Long customerId, String orderSn, String beginTime, String endTime, Integer page, Integer pageSize)
+    {
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        OrdersPoExample ordersPoExample = new OrdersPoExample();
+        OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
+        criteria.andCustomerIdEqualTo(shopId);
+        // 被逻辑删除的订单不能被返回
+        Byte beDeleted = 0;
+        criteria.andBeDeletedEqualTo(beDeleted);
+        if(customerId != null)
+            criteria.andCustomerIdEqualTo(customerId);
+        if(orderSn != null)
+            criteria.andOrderSnEqualTo(orderSn);
+        if(beginTime != null)
+            criteria.andGmtCreateGreaterThanOrEqualTo(LocalDateTime.parse(beginTime, df));
+            //criteria.andGmtCreatedGreaterThanOrEqualTo(LocalDateTime.parse(beginTime, df));
+        if(endTime != null)
+            criteria.andGmtCreateLessThanOrEqualTo(LocalDateTime.parse(endTime, df));
+            //criteria.andGmtCreatedLessThanOrEqualTo(LocalDateTime.parse(endTime, df));
+        //分页查询
+        PageHelper.startPage(page, pageSize);
+        logger.debug("page = " + page + "pageSize = " + pageSize);
+        List<OrdersPo> ordersPos = null;
+        try {
+            ordersPos = ordersPoMapper.selectByExample(ordersPoExample);
+            List<VoObject> ret = new ArrayList<>(ordersPos.size());
+            for (OrdersPo po : ordersPos) {
+                Orders order = new Orders(po);
+                ret.add(order);
+            }
+            PageInfo<VoObject> orderPage = PageInfo.of(ret);
+            return new ReturnObject<>(orderPage);
+        }
+        catch (DataAccessException e){
+            logger.error("selectAllRole: DataAccessException:" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
+
+    /**
+     * 店家查询店内订单完整信息（普通，团购，预售）
+     *
+     * @author 24320182203323  李明明
+     * @return Object 查询结果
+     */
+    public ReturnObject getOrderById(Long shopId, Long id)
+    {
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(id);
+        if(ordersPo == null)
+        {
+            logger.error("getOrderById: 数据库不存在该订单 order_id=" + id);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        Orders orders = new Orders(ordersPo);
+        return new ReturnObject<>(orders);
+    }
+
+    /**
+     * 管理员取消本店铺订单
+     *
+     * @author 24320182203323  李明明
+     * @return Object 查询结果
+     */
+    public ReturnObject<Orders> cancelOrderById(Long shopId, Long id)
+    {
+        ReturnObject<Orders> ordersReturnObject = null;
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(id);
+        if(ordersPo == null)
+        {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("不存在对应的订单id" ));
+        }
+        else if(ordersPo.getShopId() != shopId)
+        {
+            logger.debug("cancelOrderById: update Order fail " + ordersPo.toString() );
+            return new ReturnObject<>(ResponseCode.DEFAULTMODEL_EXISTED, String.format("该订单不属于该店铺" ));
+        }
+        else
+        {
+            Byte type = 0;
+            ordersPo.setState(type);
+            ordersPo.setGmtModified(LocalDateTime.now());
+            int ret = ordersPoMapper.updateByPrimaryKey(ordersPo);
+            if(ret == 0)
+            {
+                logger.debug("cancelOrderById: update Order fail " + ordersPo.toString() );
+                ordersReturnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + ordersPo.getId()));
+            }
+            else
+            {
+                logger.debug("cancelOrderById: update Order = " + ordersPo.toString());
+                ordersReturnObject = new ReturnObject<>();
+            }
+
+        }
+        return ordersReturnObject;
     }
 
     /**
@@ -380,11 +499,29 @@ public class OrderDao {
      * @author Cai Xinlu
      * @date 2020-12-10 10:50
      */
-    public ReturnObject<List<Long>> getOrderItemsIdForOther(Long userId, Long skuId)
+    public ReturnObject<List<Long>> listUserSelectOrderItemId(Long userId, Long skuId)
     {
         OrdersPoExample ordersPoExample = new OrdersPoExample();
         OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
         criteria.andCustomerIdEqualTo(userId);
+        return getOrderItemsIdForOther(skuId, ordersPoExample);
+    }
+
+    /**
+     * @auther zxj
+     * @param shopId
+     * @param skuId
+     * @return
+     */
+    public ReturnObject<List<Long>> listAdminSelectOrderItemId(Long shopId, Long skuId) {
+        OrdersPoExample ordersPoExample = new OrdersPoExample();
+        OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
+        criteria.andShopIdEqualTo(shopId);
+
+        return getOrderItemsIdForOther(skuId, ordersPoExample);
+    }
+
+    private ReturnObject<List<Long>> getOrderItemsIdForOther(Long skuId, OrdersPoExample ordersPoExample) {
         List<OrdersPo> ordersPos = ordersPoMapper.selectByExample(ordersPoExample);
         OrderItemPoExample orderItemPoExample = new OrderItemPoExample();
         List<Long> orderItemsIdList = new ArrayList<Long>();
@@ -399,5 +536,37 @@ public class OrderDao {
         }
 
         return new ReturnObject<>(orderItemsIdList);
+    }
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-11 10:42
+     */
+    public ReturnObject<OrderInnerDTO> getOrderIdbyOrderItemId(Long orderItemId)
+    {
+        Long orderId = orderItemPoMapper.selectByPrimaryKey(orderItemId).getOrderId();
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
+        OrderInnerDTO orderInnerDTO = new OrderInnerDTO();
+        orderInnerDTO.setCustomerId(ordersPo.getCustomerId());
+        orderInnerDTO.setOrderId(orderId);
+        orderInnerDTO.setShopId(ordersPo.getShopId());
+        return new ReturnObject<>(orderInnerDTO);
+    }
+
+
+     * @author Li Zihan
+     * @date 2020-12-10 10:50
+     */
+    public ReturnObject<OrderItemPo> getOrderItems(Long userId, Long orderItemId)
+    {
+        OrderItemPo orderItemPo = orderItemPoMapper.selectByPrimaryKey(orderItemId);
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderItemPo.getOrderId());
+        if (orderItemPo == null || ordersPo == null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if (!ordersPo.getCustomerId().equals(userId))
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        return new ReturnObject<>(orderItemPo);
     }
 }

@@ -9,7 +9,7 @@
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="amount" jdbcType="BIGINT" property="amount" />
     <result column="actual_amount" jdbcType="BIGINT" property="actualAmount" />
-    <result column="payment_pattern" jdbcType="TINYINT" property="paymentPattern" />
+    <result column="payment_pattern" jdbcType="VARCHAR" property="paymentPattern" />
     <result column="pay_time" jdbcType="TIMESTAMP" property="payTime" />
     <result column="pay_sn" jdbcType="VARCHAR" property="paySn" />
     <result column="begin_time" jdbcType="TIMESTAMP" property="beginTime" />
@@ -121,7 +121,7 @@
       end_time, order_id, state, 
       gmt_create, gmt_modified, aftersale_id
       )
-    values (#{amount,jdbcType=BIGINT}, #{actualAmount,jdbcType=BIGINT}, #{paymentPattern,jdbcType=TINYINT}, 
+    values (#{amount,jdbcType=BIGINT}, #{actualAmount,jdbcType=BIGINT}, #{paymentPattern,jdbcType=VARCHAR}, 
       #{payTime,jdbcType=TIMESTAMP}, #{paySn,jdbcType=VARCHAR}, #{beginTime,jdbcType=TIMESTAMP}, 
       #{endTime,jdbcType=TIMESTAMP}, #{orderId,jdbcType=BIGINT}, #{state,jdbcType=TINYINT}, 
       #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, #{aftersaleId,jdbcType=BIGINT}
@@ -182,7 +182,7 @@
         #{actualAmount,jdbcType=BIGINT},
       </if>
       <if test="paymentPattern != null">
-        #{paymentPattern,jdbcType=TINYINT},
+        #{paymentPattern,jdbcType=VARCHAR},
       </if>
       <if test="payTime != null">
         #{payTime,jdbcType=TIMESTAMP},
@@ -227,7 +227,7 @@
         actual_amount = #{actualAmount,jdbcType=BIGINT},
       </if>
       <if test="paymentPattern != null">
-        payment_pattern = #{paymentPattern,jdbcType=TINYINT},
+        payment_pattern = #{paymentPattern,jdbcType=VARCHAR},
       </if>
       <if test="payTime != null">
         pay_time = #{payTime,jdbcType=TIMESTAMP},
@@ -267,7 +267,7 @@
     update payment
     set amount = #{amount,jdbcType=BIGINT},
       actual_amount = #{actualAmount,jdbcType=BIGINT},
-      payment_pattern = #{paymentPattern,jdbcType=TINYINT},
+      payment_pattern = #{paymentPattern,jdbcType=VARCHAR},
       pay_time = #{payTime,jdbcType=TIMESTAMP},
       pay_sn = #{paySn,jdbcType=VARCHAR},
       begin_time = #{beginTime,jdbcType=TIMESTAMP},

@@ -11,7 +11,7 @@ import javax.validation.constraints.NotBlank;
 @ApiModel(description = "订单运输sn修改视图")
 public class FreightSnVo {
     @NotBlank
-    @ApiModelProperty(value = "运输sn")
+    @ApiModelProperty(value = "订单运输sn")
     String freightSn;
 
     /**

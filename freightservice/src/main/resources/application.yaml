@@ -15,17 +15,31 @@ server:
 
 
 spring:
+  main:
+    # 解决Bean重复定义问题
+    allow-bean-definition-overriding: true
   application:
-    name: order-service
+    name: freight-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
   profiles:
     active: dev
+  boot:
+    admin:
+      client:
+        url: http://localhost:8081
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    type: com.alibaba.druid.pool.DruidDataSource
-#    initialization-mode: always
-#    schema: classpath:schema.sql
-#    data: classpath:testdata.sql
+    url: jdbc:mysql://localhost:3306/oomall_order?serverTimezone=GMT%2B8
+    username: root
+    password: 12345678
     druid:
+      stat-view-servlet:
+        login-username: admin
+        login-password: 123456
+        enabled: true
+        url-pattern: /druid/*
       #初始化时建立物理连接的个数
       initial-size: 30
       #最小连接池数量
@@ -41,11 +55,7 @@ spring:
           #慢SQL执行时间
           slow-sql-millis: 100
       validation-query: select 1
-      username: root
-      password: 159156
-
     sql-script-encoding: UTF-8
-    url: jdbc:mysql://localhost:3306/oomall_order?serverTimezone=GMT%2B8
   redis:
     # Redis数据库索引（默认为0）
     database: 0
@@ -84,19 +94,24 @@ loginconfig:
   #是否允许重复登录
   multiply: false
 
-prvilegeservice:
+privilegeservice:
   #是否对数据库中的未初始化的数据初始化
   initialization: false
-  #随机雪崩时间（秒）
-  randomtime: 300
+  #分布式锁失效时间（秒）
+  lockerExpireTime: 30
   #图片存储位置
-  imgloaction: ./img
+  imglocation: ./img
   user:
     # user的权限字在Redis中失效秒数
     expiretime: 600
   role:
     # role的权限字在Redis中失效秒数
     expiretime: 600
+  login:
+    #是否允许重复登录
+    multiply: false
+    #jwt过期的时间(秒)
+    jwtExpire: 3600
 
 ##pagehelper分页插件配置
 pagehelper:
@@ -106,7 +121,7 @@ pagehelper:
 #    配置服务信息
 dubbo:
   application:
-    name: payment-service
+    name: freight-service
     qos-enable: false
     qos-accept-foreign-ip: false
   #    配置注册中心
@@ -115,7 +130,7 @@ dubbo:
   #    设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
-    port: 20880
+    port: -1
   #    设置超时时间
   consumer:
     timeout: 4000

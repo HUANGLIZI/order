@@ -37,7 +37,7 @@ public class PaymentPo {
      *
      * @mbg.generated
      */
-    private Byte paymentPattern;
+    private String paymentPattern;
 
     /**
      *
@@ -200,7 +200,7 @@ public class PaymentPo {
      *
      * @mbg.generated
      */
-    public Byte getPaymentPattern() {
+    public String getPaymentPattern() {
         return paymentPattern;
     }
 
@@ -212,8 +212,8 @@ public class PaymentPo {
      *
      * @mbg.generated
      */
-    public void setPaymentPattern(Byte paymentPattern) {
-        this.paymentPattern = paymentPattern;
+    public void setPaymentPattern(String paymentPattern) {
+        this.paymentPattern = paymentPattern == null ? null : paymentPattern.trim();
     }
 
     /**

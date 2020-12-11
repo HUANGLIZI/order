@@ -16,7 +16,14 @@ server:
 
 spring:
   application:
-    name: order-service
+    name: payment-service
+  main:
+    # 解决Bean重复定义问题
+    allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
   profiles:
     active: dev
   datasource:
@@ -83,19 +90,24 @@ loginconfig:
   #是否允许重复登录
   multiply: false
 
-prvilegeservice:
+privilegeservice:
   #是否对数据库中的未初始化的数据初始化
   initialization: false
-  #随机雪崩时间（秒）
-  randomtime: 300
+  #分布式锁失效时间（秒）
+  lockerExpireTime: 30
   #图片存储位置
-  imgloaction: ./img
+  imglocation: ./img
   user:
     # user的权限字在Redis中失效秒数
     expiretime: 600
   role:
     # role的权限字在Redis中失效秒数
     expiretime: 600
+  login:
+    #是否允许重复登录
+    multiply: false
+    #jwt过期的时间(秒)
+    jwtExpire: 3600
 
 ##pagehelper分页插件配置
 pagehelper:
@@ -114,7 +126,7 @@ dubbo:
   #    设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
-    port: 20880
+    port: -1
   #    设置超时时间
   consumer:
     timeout: 4000

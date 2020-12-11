@@ -1,5 +1,7 @@
 package cn.edu.xmu.oomall.other.service;
 
+import cn.edu.xmu.ooad.util.ReturnObject;
+
 /**
  * 地址服务调用接口
  *
@@ -16,6 +18,6 @@ public interface IAddressService {
      * @date 2020/12/01 09:11
      * @version 1.0
      */
-    Boolean getValidRegionId(Long regionId);
+    ReturnObject<Boolean> getValidRegionId(Long regionId);
 
 }

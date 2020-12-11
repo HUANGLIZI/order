@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class OrderItemVo {
     @ApiModelProperty(name = "模板名")
-    private String skuId;
+    private Long skuId;
 
     @ApiModelProperty(name = "数量")
     private Integer count;
@@ -15,7 +15,7 @@ public class OrderItemVo {
         return  this.count;
     }
 
-    public String getSkuId() {
+    public Long getSkuId() {
         return this.skuId;
     }
 }

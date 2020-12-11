@@ -81,6 +81,7 @@ public class Orders implements VoObject, Serializable {
         this.gmtModified = po.getGmtModified();
         this.presaleId=po.getPresaleId();
         this.substate=po.getSubstate();
+        this.grouponId=po.getGrouponId();
     }
 
     @Override
@@ -113,6 +114,7 @@ public class Orders implements VoObject, Serializable {
         po.setOriginPrice(originPrice);
         po.setPresaleId(presaleId);
         po.setGrouponDiscount(grouponDiscount);
+        po.setGrouponId(grouponId);
         po.setRebateNum(rebateNum);
         po.setConfirmTime(confirmTime);
         po.setShipmentSn(shipmentSn);

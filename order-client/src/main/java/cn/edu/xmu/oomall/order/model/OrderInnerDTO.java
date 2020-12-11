@@ -17,4 +17,6 @@ public class OrderInnerDTO implements Serializable {
     private Long shopId;
 
     private Long customerId;
+
+    private Long orderId;
 }

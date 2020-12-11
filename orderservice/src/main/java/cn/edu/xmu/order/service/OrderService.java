@@ -10,8 +10,14 @@ import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
 import cn.edu.xmu.order.model.po.OrderItemPo;
+import cn.edu.xmu.order.model.po.OrdersPo;
+import cn.edu.xmu.order.model.vo.OrderCreateRetVo;
+import cn.edu.xmu.order.model.vo.OrderItemsCreateVo;
 import cn.edu.xmu.order.model.vo.OrderRetVo;
+import cn.edu.xmu.order.model.vo.OrdersVo;
 import com.github.pagehelper.PageInfo;
+import io.lettuce.core.StrAlgoArgs;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@DubboService
 public class OrderService<OrdersPo> implements IOrderService {
+
     @Autowired
     private OrderDao orderDao;
 
@@ -165,6 +172,50 @@ public class OrderService<OrdersPo> implements IOrderService {
         return returnObject;
     }
 
+
+    /**
+     * 店家查询商户所有订单 (概要)
+     *
+     * @author 24320182203323  李明明
+     * @param page 页数
+     * @param pageSize 每页大小
+     * @return Object 查询结果
+     */
+    public ReturnObject<PageInfo<VoObject>> getShopAllOrders(Long shopId, Long customerId, String orderSn, String beginTime, String endTime, Integer page, Integer pageSize)
+    {
+        ReturnObject<PageInfo<VoObject>> returnObject = orderDao.getShopAllOrders(shopId,customerId, orderSn, beginTime, endTime, page, pageSize);
+        return returnObject;
+    }
+
+    /**
+     * 店家查询店内订单完整信息（普通，团购，预售）
+     *
+     * @author 24320182203323  李明明
+     * @return Object 查询结果
+     */
+    public ReturnObject getOrderById(Long shopId, Long id)
+    {
+        return orderDao.getOrderById(shopId, id);
+    }
+
+    /**
+     * 管理员取消本店铺订单
+     *
+     * @author 24320182203323  李明明
+     * @return Object 查询结果
+     */
+    @Transactional
+    public ReturnObject<VoObject> cancelOrderById(Long shopId,Long id)
+    {
+        ReturnObject<VoObject> returnObject;
+        ReturnObject<Orders> returnObject1 = orderDao.cancelOrderById(shopId, id);
+        if(returnObject1.getCode() == ResponseCode.OK)
+            returnObject = new ReturnObject<>(returnObject1.getData());
+        else
+            returnObject = new ReturnObject<>(returnObject1.getCode(),returnObject1.getErrmsg());
+        return returnObject;
+    }
+
     /**
      * @param
      * @return
@@ -187,6 +238,47 @@ public class OrderService<OrdersPo> implements IOrderService {
     @Override
     public ReturnObject<List<Long>> listUserSelectOrderItemId(Long userId, Long skuId)
     {
-        return orderDao.getOrderItemsIdForOther(userId, skuId);
+        return orderDao.listUserSelectOrderItemId(userId, skuId);
+    }
+
+    /**
+     * @auther zxj
+     * @param shopId
+     * @param skuId
+     * @return
+     */
+    @Override
+    public ReturnObject<List<Long>> listAdminSelectOrderItemId(Long shopId, Long skuId) {
+        return orderDao.listAdminSelectOrderItemId(shopId, skuId);
+    }
+
+    @Override
+    public ReturnObject<Boolean> isOrderBelongToShop(Long shopId, Long orderId) {
+        return new ReturnObject<>(orderDao.isOrderBelongToShop(shopId, orderId));
+    }
+
+    @Override
+    public  ReturnObject<ResponseCode> getAdminHandleRefund(Long userId, Long shopId, Long orderItemId, Integer quantity){
+        OrderItemPo orderItemPo=orderDao.getOrderItems(userId,orderItemId).getData();
+        List<OrderItems> orderItemsList = new ArrayList();
+        OrderItems orderItems=new OrderItems(orderItemPo);
+        Orders orders=(Orders) orderDao.getOrderById(shopId,orderItemPo.getOrderId()).getData();
+        orders.setId(null);
+        orderItemPo.setId(null);
+        orderItemPo.setQuantity(quantity);
+        orderItemsList.add(0,orderItems);
+        ReturnObject<ResponseCode> returnObject;
+        returnObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
+        if(orders.getState()==6) {
+            orderDao.createOrders(orders,orderItemsList);
+            returnObject=new ReturnObject<>(ResponseCode.OK);
+        }
+        return returnObject;
+    }
+
+    @Override
+    public ReturnObject<OrderInnerDTO> findOrderIdbyOrderItemId(Long orderItemId)
+    {
+        return orderDao.getOrderIdbyOrderItemId(orderItemId);
     }
 }

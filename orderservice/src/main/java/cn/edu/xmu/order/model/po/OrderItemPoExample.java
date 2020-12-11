@@ -625,66 +625,6 @@ public class OrderItemPoExample {
             return (Criteria) this;
         }
 
-        public Criteria andCouponIdIsNull() {
-            addCriterion("coupon_id is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andCouponIdIsNotNull() {
-            addCriterion("coupon_id is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andCouponIdEqualTo(Long value) {
-            addCriterion("coupon_id =", value, "couponId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCouponIdNotEqualTo(Long value) {
-            addCriterion("coupon_id <>", value, "couponId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCouponIdGreaterThan(Long value) {
-            addCriterion("coupon_id >", value, "couponId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCouponIdGreaterThanOrEqualTo(Long value) {
-            addCriterion("coupon_id >=", value, "couponId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCouponIdLessThan(Long value) {
-            addCriterion("coupon_id <", value, "couponId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCouponIdLessThanOrEqualTo(Long value) {
-            addCriterion("coupon_id <=", value, "couponId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCouponIdIn(List<Long> values) {
-            addCriterion("coupon_id in", values, "couponId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCouponIdNotIn(List<Long> values) {
-            addCriterion("coupon_id not in", values, "couponId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCouponIdBetween(Long value1, Long value2) {
-            addCriterion("coupon_id between", value1, value2, "couponId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCouponIdNotBetween(Long value1, Long value2) {
-            addCriterion("coupon_id not between", value1, value2, "couponId");
-            return (Criteria) this;
-        }
-
         public Criteria andCouponActivityIdIsNull() {
             addCriterion("coupon_activity_id is null");
             return (Criteria) this;

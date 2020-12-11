@@ -31,7 +31,7 @@ public class WeightFreightModel implements VoObject, Serializable {
 
     private Long regionId;
 
-    private LocalDateTime gmtCreated;
+    private LocalDateTime gmtCreate;
 
     private LocalDateTime gmtModified;
 
@@ -60,7 +60,7 @@ public class WeightFreightModel implements VoObject, Serializable {
         this.trihunPrice=po.getTrihunPrice();
         this.abovePrice=po.getAbovePrice();
         this.regionId=po.getRegionId();
-        this.gmtCreated=po.getGmtCreated();
+        this.gmtCreate=po.getGmtCreate();
         this.gmtModified=po.getGmtModified();
     }
     
@@ -75,7 +75,7 @@ public class WeightFreightModel implements VoObject, Serializable {
         po.setFreightModelId(this.getFreightModelId());
         po.setHundredPrice(this.getHundredPrice());
         po.setTenPrice(this.getTenPrice());
-        po.setGmtCreated(this.getGmtCreated());
+        po.setGmtCreate(this.getGmtCreate());
         po.setGmtModified(this.getGmtModified());
         po.setTrihunPrice(this.getTrihunPrice());
         return po;

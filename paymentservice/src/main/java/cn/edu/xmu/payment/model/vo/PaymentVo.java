@@ -29,15 +29,10 @@ public class PaymentVo {
      */
     public Payment createPayment(){
         Payment payment = new Payment();
-        payment.setAmout(this.price);
+        payment.setAmount(this.price);
         payment.setActualAmount(this.price);
-        switch (this.paymentPattern){
-            case "001":
-                payment.setPaymentPattern((byte)1);
-                break;
-            case "002":
-                payment.setPaymentPattern((byte)2);
-        }
+        payment.setPaymentPattern(this.paymentPattern);
+
 
         return payment;
     }

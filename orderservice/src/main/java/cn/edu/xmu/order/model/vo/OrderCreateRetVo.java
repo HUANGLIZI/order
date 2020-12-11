@@ -2,7 +2,6 @@ package cn.edu.xmu.order.model.vo;
 
 import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
-import cn.edu.xmu.order.model.vo.OrderRetVo;
 import lombok.Data;
 
 import java.time.LocalDateTime;

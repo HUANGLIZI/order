@@ -17,7 +17,7 @@ public class FreightModelRetVo {
     private String name;
 
     @ApiModelProperty(value = "默认模板")
-    private String defaultModel;
+    private Byte defaultModel;
 
     @ApiModelProperty(value = "修改时间")
     private LocalDateTime gmtModified;
@@ -44,7 +44,7 @@ public class FreightModelRetVo {
         //this.shopId = freightModel.getShopId();
         this.defaultModel = freightModel.getDefaultModel();
         this.type = freightModel.getType();
-        this.gmtCreated = freightModel.getGmtCreated();
+        this.gmtCreated = freightModel.getGmtCreate();
         this.gmtModified = freightModel.getGmtModified();
         this.unit=freightModel.getUnit();
     }

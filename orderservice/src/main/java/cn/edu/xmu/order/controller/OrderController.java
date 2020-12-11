@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@Api(value = "支付服务", tags = "payment")
+@Api(value = "订单服务", tags = "order")
 @RestController /*Restful的Controller对象*/
 @RequestMapping(value = "", produces = "application/json;charset=UTF-8")
 public class OrderController {
@@ -251,6 +251,7 @@ public class OrderController {
                                   @Depart @ApiIgnore Long sId,
                                   @PathVariable("shopId") Long shopId){
 
+        System.out.println(userId);
         logger.debug("shopUpdateOrder orderId:" + orderId);
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
@@ -371,8 +372,13 @@ public class OrderController {
     }
 
 
+    /**
+     * 用户创建订单
+     * @author Cai Xinlu
+     * @date 2020-12-10 10:46
+     */
 //    @Audit
-    @ApiOperation(value = "查询用户订单", produces = "application/json")
+    @ApiOperation(value = "用户创建订单", produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(paramType = "body", dataType = "OrdersVo", name = "ordersVo", value = "创建订单信息", required = true),
@@ -389,4 +395,125 @@ public class OrderController {
         ReturnObject orders = orderServiceI.createOrders(userId, ordersVo);
         return new ReturnObject<>(orders);
     }
+
+
+    /**
+     * 店家查询商户所有订单 (概要)
+     *
+     * @author 24320182203323  李明明
+     * @param page 页数
+     * @param pageSize 每页大小
+     * @return Object 查询结果
+     */
+    @ApiOperation(value = "店家查询商户所有订单 (概要)",produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "shopId", value = "店铺id", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "customerId", value = "购买者用户id", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "String", name = "orderSn", value = "订单Sn", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "String", name = "beginTime", value = "开始时间", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "String", name = "endTime", value = "结束时间", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "page", value = "页码", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageSize", value = "每页数目", required = false)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    //@Audit
+    @GetMapping("/shops/{shopId}/orders")
+    public Object getShopAllFreightModels(@PathVariable("shopId") Long shopId,
+                                          @RequestParam(required = false) Long customerId,
+                                          @RequestParam(required = false) String orderSn,
+                                          @RequestParam(required = false) String beginTime,
+                                          @RequestParam(required = false) String endTime,
+                                          @RequestParam(required = false, defaultValue = "1") Integer page,
+                                          @RequestParam(required = false, defaultValue = "10") Integer pageSize){
+        logger.debug("getShopAllFreightModels: page = "+ page +"  pageSize ="+pageSize);
+        ReturnObject<PageInfo<VoObject>> returnObject = orderService.getShopAllOrders(shopId,customerId, orderSn, beginTime, endTime, page, pageSize);
+        return Common.getPageRetObject(returnObject);
+    }
+
+    /**
+     * 店家查询店内订单完整信息（普通，团购，预售）
+     *
+     * @author 24320182203323  李明明
+     * @return Object 查询结果
+     */
+    @ApiOperation(value = "店家查询店内订单完整信息（普通，团购，预售）",produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "shopId", value = "商户id (店员只能查询本商铺)", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true)
+
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    //@Audit
+    @GetMapping("/shops/{shopId}/orders/{id}")
+    public Object getOrderById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id){
+
+
+        ReturnObject returnObject =  orderService.getOrderById(shopId, id);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+    }
+
+
+    /**
+     * 管理员取消本店铺订单
+     *
+     * @author 24320182203323  李明明
+     * @return Object 查询结果
+     */
+    @ApiOperation(value = "管理员取消本店铺订单",produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "shopId", value = "商户id (店员只能查询本商铺)", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true)
+
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    //@Audit
+    @DeleteMapping("/shops/{shopId}/orders/{id}")
+    public Object cancelOrderById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id)
+    {
+        logger.debug("Cancel Order by orderId:" +id);
+        ReturnObject<VoObject> returnObject = orderService.cancelOrderById(shopId, id);
+        return Common.decorateReturnObject(returnObject);
+    }
+
+    /**
+     * 管理员创建本店铺售后订单
+     *
+     * @author 24320182203227  李子晗
+     * @return Object 查询结果
+     */
+    @ApiOperation(value = "管理员创建本店铺售后订单",produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "Long", name = "shopId", value = "商户id (店员只能查询本商铺)", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "Long", name = "id", value = "订单id", required = true)
+
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    //@Audit
+    @PostMapping("/shops/{userId}/{shopId}/{orderItemId}/{quantity}")
+    public Object CreatOrderById(@PathVariable("shopId") Long shopId, @PathVariable("userId") Long userId,@PathVariable("orderItemId") Long orderItemId,@PathVariable("quantity") Integer quantity)
+    {
+        logger.debug("Cancel Order by orderId:" +userId);
+        ReturnObject<VoObject> returnObject = orderService.getAdminHandleRefund(userId,shopId,orderItemId,quantity);
+        return Common.decorateReturnObject(returnObject);
+    }
+
 }

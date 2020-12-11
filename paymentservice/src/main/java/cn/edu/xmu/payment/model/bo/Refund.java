@@ -6,6 +6,8 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 退款Bo类
@@ -15,10 +17,9 @@ public class Refund implements VoObject, Serializable {
     private Long id;
     private Long paymentId;
     private Long amount;
-    private String paySn;
     private Long orderId;
     private Byte state;
-    private LocalDateTime gmtCreated;
+    private LocalDateTime gmtCreate;
     private LocalDateTime gmtModified;
     private Long aftersaleId;
 
@@ -32,12 +33,11 @@ public class Refund implements VoObject, Serializable {
         this.id = po.getId();
         this.paymentId = po.getPaymentId();
         this.amount = po.getAmount();
-        this.paySn = po.getPaySn();
         this.orderId = po.getOrderId();
-        this.state=po.getState();
-        this.gmtCreated = po.getGmtCreated();
+        this.state = po.getState();
+        this.gmtCreate = po.getGmtCreate();
         this.gmtModified = po.getGmtModified();
-        this.aftersaleId=po.getAftersaleId();
+        this.aftersaleId = po.getAftersaleId();
     }
 
     @Override
@@ -49,17 +49,53 @@ public class Refund implements VoObject, Serializable {
     public Object createSimpleVo() {
         return null;
     }
+
     public RefundPo gotRefundPo() {
         RefundPo po = new RefundPo();
         po.setId(id);
         po.setPaymentId(paymentId);
         po.setAmount(amount);
-        po.setPaySn(paySn);
         po.setOrderId(orderId);
         po.setState(state);
         po.setGmtModified(gmtModified);
-        po.setGmtCreated(gmtCreated);
+        po.setGmtCreate(gmtCreate);
         po.setAftersaleId(aftersaleId);
         return po;
+    }
+
+    public enum State {
+        TO_BE_REFUND(0, "未退款"),
+        HAS_REFUND(1, "已退款"),
+        REJECT_REFUND(2, "拒绝退款");
+
+        private static final Map<Integer, Refund.State> stateMap;
+
+        static { //由类加载机制，静态块初始加载对应的枚举属性到map中，而不用每次取属性时，遍历一次所有枚举值
+            stateMap = new HashMap();
+            for (Refund.State enum1 : values()) {
+                stateMap.put(enum1.code, enum1);
+            }
+        }
+
+        private int code;
+        private String description;
+
+        State(int code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public static Refund.State getTypeByCode(Integer code) {
+            return stateMap.get(code);
+        }
+
+        public Integer getCode() {
+            return code;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
     }
 }

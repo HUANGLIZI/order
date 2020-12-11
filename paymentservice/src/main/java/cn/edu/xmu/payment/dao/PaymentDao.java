@@ -2,7 +2,6 @@ package cn.edu.xmu.payment.dao;
 
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.payment.mapper.OrdersPoMapper;
 import cn.edu.xmu.payment.mapper.PaymentPoMapper;
 import cn.edu.xmu.payment.mapper.RefundPoMapper;
 import cn.edu.xmu.payment.model.bo.Payment;
@@ -26,9 +25,6 @@ public class PaymentDao {
 
     @Autowired
     PaymentPoMapper paymentPoMapper;
-
-    @Autowired
-    OrdersPoMapper ordersPoMapper;
 
     @Autowired
     RefundPoMapper refundPoMapper;
@@ -56,9 +52,6 @@ public class PaymentDao {
         List<Payment> payments =new ArrayList<>(paymentPoS.size());
         for(PaymentPo paymentPo:paymentPoS){
             Payment payment = new Payment(paymentPo);
-            //通过调用其它模块的售后服务获得售后单id
-            payment.setAftersaleId((long) 0x75bcd15);
-
             payments.add(payment);
         }
         return new ReturnObject<>(payments);
@@ -75,13 +68,6 @@ public class PaymentDao {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
 
-        //如果该商店不拥有这个order则查不到
-        if(!isOrderBelongToShop(shopId,orderId)){
-            logger.error(" queryPaymentById: 数据库不存在该支付单 orderId="+orderId);
-            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
-        }
-
-
         List<Payment> payments =new ArrayList<>(paymentPoS.size());
         for(PaymentPo paymentPo:paymentPoS){
             Payment payment = new Payment(paymentPo);
@@ -91,17 +77,6 @@ public class PaymentDao {
             payments.add(payment);
         }
         return new ReturnObject<>(payments);
-    }
-
-    private boolean isOrderBelongToShop(Long shopId, Long orderId){
-        OrdersPoExample example=new OrdersPoExample ();
-        OrdersPoExample.Criteria criteria=example.createCriteria();
-        criteria.andIdEqualTo(orderId);
-        criteria.andShopIdEqualTo(shopId);
-
-
-        List<OrdersPo> ordersPos=ordersPoMapper.selectByExample(example);
-        return !ordersPos.isEmpty();
     }
 
 
@@ -209,7 +184,7 @@ public class PaymentDao {
             if (ret == 0) {
                 //插入失败
                 logger.debug("insertRefund: insert refund fail " + refundPo.toString());
-                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + refundPo.getPaySn()));
+//                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + refundPo.getPaySn()));
             } else {
                 //插入成功
                 logger.debug("insertRefund: insert refund = " + refundPo.toString());
@@ -220,8 +195,8 @@ public class PaymentDao {
         catch (DataAccessException e) {
             if (Objects.requireNonNull(e.getMessage()).contains("refund.pay_sn_uindex")) {
                 //若有重复的角色名则新增失败
-                logger.debug("updateRole: have same PaySn = " + refundPo.getPaySn());
-                retObj = new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("支付号重复：" + refundPo.getPaySn()));
+                logger.debug("updateRole: have same PaySn = " + refundPo.toString());
+                retObj = new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("支付号重复：" + refundPo.toString()));
             } else {
                 // 其他数据库错误
                 logger.debug("other sql exception : " + e.getMessage());
@@ -235,6 +210,7 @@ public class PaymentDao {
         }
         return retObj;
     }
+
 
     public ReturnObject insertPayment(Payment payment) {
         PaymentPo paymentPo = payment.getPaymentPo();
@@ -256,7 +232,7 @@ public class PaymentDao {
             if (Objects.requireNonNull(e.getMessage()).contains("payment.pay_sn_uindex")) {
                 //若有重复的流水号则新增失败
                 logger.debug("updateRole: have same paySn = " + paymentPo.getPaySn());
-                returnObject = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("流水号重复：" + paymentPo.toString()));
+                returnObject = new ReturnObject<>(ResponseCode.PAYSN_SAME, String.format("流水号重复：" + paymentPo.toString()));
             } else {
                 // 其他数据库错误
                 logger.debug("other sql exception : " + e.getMessage());
@@ -324,4 +300,44 @@ public class PaymentDao {
         return new ReturnObject<>(refundBoList);
     }
 
+    /**
+     * 通过orderId查找paymentId
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-11 11:10
+     */
+    public ReturnObject<Long> getPaymentIdByOrderId(Long orderId)
+    {
+        PaymentPoExample paymentPoExample = new PaymentPoExample();
+        PaymentPoExample.Criteria criteria = paymentPoExample.createCriteria();
+        criteria.andOrderIdEqualTo(orderId);
+        PaymentPo paymentPo = paymentPoMapper.selectByExample(paymentPoExample).get(0);
+        Long paymentPoId = paymentPo.getId();
+        return new ReturnObject<>(paymentPoId);
+    }
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-11 11:30
+     */
+    public ReturnObject<ResponseCode> createRefund(Refund refund)
+    {
+        RefundPo refundPo = refund.gotRefundPo();
+        ReturnObject<ResponseCode> retObj = null;
+        int ret = refundPoMapper.insertSelective(refundPo);
+        if (ret == 0) {
+            //插入失败
+            logger.debug("insertRefund: insert refund fail " + refundPo.toString());
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + refundPo.toString()));
+        } else {
+            //插入成功
+            logger.debug("insertRefund: insert refund = " + refundPo.toString());
+//            Refund refundRet = new Refund(refundPo);
+            retObj = new ReturnObject<>(ResponseCode.OK);
+        }
+        return retObj;
+    }
 }
