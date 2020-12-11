@@ -5,6 +5,7 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.order.model.OrderDTO;
 import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
+import cn.edu.xmu.oomall.order.service.IOrderItemService;
 import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.model.bo.OrderItems;
@@ -28,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @DubboService
-public class OrderService<OrdersPo> implements IOrderService {
+public class OrderService<OrdersPo> implements IOrderService, IOrderItemService {
 
     @Autowired
     private OrderDao orderDao;
@@ -281,4 +282,17 @@ public class OrderService<OrdersPo> implements IOrderService {
     {
         return orderDao.getOrderIdbyOrderItemId(orderItemId);
     }
+
+    /**
+     * 获取orderId通过orderItemId
+     * @auther 洪晓杰
+     * @return
+     */
+    @Override
+    public ReturnObject<Long> getOrderIdByOrderItemId(Long orderItemId){
+        return orderDao.getOrderIdByOrderItemId(orderItemId);
+    }
+
+
+
 }
