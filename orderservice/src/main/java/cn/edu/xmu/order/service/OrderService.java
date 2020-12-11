@@ -177,6 +177,13 @@ public class OrderService<OrdersPo> implements IOrderService {
         return orderDao.getOrderItemsForOther(userId, orderItemId);
     }
 
+    /**
+     * @param userId
+     * @param skuId
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-10 10:49
+     */
     @Override
     public ReturnObject<List<Long>> listUserSelectOrderItemId(Long userId, Long skuId)
     {

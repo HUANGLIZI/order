@@ -348,6 +348,12 @@ public class OrderDao {
         return retObj;
     }
 
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-10 10:50
+     */
     public ReturnObject<OrderDTO> getOrderItemsForOther(Long userId, Long orderItemId)
     {
         OrderItemPo orderItemPo = orderItemPoMapper.selectByPrimaryKey(orderItemId);
@@ -367,6 +373,13 @@ public class OrderDao {
         return new ReturnObject<>(orderDTO);
     }
 
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-10 10:50
+     */
     public ReturnObject<List<Long>> getOrderItemsIdForOther(Long userId, Long skuId)
     {
         OrdersPoExample ordersPoExample = new OrdersPoExample();
