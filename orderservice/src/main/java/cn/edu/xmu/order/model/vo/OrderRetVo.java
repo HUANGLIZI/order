@@ -13,8 +13,8 @@ import java.util.List;
 @Data
 public class OrderRetVo {
     private Long id;
-    private Long customerId;
-    private Long shopId;
+    private CustomerRetVo customerRetVo;
+    private ShopRetVo shopRetVo;
     private String orderSn;
     private Long pid;
     private String consignee;
@@ -43,10 +43,10 @@ public class OrderRetVo {
     /**
      * 用Order对象建立Vo对象
      */
-    public OrderRetVo(Orders orders,List<OrderItems> orderItems) {
+    public OrderRetVo(Orders orders,List<OrderItems> orderItems,CustomerRetVo customerRetVo,ShopRetVo shopRetVo) {
         this.id = orders.getId();
-        this.customerId=orders.getCustomerId();
-        this.shopId=orders.getShopId();
+        this.customerRetVo=customerRetVo;
+        this.shopRetVo=shopRetVo;
         this.orderSn=orders.getOrderSn();
         this.pid=orders.getPid();
         this.consignee = orders.getConsignee();
@@ -76,8 +76,6 @@ public class OrderRetVo {
 
     public OrderRetVo(Orders orders) {
         this.id = orders.getId();
-        this.customerId=orders.getCustomerId();
-        this.shopId=orders.getShopId();
         this.orderSn=orders.getOrderSn();
         this.pid=orders.getPid();
         this.consignee = orders.getConsignee();
