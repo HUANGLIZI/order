@@ -1,8 +1,11 @@
 package cn.edu.xmu.oomall.other.service;
 
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.other.model.AftersaleDTO;
 import cn.edu.xmu.oomall.other.model.CustomerDTO;
+
+import java.util.List;
 
 /**
  * @author Caixin
@@ -32,5 +35,8 @@ public interface IAftersaleService {
      */
     ReturnObject<Long> findOrderItemIdbyAftersaleId(Long aftersaleId);
 
-
+    /**
+     * 通过skuId清购物车
+     */
+    ReturnObject<ResponseCode> deleteGoodsInCart(Long customerId, List<Long> skuIdList);
 }
