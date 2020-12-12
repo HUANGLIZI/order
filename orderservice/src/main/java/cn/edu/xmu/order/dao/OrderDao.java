@@ -555,6 +555,29 @@ public class OrderDao {
         return new ReturnObject<>(orderInnerDTO);
     }
 
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-11 10:42
+     */
+    public ReturnObject<OrderDTO> getOrderbyOrderItemId(Long userId,Long orderItemId)
+    {
+        OrderItemPo orderItemPo=orderItemPoMapper.selectByPrimaryKey(orderItemId);
+        Long orderId = orderItemPo.getOrderId();
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
+        OrderDTO orderDTO = new OrderDTO();
+        if(ordersPo.getCustomerId()==userId) {
+            orderDTO.setOrderId(ordersPo.getId());
+            orderDTO.setOrderSn(ordersPo.getOrderSn());
+            orderDTO.setSkuId(orderItemPo.getGoodsSkuId());
+            orderDTO.setSkuName(orderItemPo.getName());
+            orderDTO.setShopId(ordersPo.getShopId());
+            orderDTO.setPrice(orderItemPo.getPrice());
+        }
+        return new ReturnObject<>(orderDTO);
+    }
+
     /*
      * @author Li Zihan
      * @date 2020-12-10 10:50

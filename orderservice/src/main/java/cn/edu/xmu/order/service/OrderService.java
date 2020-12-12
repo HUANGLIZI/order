@@ -29,7 +29,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @DubboService
 public class OrderService<OrdersPo> implements IOrderService {
@@ -313,5 +315,24 @@ public class OrderService<OrdersPo> implements IOrderService {
     public ReturnObject<OrderInnerDTO> findOrderIdbyOrderItemId(Long orderItemId)
     {
         return orderDao.getOrderIdbyOrderItemId(orderItemId);
+    }
+
+    /**
+     * Li Zihan
+     * @param userId
+     * @param orderItemIdList
+     * @return
+     */
+    @Override
+    public ReturnObject<Map<Long,OrderDTO>> getUserSelectOrderInfoByList(Long userId, List<Long>orderItemIdList)
+    {
+        Map<Long,OrderDTO> map = new HashMap<>();
+        for(int i=0;i<orderItemIdList.size();i++) {
+           OrderDTO orderDTO=orderDao.getOrderbyOrderItemId(userId,orderItemIdList.get(i)).getData();
+           if(orderDTO!=null) {
+                map.put(orderItemIdList.get(i),orderDTO);
+           }
+        }
+        return new ReturnObject<>(map);
     }
 }
