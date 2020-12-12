@@ -1,6 +1,7 @@
 package cn.edu.xmu.freight.dao;
 
 import cn.edu.xmu.freight.mapper.PieceFreightModelPoMapper;
+import cn.edu.xmu.freight.model.vo.FreightModelReturnVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.RandomCaptcha;
 import com.github.pagehelper.PageHelper;
@@ -74,8 +75,8 @@ public class FreightDao{
             freightModelPos = freightModelPoMapper.selectByExample(example);
             List<VoObject> ret = new ArrayList<>(freightModelPos.size());
             for (FreightModelPo po : freightModelPos) {
-                FreightModel freightModel = new FreightModel(po);
-                ret.add(freightModel);
+                FreightModelReturnVo freightModelReturnVo = new FreightModelReturnVo(po);
+                ret.add(freightModelReturnVo);
             }
             PageInfo<VoObject> freightModelPage = PageInfo.of(ret);
             return new ReturnObject<>(freightModelPage);
@@ -643,7 +644,7 @@ public class FreightDao{
     public ReturnObject<FreightModel> putDefaultPieceFreight(Long id, Long shopid){
         ReturnObject<FreightModel> retObj=null;
         try{
-            String str;
+            Byte str;
             int ret ;
             //通过shopid查询
             FreightModelPoExample example = new FreightModelPoExample();
@@ -664,7 +665,7 @@ public class FreightDao{
                 else{
                     if(userProxyPo.getId()==id)
                     {//将对应id的模板设置为默认模板
-                        userProxyPo.setDefaultModel("true");
+                        userProxyPo.setDefaultModel((byte) 1);
                         userProxyPo.setGmtModified(LocalDateTime.now());
                         ret=freightModelPoMapper.updateByPrimaryKey(userProxyPo);
                         if (ret == 0) {
@@ -677,7 +678,7 @@ public class FreightDao{
                             retObj = new ReturnObject<>(ResponseCode.OK,String.format("默认模板定义成功"));
                             for(FreightModelPo userAnotherProxyPo : userProxyPos){
                                 if((userAnotherProxyPo.getDefaultModel()).equals("true")&&userAnotherProxyPo.getId()!=id){//将原商店的默认模板恢复为普通模板
-                                    userAnotherProxyPo.setDefaultModel("false");
+                                    userAnotherProxyPo.setDefaultModel((byte) 0);
                                     userAnotherProxyPo.setGmtModified(LocalDateTime.now());
                                     ret=freightModelPoMapper.updateByPrimaryKeySelective(userAnotherProxyPo);
                                     if (ret == 0) {

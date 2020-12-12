@@ -88,7 +88,7 @@ public class OrderServiceI {
             OrderItems orderItems = new OrderItems(vo);
             orderItems.setName(goodsDetailDTO.getName());
             orderItems.setPrice(goodsDetailDTO.getPrice());
-            origin_price += goodsDetailDTO.getPrice();
+            origin_price += goodsDetailDTO.getPrice()*vo.getQuantity();
             orderItemsList.add(orderItems);
 
             countList.add(vo.getQuantity());
@@ -105,7 +105,8 @@ public class OrderServiceI {
         // 算discountPrice
 
         // 算orderSn
-        ordersBo.setOrderSn(Common.genSeqNum().substring(0,13));
+//        ordersBo.setOrderSn(Common.genSeqNum().substring(0,13));
+        ordersBo.setOrderSn(Common.genSeqNum());
 
         // 设置订单类型
         Byte orderType = 0;
@@ -121,13 +122,13 @@ public class OrderServiceI {
 
         ordersBo.setGmtCreated(LocalDateTime.now());
 
-        CustomerDTO customerDTO = aftersaleServiceI.findCustomerByUserId(userId).getData();//获得user信息
+        CustomerDTO customerDTO = aftersaleServiceI.findCustomerByUserId(userId).getData();
         CustomerRetVo customerRetVo = new CustomerRetVo();
         customerRetVo.setId(userId);
         customerRetVo.setName(customerDTO.getName());
         customerRetVo.setUserName(customerDTO.getUserName());
 
-        ShopDetailDTO shopDetailDTO = goodsService.getShopInfoBySkuId(orderItemsVo.get(0).getGoodsSkuId()).getData();//获得店铺信息
+        ShopDetailDTO shopDetailDTO = goodsService.getShopInfoBySkuId(orderItemsVo.get(0).getGoodsSkuId()).getData();
         ShopRetVo shopRetVo = new ShopRetVo();
         shopRetVo.setId(shopDetailDTO.getShopId());
         shopRetVo.setGmtCreate(shopDetailDTO.getGmtCreate());
@@ -142,6 +143,8 @@ public class OrderServiceI {
         orderCreateRetVo.setCustomerRetVo(customerRetVo);
         orderCreateRetVo.setShopRetVo(shopRetVo);
 
+        if (!aftersaleServiceI.deleteGoodsInCart(userId, skuIdList).getData().equals(ResponseCode.OK))
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         return new ReturnObject<>(orderCreateRetVo);
     }
 }

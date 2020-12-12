@@ -507,11 +507,11 @@ public class OrderController {
             @ApiResponse(code = 504, message = "操作id不存在")
     })
     //@Audit
-    @PostMapping("/shops/{userId}/{shopId}/{orderItemId}/{quantity}")
-    public Object CreatOrderById(@PathVariable("shopId") Long shopId, @PathVariable("userId") Long userId,@PathVariable("orderItemId") Long orderItemId,@PathVariable("quantity") Integer quantity)
+    @PostMapping("/shops/{userId}/{shopId}/{orderItemId}/{quantity}/{aftersaleId}")
+    public Object CreatOrderById(@PathVariable("shopId") Long shopId, @PathVariable("userId") Long userId,@PathVariable("orderItemId") Long orderItemId,@PathVariable("quantity") Integer quantity,@PathVariable("aftersaleId") Long aftersaleId)
     {
         logger.debug("Cancel Order by orderId:" +userId);
-        ReturnObject<VoObject> returnObject = orderService.getAdminHandleRefund(userId,shopId,orderItemId,quantity);
+        ReturnObject<ResponseCode> returnObject = orderService.getAdminHandleExchange(userId,shopId,orderItemId,quantity,aftersaleId);
         return Common.decorateReturnObject(returnObject);
     }
 

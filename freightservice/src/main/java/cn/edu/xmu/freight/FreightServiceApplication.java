@@ -10,10 +10,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @EnableDubbo(scanBasePackages = "cn.edu.xmu.freight.service")
 @SpringBootApplication(scanBasePackages = {"cn.edu.xmu.ooad", "cn.edu.xmu.freight"})
 @MapperScan("cn.edu.xmu.freight.mapper")
+@EnableDiscoveryClient
 public class FreightServiceApplication implements ApplicationRunner {
 
     private  static  final Logger logger = LoggerFactory.getLogger(FreightServiceApplication.class);
