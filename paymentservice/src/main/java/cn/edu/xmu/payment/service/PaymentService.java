@@ -88,12 +88,16 @@ public class PaymentService implements IPaymentService {
 
     @Transactional
     public ReturnObject<VoObject> insertRefunds(Refund refund, Long shopId){
-        ReturnObject<Refund> retObj = paymentDao.insertRefunds(refund);
+        ReturnObject<OrderInnerDTO> orderInnerDTO = iOrderService.findShopIdbyOrderId(id);
+        Long retShopId = orderInnerDTO.getData().getShopId();
         ReturnObject<VoObject> retReund = null;
-        if (retObj.getCode().equals(ResponseCode.OK)) {
-            retReund = new ReturnObject<>(retObj.getData());
-        } else {
-            retReund = new ReturnObject<VoObject>(retObj.getCode(), retObj.getErrmsg());
+        if(retShopId==shopId) {
+            ReturnObject<Refund> retObj = paymentDao.insertRefunds(refund);
+            if (retObj.getCode().equals(ResponseCode.OK)) {
+                retReund = new ReturnObject<>(retObj.getData());
+            } else {
+                retReund = new ReturnObject<VoObject>(retObj.getCode(), retObj.getErrmsg());
+            }
         }
         return retReund;
     }

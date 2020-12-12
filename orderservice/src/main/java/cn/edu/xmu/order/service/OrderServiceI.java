@@ -121,13 +121,13 @@ public class OrderServiceI {
 
         ordersBo.setGmtCreated(LocalDateTime.now());
 
-        CustomerDTO customerDTO = aftersaleServiceI.findCustomerByUserId(userId).getData();
+        CustomerDTO customerDTO = aftersaleServiceI.findCustomerByUserId(userId).getData();//获得user信息
         CustomerRetVo customerRetVo = new CustomerRetVo();
         customerRetVo.setId(userId);
         customerRetVo.setName(customerDTO.getName());
         customerRetVo.setUserName(customerDTO.getUserName());
 
-        ShopDetailDTO shopDetailDTO = goodsService.getShopInfoBySkuId(orderItemsVo.get(0).getGoodsSkuId()).getData();
+        ShopDetailDTO shopDetailDTO = goodsService.getShopInfoBySkuId(orderItemsVo.get(0).getGoodsSkuId()).getData();//获得店铺信息
         ShopRetVo shopRetVo = new ShopRetVo();
         shopRetVo.setId(shopDetailDTO.getShopId());
         shopRetVo.setGmtCreate(shopDetailDTO.getGmtCreate());

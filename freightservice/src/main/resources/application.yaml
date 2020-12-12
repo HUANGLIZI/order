@@ -118,7 +118,7 @@ pagehelper:
   helper-dialect: mysql
 
 
-#    配置服务信息
+#    配置服务信息
 dubbo:
   application:
     name: freight-service
@@ -135,4 +135,3 @@ dubbo:
   consumer:
     timeout: 4000
     check: false
-

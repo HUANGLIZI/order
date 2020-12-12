@@ -23,6 +23,15 @@ public interface GoodsService {
     ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId);
 
     /**
+     * 根据shopId查找店铺信息
+     * @param shopId
+     * @return ShopDetailDTO
+     * @author Li Zihan
+     * @date 2020-12-09 17:03
+     */
+    ReturnObject<ShopDetailDTO> getShopInfoByShopId(Long shopId);
+
+    /**
      * 根据skuId查找商品信息
      * @param skuId
      * @return GoodsDetailDTO

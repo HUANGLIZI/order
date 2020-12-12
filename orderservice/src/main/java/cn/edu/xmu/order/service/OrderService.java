@@ -3,21 +3,24 @@ package cn.edu.xmu.order.service;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.goods.model.ShopDetailDTO;
+import cn.edu.xmu.oomall.goods.service.GoodsService;
 import cn.edu.xmu.oomall.order.model.OrderDTO;
 import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
 import cn.edu.xmu.oomall.order.service.IOrderItemService;
 import cn.edu.xmu.oomall.order.service.IOrderService;
+import cn.edu.xmu.oomall.other.model.CustomerDTO;
+import cn.edu.xmu.oomall.other.service.IAddressService;
+import cn.edu.xmu.oomall.other.service.IAftersaleService;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrdersPo;
-import cn.edu.xmu.order.model.vo.OrderCreateRetVo;
-import cn.edu.xmu.order.model.vo.OrderItemsCreateVo;
-import cn.edu.xmu.order.model.vo.OrderRetVo;
-import cn.edu.xmu.order.model.vo.OrdersVo;
+import cn.edu.xmu.order.model.vo.*;
 import com.github.pagehelper.PageInfo;
 import io.lettuce.core.StrAlgoArgs;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +37,18 @@ public class OrderService<OrdersPo> implements IOrderService, IOrderItemService 
     @Autowired
     private OrderDao orderDao;
 
+    @DubboReference
+    private GoodsService goodsService;
+
+    @DubboReference
+    private IAftersaleService aftersaleServiceI;
+
+    @DubboReference
+    private IFreightService freightServiceI;
+
+    @DubboReference
+    private IAddressService addressServiceI;
+
     private Logger logger = LoggerFactory.getLogger(OrderService.class);
     /**
      * ID获取订单信息
@@ -47,6 +62,23 @@ public class OrderService<OrdersPo> implements IOrderService, IOrderItemService 
         Orders orders=orderDao.findOrderById(id);
         List<OrderItemPo> orderItemPos=orderDao.findOrderItemById(id);
         List<OrderItems> orderItemsList = new ArrayList<OrderItems>();
+
+        Long userId=orders.getCustomerId();
+        CustomerDTO customerDTO = aftersaleServiceI.findCustomerByUserId(userId).getData();
+        CustomerRetVo customerRetVo = new CustomerRetVo();
+        customerRetVo.setId(userId);
+        customerRetVo.setName(customerDTO.getName());
+        customerRetVo.setUserName(customerDTO.getUserName());
+
+        Long shopId=orders.getShopId();
+        ShopDetailDTO shopDetailDTO = goodsService.getShopInfoByShopId(shopId).getData();
+        ShopRetVo shopRetVo = new ShopRetVo();
+        shopRetVo.setId(shopDetailDTO.getShopId());
+        shopRetVo.setGmtCreate(shopDetailDTO.getGmtCreate());
+        shopRetVo.setGmtModified(shopDetailDTO.getGmtModified());
+        shopRetVo.setName(shopDetailDTO.getName());
+        shopRetVo.setState(shopDetailDTO.getState());
+
         for (OrderItemPo po: orderItemPos)
         {
             OrderItems orderItems = new OrderItems(po);
@@ -55,7 +87,7 @@ public class OrderService<OrdersPo> implements IOrderService, IOrderItemService 
         if(orders != null) {
             logger.debug("findOrdersById : " + returnObject);
             //OrderRetVo orderRetVo=new orderRetVo();
-            returnObject = new ReturnObject(new OrderRetVo(orders,orderItemsList));
+            returnObject = new ReturnObject(new OrderRetVo(orders,orderItemsList,customerRetVo,shopRetVo));
         } else {
             logger.debug("findOrdersById: Not Found");
             returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
