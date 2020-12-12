@@ -1,6 +1,7 @@
 package cn.edu.xmu.freight.dao;
 
 import cn.edu.xmu.freight.mapper.PieceFreightModelPoMapper;
+import cn.edu.xmu.freight.model.vo.FreightModelReturnVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.RandomCaptcha;
 import com.github.pagehelper.PageHelper;
@@ -74,8 +75,8 @@ public class FreightDao{
             freightModelPos = freightModelPoMapper.selectByExample(example);
             List<VoObject> ret = new ArrayList<>(freightModelPos.size());
             for (FreightModelPo po : freightModelPos) {
-                FreightModel freightModel = new FreightModel(po);
-                ret.add(freightModel);
+                FreightModelReturnVo freightModelReturnVo = new FreightModelReturnVo(po);
+                ret.add(freightModelReturnVo);
             }
             PageInfo<VoObject> freightModelPage = PageInfo.of(ret);
             return new ReturnObject<>(freightModelPage);
