@@ -1,16 +1,10 @@
 package cn.edu.xmu.freight.controller;
 
-import cn.edu.xmu.freight.model.vo.FreightModelChangeVo;
-import cn.edu.xmu.freight.model.vo.PieceFreightModelChangeVo;
-import cn.edu.xmu.freight.model.vo.WeightFreightModelChangeVo;
+import cn.edu.xmu.freight.model.vo.*;
 import cn.edu.xmu.freight.model.bo.FreightModel;
 import cn.edu.xmu.freight.model.bo.PieceFreightModel;
 import cn.edu.xmu.freight.model.bo.WeightFreightModel;
 import cn.edu.xmu.freight.model.po.FreightModelPo;
-import cn.edu.xmu.freight.model.vo.FreightModelVo;
-import cn.edu.xmu.freight.model.vo.OrderItemVo;
-import cn.edu.xmu.freight.model.vo.PieceFreightModelVo;
-import cn.edu.xmu.freight.model.vo.WeightFreightModelVo;
 import cn.edu.xmu.freight.service.FreightService;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
@@ -39,7 +33,7 @@ import static cn.edu.xmu.ooad.util.Common.getNullRetObj;
 
 @Api(value = "运费服务", tags = "freight")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "/freight", produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "", produces = "application/json;charset=UTF-8")
 public class FreightController {
 
     @Autowired
@@ -111,12 +105,17 @@ public class FreightController {
     })
     @Audit
     @GetMapping("/freightmodels/{id}")
-    public Object getFreightModelById(@PathVariable("id") Long id){
+    public Object getFreightModelById(@PathVariable("id") Long id,@Depart @ApiIgnore Long sId){
 
 
-        ReturnObject returnObject =  freightService.getFreightModelById(id);
+        ReturnObject<FreightModelReturnVo> returnObject =  freightService.getFreightModelById(id);
         if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getRetObject(returnObject);
+            if(sId!=0&&returnObject.getData().getShopId()!=sId){
+                httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("操作的资源id不是自己的对象")), httpServletResponse);
+            }
+            ReturnObject retObject=new ReturnObject(returnObject.getData());
+            return Common.getRetObject(retObject);
         } else {
             return Common.decorateReturnObject(returnObject);
         }
@@ -194,7 +193,8 @@ public class FreightController {
             return Common.decorateReturnObject(returnObject);
         }
         else{
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + sId)), httpServletResponse);
+            httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("操作的资源id不是自己的对象")), httpServletResponse);
         }
 
     }

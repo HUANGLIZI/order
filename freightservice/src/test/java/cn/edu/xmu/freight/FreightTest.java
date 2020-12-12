@@ -46,8 +46,8 @@ public class FreightTest {
                 .returnResult()
                 .getResponseBodyContent();
         System.out.println(new String(responseString, "UTF-8"));
-//        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":{\"page\":1,\"pageSize\":10,\"total\":4,\"pages\":1,\"list\":[{\"id\":9,\"name\":\"测试模板\",\"type\":0,\"defaultModel\":true,\"gmtCreate\":[2020,12,2,20,33,8],\"gmtModified\":[2020,12,2,20,33,8]},{\"id\":10,\"name\":\"测试模板2\",\"type\":0,\"defaultModel\":false,\"gmtCreate\":[2020,12,2,20,33,8],\"gmtModified\":[2020,12,2,20,33,8]},{\"id\":11,\"name\":\"测试模板3\",\"type\":0,\"defaultModel\":false,\"gmtCreate\":[2020,12,2,20,33,8],\"gmtModified\":[2020,12,2,20,33,8]},{\"id\":12,\"name\":\"测试模板4\",\"type\":0,\"defaultModel\":false,\"gmtCreate\":[2020,12,2,20,33,8],\"gmtModified\":[2020,12,2,20,33,8]}]}}";
-//        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), false);
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":{\"page\":1,\"pageSize\":10,\"total\":4,\"pages\":1,\"list\":[{\"id\":9,\"name\":\"测试模板\",\"type\":0,\"defaultModel\":true,\"gmtCreate\":\"2020-12-02T20:33:08\",\"gmtModified\":\"2020-12-02T20:33:08\"},{\"id\":10,\"name\":\"测试模板2\",\"type\":0,\"defaultModel\":false,\"gmtCreate\":\"2020-12-02T20:33:08\",\"gmtModified\":\"2020-12-02T20:33:08\"},{\"id\":11,\"name\":\"测试模板3\",\"type\":0,\"defaultModel\":false,\"gmtCreate\":\"2020-12-02T20:33:08\",\"gmtModified\":\"2020-12-02T20:33:08\"},{\"id\":12,\"name\":\"测试模板4\",\"type\":0,\"defaultModel\":false,\"gmtCreate\":\"2020-12-02T20:33:08\",\"gmtModified\":\"2020-12-02T20:33:08\"}]}}";
+        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), false);
     }
 
     private String login(String userName, String password) throws Exception {
@@ -105,10 +105,83 @@ public class FreightTest {
                 .returnResult()
                 .getResponseBodyContent();
         System.out.println(new String(responseString, "UTF-8"));
-        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":{\"id\":9,\"name\":\"测试模板\",\"type\":0,\"defaultModel\":true,\"gmtCreate\":\"2020-12-02T20:33:08\",\"gmtModified\":\"2020-12-02T20:33:08\"}}";
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":{\"id\":9,\"name\":\"测试模板\",\"type\":0,\"unit\":500,\"defaultModel\":true,\"gmtCreate\":\"2020-12-02T20:33:08\",\"gmtModified\":\"2020-12-02T20:33:08\"}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), true);
 
     }
 
+    @Test
+    public void getFreightModelSummary2() throws Exception {
+        String token = this.login("13088admin", "123456");
+        byte[] responseString = manageClient.get().uri("/freightmodels/13").header("authorization",token)
+                .exchange()
+                .expectStatus().isUnauthorized()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+
+        String expectedResponse = "{\"errno\":505,\"errmsg\":\"操作的资源id不是自己的对象\"}";
+        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), true);
+    }
+
+
+    @Test
+    public void deleteFreightModel() throws Exception {
+        String token = this.login("13088admin", "123456");
+        byte[] responseString = manageClient.delete().uri("/shops/0/freightmodels/200").header("authorization",token)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+
+        String expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), true);
+
+    }
+
+    @Test
+    public void deleteFreightModel1() throws Exception {
+        String token = this.login("13088admin", "123456");
+        byte[] responseString = manageClient.delete().uri("/shops/0/freightmodels/10").header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+
+
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
+//        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), true);
+
+        byte[] queryResponseString = manageClient.get().uri("/freightmodels/10").header("authorization",token)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
+                .jsonPath("$.errmsg").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getMessage())
+                .returnResult()
+                .getResponseBodyContent();
+
+        expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse, new String(queryResponseString, "UTF-8"), true);
+
+    }
+
+    @Test
+    public void deleteFreightModel2() throws Exception {
+        String token = this.login("13088admin", "123456");
+        byte[] responseString = manageClient.delete().uri("/shops/1/freightmodels/13").header("authorization",token)
+                .exchange()
+                .expectStatus().isUnauthorized()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+
+        String expectedResponse = "{\"errno\":505,\"errmsg\":\"操作的资源id不是自己的对象\"}";
+        var x = new String(responseString, "UTF-8");
+        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), true);
+
+    }
 
 }

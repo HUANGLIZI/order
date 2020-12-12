@@ -413,4 +413,23 @@ public class OrderService implements IOrderService, IOrderItemService {
         return new ReturnObject<>(orderDTO);
     }
 
+    /**
+     * 根据orderItemIdList查询订单详情表和订单表信息，同时验证该orderItem是否属于该店铺，返回orderItemId为key的Map
+     * @param shopId
+     * @param orderItemIdList
+     * @auther zxj
+     * @return
+     */
+    @Override
+    public ReturnObject<Map<Long, OrderDTO>> getShopSelectOrderInfoByList(Long shopId, List<Long> orderItemIdList) {
+        Map<Long,OrderDTO> map = new HashMap<>();
+        for(Long orderItemId:orderItemIdList){
+            ReturnObject<OrderDTO> returnObject = getShopSelectOrderInfo(shopId,orderItemId);
+            if(returnObject.getCode()==ResponseCode.OK){
+                map.put(orderItemId,returnObject.getData());
+            }
+        }
+        return new ReturnObject<>(map);
+    }
+
 }
