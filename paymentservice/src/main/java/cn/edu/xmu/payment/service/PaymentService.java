@@ -88,7 +88,7 @@ public class PaymentService implements IPaymentService {
 
     @Transactional
     public ReturnObject<VoObject> insertRefunds(Refund refund, Long shopId){
-        ReturnObject<OrderInnerDTO> orderInnerDTO = iOrderService.findShopIdbyOrderId(id);
+        ReturnObject<OrderInnerDTO> orderInnerDTO = iOrderService.findShopIdbyOrderId(refund.getOrderId());
         Long retShopId = orderInnerDTO.getData().getShopId();
         ReturnObject<VoObject> retReund = null;
         if(retShopId==shopId) {
@@ -140,7 +140,7 @@ public class PaymentService implements IPaymentService {
     // 通过 orderItemId 查找 orderId
     // 找 paymentId
     @Override
-    public ReturnObject<ResponseCode> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Long refund, Long aftersaleId)
+    public ReturnObject<ResponseCode> getAdminHandleRefund(Long userId, Long shopId, Long orderItemId, Long refund, Long aftersaleId)
     {
         OrderInnerDTO orderInnerDTO = iOrderService.findOrderIdbyOrderItemId(orderItemId).getData();
         if (!orderInnerDTO.getCustomerId().equals(userId) || !orderInnerDTO.getShopId().equals(shopId))

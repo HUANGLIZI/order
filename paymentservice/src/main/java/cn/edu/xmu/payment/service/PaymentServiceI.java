@@ -87,7 +87,7 @@ public class PaymentServiceI {
             if (returnObject.getData().size() == 1) {
                 retRefund = new ReturnObject<>(returnObject.getData().get(0));
             }else{
-                retRefund = new ReturnObject<>();
+                retRefund = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
         }else{
             retRefund = new ReturnObject<>(returnObject.getCode(), returnObject.getErrmsg());

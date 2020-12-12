@@ -1,12 +1,14 @@
 package cn.edu.xmu.order.service;
 
 import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.ShopDetailDTO;
 import cn.edu.xmu.oomall.goods.service.GoodsService;
 import cn.edu.xmu.oomall.order.model.OrderDTO;
 import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
+import cn.edu.xmu.oomall.order.service.IFreightService;
 import cn.edu.xmu.oomall.order.service.IOrderItemService;
 import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.oomall.other.model.CustomerDTO;
@@ -28,11 +30,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @DubboService
-public class OrderService<OrdersPo> implements IOrderService, IOrderItemService {
+public class OrderService implements IOrderService, IOrderItemService {
 
     @Autowired
     private OrderDao orderDao;
@@ -256,7 +261,7 @@ public class OrderService<OrdersPo> implements IOrderService, IOrderItemService 
      * @date 2020-12-09 23:28
      */
     @Override
-    public ReturnObject<OrderDTO> getSelectOrderInfo(Long userId, Long orderItemId)
+    public ReturnObject<OrderDTO> getUserSelectSOrderInfo(Long userId, Long orderItemId)
     {
         return orderDao.getOrderItemsForOther(userId, orderItemId);
     }
@@ -269,7 +274,7 @@ public class OrderService<OrdersPo> implements IOrderService, IOrderItemService 
      * @date 2020-12-10 10:49
      */
     @Override
-    public ReturnObject<List<Long>> listUserSelectOrderItemId(Long userId, Long skuId)
+    public ReturnObject<List<Long>> listUserSelectOrderItemIdBySkuList(Long userId, List<Long> skuId)
     {
         return orderDao.listUserSelectOrderItemId(userId, skuId);
     }
@@ -281,7 +286,7 @@ public class OrderService<OrdersPo> implements IOrderService, IOrderItemService 
      * @return
      */
     @Override
-    public ReturnObject<List<Long>> listAdminSelectOrderItemId(Long shopId, Long skuId) {
+    public ReturnObject<List<Long>> listAdminSelectOrderItemIdBySkuList(Long shopId, List<Long> skuId) {
         return orderDao.listAdminSelectOrderItemId(shopId, skuId);
     }
 
@@ -291,7 +296,7 @@ public class OrderService<OrdersPo> implements IOrderService, IOrderItemService 
     }
 
     @Override
-    public  ReturnObject<ResponseCode> getAdminHandleRefund(Long userId, Long shopId, Long orderItemId, Integer quantity){
+    public  ReturnObject<ResponseCode> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Integer quantity, Long aftersaleId){
         OrderItemPo orderItemPo=orderDao.getOrderItems(userId,orderItemId).getData();
         List<OrderItems> orderItemsList = new ArrayList();
         OrderItems orderItems=new OrderItems(orderItemPo);
@@ -309,6 +314,7 @@ public class OrderService<OrdersPo> implements IOrderService, IOrderItemService 
         return returnObject;
     }
 
+
     @Override
     public ReturnObject<OrderInnerDTO> findOrderIdbyOrderItemId(Long orderItemId)
     {
@@ -325,6 +331,86 @@ public class OrderService<OrdersPo> implements IOrderService, IOrderItemService 
         return orderDao.getOrderIdByOrderItemId(orderItemId);
     }
 
+    /**
+     * 拆单
+     * @param orderId
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-12 14:11
+     */
+    @Transactional
+    @Override
+    public ReturnObject<ResponseCode> splitOrders(Long orderId)
+    {
+        List<OrderItemPo> orderItemPos = orderDao.selectOrderItemsByOrderId(orderId).getData();
+        OrdersPo ordersPo = orderDao.getOrderByOrderId(orderId).getData();
+        ordersPo.setState(Orders.State.HAS_PAID.getCode().byteValue());
+        List<Long> skuIdList = new ArrayList<Long>();
+        for (OrderItemPo po: orderItemPos)
+            skuIdList.add(po.getId());
+//        System.out.println(orderItemPos.size());
+//        System.out.println("==========");
+        List<Long> shopIdList = goodsService.getShopIdBySkuId(skuIdList).getData();
+//        List<Long> shopIdList = new ArrayList<Long>();
+//        shopIdList.add(1L);
+//        shopIdList.add(1L);
+//        shopIdList.add(2L);
+//        shopIdList.add(3L);
+        Map<Long, Long> ordersPriceMap = new HashMap<>();
+        for (int i = 0; i < orderItemPos.size(); i++)
+        {
+            if (ordersPriceMap.containsKey(shopIdList.get(i)))
+            {
+                Long p = ordersPriceMap.get(shopIdList.get(i));
+                p += orderItemPos.get(i).getPrice();
+                ordersPriceMap.put(shopIdList.get(i), p);
+            }
+            else
+                ordersPriceMap.put(shopIdList.get(i), orderItemPos.get(i).getPrice());
+        }
+        List<Orders> ordersList = new ArrayList<Orders>();
+        for(Map.Entry<Long, Long> entry : ordersPriceMap.entrySet())
+        {
+            Orders orders = new Orders(ordersPo);
+            orders.setId(null);
+            orders.setShopId(entry.getKey());
+            orders.setOriginPrice(entry.getValue());
+            orders.setOrderSn(Common.genSeqNum());
+            orders.setPid(ordersPo.getId());
+            orders.setGmtCreated(LocalDateTime.now());
+            if (ordersPo.getFreightPrice() != null && entry.getValue() != null && ordersPo.getOriginPrice() != null)
+                orders.setFreightPrice(ordersPo.getFreightPrice()*(entry.getValue()/ordersPo.getOriginPrice()));
+            ordersList.add(orders);
+        }
+        return orderDao.splitOrders(ordersList, ordersPo);
+    }
 
+    /**
+     * 根据orderItemId查询订单详情表和订单表信息，同时验证该orderItem是否属于该商店，shopId为0时表示管理员 无需验证
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-12 15:12
+     */
+    @Override
+    public ReturnObject<OrderDTO> getShopSelectOrderInfo(Long shopId, Long orderItemId)
+    {
+        OrderDTO orderDTO = new OrderDTO();
+        OrderItemPo orderItemPo = orderDao.getOrderItemById(orderItemId).getData();
+        if (orderItemPo == null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        ShopDetailDTO shopDetailDTO = goodsService.getShopInfoBySkuId(orderItemPo.getGoodsSkuId()).getData();
+        if (!shopId.equals(0L))
+            if (!shopDetailDTO.getShopId().equals(shopId))
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        OrdersPo ordersPo = orderDao.getOrderByOrderId(orderItemPo.getOrderId()).getData();
+        orderDTO.setSkuName(orderItemPo.getName());
+        orderDTO.setSkuId(orderItemPo.getGoodsSkuId());
+        orderDTO.setOrderSn(ordersPo.getOrderSn());
+        orderDTO.setOrderId(orderItemPo.getOrderId());
+        orderDTO.setShopId(shopDetailDTO.getShopId());
+
+        return new ReturnObject<>(orderDTO);
+    }
 
 }

@@ -69,4 +69,9 @@ public interface GoodsService {
      *将所有运费模板值为freightId的spu改为默认运费模板
      */
     ReturnObject<Boolean> updateSpuFreightId(Long freightModelId);
+
+    /**
+     * 通过skuId查找shopId
+     */
+    ReturnObject<List<Long>> getShopIdBySkuId(List<Long> skuIds);
 }
