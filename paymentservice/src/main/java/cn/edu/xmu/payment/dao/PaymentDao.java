@@ -284,7 +284,7 @@ public class PaymentDao {
     {
         RefundPoExample refundPoExample = new RefundPoExample();
         RefundPoExample.Criteria criteria = refundPoExample.createCriteria();
-        criteria.andOrderIdEqualTo(afterSaleId);
+        criteria.andAftersaleIdEqualTo(afterSaleId);
         List<RefundPo> refundPoList = refundPoMapper.selectByExample(refundPoExample);
 
         if (refundPoList.size() == 0)

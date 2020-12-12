@@ -74,7 +74,9 @@ public class PaymentServiceI {
     @Transactional
     public ReturnObject<VoObject> userQueryRefundsByAftersaleId(Long aftersaleId, Long userId)
     {
+        System.out.println(userId);
         Long retUserId = iAftersaleService.findUserIdbyAftersaleId(aftersaleId).getData();
+        System.out.println(userId+" "+retUserId);
 //        if (!retUserId.equals(1L))
         if (retUserId == null)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
@@ -87,7 +89,7 @@ public class PaymentServiceI {
             if (returnObject.getData().size() == 1) {
                 retRefund = new ReturnObject<>(returnObject.getData().get(0));
             }else{
-                retRefund = new ReturnObject<>();
+                retRefund = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
         }else{
             retRefund = new ReturnObject<>(returnObject.getCode(), returnObject.getErrmsg());

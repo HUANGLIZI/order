@@ -8,5 +8,5 @@ import cn.edu.xmu.ooad.util.ReturnObject;
  * @date 2020-12-11 10:22
  */
 public interface IPaymentService {
-    ReturnObject<ResponseCode> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Long refund, Long aftersaleId);
+    ReturnObject<ResponseCode> getAdminHandleRefund(Long userId, Long shopId, Long orderItemId, Long refund, Long aftersaleId);
 }

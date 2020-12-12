@@ -128,7 +128,7 @@ public class PaymentService implements IPaymentService {
     // 通过 orderItemId 查找 orderId
     // 找 paymentId
     @Override
-    public ReturnObject<ResponseCode> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Long refund, Long aftersaleId)
+    public ReturnObject<ResponseCode> getAdminHandleRefund(Long userId, Long shopId, Long orderItemId, Long refund, Long aftersaleId)
     {
         OrderInnerDTO orderInnerDTO = iOrderService.findOrderIdbyOrderItemId(orderItemId).getData();
         if (!orderInnerDTO.getCustomerId().equals(userId) || !orderInnerDTO.getShopId().equals(shopId))

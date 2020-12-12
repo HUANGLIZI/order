@@ -183,7 +183,7 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/shops/{shopId}/orders/{id}/refunds")
     public Object getOrdersRefundsByOrderId(@PathVariable("id") Long id,@PathVariable("shopId") Long shopId){
         ReturnObject returnObject =  paymentServiceI.getOrdersRefundsByOrderId(id,shopId);
@@ -228,7 +228,7 @@ public class PaymentController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @PostMapping("/shops/{shopId}/payments/{id}/refunds")
     public Object insertRole(@Validated @RequestBody amountVo amount, BindingResult bindingResult,
                              @PathVariable("id") Long id, @PathVariable("shopId") Long shopId) {
@@ -304,7 +304,7 @@ public class PaymentController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功")
     })
-    //@Audit
+    @Audit
     @PostMapping("/aftersales/{id}/payments")
     public Object createPaymentByAftersaleId(@Validated @RequestBody PaymentVo vo, BindingResult bindingResult,
                                 @PathVariable("id") Long aftersaleId){
@@ -362,7 +362,7 @@ public class PaymentController {
      * @author Cai Xinlu
      * @date 2020-12-06 23:18
      */
-//    @Audit
+    @Audit
     @ApiOperation(value = "买家查询自己的退款信息",produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
@@ -376,7 +376,7 @@ public class PaymentController {
     public Object queryUserRefundsByAftersaleId(
             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
             @PathVariable("id") Long aftersaleId) {
-//        System.out.println("userId" + userId);
+        System.out.println("userId" + userId);
         ReturnObject<VoObject> returnObject = paymentServiceI.userQueryRefundsByAftersaleId(aftersaleId, userId);
         return returnObject;
     }
@@ -396,7 +396,7 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/states")
     public Object getAllPaymentsStates()
     {
@@ -421,7 +421,7 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/patterns")
     public Object userQueryPayment()
     {

@@ -330,32 +330,32 @@ public class FreightController {
      * @Author:洪晓杰
      * 店家或管理员为商铺定义默认运费模板。
      */
-    @ApiOperation(value = "店家或管理员为商铺定义默认运费模板", produces = "application/json")
-    @ApiImplicitParams({
-            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(name="shopId", value="商户 ID", required = true, dataType="int", paramType="path"),
-            @ApiImplicitParam(name="id", value="id", required = true, dataType="int", paramType="path")
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-    })
-    @Audit
-    @PostMapping("/shops/{shopId}/freight_models/{id}/default")
-    public Object postDefaultPieceFreight(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id){
-        //Logger logger;
-        logger.debug("insert role by shopId:" + shopId+"and"+id);
-
-        //需要写service层
-        ReturnObject<VoObject> returnObject =  freightService.createDefaultPieceFreight(id,shopId);
-
-        return Common.decorateReturnObject(returnObject);
-
-//        if (returnObject.getCode() == ResponseCode.OK) {
-//            return Common.getRetObject(returnObject);
-//        } else {
-//            return Common.decorateReturnObject(returnObject);
-//        }
-    }
+//    @ApiOperation(value = "店家或管理员为商铺定义默认运费模板", produces = "application/json")
+//    @ApiImplicitParams({
+//            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+//            @ApiImplicitParam(name="shopId", value="商户 ID", required = true, dataType="int", paramType="path"),
+//            @ApiImplicitParam(name="id", value="id", required = true, dataType="int", paramType="path")
+//    })
+//    @ApiResponses({
+//            @ApiResponse(code = 0, message = "成功"),
+//    })
+//    @Audit
+//    @PostMapping("/shops/{shopId}/freight_models/{id}/default")
+//    public Object postDefaultPieceFreight(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id){
+//        //Logger logger;
+//        logger.debug("insert role by shopId:" + shopId+"and"+id);
+//
+//        //需要写service层
+//        ReturnObject<VoObject> returnObject =  freightService.createDefaultPieceFreight(id,shopId);
+//
+//        return Common.decorateReturnObject(returnObject);
+//
+////        if (returnObject.getCode() == ResponseCode.OK) {
+////            return Common.getRetObject(returnObject);
+////        } else {
+////            return Common.decorateReturnObject(returnObject);
+////        }
+//    }
 
 
     /***

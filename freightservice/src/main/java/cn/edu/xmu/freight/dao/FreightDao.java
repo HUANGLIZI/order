@@ -640,75 +640,75 @@ public class FreightDao{
      * 店家或管理员为商铺定义默认运费模板
      * @author 24320182203196 洪晓杰
      */
-    public ReturnObject<FreightModel> putDefaultPieceFreight(Long id, Long shopid){
-        ReturnObject<FreightModel> retObj=null;
-        try{
-            String str;
-            int ret ;
-            //通过shopid查询
-            FreightModelPoExample example = new FreightModelPoExample();
-            FreightModelPoExample.Criteria criteria = example.createCriteria();
-            criteria.andShopIdEqualTo(shopid);
-            List<FreightModelPo> userProxyPos = freightModelPoMapper.selectByExample(example);
-            if(userProxyPos.isEmpty()==true){
-                retObj = new ReturnObject<>(ResponseCode.SHOP_ID_NOTEXIST, String.format("不存在对应的shopid" ));
-                return retObj;
-            }
-            for(FreightModelPo userProxyPo : userProxyPos){
-                str = userProxyPo.getDefaultModel();
-                if(str.equals("true")&&userProxyPo.getId()==id){
-                    //已存在对应的默认模板
-                    logger.debug("updateFreightModel: update freightModel fail " + userProxyPo.toString() );
-                    return new ReturnObject<>(ResponseCode.DEFAULTMODEL_EXISTED, String.format("已经存在对应的默认模板，新增失败" ));
-                }
-                else{
-                    if(userProxyPo.getId()==id)
-                    {//将对应id的模板设置为默认模板
-                        userProxyPo.setDefaultModel("true");
-                        userProxyPo.setGmtModified(LocalDateTime.now());
-                        ret=freightModelPoMapper.updateByPrimaryKey(userProxyPo);
-                        if (ret == 0) {
-                            //更新失败
-                            logger.debug("updateFreightModel: update freightModel fail " + userProxyPo.toString() );
-                            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + userProxyPo.getName()));
-                        } else {
-                            //更新成功
-                            logger.debug("updateFreightModel: update freightModel = " + userProxyPo.toString());
-                            retObj = new ReturnObject<>(ResponseCode.OK,String.format("默认模板定义成功"));
-                            for(FreightModelPo userAnotherProxyPo : userProxyPos){
-                                if((userAnotherProxyPo.getDefaultModel()).equals("true")&&userAnotherProxyPo.getId()!=id){//将原商店的默认模板恢复为普通模板
-                                    userAnotherProxyPo.setDefaultModel("false");
-                                    userAnotherProxyPo.setGmtModified(LocalDateTime.now());
-                                    ret=freightModelPoMapper.updateByPrimaryKeySelective(userAnotherProxyPo);
-                                    if (ret == 0) {
-                                        //更新失败
-                                        logger.debug("updateFreightModel: update freightModel fail " + userAnotherProxyPo.toString() );
-                                        retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("原默认模板新增失败：" + userAnotherProxyPo.getName()));
-                                    } else {
-                                        //更新成功
-                                        logger.debug("updateFreightModel: update freightModel = " + userAnotherProxyPo.toString());
-                                        retObj = new ReturnObject<>(ResponseCode.OK,String.format("原默认模板更新成功"));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if(retObj==null)
-                retObj = new ReturnObject<>(ResponseCode.MODEL_ID_NOTEXIST, String.format("shopid不存在对应的模板id，新增失败" ));
-        }
-        catch (DataAccessException e) {
-            logger.debug("other sql exception : " + e.getMessage());
-            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
-        }
-        catch (Exception e) {
-            // 其他Exception错误
-            logger.error("other exception : " + e.getMessage());
-            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
-        }
-        return retObj;
-    }
+//    public ReturnObject<FreightModel> putDefaultPieceFreight(Long id, Long shopid){
+//        ReturnObject<FreightModel> retObj=null;
+//        try{
+//            String str;
+//            int ret ;
+//            //通过shopid查询
+//            FreightModelPoExample example = new FreightModelPoExample();
+//            FreightModelPoExample.Criteria criteria = example.createCriteria();
+//            criteria.andShopIdEqualTo(shopid);
+//            List<FreightModelPo> userProxyPos = freightModelPoMapper.selectByExample(example);
+//            if(userProxyPos.isEmpty()==true){
+//                retObj = new ReturnObject<>(ResponseCode.SHOP_ID_NOTEXIST, String.format("不存在对应的shopid" ));
+//                return retObj;
+//            }
+//            for(FreightModelPo userProxyPo : userProxyPos){
+//                str = userProxyPo.getDefaultModel();
+//                if(str.equals("true")&&userProxyPo.getId()==id){
+//                    //已存在对应的默认模板
+//                    logger.debug("updateFreightModel: update freightModel fail " + userProxyPo.toString() );
+//                    return new ReturnObject<>(ResponseCode.DEFAULTMODEL_EXISTED, String.format("已经存在对应的默认模板，新增失败" ));
+//                }
+//                else{
+//                    if(userProxyPo.getId()==id)
+//                    {//将对应id的模板设置为默认模板
+//                        userProxyPo.setDefaultModel("true");
+//                        userProxyPo.setGmtModified(LocalDateTime.now());
+//                        ret=freightModelPoMapper.updateByPrimaryKey(userProxyPo);
+//                        if (ret == 0) {
+//                            //更新失败
+//                            logger.debug("updateFreightModel: update freightModel fail " + userProxyPo.toString() );
+//                            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + userProxyPo.getName()));
+//                        } else {
+//                            //更新成功
+//                            logger.debug("updateFreightModel: update freightModel = " + userProxyPo.toString());
+//                            retObj = new ReturnObject<>(ResponseCode.OK,String.format("默认模板定义成功"));
+//                            for(FreightModelPo userAnotherProxyPo : userProxyPos){
+//                                if((userAnotherProxyPo.getDefaultModel()).equals("true")&&userAnotherProxyPo.getId()!=id){//将原商店的默认模板恢复为普通模板
+//                                    userAnotherProxyPo.setDefaultModel("false");
+//                                    userAnotherProxyPo.setGmtModified(LocalDateTime.now());
+//                                    ret=freightModelPoMapper.updateByPrimaryKeySelective(userAnotherProxyPo);
+//                                    if (ret == 0) {
+//                                        //更新失败
+//                                        logger.debug("updateFreightModel: update freightModel fail " + userAnotherProxyPo.toString() );
+//                                        retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("原默认模板新增失败：" + userAnotherProxyPo.getName()));
+//                                    } else {
+//                                        //更新成功
+//                                        logger.debug("updateFreightModel: update freightModel = " + userAnotherProxyPo.toString());
+//                                        retObj = new ReturnObject<>(ResponseCode.OK,String.format("原默认模板更新成功"));
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//            if(retObj==null)
+//                retObj = new ReturnObject<>(ResponseCode.MODEL_ID_NOTEXIST, String.format("shopid不存在对应的模板id，新增失败" ));
+//        }
+//        catch (DataAccessException e) {
+//            logger.debug("other sql exception : " + e.getMessage());
+//            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+//        }
+//        catch (Exception e) {
+//            // 其他Exception错误
+//            logger.error("other exception : " + e.getMessage());
+//            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+//        }
+//        return retObj;
+//    }
 
 
     /**

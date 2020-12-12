@@ -10,10 +10,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @EnableDubbo(scanBasePackages = "cn.edu.xmu.order.service")
 @SpringBootApplication(scanBasePackages = {"cn.edu.xmu.ooad", "cn.edu.xmu.order"})
 @MapperScan("cn.edu.xmu.order.mapper")
+@EnableDiscoveryClient
 public class OrderServiceApplication implements ApplicationRunner {
 
     private  static  final Logger logger = LoggerFactory.getLogger(OrderServiceApplication.class);

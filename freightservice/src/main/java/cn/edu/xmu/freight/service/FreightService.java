@@ -262,18 +262,18 @@ public class FreightService {
      * 店家或管理员为商铺定义默认运费模板
      * @author 24320182203196 洪晓杰
      */
-    @Transactional
-    public ReturnObject<VoObject> createDefaultPieceFreight(Long id,Long shopId){
-        ReturnObject<VoObject> retFrei;
-        ReturnObject<FreightModel> retObj = freightDao.putDefaultPieceFreight(id,shopId);
-
-        if (retObj.getCode().equals(ResponseCode.OK)) {
-            retFrei = new ReturnObject<>(retObj.getData());
-        } else {
-            retFrei = new ReturnObject<>(retObj.getCode(), retObj.getErrmsg());
-        }
-        return retFrei;
-    }
+//    @Transactional
+//    public ReturnObject<VoObject> createDefaultPieceFreight(Long id,Long shopId){
+//        ReturnObject<VoObject> retFrei;
+//        ReturnObject<FreightModel> retObj = freightDao.putDefaultPieceFreight(id,shopId);
+//
+//        if (retObj.getCode().equals(ResponseCode.OK)) {
+//            retFrei = new ReturnObject<>(retObj.getData());
+//        } else {
+//            retFrei = new ReturnObject<>(retObj.getCode(), retObj.getErrmsg());
+//        }
+//        return retFrei;
+//    }
 
 
     /**
