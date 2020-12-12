@@ -322,6 +322,23 @@ public class OrderService implements IOrderService, IOrderItemService {
     }
 
     /**
+     * Li Zihan
+     * @param userId
+     * @param orderItemIdList
+     * @return
+     */
+    @Override
+    public ReturnObject<Map<Long,OrderDTO>> getUserSelectOrderInfoByList(Long userId, List<Long>orderItemIdList)
+    {
+        Map<Long,OrderDTO> map = new HashMap<>();
+        for(int i=0;i<orderItemIdList.size();i++) {
+           OrderDTO orderDTO=orderDao.getOrderbyOrderItemId(userId,orderItemIdList.get(i)).getData();
+           if(orderDTO!=null) {
+                map.put(orderItemIdList.get(i),orderDTO);
+           }
+        }
+        return new ReturnObject<>(map);
+    }
      * 获取orderId通过orderItemId
      * @auther 洪晓杰
      * @return

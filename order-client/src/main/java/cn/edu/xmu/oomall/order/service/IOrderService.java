@@ -6,6 +6,7 @@ import cn.edu.xmu.oomall.order.model.OrderDTO;
 import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Caixin
@@ -40,6 +41,9 @@ public interface IOrderService {
 
     ReturnObject<Boolean> isOrderBelongToShop(Long shopId, Long orderId);
 
+    //ReturnObject<ResponseCode> getAdminHandleRefund(Long userId, Long shopId, Long orderItemId, Integer quantity);
+
+    ReturnObject<Map<Long,OrderDTO>> getUserSelectOrderInfoByList(Long userId, List<Long>orderItemIdList);
     ReturnObject<ResponseCode> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Integer quantity, Long aftersaleId);
 
     /**
