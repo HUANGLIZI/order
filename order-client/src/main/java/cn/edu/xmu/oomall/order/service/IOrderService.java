@@ -64,7 +64,7 @@ public interface IOrderService {
  * 根据orderItemIdList查询订单详情表和订单表信息，同时验证该orderItem是否属于该店铺，返回orderItemId为key的Map
  * shopId为0时表示管理员 无需验证
  */
-//    ReturnObject<Map<Long,OrderDTO>> getShopSelectOrderInfoByList(Long shopId, List<Long> orderItemIdList);
+    ReturnObject<Map<Long,OrderDTO>> getShopSelectOrderInfoByList(Long shopId, List<Long> orderItemIdList);
 
 /**
  * 根据orderItemIdList查询订单详情表和订单表信息，同时验证该orderItem是否属于该用户，返回orderItemId为key的Map

@@ -1,8 +1,10 @@
 package cn.edu.xmu.freight.dao;
 
 import cn.edu.xmu.freight.mapper.PieceFreightModelPoMapper;
+import cn.edu.xmu.freight.model.vo.FreightModelRetVo;
 import cn.edu.xmu.freight.model.vo.FreightModelReturnVo;
 import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.RandomCaptcha;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -24,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestBody;
 import java.time.LocalDateTime;
@@ -65,7 +68,7 @@ public class FreightDao{
         if(!"".equals(name)&&name!=null){
             criteria.andNameLike("%"+name+"%");
         }
-
+        System.out.println(pageSize);
         //分页查询
         PageHelper.startPage(page, pageSize);
         logger.debug("page = " + page + "pageSize = " + pageSize);
@@ -108,9 +111,10 @@ public class FreightDao{
             logger.error("getFreightModelById: 数据库不存在该运费模板 freightmodel_id=" + id);
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-        FreightModel freightModel = new FreightModel(freightModelPo);
 
-        return new ReturnObject<>(freightModel);
+        FreightModelReturnVo freightModelReturnVo = new FreightModelReturnVo(freightModelPo);
+
+        return new ReturnObject<>(freightModelReturnVo);
     }
 
     /**
@@ -343,7 +347,7 @@ public class FreightDao{
      * createdBy 张湘君 2020/11/28 20:12
      * modifiedBy 张湘君 2020/11/28 20:12
      */
-    public ReturnObject<Object> delShopFreightModel(Long shopId, Long id) {
+    public ReturnObject delShopFreightModel(Long shopId, Long id) {
         ReturnObject<Object> returnObject;
         FreightModelPoExample example=new FreightModelPoExample ();
         FreightModelPoExample.Criteria criteria=example.createCriteria();
@@ -353,9 +357,9 @@ public class FreightDao{
         int ret = freightModelPoMapper.deleteByExample(example);
         if(ret==0){
            //资源不存在
-           returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"运费模板不属于该店铺");
+           returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"操作的资源id不存在");
         }else {
-            returnObject=new ReturnObject<>();
+            returnObject=new ReturnObject<>(ResponseCode.OK);
             //删出对应的运费模板详细
             WeightFreightModelPoExample weightFreightModelPoExample=new WeightFreightModelPoExample ();
             WeightFreightModelPoExample.Criteria weightCriteria=weightFreightModelPoExample.createCriteria();

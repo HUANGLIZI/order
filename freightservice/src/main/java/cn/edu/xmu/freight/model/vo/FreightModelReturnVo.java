@@ -15,13 +15,16 @@ public class FreightModelReturnVo implements VoObject {
     @ApiModelProperty(value = "模板id")
     private Long id;
 
+    @ApiModelProperty(value = "商铺id")
+    private Long shopId;
+
     @ApiModelProperty(value = "名字")
     private String name;
 
     @ApiModelProperty(value = "类型")
     private Byte type;
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "计重单位")
     private Integer unit;
 
     @ApiModelProperty(value = "默认模板")
@@ -40,6 +43,7 @@ public class FreightModelReturnVo implements VoObject {
      */
     public FreightModelReturnVo(FreightModelPo freightModelPo) {
         this.id = freightModelPo.getId();
+        this.shopId=freightModelPo.getShopId();
         this.name = freightModelPo.getName();
         this.type = freightModelPo.getType();
         this.unit= freightModelPo.getUnit();
