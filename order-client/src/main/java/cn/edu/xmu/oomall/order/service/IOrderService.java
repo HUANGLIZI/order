@@ -41,6 +41,9 @@ public interface IOrderService {
 
     ReturnObject<Boolean> isOrderBelongToShop(Long shopId, Long orderId);
 
+    //ReturnObject<ResponseCode> getAdminHandleRefund(Long userId, Long shopId, Long orderItemId, Integer quantity);
+
+    ReturnObject<Map<Long,OrderDTO>> getUserSelectOrderInfoByList(Long userId, List<Long>orderItemIdList);
     ReturnObject<ResponseCode> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Integer quantity, Long aftersaleId);
 
     /**
@@ -57,16 +60,14 @@ public interface IOrderService {
      */
     ReturnObject<OrderDTO> getShopSelectOrderInfo(Long shopId, Long orderItemId);
 
-    /**
-     * 根据orderItemIdList查询订单详情表和订单表信息，同时验证该orderItem是否属于该店铺，返回orderItemId为key的Map
-     * shopId为0时表示管理员 无需验证
-     */
-//    ReturnObject<Map<Long,OrderDTO>> getShopSelectOrderInfoByList(Long shopId, List<Long> orderItemIdList);
+/**
+ * 根据orderItemIdList查询订单详情表和订单表信息，同时验证该orderItem是否属于该店铺，返回orderItemId为key的Map
+ * shopId为0时表示管理员 无需验证
+ */
+    ReturnObject<Map<Long,OrderDTO>> getShopSelectOrderInfoByList(Long shopId, List<Long> orderItemIdList);
 
-    /**
-     * 根据orderItemIdList查询订单详情表和订单表信息，同时验证该orderItem是否属于该用户，返回orderItemId为key的Map
-     */
+/**
+ * 根据orderItemIdList查询订单详情表和订单表信息，同时验证该orderItem是否属于该用户，返回orderItemId为key的Map
+ */
 //    ReturnObject<Map<Long,OrderDTO>> getUserSelectOrderInfoByList(Long userId, List<Long> orderItemIdList);
-
-
 }

@@ -9,7 +9,10 @@ import cn.edu.xmu.order.mapper.OrderItemPoMapper;
 import cn.edu.xmu.order.mapper.OrdersPoMapper;
 import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
-import cn.edu.xmu.order.model.po.*;
+import cn.edu.xmu.order.model.po.OrderItemPo;
+import cn.edu.xmu.order.model.po.OrderItemPoExample;
+import cn.edu.xmu.order.model.po.OrdersPo;
+import cn.edu.xmu.order.model.po.OrdersPoExample;
 import cn.edu.xmu.order.model.vo.OrderItemsCreateVo;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -361,13 +364,14 @@ public class OrderDao {
      * @param page 页数
      * @param pageSize 每页大小
      * @return Object 查询结果
+     * @date 2020/12/12
      */
     public ReturnObject<PageInfo<VoObject>> getShopAllOrders(Long shopId, Long customerId, String orderSn, String beginTime, String endTime, Integer page, Integer pageSize)
     {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         OrdersPoExample ordersPoExample = new OrdersPoExample();
         OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
-        criteria.andCustomerIdEqualTo(shopId);
+        criteria.andShopIdEqualTo(shopId);
         // 被逻辑删除的订单不能被返回
         Byte beDeleted = 0;
         criteria.andBeDeletedEqualTo(beDeleted);
@@ -377,10 +381,10 @@ public class OrderDao {
             criteria.andOrderSnEqualTo(orderSn);
         if(beginTime != null)
             criteria.andGmtCreateGreaterThanOrEqualTo(LocalDateTime.parse(beginTime, df));
-            //criteria.andGmtCreatedGreaterThanOrEqualTo(LocalDateTime.parse(beginTime, df));
+        //criteria.andGmtCreatedGreaterThanOrEqualTo(LocalDateTime.parse(beginTime, df));
         if(endTime != null)
             criteria.andGmtCreateLessThanOrEqualTo(LocalDateTime.parse(endTime, df));
-            //criteria.andGmtCreatedLessThanOrEqualTo(LocalDateTime.parse(endTime, df));
+        //criteria.andGmtCreatedLessThanOrEqualTo(LocalDateTime.parse(endTime, df));
         //分页查询
         PageHelper.startPage(page, pageSize);
         logger.debug("page = " + page + "pageSize = " + pageSize);
@@ -411,6 +415,7 @@ public class OrderDao {
      *
      * @author 24320182203323  李明明
      * @return Object 查询结果
+     * @date 2020/12/12
      */
     public ReturnObject getOrderById(Long shopId, Long id)
     {
@@ -419,6 +424,11 @@ public class OrderDao {
         {
             logger.error("getOrderById: 数据库不存在该订单 order_id=" + id);
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        else if(shopId != ordersPo.getShopId())
+        {
+            logger.error("getOrderById: 店铺Id不匹配 order_id=" + id);
+            return new ReturnObject(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + shopId));
         }
         Orders orders = new Orders(ordersPo);
         return new ReturnObject<>(orders);
@@ -429,6 +439,7 @@ public class OrderDao {
      *
      * @author 24320182203323  李明明
      * @return Object 查询结果
+     * @date 2020/12/12
      */
     public ReturnObject<Orders> cancelOrderById(Long shopId, Long id)
     {
@@ -482,7 +493,6 @@ public class OrderDao {
         orderDTO.setShopId(ordersPo.getShopId());
         orderDTO.setOrderId(orderItemPo.getOrderId());
         orderDTO.setOrderSn(ordersPo.getOrderSn());
-//        orderDTO.setPrice(orderItemPo.getPrice());
         orderDTO.setSkuId(orderItemPo.getGoodsSkuId());
         orderDTO.setSkuName(orderItemPo.getName());
 
@@ -556,6 +566,29 @@ public class OrderDao {
     }
 
     /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-11 10:42
+     */
+    public ReturnObject<OrderDTO> getOrderbyOrderItemId(Long userId,Long orderItemId)
+    {
+        OrderItemPo orderItemPo=orderItemPoMapper.selectByPrimaryKey(orderItemId);
+        Long orderId = orderItemPo.getOrderId();
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
+        OrderDTO orderDTO = new OrderDTO();
+        if(ordersPo.getCustomerId()==userId) {
+            orderDTO.setOrderId(ordersPo.getId());
+            orderDTO.setOrderSn(ordersPo.getOrderSn());
+            orderDTO.setSkuId(orderItemPo.getGoodsSkuId());
+            orderDTO.setSkuName(orderItemPo.getName());
+            orderDTO.setShopId(ordersPo.getShopId());
+            orderDTO.setPrice(orderItemPo.getPrice());
+        }
+        return new ReturnObject<>(orderDTO);
+    }
+
+    /*
      * @author Li Zihan
      * @date 2020-12-10 10:50
      */
@@ -568,6 +601,17 @@ public class OrderDao {
         if (!ordersPo.getCustomerId().equals(userId))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         return new ReturnObject<>(orderItemPo);
+    }
+
+    /**
+     * 获取orderId通过orderItemId
+     * @auther 洪晓杰
+     * @return
+     */
+    public ReturnObject<Long> getOrderIdByOrderItemId(Long orderItemId) {
+        OrderItemPo orderItemPo=orderItemPoMapper.selectByPrimaryKey(orderItemId);
+        if(orderItemPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        return new ReturnObject<>(orderItemPo.getOrderId());
     }
 
     public ReturnObject<List<OrderItemPo>> selectOrderItemsByOrderId(Long orderId)
@@ -605,5 +649,6 @@ public class OrderDao {
     {
         return new ReturnObject<>(orderItemPoMapper.selectByPrimaryKey(orderItemId));
     }
+
 
 }

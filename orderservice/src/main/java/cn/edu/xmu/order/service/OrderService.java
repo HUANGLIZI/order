@@ -8,16 +8,18 @@ import cn.edu.xmu.oomall.goods.model.ShopDetailDTO;
 import cn.edu.xmu.oomall.goods.service.GoodsService;
 import cn.edu.xmu.oomall.order.model.OrderDTO;
 import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
+import cn.edu.xmu.oomall.order.service.IFreightService;
+import cn.edu.xmu.oomall.order.service.IOrderItemService;
 import cn.edu.xmu.oomall.order.service.IOrderService;
+import cn.edu.xmu.oomall.other.model.CustomerDTO;
+import cn.edu.xmu.oomall.other.service.IAddressService;
+import cn.edu.xmu.oomall.other.service.IAftersaleService;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrdersPo;
-import cn.edu.xmu.order.model.vo.OrderCreateRetVo;
-import cn.edu.xmu.order.model.vo.OrderItemsCreateVo;
-import cn.edu.xmu.order.model.vo.OrderRetVo;
-import cn.edu.xmu.order.model.vo.OrdersVo;
+import cn.edu.xmu.order.model.vo.*;
 import com.github.pagehelper.PageInfo;
 import io.lettuce.core.StrAlgoArgs;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -35,13 +37,22 @@ import java.util.List;
 import java.util.Map;
 
 @DubboService
-public class OrderService implements IOrderService {
+public class OrderService implements IOrderService, IOrderItemService {
 
     @Autowired
     private OrderDao orderDao;
 
     @DubboReference
     private GoodsService goodsService;
+
+    @DubboReference
+    private IAftersaleService aftersaleServiceI;
+
+    @DubboReference
+    private IFreightService freightServiceI;
+
+    @DubboReference
+    private IAddressService addressServiceI;
 
     private Logger logger = LoggerFactory.getLogger(OrderService.class);
     /**
@@ -56,6 +67,23 @@ public class OrderService implements IOrderService {
         Orders orders=orderDao.findOrderById(id);
         List<OrderItemPo> orderItemPos=orderDao.findOrderItemById(id);
         List<OrderItems> orderItemsList = new ArrayList<OrderItems>();
+
+        Long userId=orders.getCustomerId();
+        CustomerDTO customerDTO = aftersaleServiceI.findCustomerByUserId(userId).getData();
+        CustomerRetVo customerRetVo = new CustomerRetVo();
+        customerRetVo.setId(userId);
+        customerRetVo.setName(customerDTO.getName());
+        customerRetVo.setUserName(customerDTO.getUserName());
+
+        Long shopId=orders.getShopId();
+        ShopDetailDTO shopDetailDTO = goodsService.getShopInfoByShopId(shopId).getData();
+        ShopRetVo shopRetVo = new ShopRetVo();
+        shopRetVo.setId(shopDetailDTO.getShopId());
+        shopRetVo.setGmtCreate(shopDetailDTO.getGmtCreate());
+        shopRetVo.setGmtModified(shopDetailDTO.getGmtModified());
+        shopRetVo.setName(shopDetailDTO.getName());
+        shopRetVo.setState(shopDetailDTO.getState());
+
         for (OrderItemPo po: orderItemPos)
         {
             OrderItems orderItems = new OrderItems(po);
@@ -64,7 +92,7 @@ public class OrderService implements IOrderService {
         if(orders != null) {
             logger.debug("findOrdersById : " + returnObject);
             //OrderRetVo orderRetVo=new orderRetVo();
-            returnObject = new ReturnObject(new OrderRetVo(orders,orderItemsList));
+            returnObject = new ReturnObject(new OrderRetVo(orders,orderItemsList,customerRetVo,shopRetVo));
         } else {
             logger.debug("findOrdersById: Not Found");
             returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
@@ -190,7 +218,9 @@ public class OrderService implements IOrderService {
      * @param page 页数
      * @param pageSize 每页大小
      * @return Object 查询结果
+     * @date 2020/12/12
      */
+    @Transactional
     public ReturnObject<PageInfo<VoObject>> getShopAllOrders(Long shopId, Long customerId, String orderSn, String beginTime, String endTime, Integer page, Integer pageSize)
     {
         ReturnObject<PageInfo<VoObject>> returnObject = orderDao.getShopAllOrders(shopId,customerId, orderSn, beginTime, endTime, page, pageSize);
@@ -202,10 +232,46 @@ public class OrderService implements IOrderService {
      *
      * @author 24320182203323  李明明
      * @return Object 查询结果
+     * @date 2020/12/12
      */
-    public ReturnObject getOrderById(Long shopId, Long id)
+    @Transactional
+    public ReturnObject<VoObject> getOrderById(Long shopId, Long id)
     {
-        return orderDao.getOrderById(shopId, id);
+        Orders orders = (Orders) orderDao.getOrderById(shopId,id).getData();
+
+        List<OrderItemPo> orderItemPos=orderDao.findOrderItemById(id);
+        List<OrderItems> orderItemsList = new ArrayList<OrderItems>();
+        for(OrderItemPo po : orderItemPos)
+        {
+            OrderItems orderItems = new OrderItems(po);
+            orderItemsList.add(orderItems);
+        }
+
+
+        Long customerId = orders.getCustomerId();
+        CustomerDTO customerDTO = aftersaleServiceI.findCustomerByUserId(customerId).getData();
+        CustomerRetVo customerRetVo = new CustomerRetVo();
+        customerRetVo.setId(customerId);
+        customerRetVo.setName(customerDTO.getName());
+        customerRetVo.setUserName(customerDTO.getUserName());
+
+        ShopRetVo shopRetVo = new ShopRetVo();
+        ShopDetailDTO shopDetailDTO = goodsService.getShopInfoByShopId(shopId).getData();
+        shopRetVo.setId(shopId);
+        shopRetVo.setName(shopDetailDTO.getName());
+        shopRetVo.setState(shopDetailDTO.getState());
+        shopRetVo.setGmtCreate(shopDetailDTO.getGmtCreate());
+        shopRetVo.setGmtModified(shopDetailDTO.getGmtModified());
+
+        ReturnObject<VoObject> returnObject = null;
+        if(orders != null) {
+            logger.debug("findOrdersById : " + returnObject);
+            returnObject = new ReturnObject(new OrderRetVo(orders,orderItemsList,customerRetVo,shopRetVo));
+        } else {
+            logger.debug("findOrdersById: Not Found");
+            returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        return returnObject;
     }
 
     /**
@@ -286,10 +352,40 @@ public class OrderService implements IOrderService {
         return returnObject;
     }
 
+
     @Override
     public ReturnObject<OrderInnerDTO> findOrderIdbyOrderItemId(Long orderItemId)
     {
         return orderDao.getOrderIdbyOrderItemId(orderItemId);
+    }
+
+    /**
+     * Li Zihan
+     * @param userId
+     * @param orderItemIdList
+     * @return
+     */
+    @Override
+    public ReturnObject<Map<Long,OrderDTO>> getUserSelectOrderInfoByList(Long userId, List<Long>orderItemIdList)
+    {
+        Map<Long,OrderDTO> map = new HashMap<>();
+        for(int i=0;i<orderItemIdList.size();i++) {
+           OrderDTO orderDTO=orderDao.getOrderbyOrderItemId(userId,orderItemIdList.get(i)).getData();
+           if(orderDTO!=null) {
+                map.put(orderItemIdList.get(i),orderDTO);
+           }
+        }
+        return new ReturnObject<>(map);
+    }
+
+    /**
+     * 获取orderId通过orderItemId
+     * @auther 洪晓杰
+     * @return
+     */
+    @Override
+    public ReturnObject<Long> getOrderIdByOrderItemId(Long orderItemId){
+        return orderDao.getOrderIdByOrderItemId(orderItemId);
     }
 
     /**
@@ -363,7 +459,7 @@ public class OrderService implements IOrderService {
         ShopDetailDTO shopDetailDTO = goodsService.getShopInfoBySkuId(orderItemPo.getGoodsSkuId()).getData();
         if (!shopId.equals(0L))
             if (!shopDetailDTO.getShopId().equals(shopId))
-               return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         OrdersPo ordersPo = orderDao.getOrderByOrderId(orderItemPo.getOrderId()).getData();
         orderDTO.setSkuName(orderItemPo.getName());
         orderDTO.setSkuId(orderItemPo.getGoodsSkuId());
@@ -373,4 +469,24 @@ public class OrderService implements IOrderService {
 
         return new ReturnObject<>(orderDTO);
     }
+
+    /**
+     * 根据orderItemIdList查询订单详情表和订单表信息，同时验证该orderItem是否属于该店铺，返回orderItemId为key的Map
+     * @param shopId
+     * @param orderItemIdList
+     * @auther zxj
+     * @return
+     */
+    @Override
+    public ReturnObject<Map<Long, OrderDTO>> getShopSelectOrderInfoByList(Long shopId, List<Long> orderItemIdList) {
+        Map<Long,OrderDTO> map = new HashMap<>();
+        for(Long orderItemId:orderItemIdList){
+            ReturnObject<OrderDTO> returnObject = getShopSelectOrderInfo(shopId,orderItemId);
+            if(returnObject.getCode()==ResponseCode.OK){
+                map.put(orderItemId,returnObject.getData());
+            }
+        }
+        return new ReturnObject<>(map);
+    }
+
 }

@@ -35,7 +35,6 @@ public interface IAftersaleService {
      */
     ReturnObject<Long> findOrderItemIdbyAftersaleId(Long aftersaleId);
 
-
     /**
      * 通过skuId清购物车
      */

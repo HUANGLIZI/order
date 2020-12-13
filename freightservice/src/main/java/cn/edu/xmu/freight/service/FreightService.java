@@ -1,6 +1,7 @@
 package cn.edu.xmu.freight.service;
 
 import cn.edu.xmu.freight.dao.FreightDao;
+import cn.edu.xmu.freight.model.vo.*;
 import cn.edu.xmu.oomall.goods.model.GoodsFreightDTO;
 import cn.edu.xmu.oomall.goods.service.GoodsService;
 import com.github.pagehelper.PageInfo;
@@ -9,14 +10,10 @@ import org.springframework.stereotype.Service;
 import cn.edu.xmu.freight.model.bo.FreightModelChangeBo;
 import cn.edu.xmu.freight.model.bo.PieceFreightModelChangeBo;
 import cn.edu.xmu.freight.model.bo.WeightFreightModelChangeBo;
-import cn.edu.xmu.freight.model.vo.FreightModelChangeVo;
-import cn.edu.xmu.freight.model.vo.PieceFreightModelChangeVo;
-import cn.edu.xmu.freight.model.vo.WeightFreightModelChangeVo;
 import cn.edu.xmu.freight.model.bo.FreightModel;
 import cn.edu.xmu.freight.model.bo.PieceFreightModel;
 import cn.edu.xmu.freight.model.bo.WeightFreightModel;
 import cn.edu.xmu.freight.model.po.FreightModelPo;
-import cn.edu.xmu.freight.model.vo.FreightModelRetVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -82,7 +79,7 @@ public class FreightService {
      * createdBy 张湘君 2020/11/25 20:12
      * modifiedBy 张湘君 2020/11/25 20:12
      */
-    public ReturnObject getFreightModelById(Long id) {
+    public ReturnObject<FreightModelReturnVo> getFreightModelById(Long id) {
         return freightDao.getFreightModelById(id);
     }
 
@@ -129,7 +126,7 @@ public class FreightService {
      * createdBy 张湘君 2020/11/28 20:12
      * modifiedBy 张湘君 2020/11/28 20:12
      */
-    public ReturnObject<Object> delShopFreightModel(Long shopId, Long id) {
+    public ReturnObject delShopFreightModel(Long shopId, Long id) {
         //物理删除
         ReturnObject returnObject=freightDao.delShopFreightModel(shopId,id);
         if (returnObject.getCode() == ResponseCode.OK) {
