@@ -436,6 +436,7 @@ public class FreightController {
      * @param id 重量运费模板明细id
      * @return ReturnObject
      * @author li mingming
+     * @date 2020/12/12
      */
     @ApiOperation(value = "查询某个重量运费模板明细")
     @ApiImplicitParams({
@@ -450,17 +451,26 @@ public class FreightController {
     })
     @Audit
     @GetMapping("/shops/{shopId}/freightmodels/{id}/weightItems")
-    public Object findWeightItemByFreightModelId(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id)
+    public Object findWeightItemByFreightModelId(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id, @Depart @ApiIgnore Long departId)
     {
-        ReturnObject<List> returnObject = freightService.getWeightItemsByFreightModelId(shopId,id);
-        if(returnObject.getCode() == ResponseCode.OK)
+        if(shopId == departId)
         {
-            return Common.getListRetObject(returnObject);
+            ReturnObject<List> returnObject = freightService.getWeightItemsByFreightModelId(shopId,id);
+            //return Common.getRetObject(new ReturnObject<>(ResponseCode.OK, "22222"));
+            if(returnObject.getCode() == ResponseCode.OK)
+            {
+                return Common.getListRetObject(returnObject);
+            }
+            else
+            {
+                return Common.decorateReturnObject(returnObject);
+            }
         }
         else
         {
-            return Common.decorateReturnObject(returnObject);
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("lmmm店铺id不匹配：" + departId)), httpServletResponse);
         }
+
     }
 
     /**
@@ -469,6 +479,7 @@ public class FreightController {
      * @param id 件数运费模板明细id
      * @return ReturnObject
      * @author li mingming
+     * @date 2020/12/12
      */
     @ApiOperation(value = "查询某个件数运费模板明细")
     @ApiImplicitParams({
@@ -483,14 +494,22 @@ public class FreightController {
     })
     @Audit
     @GetMapping("/shops/{shopId}/freightmodels/{id}/pieceItems")
-    public Object findPieceItemByFreightModelId(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id)
+    public Object findPieceItemByFreightModelId(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id, @Depart @ApiIgnore Long departId)
     {
-        ReturnObject<List> returnObject = freightService.getPieceItemsByFreightModelId(shopId, id);
-        if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getListRetObject(returnObject);
-        } else {
-            return Common.decorateReturnObject(returnObject);
+        if(shopId == departId)
+        {
+            ReturnObject<List> returnObject = freightService.getPieceItemsByFreightModelId(shopId, id);
+            if (returnObject.getCode() == ResponseCode.OK) {
+                return Common.getListRetObject(returnObject);
+            } else {
+                return Common.decorateReturnObject(returnObject);
+            }
         }
+        else
+        {
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + departId)), httpServletResponse);
+        }
+
     }
 
     /**
@@ -498,6 +517,7 @@ public class FreightController {
      * @param id 重量运费模板明细id
      * @return ReturnObject
      * @author li mingming
+     * @date 2020/12/12
      */
     @ApiOperation(value = "删除重量运费模板明细")
     @ApiImplicitParams({
@@ -512,10 +532,18 @@ public class FreightController {
     })
     @Audit
     @DeleteMapping("/shops/{shopId}/weightItems/{id}")
-    public Object delWeightItemById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id)
+    public Object delWeightItemById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id,@Depart @ApiIgnore Long departId)
     {
-        ReturnObject<VoObject> returnObject = freightService.delWeightItemById(shopId, id);
-        return Common.getRetObject(returnObject);
+        if(shopId == departId)
+        {
+            ReturnObject<VoObject> returnObject = freightService.delWeightItemById(shopId, id);
+            return Common.getRetObject(returnObject);
+        }
+        else
+        {
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + departId)), httpServletResponse);
+        }
+
     }
 
     /**
@@ -523,6 +551,7 @@ public class FreightController {
      * @param id 件数运费模板明细id
      * @return ReturnObject
      * @author li mingming
+     * @date 2020/12/12
      */
     @ApiOperation(value = "删除件数运费模板明细")
     @ApiImplicitParams({
@@ -537,10 +566,17 @@ public class FreightController {
     })
     @Audit
     @DeleteMapping("/shops/{shopId}/pieceItems/{id}")
-    public Object delPieceItemById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id)
+    public Object delPieceItemById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id, @Depart @ApiIgnore Long departId)
     {
-        ReturnObject<VoObject> returnObject = freightService.delPieceItemById(shopId, id);
-        return Common.getRetObject(returnObject);
+        if(shopId == departId)
+        {
+            ReturnObject<VoObject> returnObject = freightService.delPieceItemById(shopId, id);
+            return Common.getRetObject(returnObject);
+        }
+        else
+        {
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + departId)), httpServletResponse);
+        }
     }
 
 

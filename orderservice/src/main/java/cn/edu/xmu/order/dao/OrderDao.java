@@ -364,13 +364,14 @@ public class OrderDao {
      * @param page 页数
      * @param pageSize 每页大小
      * @return Object 查询结果
+     * @date 2020/12/12
      */
     public ReturnObject<PageInfo<VoObject>> getShopAllOrders(Long shopId, Long customerId, String orderSn, String beginTime, String endTime, Integer page, Integer pageSize)
     {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         OrdersPoExample ordersPoExample = new OrdersPoExample();
         OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
-        criteria.andCustomerIdEqualTo(shopId);
+        criteria.andShopIdEqualTo(shopId);
         // 被逻辑删除的订单不能被返回
         Byte beDeleted = 0;
         criteria.andBeDeletedEqualTo(beDeleted);
@@ -380,10 +381,10 @@ public class OrderDao {
             criteria.andOrderSnEqualTo(orderSn);
         if(beginTime != null)
             criteria.andGmtCreateGreaterThanOrEqualTo(LocalDateTime.parse(beginTime, df));
-            //criteria.andGmtCreatedGreaterThanOrEqualTo(LocalDateTime.parse(beginTime, df));
+        //criteria.andGmtCreatedGreaterThanOrEqualTo(LocalDateTime.parse(beginTime, df));
         if(endTime != null)
             criteria.andGmtCreateLessThanOrEqualTo(LocalDateTime.parse(endTime, df));
-            //criteria.andGmtCreatedLessThanOrEqualTo(LocalDateTime.parse(endTime, df));
+        //criteria.andGmtCreatedLessThanOrEqualTo(LocalDateTime.parse(endTime, df));
         //分页查询
         PageHelper.startPage(page, pageSize);
         logger.debug("page = " + page + "pageSize = " + pageSize);
@@ -414,6 +415,7 @@ public class OrderDao {
      *
      * @author 24320182203323  李明明
      * @return Object 查询结果
+     * @date 2020/12/12
      */
     public ReturnObject getOrderById(Long shopId, Long id)
     {
@@ -422,6 +424,11 @@ public class OrderDao {
         {
             logger.error("getOrderById: 数据库不存在该订单 order_id=" + id);
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        else if(shopId != ordersPo.getShopId())
+        {
+            logger.error("getOrderById: 店铺Id不匹配 order_id=" + id);
+            return new ReturnObject(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + shopId));
         }
         Orders orders = new Orders(ordersPo);
         return new ReturnObject<>(orders);
@@ -432,6 +439,7 @@ public class OrderDao {
      *
      * @author 24320182203323  李明明
      * @return Object 查询结果
+     * @date 2020/12/12
      */
     public ReturnObject<Orders> cancelOrderById(Long shopId, Long id)
     {
