@@ -377,7 +377,7 @@ public class OrderController {
      * @author Cai Xinlu
      * @date 2020-12-10 10:46
      */
-//    @Audit
+    @Audit
     @ApiOperation(value = "用户创建订单", produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),

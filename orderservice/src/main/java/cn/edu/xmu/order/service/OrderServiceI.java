@@ -60,31 +60,30 @@ public class OrderServiceI {
 
         // 判断regionId是否有效
         Long regionId = ordersBo.getRegionId();
-//        if (!addressServiceI.getValidRegionId(regionId).getData())
-//            new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if (!addressServiceI.getValidRegionId(regionId).getData())
+            new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         // 判断couponId、presaleId、grouponId是否有效  可能为null或是0
-//        if (!goodsService.judgeActivityIdValid(ordersBo.getCouponId(),ordersBo.getPresaleId(),ordersBo.getGrouponId()).getData())
-//            new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if (!goodsService.judgeActivityIdValid(ordersBo.getCouponId(),ordersBo.getPresaleId(),ordersBo.getGrouponId()).getData())
+            new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         // 通过orderItemsVo找到全的
         List<OrderItems> orderItemsList = new ArrayList<OrderItems>();
         List<Integer> countList = new ArrayList<Integer>();
         List<Long> skuIdList = new ArrayList<Long>();
-        List<Long> regionIdList = new ArrayList<Long>();
 
         Long origin_price = 0L;
 
         for (OrderItemsCreateVo vo: orderItemsVo){
-//            if (!goodsService.judgeCouponActivityIdValid(ordersBo.getCouponActivityId()).getData())
-//                new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-//            GoodsDetailDTO goodsDetailDTO = goodsService.getGoodsBySkuId(vo.getGoodsSkuId()).getData();
-//            if (goodsDetailDTO == null)
-//                new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            if (!goodsService.judgeCouponActivityIdValid(ordersBo.getCouponActivityId()).getData())
+                new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            GoodsDetailDTO goodsDetailDTO = goodsService.getGoodsBySkuId(vo.getGoodsSkuId()).getData();
+            if (goodsDetailDTO == null)
+                new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             // 如果库存不够
-//            if (goodsDetailDTO.getInventory() == null || goodsDetailDTO.getInventory() < vo.getQuantity())
-//                new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
-            GoodsDetailDTO goodsDetailDTO = new GoodsDetailDTO("caixin", 123L, 10);
+            if (goodsDetailDTO.getInventory() == null || goodsDetailDTO.getInventory() < vo.getQuantity())
+                new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
+//            GoodsDetailDTO goodsDetailDTO = new GoodsDetailDTO("caixin", 123L, 10);
             OrderItems orderItems = new OrderItems(vo);
             orderItems.setName(goodsDetailDTO.getName());
             orderItems.setPrice(goodsDetailDTO.getPrice());
@@ -93,11 +92,10 @@ public class OrderServiceI {
 
             countList.add(vo.getQuantity());
             skuIdList.add(vo.getSkuId());
-            regionIdList.add(regionId);
         }
         // 算运费
-        Integer freight_Price = freightServiceI.calcuFreightPrice(countList, skuIdList, regionIdList).getData();
-        ordersBo.setFreightPrice(freight_Price.longValue());
+        Long freight_Price = freightServiceI.calcuFreightPrice(countList, skuIdList, regionId).getData();
+        ordersBo.setFreightPrice(freight_Price);
 
         // 初始价格
         ordersBo.setOriginPrice(origin_price);

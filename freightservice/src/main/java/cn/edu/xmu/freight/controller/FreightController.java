@@ -202,7 +202,7 @@ public class FreightController {
      * @author Cai Xinlu
      * @date 2020-12-10 9:40
      */
-    @Audit
+//    @Audit
     @ApiOperation(value = "修改运费模板", produces="application/json")
     @ApiImplicitParams({
     })
@@ -214,11 +214,12 @@ public class FreightController {
     public Object changeFreightModel(@Depart @ApiIgnore Long sId,
                                      @PathVariable("shopId") Long shopId,
                                      @PathVariable("id") Long id,
-                                     @Validated  @RequestBody FreightModelChangeVo freightModelChangeVo)
+                                     @RequestBody FreightModelChangeVo freightModelChangeVo)
     {
+        sId = 1L;
 
-        ReturnObject<Object> returnObject = freightService.changeFreightModel(id, freightModelChangeVo, shopId, sId);
-        return getNullRetObj(returnObject, httpServletResponse);
+        ReturnObject<ResponseCode> ret = freightService.changeFreightModel(id, freightModelChangeVo, shopId, sId);
+        return Common.decorateReturnObject(ret);
     }
 
 
@@ -241,8 +242,8 @@ public class FreightController {
                                            @PathVariable("id") Long id,
                                            @RequestBody WeightFreightModelChangeVo weightFreightModelChangeVo)
     {
-        ReturnObject<Object> objectReturnObject = freightService.changeWeightFreightModel(id, weightFreightModelChangeVo, shopId, sId);
-        return getNullRetObj(objectReturnObject, httpServletResponse);
+        ReturnObject<ResponseCode> ret = freightService.changeWeightFreightModel(id, weightFreightModelChangeVo, shopId, sId);
+        return Common.decorateReturnObject(ret);
     }
 
     /**
@@ -264,9 +265,8 @@ public class FreightController {
                                           @PathVariable("id") Long id,
                                           @RequestBody PieceFreightModelChangeVo pieceFreightModelChangeVo)
     {
-        System.out.println(pieceFreightModelChangeVo);
-        ReturnObject<Object> objectReturnObject = freightService.changePieceFreightModel(id, pieceFreightModelChangeVo, shopId, sId);
-        return getNullRetObj(objectReturnObject, httpServletResponse);
+        ReturnObject<ResponseCode> ret = freightService.changePieceFreightModel(id, pieceFreightModelChangeVo, shopId, sId);
+        return Common.decorateReturnObject(ret);
     }
 
 

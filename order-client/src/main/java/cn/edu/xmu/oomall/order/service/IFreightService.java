@@ -18,5 +18,5 @@ public interface IFreightService {
      * @author Cai Xinlu
      * @date 2020-12-09 17:12
      */
-    ReturnObject<Integer> calcuFreightPrice(List<Integer> count, List<Long> skuId, List<Long> regionId);
+    ReturnObject<Long> calcuFreightPrice(List<Integer> count, List<Long> skuId, Long regionId);
 }

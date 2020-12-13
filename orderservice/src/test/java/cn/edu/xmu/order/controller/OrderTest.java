@@ -101,7 +101,7 @@ public class OrderTest {
     {
         String token=this.creatTestToken(1L,0L,100);
 
-        byte[] responseString=webTestClient.get().uri("/orders?page=1&pageSize=1")
+        byte[] responseString=webTestClient.get().uri("/orders?orderSn=2016102361242&page=1&pageSize=6")
                 .header("authorization", token)
                 .exchange()
                 .expectStatus().isOk()
@@ -110,6 +110,8 @@ public class OrderTest {
                 .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBody();
+        System.out.println("==========");
+        System.out.println(new String(responseString, StandardCharsets.UTF_8));
 //        String expectedResponse="{\"errno\":0,\"data\":{\"total\":1,\"pages\":1,\"pageSize\":1,\"page\":1,\"list\":[{\"id\":1,\"customerId\":1,\"shopId\":1,\"orderSn\":\"2016102361242\",\"pid\":null,\"consignee\":\"刘勤\",\"regionId\":null,\"address\":null,\"mobile\":\"13959288888\",\"message\":null,\"orderType\":null,\"freightPrice\":null,\"couponId\":null,\"couponActivityId\":null,\"discountPrice\":null,\"originPrice\":null,\"presaleId\":null,\"grouponDiscount\":null,\"rebateNum\":null,\"confirmTime\":null,\"shipmentSn\":null,\"state\":6,\"substate\":null,\"beDeleted\":0,\"gmtCreated\":\"2020-12-06T22:44:31\",\"gmtModified\":\"2020-12-06T22:44:31\",\"orderItems\":null}]},\"errmsg\":\"成功\"}";
         String expectedResponse="{\"errno\":0,\"errmsg\":\"成功\"}";
         JSONAssert.assertEquals(expectedResponse,new String(responseString, StandardCharsets.UTF_8),false);

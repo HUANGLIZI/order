@@ -46,7 +46,7 @@ public class CaixinFreghtControllerTest {
     @Test
     public void ChangeFreightModel1()
     {
-        String token = creatTestToken(1L, 0L, 1000);
+        String token = creatTestToken(1L, 1L, 1000);
         FreightModelChangeVo freightModelChangeVo = new FreightModelChangeVo();
         freightModelChangeVo.setName("testChangeModel");
         freightModelChangeVo.setUnit(100);
@@ -63,6 +63,8 @@ public class CaixinFreghtControllerTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+//        System.out.println("=======");
+//        System.out.println(responseString);
         expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -74,9 +76,9 @@ public class CaixinFreghtControllerTest {
     @Test
     public void ChangeFreightModel2()
     {
-        String token = creatTestToken(1L, 0L, 1000);
+        String token = creatTestToken(1L, 1L, 1000);
         FreightModelChangeVo freightModelChangeVo = new FreightModelChangeVo();
-        freightModelChangeVo.setName("freightModelBefore");
+        freightModelChangeVo.setName("freightModel");
         freightModelChangeVo.setUnit(100);
         String roleJson = JacksonUtil.toJson(freightModelChangeVo);
         String expectedResponse = "";
