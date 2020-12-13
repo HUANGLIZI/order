@@ -722,17 +722,27 @@ public class FreightDao{
      * @param shopId 店铺Id
      * @param id 重量运费模板明细id
      * @return ReturnObject
+     * @date 2020/12/12
      */
-    public ReturnObject<List> getWeightItemByFreightModelId(Long shopId, Long id) {
+    public ReturnObject<List> getWeightItemByFreightModelId(Long shopId, Long id)
+    {
+        FreightModelPo freightModelPo = freightModelPoMapper.selectByPrimaryKey(id);
+        if(shopId != freightModelPo.getShopId())
+        {
+            return new ReturnObject(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + shopId));
+        }
         WeightFreightModelPoExample example = new WeightFreightModelPoExample();
         WeightFreightModelPoExample.Criteria criteria = example.createCriteria();
         criteria.andFreightModelIdEqualTo(id);
         List<WeightFreightModelPo> weightFreightModelPos = weightFreightModelPoMapper.selectByExample(example);
 
-        if (null == weightFreightModelPos || weightFreightModelPos.isEmpty()) {
+        if (null == weightFreightModelPos || weightFreightModelPos.isEmpty())
+        {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
-        } else {
-            List<WeightFreightModel> weightFreightModels = null;
+        }
+        else
+        {
+            List<WeightFreightModel> weightFreightModels = new ArrayList<>();
             for (WeightFreightModelPo weightFreightModelPo:weightFreightModelPos)
             {
                 WeightFreightModel weightFreightModel = new WeightFreightModel(weightFreightModelPo);
@@ -748,8 +758,14 @@ public class FreightDao{
      * @param shopId 店铺Id
      * @param id 件数运费模板明细id
      * @return ReturnObject
+     * @date 2020/12/12
      */
     public ReturnObject<List> getPieceItemByFreightModelId(Long shopId, Long id) {
+        FreightModelPo freightModelPo = freightModelPoMapper.selectByPrimaryKey(id);
+        if(shopId != freightModelPo.getShopId())
+        {
+            return new ReturnObject(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + shopId));
+        }
         PieceFreightModelPoExample example = new PieceFreightModelPoExample();
         PieceFreightModelPoExample.Criteria criteria = example.createCriteria();
         criteria.andFreightModelIdEqualTo(id);
@@ -758,7 +774,7 @@ public class FreightDao{
         if (null == pieceFreightModelPos || pieceFreightModelPos.isEmpty()) {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
         } else {
-            List<PieceFreightModel> pieceFreightModels = null;
+            List<PieceFreightModel> pieceFreightModels = new ArrayList<>();
             for (PieceFreightModelPo pieceFreightModelPo:pieceFreightModelPos)
             {
                 PieceFreightModel pieceFreightModel = new PieceFreightModel(pieceFreightModelPo);
@@ -773,17 +789,32 @@ public class FreightDao{
      * @author li mingming
      * @param id 重量运费模板明细id
      * @return ReturnObject
+     * @date 2020/12/12
      */
     public ReturnObject<VoObject> delWeightItemById(Long shopId, Long id)
     {
         ReturnObject<VoObject> returnObject;
-        int state = weightFreightModelPoMapper.deleteByPrimaryKey(id);
-        if (state == 0) {
+        WeightFreightModelPo weightFreightModelPo = weightFreightModelPoMapper.selectByPrimaryKey(id);
+        if(weightFreightModelPo == null)
+        {
             logger.info("模板明细不存在或已被删除：id = " + id);
             returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        } else {
-            logger.info("模板明细 id = " + id + " 已被永久删除");
-            returnObject = new ReturnObject<>();
+        }
+        else
+        {
+            FreightModelPo freightModelPo = freightModelPoMapper.selectByPrimaryKey(weightFreightModelPo.getFreightModelId());
+            if(freightModelPo.getShopId() != shopId)
+            {
+                return new ReturnObject(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + shopId));
+            }
+            int state = weightFreightModelPoMapper.deleteByPrimaryKey(id);
+            if (state == 0) {
+                logger.info("模板明细不存在或已被删除：id = " + id);
+                returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            } else {
+                logger.info("模板明细 id = " + id + " 已被永久删除");
+                returnObject = new ReturnObject<>();
+            }
         }
         return returnObject;
     }
@@ -793,17 +824,32 @@ public class FreightDao{
      * @author li mingming
      * @param id 件数运费模板明细id
      * @return ReturnObject
+     * @date 2020/12/12
      */
     public ReturnObject<VoObject> delPieceItemById(Long shopId, Long id)
     {
         ReturnObject<VoObject> returnObject;
-        int state = pieceFreightModelPoMapper.deleteByPrimaryKey(id);
-        if (state == 0) {
+        PieceFreightModelPo pieceFreightModelPo = pieceFreightModelPoMapper.selectByPrimaryKey(id);
+        if(pieceFreightModelPo == null)
+        {
             logger.info("模板明细不存在或已被删除：id = " + id);
             returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        } else {
-            logger.info("模板明细 id = " + id + " 已被永久删除");
-            returnObject = new ReturnObject<>();
+        }
+        else
+        {
+            FreightModelPo freightModelPo = freightModelPoMapper.selectByPrimaryKey(pieceFreightModelPo.getFreightModelId());
+            if(freightModelPo.getShopId() != shopId)
+            {
+                return new ReturnObject(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + shopId));
+            }
+            int state = pieceFreightModelPoMapper.deleteByPrimaryKey(id);
+            if (state == 0) {
+                logger.info("模板明细不存在或已被删除：id = " + id);
+                returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            } else {
+                logger.info("模板明细 id = " + id + " 已被永久删除");
+                returnObject = new ReturnObject<>();
+            }
         }
         return returnObject;
     }

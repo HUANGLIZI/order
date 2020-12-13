@@ -1,6 +1,7 @@
 package cn.edu.xmu.freight.model.bo;
 
 import cn.edu.xmu.freight.model.po.WeightFreightModelPo;
+import cn.edu.xmu.freight.model.vo.WeightFreightModelRetVo;
 import cn.edu.xmu.freight.model.vo.WeightFreightModelVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import lombok.Data;
@@ -83,7 +84,7 @@ public class WeightFreightModel implements VoObject, Serializable {
 
     @Override
     public Object createVo() {
-        return null;
+        return new WeightFreightModelRetVo(this);
     }
 
     @Override

@@ -218,7 +218,9 @@ public class OrderService implements IOrderService, IOrderItemService {
      * @param page 页数
      * @param pageSize 每页大小
      * @return Object 查询结果
+     * @date 2020/12/12
      */
+    @Transactional
     public ReturnObject<PageInfo<VoObject>> getShopAllOrders(Long shopId, Long customerId, String orderSn, String beginTime, String endTime, Integer page, Integer pageSize)
     {
         ReturnObject<PageInfo<VoObject>> returnObject = orderDao.getShopAllOrders(shopId,customerId, orderSn, beginTime, endTime, page, pageSize);
@@ -230,10 +232,46 @@ public class OrderService implements IOrderService, IOrderItemService {
      *
      * @author 24320182203323  李明明
      * @return Object 查询结果
+     * @date 2020/12/12
      */
-    public ReturnObject getOrderById(Long shopId, Long id)
+    @Transactional
+    public ReturnObject<VoObject> getOrderById(Long shopId, Long id)
     {
-        return orderDao.getOrderById(shopId, id);
+        Orders orders = (Orders) orderDao.getOrderById(shopId,id).getData();
+
+        List<OrderItemPo> orderItemPos=orderDao.findOrderItemById(id);
+        List<OrderItems> orderItemsList = new ArrayList<OrderItems>();
+        for(OrderItemPo po : orderItemPos)
+        {
+            OrderItems orderItems = new OrderItems(po);
+            orderItemsList.add(orderItems);
+        }
+
+
+        Long customerId = orders.getCustomerId();
+        CustomerDTO customerDTO = aftersaleServiceI.findCustomerByUserId(customerId).getData();
+        CustomerRetVo customerRetVo = new CustomerRetVo();
+        customerRetVo.setId(customerId);
+        customerRetVo.setName(customerDTO.getName());
+        customerRetVo.setUserName(customerDTO.getUserName());
+
+        ShopRetVo shopRetVo = new ShopRetVo();
+        ShopDetailDTO shopDetailDTO = goodsService.getShopInfoByShopId(shopId).getData();
+        shopRetVo.setId(shopId);
+        shopRetVo.setName(shopDetailDTO.getName());
+        shopRetVo.setState(shopDetailDTO.getState());
+        shopRetVo.setGmtCreate(shopDetailDTO.getGmtCreate());
+        shopRetVo.setGmtModified(shopDetailDTO.getGmtModified());
+
+        ReturnObject<VoObject> returnObject = null;
+        if(orders != null) {
+            logger.debug("findOrdersById : " + returnObject);
+            returnObject = new ReturnObject(new OrderRetVo(orders,orderItemsList,customerRetVo,shopRetVo));
+        } else {
+            logger.debug("findOrdersById: Not Found");
+            returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        return returnObject;
     }
 
     /**
@@ -339,6 +377,8 @@ public class OrderService implements IOrderService, IOrderItemService {
         }
         return new ReturnObject<>(map);
     }
+
+    /**
      * 获取orderId通过orderItemId
      * @auther 洪晓杰
      * @return
