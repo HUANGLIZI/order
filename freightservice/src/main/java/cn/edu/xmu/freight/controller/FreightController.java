@@ -78,7 +78,7 @@ public class FreightController {
             ReturnObject<PageInfo<VoObject>> returnObject = freightService.getShopAllFreightModels(shopId,name,page, pageSize);
             return Common.getPageRetObject(returnObject);
         }else{
-            httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
             return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("操作的资源id不是自己的对象")), httpServletResponse);
         }
 
@@ -104,16 +104,16 @@ public class FreightController {
             @ApiResponse(code = 504, message = "操作id不存在")
     })
     @Audit
-    @GetMapping("/freightmodels/{id}")
-    public Object getFreightModelById(@PathVariable("id") Long id,@Depart @ApiIgnore Long sId){
+    @GetMapping("/shops/{shopId}/freightmodels/{id}")
+    public Object getFreightModelById(@PathVariable("id") Long id,@PathVariable("id") Long shopId,@Depart @ApiIgnore Long sId){
 
+        if(shopId!=sId&&sId!=0){
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("操作的资源id不是自己的对象")), httpServletResponse);
+        }
 
         ReturnObject<FreightModelReturnVo> returnObject =  freightService.getFreightModelById(id);
         if (returnObject.getCode() == ResponseCode.OK) {
-            if(sId!=0&&returnObject.getData().getShopId()!=sId){
-                httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
-                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("操作的资源id不是自己的对象")), httpServletResponse);
-            }
             ReturnObject retObject=new ReturnObject(returnObject.getData());
             return Common.getRetObject(retObject);
         } else {
@@ -193,7 +193,7 @@ public class FreightController {
             return Common.decorateReturnObject(returnObject);
         }
         else{
-            httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
             return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("操作的资源id不是自己的对象")), httpServletResponse);
         }
 

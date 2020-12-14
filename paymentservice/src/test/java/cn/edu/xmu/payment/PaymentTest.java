@@ -17,7 +17,7 @@ public class PaymentTest {
 
     public PaymentTest(){
         this.webTestClient = WebTestClient.bindToServer()
-                .baseUrl("http://localhost:8080")
+                .baseUrl("http://localhost:8088")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
     }
@@ -29,7 +29,7 @@ public class PaymentTest {
     @Test
     public void userQueryPaymentTest() throws Exception{
         String token=this.creatTestToken(1L,0L,100);
-        byte[] responseString=webTestClient.get().uri("/payment/orders/{id}/payments",123)
+        byte[] responseString=webTestClient.get().uri("/orders/{id}/payments",1)
                 .header("authorization", token)
                 .exchange()
                 .expectStatus().isOk()
@@ -39,45 +39,31 @@ public class PaymentTest {
                 .returnResult()
                 .getResponseBody();
 
-        String expectedResponse="{\"errno\": 0,\n" +
-                "    \"data\": [\n" +
-                "        {\n" +
-                "            \"id\": 108,\n" +
-                "            \"amout\": null,\n" +
-                "            \"actualAmount\": 0,\n" +
-                "            \"paymentPattern\": 0,\n" +
-                "            \"payTime\": \"2020-11-24T18:40:25\",\n" +
-                "            \"paySn\": null,\n" +
-                "            \"beginTime\": \"2020-11-24T18:40:25\",\n" +
-                "            \"endTime\": \"2020-11-24T18:40:25\",\n" +
-                "            \"orderId\": 123,\n" +
-                "            \"aftersaleId\": 123456789,\n" +
-                "            \"state\": 0,\n" +
-                "            \"gmtCreated\": \"2020-11-24T18:40:25\",\n" +
-                "            \"gmtModified\": \"2020-11-24T18:40:25\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"id\": 109,\n" +
-                "            \"amout\": null,\n" +
-                "            \"actualAmount\": 2399,\n" +
-                "            \"paymentPattern\": 0,\n" +
-                "            \"payTime\": \"2020-11-24T18:40:25\",\n" +
-                "            \"paySn\": null,\n" +
-                "            \"beginTime\": \"2020-11-24T18:40:25\",\n" +
-                "            \"endTime\": \"2020-11-24T18:40:25\",\n" +
-                "            \"orderId\": 123,\n" +
-                "            \"aftersaleId\": 123456789,\n" +
-                "            \"state\": 0,\n" +
-                "            \"gmtCreated\": \"2020-11-24T18:40:25\",\n" +
-                "            \"gmtModified\": \"2020-11-24T18:40:25\"\n" +
-                "        }\n" +
-                "    ],\n" +
-                "    \"errmsg\": \"成功\"}";
+        System.out.println(new String(responseString,"UTF-8"));
+        String expectedResponse="{\"errno\":0,\"data\":[{\"id\":1,\"amout\":0,\"actualAmount\":0,\"paymentPattern\":\"0\",\"payTime\":\"2020-12-10T19:29:50\",\"beginTime\":\"2020-12-10T19:29:50\",\"endTime\":\"2020-12-10T19:29:50\",\"orderId\":1,\"aftersaleId\":null,\"state\":0,\"gmtCreated\":\"2020-12-10T19:29:50\",\"gmtModified\":\"2020-12-10T19:29:50\"}],\"errmsg\":\"成功\"}";
         JSONAssert.assertEquals(expectedResponse,new String(responseString, StandardCharsets.UTF_8),false);
-
-
     }
+    /**
+     * @author zxj
+     * @date Created in 2020年12月3日20:32:07
+     */
+    @Test
+    public void userQueryPaymentTest2() throws Exception{
+        String token=this.creatTestToken(1L,0L,100);
+        byte[] responseString=webTestClient.get().uri("/orders/{id}/payments",21000)
+                .header("authorization", token)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
+                .jsonPath("$.errmsg").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getMessage())
+                .returnResult()
+                .getResponseBody();
 
+        System.out.println(new String(responseString,"UTF-8"));
+        String expectedResponse="{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse,new String(responseString, StandardCharsets.UTF_8),false);
+    }
     /**
      * @author zxj
      * @date Created in 2020年12月3日20:32:07
@@ -85,7 +71,7 @@ public class PaymentTest {
     @Test
     public void queryPaymentTest() throws Exception{
         String token=this.creatTestToken(1L,0L,100);
-        byte[] responseString=webTestClient.get().uri("/payment/shops/{shopId}/orders/{id}/payments",1010,123)
+        byte[] responseString=webTestClient.get().uri("/shops/{shopId}/orders/{id}/payments",1,1)
                 .header("authorization", token)
                 .exchange()
                 .expectStatus().isOk()
@@ -95,42 +81,8 @@ public class PaymentTest {
                 .returnResult()
                 .getResponseBody();
 
-        String expectedResponse="{\n" +
-                "    \"errno\": 0,\n" +
-                "    \"data\": [\n" +
-                "        {\n" +
-                "            \"id\": 108,\n" +
-                "            \"amout\": null,\n" +
-                "            \"actualAmount\": 0,\n" +
-                "            \"paymentPattern\": 0,\n" +
-                "            \"payTime\": \"2020-11-24T18:40:25\",\n" +
-                "            \"paySn\": null,\n" +
-                "            \"beginTime\": \"2020-11-24T18:40:25\",\n" +
-                "            \"endTime\": \"2020-11-24T18:40:25\",\n" +
-                "            \"orderId\": 123,\n" +
-                "            \"aftersaleId\": 123456789,\n" +
-                "            \"state\": 0,\n" +
-                "            \"gmtCreated\": \"2020-11-24T18:40:25\",\n" +
-                "            \"gmtModified\": \"2020-11-24T18:40:25\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"id\": 109,\n" +
-                "            \"amout\": null,\n" +
-                "            \"actualAmount\": 2399,\n" +
-                "            \"paymentPattern\": 0,\n" +
-                "            \"payTime\": \"2020-11-24T18:40:25\",\n" +
-                "            \"paySn\": null,\n" +
-                "            \"beginTime\": \"2020-11-24T18:40:25\",\n" +
-                "            \"endTime\": \"2020-11-24T18:40:25\",\n" +
-                "            \"orderId\": 123,\n" +
-                "            \"aftersaleId\": 123456789,\n" +
-                "            \"state\": 0,\n" +
-                "            \"gmtCreated\": \"2020-11-24T18:40:25\",\n" +
-                "            \"gmtModified\": \"2020-11-24T18:40:25\"\n" +
-                "        }\n" +
-                "    ],\n" +
-                "    \"errmsg\": \"成功\"\n" +
-                "}";
+        System.out.println(new String(responseString,"UTF-8"));
+        String expectedResponse="{\"errno\":0,\"data\":[{\"id\":1,\"amout\":0,\"actualAmount\":0,\"paymentPattern\":\"0\",\"payTime\":\"2020-12-10T19:29:50\",\"beginTime\":\"2020-12-10T19:29:50\",\"endTime\":\"2020-12-10T19:29:50\",\"orderId\":1,\"aftersaleId\":null,\"state\":0,\"gmtCreated\":\"2020-12-10T19:29:50\",\"gmtModified\":\"2020-12-10T19:29:50\"}],\"errmsg\":\"成功\"}\n";
         JSONAssert.assertEquals(expectedResponse,new String(responseString, StandardCharsets.UTF_8),false);
 
 
@@ -141,9 +93,25 @@ public class PaymentTest {
      * @date Created in 2020年12月3日20:32:07
      */
     @Test
-    public void queryPaymentTest0() throws Exception{
+    public void queryPaymentTest1() throws Exception{
         String token=this.creatTestToken(1L,0L,100);
-        byte[] responseString=webTestClient.get().uri("/payment/shops/{shopId}/orders/{id}/payments",1011,123)
+        byte[] responseString=webTestClient.get().uri("/shops/{shopId}/orders/{id}/payments",2,1)
+                .header("authorization", token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
+                .jsonPath("$.errmsg").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage())
+                .returnResult()
+                .getResponseBody();
+
+        System.out.println(new String(responseString,"UTF-8"));
+    }
+
+    @Test
+    public void queryPaymentTest2() throws Exception{
+        String token=this.creatTestToken(1L,0L,100);
+        byte[] responseString=webTestClient.get().uri("/shops/{shopId}/orders/{id}/payments",0,39000)
                 .header("authorization", token)
                 .exchange()
                 .expectStatus().isNotFound()
@@ -154,8 +122,6 @@ public class PaymentTest {
                 .getResponseBody();
 
     }
-
-
     /**
      * @author zxj
      * @date Created in 2020年12月3日20:32:07

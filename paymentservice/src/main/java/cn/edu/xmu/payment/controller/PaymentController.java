@@ -2,6 +2,7 @@ package cn.edu.xmu.payment.controller;
 
 
 import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
@@ -33,7 +34,7 @@ import java.util.List;
 
 @Api(value = "支付服务", tags = "payment")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "/payment", produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "", produces = "application/json;charset=UTF-8")
 public class PaymentController {
     @Autowired
     private PaymentService paymentService;
@@ -98,13 +99,19 @@ public class PaymentController {
     })
     @Audit
     @GetMapping("/shops/{shopId}/orders/{id}/payments")
-    public Object queryPayment(@PathVariable("shopId") Long shopId,@PathVariable("id") Long orderId){
+    public Object queryPayment(@PathVariable("shopId") Long shopId,@PathVariable("id") Long orderId,@Depart @ApiIgnore Long sId){
         ReturnObject returnObject =  paymentService.queryPayment(shopId,orderId);
-        if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getListRetObject(returnObject);
-        } else {
-            return Common.decorateReturnObject(returnObject);
+        if(shopId.equals(sId)||sId==0){
+            if (returnObject.getCode() == ResponseCode.OK) {
+                return Common.getListRetObject(returnObject);
+            } else {
+                return Common.decorateReturnObject(returnObject);
+            }
+        }else {
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("操作的资源id不是自己的对象")), httpServletResponse);
         }
+
     }
 
 

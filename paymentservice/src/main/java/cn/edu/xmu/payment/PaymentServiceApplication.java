@@ -10,8 +10,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-
-
 @SpringBootApplication(scanBasePackages = {"cn.edu.xmu.ooad", "cn.edu.xmu.payment"})
 @MapperScan("cn.edu.xmu.payment.mapper")
 @EnableDiscoveryClient
