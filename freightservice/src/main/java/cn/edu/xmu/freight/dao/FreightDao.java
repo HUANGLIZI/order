@@ -68,7 +68,7 @@ public class FreightDao{
         if(!"".equals(name)&&name!=null){
             criteria.andNameLike("%"+name+"%");
         }
-        System.out.println(pageSize);
+
         //分页查询
         PageHelper.startPage(page, pageSize);
         logger.debug("page = " + page + "pageSize = " + pageSize);
@@ -82,6 +82,7 @@ public class FreightDao{
                 ret.add(freightModelReturnVo);
             }
             PageInfo<VoObject> freightModelPage = PageInfo.of(ret);
+            freightModelPage.setPageSize(pageSize);
             return new ReturnObject<>(freightModelPage);
         }
         catch (DataAccessException e){
