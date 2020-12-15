@@ -203,8 +203,10 @@ public class PaymentController {
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getListRetObject(returnObject);
         } else {
-            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE)
+            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE) {
                 httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()),httpServletResponse);
+            }
             return Common.decorateReturnObject(returnObject);
         }
     }
@@ -238,8 +240,10 @@ public class PaymentController {
             logger.info(returnObject.getCode().toString() + "============");
             return Common.decorateReturnObject(returnObject);
         } else {
-            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE)
+            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE) {
                 httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()),httpServletResponse);
+            }
             return Common.decorateReturnObject(returnObject);
         }
     }
@@ -392,8 +396,10 @@ public class PaymentController {
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);
         } else {
-            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE)
+            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE) {
                 httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()),httpServletResponse);
+            }
             return Common.decorateReturnObject(returnObject);
         }
     }
@@ -424,8 +430,10 @@ public class PaymentController {
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.decorateReturnObject(returnObject);
         } else {
-            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE)
+            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE) {
                 httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()),httpServletResponse);
+            }
             return Common.decorateReturnObject(returnObject);
         }
     }

@@ -6,15 +6,16 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * @author Caixin
- * @date 2020-12-08 22:06
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GoodsDetailDTO implements Serializable {
+public class SkuInfoDTO implements Serializable {
+    private Long id;
     private String name;
-    private Long price;
+    private String skuSn;
+    private String imageUrl;
     private Integer inventory;
+    private Long originalPrice;
+    private Long price;
+    private Byte disable;
 }

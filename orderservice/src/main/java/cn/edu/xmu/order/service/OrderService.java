@@ -5,14 +5,16 @@ import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.ShopDetailDTO;
-import cn.edu.xmu.oomall.goods.service.GoodsService;
+import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import cn.edu.xmu.oomall.order.model.OrderDTO;
 import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
+import cn.edu.xmu.oomall.order.model.SimpleFreightModelDTO;
 import cn.edu.xmu.oomall.order.service.IFreightService;
 import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.oomall.other.model.CustomerDTO;
 import cn.edu.xmu.oomall.other.service.IAddressService;
 import cn.edu.xmu.oomall.other.service.IAftersaleService;
+import cn.edu.xmu.oomall.other.service.ICustomerService;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
@@ -40,10 +42,13 @@ public class OrderService implements IOrderService {
     private OrderDao orderDao;
 
     @DubboReference
-    private GoodsService goodsService;
+    private IGoodsService goodsServiceI;
 
     @DubboReference
     private IAftersaleService aftersaleServiceI;
+
+    @DubboReference
+    private ICustomerService customerServiceI;
 
     @DubboReference
     private IFreightService freightServiceI;
@@ -66,14 +71,14 @@ public class OrderService implements IOrderService {
         List<OrderItems> orderItemsList = new ArrayList<OrderItems>();
 
         Long userId=orders.getCustomerId();
-        CustomerDTO customerDTO = aftersaleServiceI.findCustomerByUserId(userId).getData();
+        CustomerDTO customerDTO = customerServiceI.findCustomerByUserId(userId).getData();
         CustomerRetVo customerRetVo = new CustomerRetVo();
         customerRetVo.setId(userId);
         customerRetVo.setName(customerDTO.getName());
         customerRetVo.setUserName(customerDTO.getUserName());
 
         Long shopId=orders.getShopId();
-        ShopDetailDTO shopDetailDTO = goodsService.getShopInfoByShopId(shopId).getData();
+        ShopDetailDTO shopDetailDTO = goodsServiceI.getShopInfoByShopId(shopId).getData();
         ShopRetVo shopRetVo = new ShopRetVo();
         shopRetVo.setId(shopDetailDTO.getShopId());
         shopRetVo.setGmtCreate(shopDetailDTO.getGmtCreate());
@@ -246,14 +251,14 @@ public class OrderService implements IOrderService {
 
 
         Long customerId = orders.getCustomerId();
-        CustomerDTO customerDTO = aftersaleServiceI.findCustomerByUserId(customerId).getData();
+        CustomerDTO customerDTO = customerServiceI.findCustomerByUserId(customerId).getData();
         CustomerRetVo customerRetVo = new CustomerRetVo();
         customerRetVo.setId(customerId);
         customerRetVo.setName(customerDTO.getName());
         customerRetVo.setUserName(customerDTO.getUserName());
 
         ShopRetVo shopRetVo = new ShopRetVo();
-        ShopDetailDTO shopDetailDTO = goodsService.getShopInfoByShopId(shopId).getData();
+        ShopDetailDTO shopDetailDTO = goodsServiceI.getShopInfoByShopId(shopId).getData();
         shopRetVo.setId(shopId);
         shopRetVo.setName(shopDetailDTO.getName());
         shopRetVo.setState(shopDetailDTO.getState());
@@ -349,6 +354,16 @@ public class OrderService implements IOrderService {
         return returnObject;
     }
 
+    @Override
+    public ReturnObject<Object> putGrouponOffshelves(Long grouponId) {
+        return null;
+    }
+
+    @Override
+    public ReturnObject<Object> putPresaleOffshevles(Long presaleId) {
+        return null;
+    }
+
 
     @Override
     public ReturnObject<OrderInnerDTO> findOrderIdbyOrderItemId(Long orderItemId)
@@ -400,13 +415,14 @@ public class OrderService implements IOrderService {
         List<OrderItemPo> orderItemPos = orderDao.selectOrderItemsByOrderId(orderId).getData();
         OrdersPo ordersPo = orderDao.getOrderByOrderId(orderId).getData();
         ordersPo.setState(Orders.State.HAS_PAID.getCode().byteValue());
-        List<Long> skuIdList = new ArrayList<Long>();
+        List<Long> shopIdList = new ArrayList<Long>();
+//        List<Long> skuIdList = new ArrayList<Long>();
         for (OrderItemPo po: orderItemPos)
-            skuIdList.add(po.getId());
+            shopIdList.add(goodsServiceI.getShopIdBySkuId(po.getId()).getData());
+//            skuIdList.add(po.getId());
 //        System.out.println(orderItemPos.size());
 //        System.out.println("==========");
-        List<Long> shopIdList = goodsService.getShopIdBySkuId(skuIdList).getData();
-//        List<Long> shopIdList = new ArrayList<Long>();
+//        for ()
 //        shopIdList.add(1L);
 //        shopIdList.add(1L);
 //        shopIdList.add(2L);
@@ -438,6 +454,11 @@ public class OrderService implements IOrderService {
             ordersList.add(orders);
         }
         return orderDao.splitOrders(ordersList, ordersPo);
+    }
+
+    @Override
+    public ReturnObject<Object> grouponEnd(String strategy, Long GrouponId) {
+        return null;
     }
 
     /**

@@ -3,13 +3,12 @@ package cn.edu.xmu.freight.service;
 import cn.edu.xmu.freight.dao.FreightDao;
 import cn.edu.xmu.freight.model.vo.*;
 import cn.edu.xmu.oomall.goods.model.GoodsFreightDTO;
-import cn.edu.xmu.oomall.goods.service.GoodsService;
+import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import cn.edu.xmu.oomall.order.model.SimpleFreightModelDTO;
 import cn.edu.xmu.oomall.order.service.IFreightService;
 import com.github.pagehelper.PageInfo;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
-import org.springframework.stereotype.Service;
 import cn.edu.xmu.freight.model.bo.FreightModelChangeBo;
 import cn.edu.xmu.freight.model.bo.PieceFreightModelChangeBo;
 import cn.edu.xmu.freight.model.bo.WeightFreightModelChangeBo;
@@ -32,7 +31,7 @@ public class FreightService implements IFreightService {
     private FreightDao freightDao;
 
     @DubboReference
-    private GoodsService goodsService;
+    private IGoodsService goodsServiceI;
 
 
     private Logger logger = LoggerFactory.getLogger(FreightService.class);
@@ -135,7 +134,7 @@ public class FreightService implements IFreightService {
         if (returnObject.getCode() == ResponseCode.OK) {
 
             //在这里调用商品模块的api修改相应商品的freight_id
-            goodsService.updateSpuFreightId(id);
+            goodsServiceI.updateSpuFreightId(id);
             
         }
 
@@ -204,10 +203,10 @@ public class FreightService implements IFreightService {
         Long weightSum = 0L;
         Integer countSum=0;
         for (int i=0;i<skuId.size();i++) {
-            goodsFreightDTO.add(goodsService.getGoodsFreightDetailBySkuId(skuId.get(i)).getData());
+            goodsFreightDTO.add(goodsServiceI.getGoodsFreightDetailBySkuId(skuId.get(i)).getData());
 //            GoodsFreightDTO goodsFreightDTO = new GoodsFreightDTO();
 
-            weightSum+=goodsFreightDTO.get(i).getWeight();//计算总重量
+
             countSum+=count.get(i);//计算总件数
             if(goodsFreightDTO.get(i).getFreightModelId()==null) {//如果没有单品运费模板,采用默认模板
                 Long shopId=goodsFreightDTO.get(i).getShopId();
@@ -219,6 +218,7 @@ public class FreightService implements IFreightService {
                 freightModelId.add(goodsFreightDTO.get(i).getFreightModelId());//获得单品运费模板id列表
                 freightModelPos.add((FreightModelPo)(freightDao.getFreightModelById(goodsFreightDTO.get(i).getFreightModelId()).getData()));//将单品运费模板加入运费模板列表
             }
+            weightSum+=goodsFreightDTO.get(i).getWeight()*freightModelPos.get(i).getUnit()/1000;//计算总重量
         }
         for (int i=0;i<freightModelPos.size();i++) {
             FreightModelPo freightModelPo_temp=freightModelPos.get(i);
