@@ -377,11 +377,17 @@ public class FreightDao{
         return  returnObject;
     }
 
-    
 
-    public ReturnObject<Object> changeFreightModel(FreightModelChangeBo freightModelChangeBo) {
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-12 17:45
+     */
+    public ReturnObject<ResponseCode> changeFreightModel(FreightModelChangeBo freightModelChangeBo) {
         FreightModelPo freightModelPo = freightModelChangeBo.gotFreightModelPo();
-        ReturnObject<Object> retObj = null;
+//        ReturnObject<ResponseCode> retObj = null;
 
         String name = freightModelChangeBo.getName();
         if (name != null)
@@ -393,18 +399,17 @@ public class FreightDao{
             criteria.andShopIdEqualTo(shopId);
             List<FreightModelPo> freightModelPoList = freightModelPoMapper.selectByExample(freightModelPoExample);
             if (freightModelPoList.size() > 0) {
-                retObj = new ReturnObject<>(ResponseCode.FREIGHTNAME_SAME);
-                return retObj;
+                logger.info(freightModelPoList.get(0).toString());
+                return new ReturnObject<>(ResponseCode.FREIGHTNAME_SAME);
             }
         }
 
         int ret = freightModelMapper.updateFreightModel(freightModelPo);
         if (ret == 0) {
-            retObj = new ReturnObject<>(ResponseCode.FREIGHTMODEL_SHOP_NOTFIT);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         } else {
-            retObj = new ReturnObject<>();
+            return new ReturnObject<>();
         }
-        return retObj;
     }
 
     /**
@@ -458,15 +463,15 @@ public class FreightDao{
      * @author Cai Xinlu
      * @date 2020-12-10 9:40
      */
-    public ReturnObject<Object> changeWeightFreightModel(WeightFreightModelChangeBo weightFreightModelChangeBo,
-                                                         Long shopId) {
-        ReturnObject<Object> retObj = null;
+    public ReturnObject<ResponseCode> changeWeightFreightModel(WeightFreightModelChangeBo weightFreightModelChangeBo,
+                                                               Long shopId) {
+        ReturnObject<ResponseCode> retObj = null;
 
         WeightFreightModelPo weightFreightModelPo = weightFreightModelChangeBo.gotWeightFreightModelPo();
         WeightFreightModelPo retWeightFreightModel = weightFreightModelPoMapper.selectByPrimaryKey(weightFreightModelChangeBo.getId());
         if (retWeightFreightModel == null)
         {
-            retObj = new ReturnObject<>(ResponseCode.FREIGHTMODEL_SHOP_NOTFIT);
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             return retObj;
         }
         Long freightModelId = retWeightFreightModel.getFreightModelId();
@@ -497,14 +502,14 @@ public class FreightDao{
             }
 
         } else {
-            retObj = new ReturnObject<>(ResponseCode.FREIGHTMODEL_SHOP_NOTFIT);
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
             return retObj;
         }
 
 
         int ret = freightModelMapper.updateWeightFreightModel(weightFreightModelPo);
         if (ret == 0) {
-            retObj = new ReturnObject<>(ResponseCode.FREIGHTMODEL_ERROR);
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         } else {
             retObj = new ReturnObject<>();
         }
@@ -516,16 +521,16 @@ public class FreightDao{
      * @author Cai Xinlu
      * @date 2020-12-10 9:40
      */
-    public ReturnObject<Object> changePieceFreightModel(PieceFreightModelChangeBo pieceFreightModelChangeBo,
-                                                        Long shopId) {
-        ReturnObject<Object> retObj = null;
+    public ReturnObject<ResponseCode> changePieceFreightModel(PieceFreightModelChangeBo pieceFreightModelChangeBo,
+                                                              Long shopId) {
+        ReturnObject<ResponseCode> retObj = null;
 
         PieceFreightModelPo pieceFreightModelPo = pieceFreightModelChangeBo.gotPieceFreightModelPo();
         PieceFreightModelPo retPieceFreightModel = pieceFreightModelPoMapper.selectByPrimaryKey(pieceFreightModelChangeBo.getId());
         // 判断是否存在此运费模板明细，即数据库是否有此id
         if (retPieceFreightModel == null)
         {
-            retObj = new ReturnObject<>(ResponseCode.FREIGHTMODEL_SHOP_NOTFIT);
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             return retObj;
         }
         Long freightModelId = retPieceFreightModel.getFreightModelId();
@@ -556,13 +561,13 @@ public class FreightDao{
             }
 
         } else {
-            retObj = new ReturnObject<>(ResponseCode.FREIGHTMODEL_SHOP_NOTFIT);
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
             return retObj;
         }
 
         int ret = freightModelMapper.updatePieceFreightModel(pieceFreightModelPo);
         if (ret == 0) {
-            retObj = new ReturnObject<>(ResponseCode.FREIGHTMODEL_ERROR);
+            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         } else {
             retObj = new ReturnObject<>();
         }

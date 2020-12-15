@@ -1,6 +1,7 @@
 package cn.edu.xmu.privilege.controller;
 
 import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.privilege.PrivilegeServiceApplication;
@@ -67,5 +68,7 @@ public class UserControllerTest {
         return  JacksonUtil.parseString(response, "data");
 
     }
+
+
 }
 

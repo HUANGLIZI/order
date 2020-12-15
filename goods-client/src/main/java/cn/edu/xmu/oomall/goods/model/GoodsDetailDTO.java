@@ -17,4 +17,5 @@ public class GoodsDetailDTO implements Serializable {
     private String name;
     private Long price;
     private Integer inventory;
+
 }

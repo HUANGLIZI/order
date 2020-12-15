@@ -5,13 +5,14 @@ management:
         include: "*"
 
 server:
-  port: 8083
+  port: 8086
   tomcat:
     threads:
       max: 1000
     maxConnections: 10000
     accept-count: 1000
     connection-timeout: 200
+#  address: 172.20.10.5
 
 
 spring:
@@ -24,6 +25,7 @@ spring:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+#        server-addr: 172.20.10.3:8848
   profiles:
     active: dev
   boot:
@@ -33,7 +35,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/oomall_order?serverTimezone=GMT%2B8
     username: root
-    password: 123456
+    password: 12345678
     druid:
       stat-view-servlet:
         login-username: admin
@@ -127,10 +129,12 @@ dubbo:
   #    配置注册中心
   registry:
     address: nacos://127.0.0.1:8848
+#    address: nacos://172.20.10.3:8848
   #    设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
     port: -1
+#    host: 172.20.10.5
   #    设置超时时间
   consumer:
     timeout: 4000

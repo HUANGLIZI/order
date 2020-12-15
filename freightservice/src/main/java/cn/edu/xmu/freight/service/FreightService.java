@@ -4,8 +4,11 @@ import cn.edu.xmu.freight.dao.FreightDao;
 import cn.edu.xmu.freight.model.vo.*;
 import cn.edu.xmu.oomall.goods.model.GoodsFreightDTO;
 import cn.edu.xmu.oomall.goods.service.GoodsService;
+import cn.edu.xmu.oomall.order.model.SimpleFreightModelDTO;
+import cn.edu.xmu.oomall.order.service.IFreightService;
 import com.github.pagehelper.PageInfo;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.stereotype.Service;
 import cn.edu.xmu.freight.model.bo.FreightModelChangeBo;
 import cn.edu.xmu.freight.model.bo.PieceFreightModelChangeBo;
@@ -23,8 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
-@Service
-public class FreightService {
+@DubboService
+public class FreightService implements IFreightService {
     @Autowired
     private FreightDao freightDao;
 
@@ -144,11 +147,9 @@ public class FreightService {
      * @author Cai Xinlu
      * @date 2020-12-10 9:40
      */
-    public ReturnObject<Object> changeFreightModel(Long id, FreightModelChangeVo freightModelChangeVo,
-                                                     Long shopId, Long sId)
+    public ReturnObject<ResponseCode> changeFreightModel(Long id, FreightModelChangeVo freightModelChangeVo,
+                                                         Long shopId)
     {
-        if (!shopId.equals(sId))
-            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
         FreightModelChangeBo freightModelChangeBo = freightModelChangeVo.createFreightModelBo();
         freightModelChangeBo.setShopId(shopId);
         freightModelChangeBo.setId(id);
@@ -161,11 +162,9 @@ public class FreightService {
      * @author Cai Xinlu
      * @date 2020-12-10 9:40
      */
-    public ReturnObject<Object> changeWeightFreightModel(Long id, WeightFreightModelChangeVo weightFreightModelChangeVo,
-                                                         Long shopId, Long sId)
+    public ReturnObject<ResponseCode> changeWeightFreightModel(Long id, WeightFreightModelChangeVo weightFreightModelChangeVo,
+                                                               Long shopId)
     {
-        if (!shopId.equals(sId))
-            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
         WeightFreightModelChangeBo weightFreightModelChangeBo = weightFreightModelChangeVo.createWeightFreightModelBo();
         weightFreightModelChangeBo.setId(id);
 
@@ -177,11 +176,9 @@ public class FreightService {
      * @author Cai Xinlu
      * @date 2020-12-10 9:40
      */
-    public ReturnObject<Object> changePieceFreightModel(Long id, PieceFreightModelChangeVo pieceFreightModelChangeVo,
-                                                        Long shopId, Long sId)
+    public ReturnObject<ResponseCode> changePieceFreightModel(Long id, PieceFreightModelChangeVo pieceFreightModelChangeVo,
+                                                              Long shopId)
     {
-        if (!shopId.equals(sId))
-            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
         PieceFreightModelChangeBo pieceFreightModelChangeBo = pieceFreightModelChangeVo.createPieceFreightModelChangeBo();
         pieceFreightModelChangeBo.setId(id);
 
@@ -196,6 +193,7 @@ public class FreightService {
      * @return ReturnObject<VoObject> 运费模板返回视图
      */
     @Transactional
+    @Override
     public ReturnObject<Long> calcuFreightPrice(List<Integer> count, List<Long> skuId,Long regionId) {
         Long freightPrice = 0L;
         //根据skuId查询模板、重量,查询默认运费模板
@@ -207,6 +205,8 @@ public class FreightService {
         Integer countSum=0;
         for (int i=0;i<skuId.size();i++) {
             goodsFreightDTO.add(goodsService.getGoodsFreightDetailBySkuId(skuId.get(i)).getData());
+//            GoodsFreightDTO goodsFreightDTO = new GoodsFreightDTO();
+
             weightSum+=goodsFreightDTO.get(i).getWeight();//计算总重量
             countSum+=count.get(i);//计算总件数
             if(goodsFreightDTO.get(i).getFreightModelId()==null) {//如果没有单品运费模板,采用默认模板
@@ -358,7 +358,30 @@ public class FreightService {
     }
 
 
+    /**
+     * @param freightId
+     * @return
+     * @date 2020-12-13 20:35
+     */
+    @Override
+    public ReturnObject<SimpleFreightModelDTO> getSimpleFreightById(Long freightId)
+    {
+        SimpleFreightModelDTO simpleFreightModelDTO = new SimpleFreightModelDTO();
+        if (freightDao.getFreightModelById(freightId).getCode().equals(ResponseCode.OK))
+        {
+            FreightModelReturnVo freightModelReturnVo = (FreightModelReturnVo)freightDao.getFreightModelById(freightId).getData();
 
+            simpleFreightModelDTO.setId(freightId);
+            simpleFreightModelDTO.setName(freightModelReturnVo.getName());
+            simpleFreightModelDTO.setType(freightModelReturnVo.getType());
+            simpleFreightModelDTO.setUnit(freightModelReturnVo.getUnit());
+            simpleFreightModelDTO.setIsDefault(freightModelReturnVo.getDefaultModel());
+            simpleFreightModelDTO.setGmtCreated(freightModelReturnVo.getGmtCreate());
+            simpleFreightModelDTO.setGmtModified(freightModelReturnVo.getGmtModified());
+        }
+
+        return new ReturnObject<>(simpleFreightModelDTO);
+    }
 
 
 }

@@ -390,9 +390,17 @@ public class OrderController {
     public Object createOrders(
             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
             @Validated @RequestBody OrdersVo ordersVo) {
+//        Long userId = 1L;
 //        System.out.println(ordersVo);
+        if (ordersVo.getCouponId() != null && ordersVo.getGrouponId() != null)
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+        if (ordersVo.getPresaleId() != null && ordersVo.getGrouponId() != null)
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+        if (ordersVo.getPresaleId() != null && ordersVo.getCouponId() != null)
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
         ReturnObject orders = orderServiceI.createOrders(userId, ordersVo);
-        return new ReturnObject<>(orders);
+        httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        return Common.decorateReturnObject(orders);
     }
 
 
@@ -541,4 +549,9 @@ public class OrderController {
         return Common.decorateReturnObject(returnObject);
     }
 
+    @PostMapping("/test/{id}")
+    public ReturnObject<ResponseCode> justTest(@PathVariable("id") Long ordersId)
+    {
+        return orderService.splitOrders(ordersId);
+    }
 }

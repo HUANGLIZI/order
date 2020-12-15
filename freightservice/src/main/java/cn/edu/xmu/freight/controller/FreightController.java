@@ -216,11 +216,14 @@ public class FreightController {
     public Object changeFreightModel(@Depart @ApiIgnore Long sId,
                                      @PathVariable("shopId") Long shopId,
                                      @PathVariable("id") Long id,
-                                     @Validated  @RequestBody FreightModelChangeVo freightModelChangeVo)
+                                     @RequestBody FreightModelChangeVo freightModelChangeVo)
     {
-
-        ReturnObject<Object> returnObject = freightService.changeFreightModel(id, freightModelChangeVo, shopId, sId);
-        return getNullRetObj(returnObject, httpServletResponse);
+        if (!shopId.equals(sId) && sId != 0) {
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+        }
+        ReturnObject<ResponseCode> ret = freightService.changeFreightModel(id, freightModelChangeVo, shopId);
+        return Common.decorateReturnObject(ret);
     }
 
 
@@ -243,8 +246,12 @@ public class FreightController {
                                            @PathVariable("id") Long id,
                                            @RequestBody WeightFreightModelChangeVo weightFreightModelChangeVo)
     {
-        ReturnObject<Object> objectReturnObject = freightService.changeWeightFreightModel(id, weightFreightModelChangeVo, shopId, sId);
-        return getNullRetObj(objectReturnObject, httpServletResponse);
+        if (!shopId.equals(sId) && sId != 0) {
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+        }
+        ReturnObject<ResponseCode> ret = freightService.changeWeightFreightModel(id, weightFreightModelChangeVo, shopId);
+        return Common.decorateReturnObject(ret);
     }
 
     /**
@@ -266,9 +273,12 @@ public class FreightController {
                                           @PathVariable("id") Long id,
                                           @RequestBody PieceFreightModelChangeVo pieceFreightModelChangeVo)
     {
-        System.out.println(pieceFreightModelChangeVo);
-        ReturnObject<Object> objectReturnObject = freightService.changePieceFreightModel(id, pieceFreightModelChangeVo, shopId, sId);
-        return getNullRetObj(objectReturnObject, httpServletResponse);
+        if (!shopId.equals(sId) && sId != 0) {
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+        }
+        ReturnObject<ResponseCode> ret = freightService.changePieceFreightModel(id, pieceFreightModelChangeVo, shopId);
+        return Common.decorateReturnObject(ret);
     }
 
 
