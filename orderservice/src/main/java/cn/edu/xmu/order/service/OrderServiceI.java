@@ -4,20 +4,20 @@ import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
-import cn.edu.xmu.oomall.goods.model.ShopDetailDTO;
-import cn.edu.xmu.oomall.goods.service.GoodsService;
-import cn.edu.xmu.oomall.order.model.FreightDTO;
+import cn.edu.xmu.oomall.goods.service.IActivityService;
+import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import cn.edu.xmu.oomall.order.service.IFreightService;
 import cn.edu.xmu.oomall.other.model.CustomerDTO;
 import cn.edu.xmu.oomall.other.service.IAddressService;
 import cn.edu.xmu.oomall.other.service.IAftersaleService;
+import cn.edu.xmu.oomall.other.service.ICartService;
+import cn.edu.xmu.oomall.other.service.ICustomerService;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.model.bo.DiscountStrategy;
 import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
 import cn.edu.xmu.order.model.vo.*;
 import com.google.gson.Gson;
-import io.swagger.models.auth.In;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,7 +38,7 @@ public class OrderServiceI {
     private OrderDao orderDao;
 
     @DubboReference
-    private GoodsService goodsService;
+    private IGoodsService goodsServiceI;
 
     @DubboReference
     private IAftersaleService aftersaleServiceI;
@@ -48,6 +48,16 @@ public class OrderServiceI {
 
     @DubboReference
     private IAddressService addressServiceI;
+
+    @DubboReference
+    private IActivityService activityServiceI;
+
+    @DubboReference
+    private ICustomerService customerServiceI;
+
+    @DubboReference
+    private ICartService cartServiceI;
+
     /**
      * @param
      * @return
@@ -101,10 +111,10 @@ public class OrderServiceI {
         Long origin_price = 0L;
 
         for (OrderItemsCreateVo vo: orderItemsVo){
-            if (!goodsService.judgeCouponActivityIdValid(ordersBo.getCouponActivityId()).getData())
+            if (!activityServiceI.judgeCouponActivityIdValid(ordersBo.getCouponActivityId()).getData())
                 new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             // 判断返回值
-            GoodsDetailDTO goodsDetailDTO = goodsService.getGoodsBySkuId(vo.getGoodsSkuId(), orderType, activityId, -vo.getQuantity()).getData();
+            GoodsDetailDTO goodsDetailDTO = goodsServiceI.getGoodsBySkuId(vo.getGoodsSkuId(), orderType, activityId, -vo.getQuantity()).getData();
             if (goodsDetailDTO == null)
                 new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             // 如果库存不够
@@ -129,7 +139,7 @@ public class OrderServiceI {
 
         // 算discountPrice
         Long discountPrice = 0L;
-        List<String> couponRule=goodsService.getActivityRule(ordersBo.getCouponId(),couponActIdList).getData();
+        List<String> couponRule=goodsServiceI.getActivityRule(ordersBo.getCouponId(),couponActIdList).getData();
         for(int i=0;i<orderItemsList.size();i++) {//设置优惠金额
             OrderItems orderItems=orderItemsList.get(i);//订单明细
             Gson gson=new Gson();
@@ -174,7 +184,7 @@ public class OrderServiceI {
 
         ordersBo.setGmtCreated(LocalDateTime.now());
 
-        CustomerDTO customerDTO = aftersaleServiceI.findCustomerByUserId(userId).getData();
+        CustomerDTO customerDTO = customerServiceI.findCustomerByUserId(userId).getData();
         CustomerRetVo customerRetVo = new CustomerRetVo();
         customerRetVo.setId(userId);
         customerRetVo.setName(customerDTO.getName());
@@ -188,7 +198,7 @@ public class OrderServiceI {
 //        shopRetVo.setName(shopDetailDTO.getName());
 //        shopRetVo.setState(shopDetailDTO.getState());
 
-        if (!aftersaleServiceI.deleteGoodsInCart(userId, skuIdList).getData().equals(ResponseCode.OK))
+        if (!cartServiceI.deleteGoodsInCart(userId, skuIdList).getData().equals(ResponseCode.OK))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         ordersBo.setCustomerId(userId);
@@ -199,7 +209,7 @@ public class OrderServiceI {
         orderCreateRetVo.setShopRetVo(shopRetVo);
 
         // 通知商品模块扣库存
-        ReturnObject<ResponseCode> decrInventoryRet = goodsService.signalDecrInventory(skuIdList, countList);
+        ReturnObject<ResponseCode> decrInventoryRet = goodsServiceI.signalDecrInventory(skuIdList, countList);
         if (!decrInventoryRet.getCode().equals(ResponseCode.OK))
             return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
         return new ReturnObject<>(orderCreateRetVo);

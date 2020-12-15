@@ -5,16 +5,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
-/**
- * @author Caixin
- * @date 2020-12-08 22:06
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GoodsDetailDTO implements Serializable {
+public class CouponInfoDTO implements Serializable {
+    /**
+     * 优惠活动id
+     */
+    private Long id;
     private String name;
-    private Long price;
-    private Integer inventory;
+    private LocalDateTime beginTime;
+    private LocalDateTime endTime;
 }

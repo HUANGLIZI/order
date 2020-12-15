@@ -28,9 +28,6 @@ public class PaymentService implements IPaymentService {
     @DubboReference
     private IOrderService iOrderService;
 
-//    @DubboReference
-//    private IOrderItemService iOrderItemService;
-
     @DubboReference
     private IAftersaleService iAftersaleService;
 

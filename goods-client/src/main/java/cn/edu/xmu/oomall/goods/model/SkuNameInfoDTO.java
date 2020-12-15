@@ -1,4 +1,4 @@
-package cn.edu.xmu.oomall.other.model;
+package cn.edu.xmu.oomall.goods.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,13 +6,10 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * @date 2020-12-15 20:51
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CustomerDTO implements Serializable {
-    private String userName;
+public class SkuNameInfoDTO implements Serializable {
     private String name;
+    private Long id;
 }
