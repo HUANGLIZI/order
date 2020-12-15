@@ -2,6 +2,7 @@ package cn.edu.xmu.order.service;
 
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
+import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.ShopDetailDTO;
@@ -11,6 +12,7 @@ import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
 import cn.edu.xmu.oomall.order.model.SimpleFreightModelDTO;
 import cn.edu.xmu.oomall.order.service.IFreightService;
 import cn.edu.xmu.oomall.order.service.IOrderService;
+import cn.edu.xmu.oomall.order.service.IPaymentService;
 import cn.edu.xmu.oomall.other.model.CustomerDTO;
 import cn.edu.xmu.oomall.other.service.IAddressService;
 import cn.edu.xmu.oomall.other.service.IAftersaleService;
@@ -18,6 +20,7 @@ import cn.edu.xmu.oomall.other.service.ICustomerService;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
+import cn.edu.xmu.order.model.bo.Strategy;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrdersPo;
 import cn.edu.xmu.order.model.vo.*;
@@ -55,6 +58,9 @@ public class OrderService implements IOrderService {
 
     @DubboReference
     private IAddressService addressServiceI;
+
+    @DubboReference
+    private IPaymentService paymentServiceI;
 
     private Logger logger = LoggerFactory.getLogger(OrderService.class);
     /**
@@ -354,15 +360,7 @@ public class OrderService implements IOrderService {
         return returnObject;
     }
 
-    @Override
-    public ReturnObject<Object> putGrouponOffshelves(Long grouponId) {
-        return null;
-    }
 
-    @Override
-    public ReturnObject<Object> putPresaleOffshevles(Long presaleId) {
-        return null;
-    }
 
 
     @Override
@@ -456,10 +454,6 @@ public class OrderService implements IOrderService {
         return orderDao.splitOrders(ordersList, ordersPo);
     }
 
-    @Override
-    public ReturnObject<Object> grouponEnd(String strategy, Long GrouponId) {
-        return null;
-    }
 
     /**
      * 根据orderItemId查询订单详情表和订单表信息，同时验证该orderItem是否属于该商店，shopId为0时表示管理员 无需验证
@@ -513,6 +507,138 @@ public class OrderService implements IOrderService {
             }
         }
         return new ReturnObject<>(map);
+    }
+
+    /**
+     *团购活动下架后将所有订单转换为普通订单
+     * @param grouponId  团购活动的id
+     * @date 2020-12-14
+     * @author 李明明
+     */
+    @Transactional
+    @Override
+    public ReturnObject<Object> putGrouponOffshelves(Long grouponId)
+    {
+        List<Orders> ordersList = orderDao.getOrdersByGrouponId(grouponId);
+        if(null == ordersList)
+        {
+            return new ReturnObject<>(ResponseCode.OK);//如果没有查到属于该groupId的订单，就不用进行转换处理，同样是成功的。
+        }
+        else
+        {
+            for(Orders orders : ordersList)
+            {
+                //对每个订单调用本类中 ”public ReturnObject<VoObject> transOrder(Long id)“方法
+                ReturnObject<VoObject> returnObject = this.transOrder(orders.getId());
+                if(returnObject.getCode() != ResponseCode.OK)
+                {
+                    //如果其中有一个无法转换，就返回错误
+                    return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW, String.format("该订单不是团购订单，无法进行转换,OrderId:" + orders.getId()));
+                }
+            }
+            return new ReturnObject<>(ResponseCode.OK);
+        }
+
+    }
+
+    /**
+     * 预售活动取消后，需要将所有的预售订单退款（需要将所有订单的状体置为取消）
+     * @param presaleId 预售活动Id
+     * @date 2020-12-14
+     * @author 李明明
+     */
+    @Override
+    public ReturnObject<Object> putPresaleOffshevles(Long presaleId)
+    {
+        List<Orders> ordersList = orderDao.getOrdersByPresleId(presaleId);
+        if(null == ordersList)
+        {
+            return new ReturnObject<Object>(ResponseCode.OK); //如果没有查到属于该presaleId的订单，就不用进行转换处理，同样是成功的。
+        }
+        else
+        {
+            for(Orders orders : ordersList)
+            {
+                //对每个orders调用本类中 “public ReturnObject<VoObject> cancelOrderById(Long shopId,Long id)”
+                ReturnObject<VoObject> returnObject = this.cancelOrderById(orders.getShopId(),orders.getId());
+                if(returnObject.getCode() != ResponseCode.OK)
+                {
+                    return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("订单更新失败 orderId：" + orders.getId()));
+                }
+                ReturnObject<ResponseCode> codeReturnObject = paymentServiceI.createRefundbyOrederId(orders.getShopId(),orders.getId());
+                if(codeReturnObject.getCode() != ResponseCode.OK)
+                {
+                    return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("退款单创建失败，orderId：" + orders.getId()));
+                }
+            }
+            return new ReturnObject<>(ResponseCode.OK);
+        }
+    }
+
+    /**
+     * 1.定时器到了，我们告诉你们团购ID及里面的规则
+     * 2.你们去找有多少订单参与了活动
+     * 3.你们根据订单数判断是否成团及成团等级
+     * 4.如果失败，问顾客退单还是转成普通订单（先弄成直接变普通订单的）
+     * 5.如果成功，每个订单按成团等级找core确定优惠金额
+     * 6.返还优惠
+     * @param strategy 团购规则
+     * @param GrouponId 团购id
+     * @return
+     * @author 李明明
+     * @date 2020-12-14
+     */
+    @Transactional
+    @Override
+    public ReturnObject<Object> grouponEnd(String strategy, Long GrouponId)
+    {
+        Strategy strategy1 = JacksonUtil.toObj(strategy, Strategy.class);//不知道是不是这样用
+        List<Orders> ordersList = orderDao.getOrdersByGrouponId(GrouponId);
+        if(null == ordersList)
+        {
+            return new ReturnObject<>(ResponseCode.OK);
+        }
+        Integer orderAmount = ordersList.size();
+        //System.out.println("!!!!!!"+ orderAmount + "!!!!!!!!!");
+        Long refundPrice = 0L;
+        List<Strategy.level> levelList = strategy1.getData();
+        for(Strategy.level level : levelList)
+        {
+            if(orderAmount >= level.getNum() && level.getPrice() > refundPrice)
+                refundPrice = level.getPrice();
+        }
+        //ystem.out.println("@@@@@@@@@@@"+ refundPrice + "@@@@@@@@@@@@");
+        //验证退款金额是否超过支付金额,因为团购订单不允许使用优惠券,且每个订单中的订单明细表中只有一个元素,
+        // 所以每个订单的originPrice就是支付的价格,如果退款金额大于等于支付金额,就返回错误.
+        Long originPrice = ordersList.get(0).getOriginPrice();
+        //System.out.println("###########" + originPrice + "#############");
+        if(originPrice <= refundPrice)
+            return new ReturnObject<>(ResponseCode.REFUND_MORE);
+        if(refundPrice == 0L)//没有成团
+        {
+            for(Orders orders : ordersList)
+            {
+                //对每个订单调用本类中 ”public ReturnObject<VoObject> transOrder(Long id)“方法
+                ReturnObject<VoObject> returnObject = this.transOrder(orders.getId());
+                if(returnObject.getCode() != ResponseCode.OK)
+                {
+                    //如果其中有一个无法转换，就返回错误
+                    return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW, String.format("该订单不是团购订单，无法进行转换,OrderId:" + orders.getId()));
+                }
+            }
+            return new ReturnObject<>(ResponseCode.OK);
+        }
+        //下面是处理成团的情况,首先需要将支付单中的actual_amount换成减去团购优惠后的金额,然后为该支付单创建退款单
+        for(Orders orders : ordersList)
+        {
+            //System.out.println("%%%%%%%%%%%%%%%%%%%处理成团的情况");
+            ReturnObject<ResponseCode> returnObject = paymentServiceI.createRefundForGrouponByOrderId(orders.getId(),orders.getShopId(),refundPrice);
+            if(returnObject.getCode() != ResponseCode.OK)
+            {
+                return new ReturnObject<>(returnObject.getCode(),returnObject.getErrmsg());
+            }
+        }
+        return new ReturnObject<>(ResponseCode.OK);
     }
 
 }
