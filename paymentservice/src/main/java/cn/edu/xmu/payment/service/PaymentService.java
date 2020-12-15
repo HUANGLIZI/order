@@ -56,7 +56,7 @@ public class PaymentService implements IPaymentService {
             logger.error(" queryPaymentById: 数据库不存在该支付单 orderId="+orderId);
             return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
-        return paymentDao.queryPayment(shopId,orderId);
+        return paymentDao.queryPayment(orderId);
     }
 
 
