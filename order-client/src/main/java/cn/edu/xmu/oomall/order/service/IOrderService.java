@@ -80,7 +80,7 @@ public interface IOrderService {
     /**
      * 判断订单是否属于某个商铺
      */
-    ReturnObject<Boolean> isOrderBelongToShop(Long shopId, Long orderId);
+    ReturnObject isOrderBelongToShop(Long shopId, Long orderId);
 
     /**
      * 通过OrderItemId获取OrderId
