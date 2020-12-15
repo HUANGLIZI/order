@@ -101,8 +101,8 @@ public class PaymentController {
     @Audit
     @GetMapping("/shops/{shopId}/orders/{id}/payments")
     public Object queryPayment(@PathVariable("shopId") Long shopId,@PathVariable("id") Long orderId,@Depart @ApiIgnore Long sId){
-        ReturnObject returnObject =  paymentService.queryPayment(shopId,orderId);
         if(shopId.equals(sId)||sId==0){
+            ReturnObject returnObject =  paymentService.queryPayment(shopId,orderId);
             if (returnObject.getCode() == ResponseCode.OK) {
                 return Common.getListRetObject(returnObject);
             } else {

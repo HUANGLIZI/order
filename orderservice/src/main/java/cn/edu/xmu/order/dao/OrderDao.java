@@ -130,9 +130,9 @@ public class OrderDao {
     public ReturnObject shopUpdateOrder(Orders orders) {
         OrdersPo ordersPo=orders.gotOrdersPo();
         //如果该店铺不拥有这个order则查不到
-        if(!isOrderBelongToShop(orders.getShopId(),orders.getId())){
-            logger.error(" shopUpdateOrder: 数据库不存在该支订单 orderId="+orders.getId());
-            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        ReturnObject returnObject=isOrderBelongToShop(orders.getShopId(),orders.getId());
+        if(returnObject.getCode()!=ResponseCode.OK){
+            return returnObject;
         }
 
         try{
@@ -161,42 +161,38 @@ public class OrderDao {
     }
 
     //判断order是否属于shop
-    public boolean isOrderBelongToShop(Long shopId, Long orderId){
+    public ReturnObject<OrdersPo> isOrderBelongToShop(Long shopId, Long orderId){
         OrdersPoExample example=new OrdersPoExample ();
         OrdersPoExample.Criteria criteria=example.createCriteria();
         criteria.andIdEqualTo(orderId);
-        criteria.andShopIdEqualTo(shopId);
-
-
         List<OrdersPo> ordersPos=ordersPoMapper.selectByExample(example);
-        return !ordersPos.isEmpty();
+        if(ordersPos.size()==0){
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        //根据id查只能查到一个
+        OrdersPo po = ordersPos.get(0);
+        if(!(po.getShopId().equals(shopId))){
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+
+        return new ReturnObject(po);
     }
 
 
     public ReturnObject shopDeliverOrder(Orders orders) {
 
-        OrdersPoExample example=new OrdersPoExample ();
-        OrdersPoExample.Criteria criteria=example.createCriteria();
-        criteria.andIdEqualTo(orders.getId());
-        criteria.andShopIdEqualTo(orders.getShopId());
-
-        List<OrdersPo> ordersPos=ordersPoMapper.selectByExample(example);
-
-
-        //如果该用户不拥有这个order则查不到
-        if(ordersPos.isEmpty()){
-            logger.error(" shopDeliverOrder: 数据库不存在该支订单 orderId="+orders.getId());
-            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        //如果该店铺不拥有这个order则查不到
+        ReturnObject returnObject=isOrderBelongToShop(orders.getShopId(),orders.getId());
+        if(returnObject.getCode()!=ResponseCode.OK){
+            return returnObject;
         }
-
-        //按id搜索应该只有一个po对象
-        OrdersPo ordersPo=ordersPos.get(0);
+        OrdersPo ordersPo=(OrdersPo) returnObject.getData();
 
         //订单未处于已支付状态，则不允许改变
         if(ordersPo.getState()!=(byte)10&&ordersPo.getState()!=(byte)11&&ordersPo.getState()!=(byte)12){
             //修改失败
             logger.error("shopDeliverOrder:Error Order State : " + ordersPo.toString());
-            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW, String.format("订单状态无法转换为发货中：state=" + ordersPo.getState()));
+            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW, String.format("订单状态无法转换为发货中"));
         }
 
         //改为发货中状态
