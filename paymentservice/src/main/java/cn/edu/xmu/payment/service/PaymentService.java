@@ -4,25 +4,22 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
-import cn.edu.xmu.oomall.order.service.IOrderItemService;
 import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.oomall.order.service.IPaymentService;
 import cn.edu.xmu.oomall.other.service.IAftersaleService;
 import cn.edu.xmu.payment.dao.PaymentDao;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.bo.Refund;
-import cn.edu.xmu.payment.model.po.RefundPo;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-@Service
+@DubboService
 public class PaymentService implements IPaymentService {
 
     @Autowired
@@ -31,8 +28,8 @@ public class PaymentService implements IPaymentService {
     @DubboReference
     private IOrderService iOrderService;
 
-    @DubboReference
-    private IOrderItemService iOrderItemService;
+//    @DubboReference
+//    private IOrderItemService iOrderItemService;
 
     @DubboReference
     private IAftersaleService iAftersaleService;
@@ -142,18 +139,31 @@ public class PaymentService implements IPaymentService {
     @Override
     public ReturnObject<ResponseCode> getAdminHandleRefund(Long userId, Long shopId, Long orderItemId, Long refund, Long aftersaleId)
     {
-        OrderInnerDTO orderInnerDTO = iOrderService.findOrderIdbyOrderItemId(orderItemId).getData();
+        ReturnObject<OrderInnerDTO> ret = iOrderService.findOrderIdbyOrderItemId(orderItemId);
+        if (!ret.getCode().equals(ResponseCode.OK))
+        {
+            logger.info("orderInnerDTO is: " + ret.getData().toString());
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        OrderInnerDTO orderInnerDTO = ret.getData();
         if (!orderInnerDTO.getCustomerId().equals(userId) || !orderInnerDTO.getShopId().equals(shopId))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-        Long paymentId = paymentDao.getPaymentIdByOrderId(orderInnerDTO.getOrderId()).getData();
+        ReturnObject<Long> paymentIdRet = paymentDao.getPaymentIdByOrderId(orderInnerDTO.getOrderId());
+        if (!paymentIdRet.getCode().equals(ResponseCode.OK))
+        {
+            logger.info("paymentId is: " + paymentIdRet.getData().toString());
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
         Refund refundBo = new Refund();
         refundBo.setAftersaleId(aftersaleId);
         refundBo.setAmount(Math.abs(refund));
         refundBo.setOrderId(orderInnerDTO.getOrderId());
-        refundBo.setPaymentId(paymentId);
+        refundBo.setPaymentId(paymentIdRet.getData());
         Refund.State state = Refund.State.TO_BE_REFUND;
         refundBo.setState(state.getCode().byteValue());
 
+        logger.info( "refundBo is: " + refundBo.toString());
         return paymentDao.createRefund(refundBo);
     }
 
@@ -165,8 +175,10 @@ public class PaymentService implements IPaymentService {
     @Override
     public ReturnObject<ResponseCode> getAdminHandleRepair(Long userId, Long shopId,Long orderItemId,Long refund,Long aftersaleId){
 
+        logger.info("orderItemId: "+ orderItemId);
         //跨域获取orderId
-        Long orderId=iOrderItemService.getOrderIdByOrderItemId(orderItemId).getData();
+        Long orderId=iOrderService.getOrderIdByOrderItemId(orderItemId).getData();
+        logger.info("orderId: "+ orderId);
 
         Payment payment=new Payment();
 
@@ -200,7 +212,7 @@ public class PaymentService implements IPaymentService {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //跨域获取orderId
-        Long retorderId=iOrderItemService.getOrderIdByOrderItemId(retOrderItemId).getData();
+        Long retorderId=iOrderService.getOrderIdByOrderItemId(retOrderItemId).getData();
 
 
         //Long retOrderID=iOrderItemService

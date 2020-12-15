@@ -46,9 +46,9 @@ public class OrderItems {
         orderItemPo.setPrice(this.price);
         orderItemPo.setDiscount(this.discount);
         orderItemPo.setName(this.name);
-        orderItemPo.setOrderId(orderId);
+        orderItemPo.setOrderId(this.orderId);
         orderItemPo.setGoodsSkuId(this.skuId);
-
+        orderItemPo.setQuantity(this.quantity);
         return orderItemPo;
     }
 }

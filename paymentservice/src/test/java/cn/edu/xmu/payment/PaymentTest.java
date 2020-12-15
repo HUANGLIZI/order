@@ -1,23 +1,28 @@
 package cn.edu.xmu.payment;
 
+import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.json.JsonContentAssert;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 
 @SpringBootTest(classes = PaymentServiceApplication.class)
 public class PaymentTest {
+
     private WebTestClient webTestClient;
 
     public PaymentTest(){
         this.webTestClient = WebTestClient.bindToServer()
-                .baseUrl("http://localhost:8080")
+//                .baseUrl("http://localhost:8088")
+                .baseUrl("http://172.20.10.5:8088")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
     }
@@ -200,6 +205,50 @@ public class PaymentTest {
         //log.debug(token);
         return token;
     }
+
+    /**
+     * 根据aftersaleId查询refund 正确
+     * @author Cai Xinlu
+     * @date 2020-12-13 21:30
+     */
+    @Test
+    public void getRefundTest1() throws Exception{
+        String token=this.creatTestToken(1L,0L,100);
+        byte[] responseString=webTestClient.get().uri("/payment/aftersales/{id}/refunds",1)
+                .header("authorization", token)
+                .exchange()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
+                .returnResult()
+                .getResponseBody();
+
+        String expectedResponse = "{\"errno\":0,\"data\":{\"id\":1,\"paymentId\":1,\"amount\":1,\"state\":null,\"gmtCreated\":\"2020-12-10T17:52:47\",\"gmtModified\":null,\"orderId\":1,\"aftersaleId\":1},\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
+    }
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-13 21:30
+     */
+    @Test
+    public void getRefundTest2() throws Exception{
+        String token=this.creatTestToken(1L,0L,100);
+        byte[] responseString=webTestClient.get().uri("/payment/aftersales/{id}/refunds",2)
+                .header("authorization", token)
+                .exchange()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
+                .returnResult()
+                .getResponseBody();
+
+        String expectedResponse = "{\"errno\":0,\"data\":{\"id\":1,\"paymentId\":1,\"amount\":1,\"state\":null,\"gmtCreated\":\"2020-12-10T17:52:47\",\"gmtModified\":null,\"orderId\":1,\"aftersaleId\":1},\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
+    }
+
 }
 
 

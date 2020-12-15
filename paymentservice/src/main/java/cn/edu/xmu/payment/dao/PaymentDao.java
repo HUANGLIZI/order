@@ -219,11 +219,11 @@ public class PaymentDao {
             int ret = paymentPoMapper.insertSelective(paymentPo);
             if (ret == 0) {
                 //插入失败
-                logger.debug("insertPayment: insert Payment fail " + paymentPo.toString());
+                logger.info("insertPayment: insert Payment fail " + paymentPo.toString());
                 returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + paymentPo.toString()));
             } else {
                 //插入成功
-                logger.debug("insertPayment: insert Payment  = " + paymentPo.toString());
+                logger.info("insertPayment: insert Payment  = " + paymentPo.toString());
                 payment.setId(paymentPo.getId());
                 returnObject = new ReturnObject<>(payment);
             }
@@ -231,17 +231,17 @@ public class PaymentDao {
         catch (DataAccessException e) {
             if (Objects.requireNonNull(e.getMessage()).contains("payment.pay_sn_uindex")) {
                 //若有重复的流水号则新增失败
-                logger.debug("updateRole: have same paySn = " + paymentPo.getPaySn());
+                logger.info("updateRole: have same paySn = " + paymentPo.getPaySn());
                 returnObject = new ReturnObject<>(ResponseCode.PAYSN_SAME, String.format("流水号重复：" + paymentPo.toString()));
             } else {
                 // 其他数据库错误
-                logger.debug("other sql exception : " + e.getMessage());
+                logger.info("other sql exception : " + e.getMessage());
                 returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
             }
         }
         catch (Exception e) {
             // 其他Exception错误
-            logger.error("other exception : " + e.getMessage());
+            logger.info("other exception : " + e.getMessage());
             returnObject  = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
         return returnObject ;
@@ -330,11 +330,11 @@ public class PaymentDao {
         int ret = refundPoMapper.insertSelective(refundPo);
         if (ret == 0) {
             //插入失败
-            logger.debug("insertRefund: insert refund fail " + refundPo.toString());
+            logger.info("insertRefund: insert refund fail " + refundPo.toString());
             retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + refundPo.toString()));
         } else {
             //插入成功
-            logger.debug("insertRefund: insert refund = " + refundPo.toString());
+            logger.info("insertRefund: insert refund = " + refundPo.toString());
 //            Refund refundRet = new Refund(refundPo);
             retObj = new ReturnObject<>(ResponseCode.OK);
         }

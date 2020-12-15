@@ -4,6 +4,7 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.order.model.OrderDTO;
 import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
+import cn.edu.xmu.oomall.order.model.SimpleFreightModelDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -23,8 +24,22 @@ public interface IOrderService {
      */
     ReturnObject<OrderInnerDTO> findUserIdbyOrderId(Long orderId);
 
+    /**
+     * 通过订单id查找shopId
+     * @param orderId
+     * @return Long
+     * @author Cai Xinlu
+     * @date 2020-12-05 21:38
+     */
     ReturnObject<OrderInnerDTO> findShopIdbyOrderId(Long orderId);
 
+    /**
+     * 通过订单详情id查找订单id
+     * @param orderItemId
+     * @return Long
+     * @author Cai Xinlu
+     * @date 2020-12-05 21:38
+     */
     ReturnObject<OrderInnerDTO> findOrderIdbyOrderItemId(Long orderItemId);
 
     ReturnObject<OrderDTO> getUserSelectSOrderInfo(Long userId, Long orderItemId);
@@ -39,15 +54,20 @@ public interface IOrderService {
      */
     ReturnObject<List<Long>> listAdminSelectOrderItemIdBySkuList(Long shopId, List<Long> skuId);
 
+    /**
+     * 判断订单是否属于某个商铺
+     * @author 张湘君
+     * @param shopId
+     * @param orderId
+     * @return
+     */
     ReturnObject<Boolean> isOrderBelongToShop(Long shopId, Long orderId);
 
-    //ReturnObject<ResponseCode> getAdminHandleRefund(Long userId, Long shopId, Long orderItemId, Integer quantity);
-
-    ReturnObject<Map<Long,OrderDTO>> getUserSelectOrderInfoByList(Long userId, List<Long>orderItemIdList);
     ReturnObject<ResponseCode> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Integer quantity, Long aftersaleId);
 
     /**
      * 支付完拆单
+     * @author Cai Xinlu
      * @param orderId
      * @return
      */
@@ -69,5 +89,12 @@ public interface IOrderService {
 /**
  * 根据orderItemIdList查询订单详情表和订单表信息，同时验证该orderItem是否属于该用户，返回orderItemId为key的Map
  */
-//    ReturnObject<Map<Long,OrderDTO>> getUserSelectOrderInfoByList(Long userId, List<Long> orderItemIdList);
+    ReturnObject<Map<Long,OrderDTO>> getUserSelectOrderInfoByList(Long userId, List<Long> orderItemIdList);
+
+
+    /**
+     * 通过OrderItemId获取OrderId
+     * @author 洪晓杰
+     */
+    ReturnObject<Long> getOrderIdByOrderItemId(Long orderId);
 }

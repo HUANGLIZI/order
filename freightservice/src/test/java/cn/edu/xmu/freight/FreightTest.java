@@ -179,7 +179,7 @@ public class FreightTest {
                 .getResponseBodyContent();
 
         String expectedResponse = "{\"errno\":505,\"errmsg\":\"操作的资源id不是自己的对象\"}";
-        var x = new String(responseString, "UTF-8");
+        String x = new String(responseString, "UTF-8");
         JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), true);
 
     }

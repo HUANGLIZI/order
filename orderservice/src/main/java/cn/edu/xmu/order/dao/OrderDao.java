@@ -309,6 +309,7 @@ public class OrderDao {
                 ret.add(order);
             }
             PageInfo<VoObject> orderPage = PageInfo.of(ret);
+            orderPage.setPageSize(pageSize);
             return new ReturnObject<>(orderPage);
         } catch (DataAccessException e) {
             logger.error("selectAllRole: DataAccessException:" + e.getMessage());
@@ -485,10 +486,20 @@ public class OrderDao {
     {
         OrderItemPo orderItemPo = orderItemPoMapper.selectByPrimaryKey(orderItemId);
         OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderItemPo.getOrderId());
+//        System.out.println(orderItemPo);
         if (orderItemPo == null || ordersPo == null)
+        {
+            logger.info("Other" + ordersPo.toString());
+            logger.info("Other" + orderItemPo.toString());
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
         if (!ordersPo.getCustomerId().equals(userId))
+        {
+            logger.info("Other " + ordersPo.toString());
+            logger.info("Other " + orderItemPo.toString());
+            logger.info("Other " + userId);
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setShopId(ordersPo.getShopId());
         orderDTO.setOrderId(orderItemPo.getOrderId());
@@ -557,11 +568,23 @@ public class OrderDao {
     public ReturnObject<OrderInnerDTO> getOrderIdbyOrderItemId(Long orderItemId)
     {
         Long orderId = orderItemPoMapper.selectByPrimaryKey(orderItemId).getOrderId();
+        logger.info("orderId is: " + orderId);
+        if (orderId == null)
+        {
+            logger.info("orderId is: " + orderId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
         OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
+        if (ordersPo == null)
+        {
+            logger.info("ordersPo is: " + ordersPo.toString());
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
         OrderInnerDTO orderInnerDTO = new OrderInnerDTO();
         orderInnerDTO.setCustomerId(ordersPo.getCustomerId());
         orderInnerDTO.setOrderId(orderId);
         orderInnerDTO.setShopId(ordersPo.getShopId());
+        logger.info("orderInnerDTO is: " + orderInnerDTO.toString());
         return new ReturnObject<>(orderInnerDTO);
     }
 
@@ -583,7 +606,7 @@ public class OrderDao {
             orderDTO.setSkuId(orderItemPo.getGoodsSkuId());
             orderDTO.setSkuName(orderItemPo.getName());
             orderDTO.setShopId(ordersPo.getShopId());
-            orderDTO.setPrice(orderItemPo.getPrice());
+//            orderDTO.setPrice(orderItemPo.getPrice());
         }
         return new ReturnObject<>(orderDTO);
     }
@@ -610,7 +633,9 @@ public class OrderDao {
      */
     public ReturnObject<Long> getOrderIdByOrderItemId(Long orderItemId) {
         OrderItemPo orderItemPo=orderItemPoMapper.selectByPrimaryKey(orderItemId);
-        if(orderItemPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        logger.info("orderItemPo is " + orderItemPo.toString());
+        if(orderItemPo==null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         return new ReturnObject<>(orderItemPo.getOrderId());
     }
 

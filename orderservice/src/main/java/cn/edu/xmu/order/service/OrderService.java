@@ -9,7 +9,6 @@ import cn.edu.xmu.oomall.goods.service.GoodsService;
 import cn.edu.xmu.oomall.order.model.OrderDTO;
 import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
 import cn.edu.xmu.oomall.order.service.IFreightService;
-import cn.edu.xmu.oomall.order.service.IOrderItemService;
 import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.oomall.other.model.CustomerDTO;
 import cn.edu.xmu.oomall.other.service.IAddressService;
@@ -21,13 +20,11 @@ import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrdersPo;
 import cn.edu.xmu.order.model.vo.*;
 import com.github.pagehelper.PageInfo;
-import io.lettuce.core.StrAlgoArgs;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -37,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 @DubboService
-public class OrderService implements IOrderService, IOrderItemService {
+public class OrderService implements IOrderService {
 
     @Autowired
     private OrderDao orderDao;
@@ -385,6 +382,7 @@ public class OrderService implements IOrderService, IOrderItemService {
      */
     @Override
     public ReturnObject<Long> getOrderIdByOrderItemId(Long orderItemId){
+        logger.info("orderItemId is " + orderItemId);
         return orderDao.getOrderIdByOrderItemId(orderItemId);
     }
 
@@ -456,16 +454,23 @@ public class OrderService implements IOrderService, IOrderItemService {
         OrderItemPo orderItemPo = orderDao.getOrderItemById(orderItemId).getData();
         if (orderItemPo == null)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        ShopDetailDTO shopDetailDTO = goodsService.getShopInfoBySkuId(orderItemPo.getGoodsSkuId()).getData();
-        if (!shopId.equals(0L))
-            if (!shopDetailDTO.getShopId().equals(shopId))
-                return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-        OrdersPo ordersPo = orderDao.getOrderByOrderId(orderItemPo.getOrderId()).getData();
+        ReturnObject<OrdersPo> returnObject = orderDao.getOrderByOrderId(orderItemPo.getOrderId());
+        if (!returnObject.getCode().equals(ResponseCode.OK))
+        {
+            logger.info("getOrderById: 数据库不存在该订单 order_id=" + orderItemPo.getOrderId());
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        OrdersPo ordersPo = returnObject.getData();
+        if (!ordersPo.getShopId().equals(shopId))
+        {
+            logger.info("getOrderById: 店铺Id不匹配 order_id=" + orderItemPo.getOrderId());
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + shopId));
+        }
         orderDTO.setSkuName(orderItemPo.getName());
         orderDTO.setSkuId(orderItemPo.getGoodsSkuId());
         orderDTO.setOrderSn(ordersPo.getOrderSn());
         orderDTO.setOrderId(orderItemPo.getOrderId());
-        orderDTO.setShopId(shopDetailDTO.getShopId());
+        orderDTO.setShopId(ordersPo.getShopId());
 
         return new ReturnObject<>(orderDTO);
     }

@@ -2,6 +2,7 @@ package cn.edu.xmu.payment.controller;
 
 
 import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
@@ -20,6 +21,7 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -33,7 +35,7 @@ import java.util.List;
 
 @Api(value = "支付服务", tags = "payment")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "/payment", produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "", produces = "application/json;charset=UTF-8")
 public class PaymentController {
     @Autowired
     private PaymentService paymentService;
@@ -185,9 +187,20 @@ public class PaymentController {
     })
     @Audit
     @GetMapping("/shops/{shopId}/orders/{id}/refunds")
-    public Object getOrdersRefundsByOrderId(@PathVariable("id") Long id,@PathVariable("shopId") Long shopId){
+    public Object getOrdersRefundsByOrderId(@Depart @ApiIgnore Long sId,
+            @PathVariable("id") Long id,
+            @PathVariable("shopId") Long shopId){
+        if (!shopId.equals(sId) && sId != 0) {
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+        }
         ReturnObject returnObject =  paymentServiceI.getOrdersRefundsByOrderId(id,shopId);
-        return returnObject;
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getListRetObject(returnObject);
+        } else {
+            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE)
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.decorateReturnObject(returnObject);
+        }
     }
     /**
      * 通过AfterSaleId查询订单的退款信息
@@ -208,9 +221,21 @@ public class PaymentController {
     })
     @Audit
     @GetMapping("/shops/{shopId}/aftersales/{id}/refunds")
-    public Object getOrdersRefundsByAftersaleId(@PathVariable("id") Long id,@PathVariable("shopId") Long shopId){
+    public Object getOrdersRefundsByAftersaleId(@Depart @ApiIgnore Long sId,
+            @PathVariable("id") Long id,
+            @PathVariable("shopId") Long shopId){
+        if (!shopId.equals(sId) && sId != 0) {
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+        }
         ReturnObject returnObject =  paymentServiceI.getOrdersRefundsByAftersaleId(id,shopId);
-        return returnObject;
+        if (returnObject.getCode() == ResponseCode.OK) {
+            logger.info(returnObject.getCode().toString() + "============");
+            return Common.decorateReturnObject(returnObject);
+        } else {
+            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE)
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
     /**
@@ -240,7 +265,11 @@ public class PaymentController {
         refund.setGmtCreate(LocalDateTime.now());
         ReturnObject<VoObject> retObject = paymentService.insertRefunds(refund,shopId);
         httpServletResponse.setStatus(HttpStatus.CREATED.value());
-        return Common.decorateReturnObject(retObject);
+        if (retObject.getCode() == ResponseCode.OK) {
+            return Common.decorateReturnObject(retObject);
+        } else {
+            return Common.decorateReturnObject(retObject);
+        }
     }
 
     /**
@@ -353,7 +382,14 @@ public class PaymentController {
             @PathVariable("id") Long orderId) {
 //        System.out.println("userId" + userId);
         ReturnObject<VoObject> returnObject = paymentServiceI.userQueryRefundsByOrderId(orderId, userId);
-        return returnObject;
+
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE)
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
     /**
@@ -378,7 +414,14 @@ public class PaymentController {
             @PathVariable("id") Long aftersaleId) {
         System.out.println("userId" + userId);
         ReturnObject<VoObject> returnObject = paymentServiceI.userQueryRefundsByAftersaleId(aftersaleId, userId);
-        return returnObject;
+
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.decorateReturnObject(returnObject);
+        } else {
+            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE)
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
 

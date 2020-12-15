@@ -12,7 +12,7 @@ server:
     maxConnections: 10000
     accept-count: 1000
     connection-timeout: 200
-
+#  address: 172.20.10.5
 
 spring:
   application:
@@ -23,7 +23,8 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.137.1:8848
+#        server-addr: 172.20.10.3:8848
+        server-addr: 127.0.0.1:8848
   profiles:
     active: dev
   datasource:
@@ -122,11 +123,13 @@ dubbo:
     qos-accept-foreign-ip: false
   #    配置注册中心
   registry:
-    address: nacos://192.168.137.1:8848
+#    address: nacos://172.20.10.3:8848
+    address: nacos://127.0.0.1:8848
   #    设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
     port: -1
+#    host: 172.20.10.5
   #    设置超时时间
   consumer:
     timeout: 4000
