@@ -555,7 +555,7 @@ public class OrderController {
     public Object CreatOrderById(@PathVariable("shopId") Long shopId, @PathVariable("userId") Long userId,@PathVariable("orderItemId") Long orderItemId,@PathVariable("quantity") Integer quantity,@PathVariable("aftersaleId") Long aftersaleId)
     {
         logger.debug("Cancel Order by orderId:" +userId);
-        ReturnObject<ResponseCode> returnObject = orderService.getAdminHandleExchange(userId,shopId,orderItemId,quantity,aftersaleId);
+        ReturnObject<Long> returnObject = orderService.getAdminHandleExchange(userId,shopId,orderItemId,quantity,aftersaleId);
         return Common.decorateReturnObject(returnObject);
     }
 

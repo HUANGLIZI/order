@@ -342,7 +342,7 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public  ReturnObject<ResponseCode> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Integer quantity, Long aftersaleId){
+    public  ReturnObject<Long> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Integer quantity, Long aftersaleId){
         OrderItemPo orderItemPo=orderDao.getOrderItems(userId,orderItemId).getData();
         List<OrderItems> orderItemsList = new ArrayList();
         OrderItems orderItems=new OrderItems(orderItemPo);
@@ -351,11 +351,13 @@ public class OrderService implements IOrderService {
         orderItemPo.setId(null);
         orderItemPo.setQuantity(quantity);
         orderItemsList.add(0,orderItems);
-        ReturnObject<ResponseCode> returnObject;
+        ReturnObject<Long> returnObject;
         returnObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
         if(orders.getState()==6) {
-            orderDao.createOrders(orders,orderItemsList);
-            returnObject=new ReturnObject<>(ResponseCode.OK);
+            ReturnObject<Orders> orders1 = orderDao.createOrders(orders, orderItemsList);
+            if (!orders1.getCode().equals(ResponseCode.OK))
+                returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            else returnObject=new ReturnObject<>(orders1.getData().getId());
         }
         return returnObject;
     }
