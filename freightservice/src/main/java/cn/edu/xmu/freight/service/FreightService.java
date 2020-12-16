@@ -6,6 +6,7 @@ import cn.edu.xmu.oomall.goods.model.GoodsFreightDTO;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import cn.edu.xmu.oomall.order.model.SimpleFreightModelDTO;
 import cn.edu.xmu.oomall.order.service.IFreightService;
+import cn.edu.xmu.oomall.other.service.IAddressService;
 import com.github.pagehelper.PageInfo;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
@@ -34,6 +35,9 @@ public class FreightService implements IFreightService {
 
     @DubboReference
     private IGoodsService goodsServiceI;
+
+    @DubboReference
+    private IAddressService addressServiceI;
 
 
     private Logger logger = LoggerFactory.getLogger(FreightService.class);
@@ -196,6 +200,7 @@ public class FreightService implements IFreightService {
     @Transactional
     @Override
     public ReturnObject<Long> calcuFreightPrice(List<Integer> count, List<Long> skuId,Long regionId) {
+
         Long freightPrice = 0L;
         //根据skuId查询模板、重量,查询默认运费模板
         //根据重量、count并比较算出freightPrice

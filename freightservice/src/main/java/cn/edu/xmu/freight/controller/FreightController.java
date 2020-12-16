@@ -12,9 +12,11 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.other.service.IAddressService;
 import com.github.pagehelper.PageInfo;
 
 import io.swagger.annotations.*;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,7 @@ import static cn.edu.xmu.ooad.util.Common.getNullRetObj;
 
 @Api(value = "运费服务", tags = "freight")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "", produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/order", produces = "application/json;charset=UTF-8")
 public class FreightController {
 
     @Autowired
@@ -42,6 +44,8 @@ public class FreightController {
     @Autowired
     private HttpServletResponse httpServletResponse;
 
+    @DubboReference
+    private IAddressService addressServiceI;
 
     private  static  final Logger logger = LoggerFactory.getLogger(FreightController.class);
 
@@ -295,6 +299,7 @@ public class FreightController {
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 805, message = "地区不可达")
     })
     @Audit
     @PostMapping(value = "/shops/{id}/freightmodels",produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -305,13 +310,14 @@ public class FreightController {
         freightModel.setShopId(id);
         freightModel.setGmtCreate(LocalDateTime.now());
         ReturnObject<VoObject> retObject = freightService.insertFreightModel(freightModel);
+        httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return Common.decorateReturnObject(retObject);
     }
     /**
      * 计算运费
      * @author 24320182203227 李子晗
      */
-    @ApiOperation(value = "管理员定义店铺的运费模板")
+    @ApiOperation(value = "用户计算运费")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(paramType = "body", dataType = "OrderItemVo", name = "vo", value = "可修改的用户信息", required = true),
@@ -324,7 +330,11 @@ public class FreightController {
     @PostMapping("/region/{rid}/price")
     @ResponseBody
     public Object calcuFreightPrice(@Validated @RequestBody List<OrderItemVo> vo, @PathVariable Long rid) {
-        logger.debug("calculate freight service by regionId:" + rid);
+        logger.info("calculate freight service by regionId:" + rid);
+        if(!addressServiceI.getValidRegionId(rid).getData()) {
+            ReturnObject<Long> retObject = new ReturnObject<>(ResponseCode.PAYSN_SAME);
+            return Common.decorateReturnObject(retObject);
+        }
         int listSize = vo.size();
         System.out.println(listSize);
         List<Integer> count = new ArrayList<>();
@@ -336,6 +346,7 @@ public class FreightController {
             skuId.add(vo.get(i).getSkuId());
         }
         ReturnObject<Long> retObject = freightService.calcuFreightPrice(count,skuId,rid);
+        httpServletResponse.setStatus(HttpStatus.CREATED.value());
         System.out.println(retObject.getData());
         return Common.decorateReturnObject(retObject);
     }
@@ -590,7 +601,6 @@ public class FreightController {
             return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + departId)), httpServletResponse);
         }
     }
-
 
 
 }

@@ -119,7 +119,6 @@ CREATE TABLE `payment` (
   `gmt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `gmt_modified` datetime DEFAULT NULL,
   `aftersale_id` bigint DEFAULT NULL,
-  `if_deposit` tinyint DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=20828 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -198,4 +197,4 @@ CREATE TABLE `weight_freight_model` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-12-09 14:47:20
+-- Dump completed on 2020-12-10 19:32:05
