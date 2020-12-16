@@ -21,8 +21,8 @@ public class PaymentTest {
 
     public PaymentTest(){
         this.webTestClient = WebTestClient.bindToServer()
-//                .baseUrl("http://localhost:8088")
-                .baseUrl("http://172.20.10.5:8088")
+                .baseUrl("http://localhost:8088")
+//                .baseUrl("http://172.20.10.5:8088")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
     }
@@ -215,6 +215,64 @@ public class PaymentTest {
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
     }
 
+
+    /**
+     * @author zxj
+     * @date Created in 2020年12月3日20:32:07
+     */
+    @Test
+    public void getAllPaymentsStatesTest() throws Exception{
+        String token=this.creatTestToken(1L,0L,100);
+        byte[] responseString=webTestClient.get().uri("/payments/states")
+                .header("authorization", token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
+                .returnResult()
+                .getResponseBody();
+
+        String expectedResponse="{\"errno\":0,\"data\":[{\"name\":\"支付单未支付\",\"code\":0},{\"name\":\"支付单已支付\",\"code\":1},{\"name\":\"支付失败\",\"code\":2}],\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,new String(responseString, StandardCharsets.UTF_8),false);
+    }
+
+    /**
+     * @author zxj
+     * @date Created in 2020年12月3日20:32:07
+     */
+    @Test
+    public void getAllPaymentsStatesTest1() throws Exception{
+//        String token=this.creatTestToken(1L,0L,100);
+        byte[] responseString=webTestClient.get().uri("/payments/states")
+                .exchange()
+                .expectStatus().isUnauthorized()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_NEED_LOGIN.getCode())
+                .returnResult()
+                .getResponseBody();
+    }
+
+    /**
+     * @author zxj
+     * @date Created in 2020年12月3日20:32:07
+     */
+    @Test
+    public void getPaymentPatternsTset() throws Exception{
+        String token=this.creatTestToken(1L,0L,100);
+        byte[] responseString=webTestClient.get().uri("/payments/patterns")
+                .header("authorization", token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
+                .returnResult()
+                .getResponseBody();
+
+        String expectedResponse="{\"errno\":0,\"data\":[{\"name\":\"返点支付\",\"payPattern\":\"001\"},{\"name\":\"模拟支付渠道\",\"payPattern\":\"002\"}],\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,new String(responseString, StandardCharsets.UTF_8),false);
+    }
 }
 
 

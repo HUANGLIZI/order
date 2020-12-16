@@ -454,7 +454,7 @@ public class PaymentController {
             @ApiResponse(code = 504, message = "操作id不存在")
     })
     @Audit
-    @GetMapping("/states")
+    @GetMapping("/payments/states")
     public Object getAllPaymentsStates()
     {
         Payment.State[] states = Payment.State.class.getEnumConstants();
@@ -479,10 +479,11 @@ public class PaymentController {
             @ApiResponse(code = 504, message = "操作id不存在")
     })
     @Audit
-    @GetMapping("/patterns")
+    @GetMapping("/payments/patterns")
     public Object userQueryPayment()
     {
         List<PayPatternVo> payPatternVos=new ArrayList<PayPatternVo>();
+        payPatternVos.add(new PayPatternVo("001","返点支付"));
         payPatternVos.add(new PayPatternVo("002","模拟支付渠道"));
         return ResponseUtil.ok(new ReturnObject<List>(payPatternVos).getData());
     }
