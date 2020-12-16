@@ -227,7 +227,7 @@ public class FreightService implements IFreightService {
                 FreightModelPo freightModelPo=freightModelReturnVo.createPo();
                 freightModelPos.add(freightModelPo);//将单品运费模板加入运费模板列表
             }
-            weightSum+=goodsFreightDTO.get(i).getWeight();//计算总重量,单位为g
+            weightSum+=goodsFreightDTO.get(i).getWeight()*count.get(i);//计算总重量,单位为g
         }
         for (int i=0;i<freightModelPos.size();i++) {
             FreightModelPo freightModelPo_temp=freightModelPos.get(i);
@@ -236,7 +236,7 @@ public class FreightService implements IFreightService {
             {
                 PieceFreightModel pieceFreightModel_temp=freightDao.getPieceItemByFreightModelIdRegionId(freightModelPo_temp.getShopId(),freightModelPo_temp.getId(),regionId);
                 if((countSum-pieceFreightModel_temp.getFirstItems()*freightModelPo_temp.getUnit())>0)
-                    price_temp= pieceFreightModel_temp.getFirstItemsPrice()+pieceFreightModel_temp.getAdditionalItemsPrice()*(long)Math.ceil((countSum-pieceFreightModel_temp.getFirstItems()*freightModelPo_temp.getUnit())/(pieceFreightModel_temp.getAdditionalItems()*freightModelPo_temp.getUnit()));
+                    price_temp= pieceFreightModel_temp.getFirstItemsPrice()+pieceFreightModel_temp.getAdditionalItemsPrice()*(long)(Math.ceil((countSum-pieceFreightModel_temp.getFirstItems()*freightModelPo_temp.getUnit())/(pieceFreightModel_temp.getAdditionalItems()*freightModelPo_temp.getUnit())));
                 else
                     price_temp=pieceFreightModel_temp.getFirstItemsPrice();
                 if(price_temp>freightPrice) {
@@ -250,14 +250,19 @@ public class FreightService implements IFreightService {
                     price_temp=weightFreightModel.getFirstWeightFreight();
                 else if(weightSum>weightFreightModel.getFirstWeight()&&weightSum<=10000)
                     price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)(Math.ceil((weightSum-weightFreightModel.getFirstWeight())/freightModelPo_temp.getUnit()));
-                else if(weightSum>10000&&weightSum<=50000)
-                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/freightModelPo_temp.getUnit())+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10000)/freightModelPo_temp.getUnit());
-                else if(weightSum>50000&&weightSum<=100000)
-                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/freightModelPo_temp.getUnit())+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10000)/freightModelPo_temp.getUnit())+weightFreightModel.getHundredPrice()*(long)Math.ceil((weightSum-50000)/freightModelPo_temp.getUnit());
+                else if(weightSum>10000&&weightSum<=50000) {
+//                    Long a = weightFreightModel.getFirstWeightFreight();
+//                    Long b=(long) (Math.ceil((10000 - weightFreightModel.getFirstWeight()) / freightModelPo_temp.getUnit()));
+//                    Long c=(long) (Math.ceil((weightSum - 10000) / freightModelPo_temp.getUnit()));
+//                    Long d=weightFreightModel.getTenPrice();
+//                    Long e=weightFreightModel.getFiftyPrice();
+                    price_temp = weightFreightModel.getFirstWeightFreight() + weightFreightModel.getTenPrice() * (long) (Math.ceil((10000 - weightFreightModel.getFirstWeight()) / freightModelPo_temp.getUnit())) + weightFreightModel.getFiftyPrice() * (long) (Math.ceil((weightSum - 10000) / freightModelPo_temp.getUnit()));
+                }else if(weightSum>50000&&weightSum<=100000)
+                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)(Math.ceil((10000-weightFreightModel.getFirstWeight())/freightModelPo_temp.getUnit()))+weightFreightModel.getFiftyPrice()*(long)(Math.ceil((50000-10000)/freightModelPo_temp.getUnit()))+weightFreightModel.getHundredPrice()*(long)(Math.ceil((weightSum-50000)/freightModelPo_temp.getUnit()));
                 else if(weightSum>100000&&weightSum<=300000)
-                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/freightModelPo_temp.getUnit())+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10000)/freightModelPo_temp.getUnit())+weightFreightModel.getHundredPrice()*(long)Math.ceil((weightSum-50000)/freightModelPo_temp.getUnit())+weightFreightModel.getTrihunPrice()*(long)Math.ceil((weightSum-100000)/freightModelPo_temp.getUnit());
+                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)(Math.ceil((10000-weightFreightModel.getFirstWeight())/freightModelPo_temp.getUnit()))+weightFreightModel.getFiftyPrice()*(long)(Math.ceil((50000-10000)/freightModelPo_temp.getUnit()))+weightFreightModel.getHundredPrice()*(long)(Math.ceil((100000-50000)/freightModelPo_temp.getUnit()))+weightFreightModel.getTrihunPrice()*(long)(Math.ceil((weightSum-100000)/freightModelPo_temp.getUnit()));
                 else if(weightSum>300000)
-                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/freightModelPo_temp.getUnit())+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10000)/freightModelPo_temp.getUnit())+weightFreightModel.getHundredPrice()*(long)Math.ceil((weightSum-50000)/freightModelPo_temp.getUnit())+weightFreightModel.getTrihunPrice()*(long)Math.ceil((weightSum-100000)/freightModelPo_temp.getUnit())+weightFreightModel.getAbovePrice()*(long)Math.ceil((weightSum-300000)/freightModelPo_temp.getUnit());
+                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)(Math.ceil((10000-weightFreightModel.getFirstWeight())/freightModelPo_temp.getUnit()))+weightFreightModel.getFiftyPrice()*(long)(Math.ceil((50000-10000)/freightModelPo_temp.getUnit()))+weightFreightModel.getHundredPrice()*(long)(Math.ceil((100000-50000)/freightModelPo_temp.getUnit()))+weightFreightModel.getTrihunPrice()*(long)(Math.ceil((300000-100000)/freightModelPo_temp.getUnit()))+weightFreightModel.getAbovePrice()*(long)(Math.ceil((weightSum-300000)/freightModelPo_temp.getUnit()));
                 if(price_temp>freightPrice)
                     freightPrice=price_temp;
             }
