@@ -152,7 +152,7 @@ public class OrderController {
             @ApiResponse(code = 0, message = "成功"),
     })
     //@Audit
-    @PutMapping("/orders3/{id}")
+    @PutMapping("/orders/{id}")
     public Object updateOrder(@PathVariable("id") Long id, @Validated @RequestBody OrderSimpleVo vo, BindingResult bindingResult) {
         logger.debug("update order by orderId:" + id);
         //校验前端数据-----暂时还没写
@@ -182,7 +182,7 @@ public class OrderController {
             @ApiResponse(code = 0, message = "成功"),
     })
     //@Audit
-    @PutMapping("/orders2/{id}/confirm")
+    @PutMapping("/orders/{id}/confirm")
     public Object updateOrderStateToConfirm( @PathVariable("id") Long id) {
         logger.debug("update orders by orderId:" + id);
         //校验前端数据-----暂时还没写
@@ -210,7 +210,7 @@ public class OrderController {
             @ApiResponse(code = 0, message = "成功"),
     })
     //@Audit
-    @PutMapping("/orders1/{id}")
+    @DeleteMapping("/orders/{id}")
     public Object logicDeleteOrder( @PathVariable("id") Long id) {
         logger.debug("logicDelete order by orderId:" + id);
         //校验前端数据-----暂时还没写
