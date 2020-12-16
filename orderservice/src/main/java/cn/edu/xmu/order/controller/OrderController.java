@@ -233,7 +233,7 @@ public class OrderController {
      * @param userId 当前用户id
      * @return Object 订单返回视图
      */
-    @ApiOperation(value = "买家修改本人名下订单。", produces = "application/json")
+    @ApiOperation(value = "店家修改订单 (留言)。", produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true),
@@ -251,7 +251,7 @@ public class OrderController {
                                   @Depart @ApiIgnore Long sId,
                                   @PathVariable("shopId") Long shopId){
 
-        System.out.println(userId);
+
         logger.debug("shopUpdateOrder orderId:" + orderId);
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
@@ -259,15 +259,20 @@ public class OrderController {
             return returnObject;
         }
 
-        if (shopId.equals(sId)){
+        if (shopId.equals(sId)||sId==0){
             Orders orders=vo.createOrder();
             orders.setId(orderId);
             orders.setShopId(shopId);
             ReturnObject<Object> retObject = orderService.shopUpdateOrder(orders);
+            if(retObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE){
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
+            }
             return Common.decorateReturnObject(retObject);
         }
         else{
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + sId)), httpServletResponse);
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
         }
 
     }
@@ -299,15 +304,20 @@ public class OrderController {
                                    @PathVariable("shopId") Long shopId){
 
         logger.debug("customerConfirmOrder orderId:" + orderId);
-        if(shopId.equals(sId)){
+        if(shopId.equals(sId)||sId==0){
             Orders orders=vo.createOrder();
             orders.setId(orderId);
             orders.setShopId(shopId);
             ReturnObject<Object> retObject = orderService.shopDeliverOrder(orders);
+            if(retObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE){
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
+            }
             return Common.decorateReturnObject(retObject);
         }
         else{
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + sId)), httpServletResponse);
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
         }
 
     }

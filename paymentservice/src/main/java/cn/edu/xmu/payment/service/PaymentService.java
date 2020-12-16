@@ -1,6 +1,7 @@
 package cn.edu.xmu.payment.service;
 
 import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
@@ -49,9 +50,10 @@ public class PaymentService implements IPaymentService {
     public ReturnObject queryPayment(Long shopId, Long orderId) {
 
         //如果该商店不拥有这个order则查不到
-        if(!((iOrderService.isOrderBelongToShop(shopId,orderId)).getData())&&shopId!=0){
+        ReturnObject returnObject=iOrderService.isOrderBelongToShop(shopId,orderId);
+        if(returnObject.getCode()!=ResponseCode.OK){
             logger.error(" queryPaymentById: 数据库不存在该支付单 orderId="+orderId);
-            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            return returnObject;
         }
         return paymentDao.queryPayment(orderId);
     }
@@ -114,7 +116,7 @@ public class PaymentService implements IPaymentService {
         //支付成功
         payment.setState((byte)0);
         payment.setPayTime(localDateTime);
-
+        payment.setPaySn(Common.genSeqNum());
         payment.setGmtModified(localDateTime);
 
         ReturnObject returnObject = paymentDao.insertPayment(payment);

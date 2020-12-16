@@ -331,8 +331,8 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public ReturnObject<Boolean> isOrderBelongToShop(Long shopId, Long orderId) {
-        return new ReturnObject<>(orderDao.isOrderBelongToShop(shopId, orderId));
+    public ReturnObject isOrderBelongToShop(Long shopId, Long orderId) {
+        return orderDao.isOrderBelongToShop(shopId, orderId);
     }
 
     @Override
