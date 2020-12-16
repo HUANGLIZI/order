@@ -671,6 +671,27 @@ public class OrderDao {
         return new ReturnObject<>(orderItemPoMapper.selectByPrimaryKey(orderItemId));
     }
 
+    /**
+     *通过grouponId查询所有的对应的订单
+     * @param grouponId  团购活动的id
+     * @date 2020-12-14
+     * @author 李明明
+     */
+    public List<Orders> getOrdersByGrouponId(Long grouponId)
+    {
+        OrdersPoExample example = new OrdersPoExample();
+        OrdersPoExample.Criteria criteria = example.createCriteria();
+        criteria.andGrouponIdEqualTo(grouponId);
+
+        List<OrdersPo> ordersPos = ordersPoMapper.selectByExample(example);
+        List<Orders> ordersList = new ArrayList<>(ordersPos.size());
+        for(OrdersPo po : ordersPos)
+        {
+            Orders orders = new Orders(po);
+            ordersList.add(orders);
+        }
+        return ordersList;
+    }
 
     public List<OrderItemPo> findOrderItemsByTime() {
         OrderItemPoExample orderItemPoExample = new OrderItemPoExample();
@@ -688,5 +709,26 @@ public class OrderDao {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         return new ReturnObject();
+    }    
+    /**
+     * 通过presaleId查找所有对应的订单
+     * @param presaleId 预售活动Id
+     * @date 2020-12-14
+     * @author 李明明
+     */
+    public List<Orders> getOrdersByPresleId(Long presaleId)
+    {
+        OrdersPoExample example = new OrdersPoExample();
+        OrdersPoExample.Criteria criteria = example.createCriteria();
+        criteria.andPresaleIdEqualTo(presaleId);
+
+        List<OrdersPo> ordersPos = ordersPoMapper.selectByExample(example);
+        List<Orders> ordersList = new ArrayList<>(ordersPos.size());
+        for(OrdersPo ordersPo : ordersPos)
+        {
+            Orders orders = new Orders(ordersPo);
+            ordersList.add(orders);
+        }
+        return ordersList;
     }
 }

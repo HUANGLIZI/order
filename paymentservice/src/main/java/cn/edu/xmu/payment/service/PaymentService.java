@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @DubboService
 public class PaymentService implements IPaymentService {
@@ -237,6 +238,77 @@ public class PaymentService implements IPaymentService {
         }else {
             return new ReturnObject<>(returnObject.getCode(),returnObject.getErrmsg());
         }
+    }
+
+    /**
+     * 为对应的orderId查找payment并创建退款单。、
+     * 实现IPaymentService.java中 “ReturnObject<ResponseCode> createRefundbyOrederId(Long orderId);”
+     * @author 李明明
+     * @param shopId, orderId
+     * @return
+     * @date 2020-12-14
+     */
+    @Override
+    public ReturnObject<ResponseCode> createRefundbyOrederId(Long shopId, Long orderId)
+    {
+        //调用 "public ReturnObject queryPayment(Long shopId, Long orderId)"
+        ReturnObject<List<Payment>> returnObject = paymentDao.queryPayment(orderId);
+        List<Payment> paymentList = returnObject.getData();
+        //paymentList大概会有1个或2个元素,
+        // 1个元素:是支付定金产生的
+        // 2个元素:一个是支付定金时产生的,另一个是支付尾款时产生的,分两次共两个退款单分别退款
+        for(Payment payment : paymentList)
+        {
+            Refund refund = new Refund();
+            refund.setPaymentId(payment.getId());
+            refund.setOrderId(orderId);
+            refund.setState(Refund.State.HAS_REFUND.getCode().byteValue());
+            refund.setAmount(payment.getActualAmount());
+            refund.setGmtCreate(LocalDateTime.now());
+            ReturnObject<Refund> returnObject1 = paymentDao.insertRefunds(refund);
+            if(returnObject1.getCode() != ResponseCode.OK) {
+                return new ReturnObject<ResponseCode>(returnObject1.getCode(), returnObject1.getErrmsg());
+            }
+        }
+        return new ReturnObject<>(ResponseCode.OK);
+    }
+
+    /**
+     * 处理成团的情况,首先需要将支付单中的actual_amount换成减去团购优惠后的金额,然后为该支付单创建退款单
+     * @param orderId
+     * @param refundPrice
+     * @param shopId
+     * @return
+     * @author 李明明
+     * @date 2020-12-14
+     */
+    @Override
+    public ReturnObject<ResponseCode> createRefundForGrouponByOrderId(Long orderId, Long shopId, Long refundPrice)
+    {
+        //System.out.println("*************欢迎进入paymentService***********");
+        ReturnObject<List<Payment>> returnObject = paymentDao.queryPayment(orderId);
+        if(returnObject.getCode() != ResponseCode.OK)
+            return new ReturnObject<>(returnObject.getCode(),returnObject.getErrmsg());
+        List<Payment> paymentList = returnObject.getData();
+        for(Payment payment : paymentList)
+        {
+            ReturnObject<ResponseCode> returnObject1 = paymentDao.setActualAmount(payment.getId(),refundPrice);
+            if(returnObject1.getCode() != ResponseCode.OK)
+            {
+                return new ReturnObject<>(returnObject1.getCode(),returnObject1.getErrmsg());
+            }
+            Refund refund = new Refund();
+            refund.setPaymentId(payment.getId());
+            refund.setOrderId(orderId);
+            refund.setState(Refund.State.HAS_REFUND.getCode().byteValue());
+            refund.setAmount(refundPrice);
+            refund.setGmtCreate(LocalDateTime.now());
+            ReturnObject<Refund> returnObject2 = paymentDao.insertRefunds(refund);
+            if(returnObject1.getCode() != ResponseCode.OK) {
+                return new ReturnObject<ResponseCode>(returnObject1.getCode(), returnObject1.getErrmsg());
+            }
+        }
+        return new ReturnObject<>(ResponseCode.OK);
     }
 
 }
