@@ -326,15 +326,17 @@ public class FreightController {
     public Object calcuFreightPrice(@Validated @RequestBody List<OrderItemVo> vo, @PathVariable Long rid) {
         logger.debug("calculate freight service by regionId:" + rid);
         int listSize = vo.size();
+        System.out.println(listSize);
         List<Integer> count = new ArrayList<>();
         List<Long> skuId = new ArrayList<>();
-
+        System.out.println(rid);
         for(int i=0;i<listSize;i++)
         {
             count.add(vo.get(i).getConut());
             skuId.add(vo.get(i).getSkuId());
         }
         ReturnObject<Long> retObject = freightService.calcuFreightPrice(count,skuId,rid);
+        System.out.println(retObject.getData());
         return Common.decorateReturnObject(retObject);
     }
 

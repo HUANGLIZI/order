@@ -63,4 +63,20 @@ public class FreightModelReturnVo implements VoObject {
     public Object createSimpleVo() {
         return null;
     }
+
+    public FreightModelPo createPo() {
+        FreightModelPo freightModelPo=new FreightModelPo();
+        freightModelPo.setId(this.id);
+        freightModelPo.setShopId(this.shopId);
+        freightModelPo.setName(this.name);
+        freightModelPo.setType(this.type);
+        freightModelPo.setUnit(this.unit);
+        freightModelPo.setGmtCreate(this.gmtCreate);
+        freightModelPo.setGmtModified(this.gmtModified);
+        Byte a=1;
+        if(this.defaultModel=true){
+            freightModelPo.setDefaultModel(a);
+        }
+        return  freightModelPo;
+    }
 }
