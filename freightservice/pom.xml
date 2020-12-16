@@ -167,6 +167,9 @@
             <artifactId>other-client</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
+            <artifactId>privilegeservice</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

@@ -164,7 +164,8 @@ public class FreightController {
             }
         }
         else{
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + sId)), httpServletResponse);
+            httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("操作的资源id不是自己的对象")), httpServletResponse);
         }
 
     }
