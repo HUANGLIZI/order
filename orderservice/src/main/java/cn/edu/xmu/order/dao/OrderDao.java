@@ -189,14 +189,14 @@ public class OrderDao {
         OrdersPo ordersPo=(OrdersPo) returnObject.getData();
 
         //订单未处于已支付状态，则不允许改变
-        if(ordersPo.getState()!=(byte)10&&ordersPo.getState()!=(byte)11&&ordersPo.getState()!=(byte)12){
+        if(ordersPo.getState()!=(byte)21){
             //修改失败
             logger.error("shopDeliverOrder:Error Order State : " + ordersPo.toString());
             return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW, String.format("订单状态无法转换为发货中"));
         }
 
         //改为发货中状态
-        ordersPo.setState((byte) 16);
+        ordersPo.setState((byte) 24);
         //设置运输sn
         ordersPo.setShipmentSn(orders.getShipmentSn());
 
@@ -672,4 +672,21 @@ public class OrderDao {
     }
 
 
+    public List<OrderItemPo> findOrderItemsByTime() {
+        OrderItemPoExample orderItemPoExample = new OrderItemPoExample();
+        OrderItemPoExample.Criteria criteria = orderItemPoExample.createCriteria();
+        criteria.andGmtCreateBetween(LocalDateTime.now().minusDays(8),LocalDateTime.now().minusDays(7));
+
+        List<OrderItemPo> orderItemPos=orderItemPoMapper.selectByExample(orderItemPoExample);
+
+        return orderItemPos;
+    }
+
+    public ReturnObject updateOrderItem(OrderItemPo po) {
+        int ret=orderItemPoMapper.updateByPrimaryKeySelective(po);
+        if(ret==0){
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        return new ReturnObject();
+    }
 }

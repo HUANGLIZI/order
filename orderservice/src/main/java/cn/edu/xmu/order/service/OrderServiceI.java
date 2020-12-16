@@ -8,18 +8,19 @@ import cn.edu.xmu.oomall.goods.service.IActivityService;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import cn.edu.xmu.oomall.order.service.IFreightService;
 import cn.edu.xmu.oomall.other.model.CustomerDTO;
-import cn.edu.xmu.oomall.other.service.IAddressService;
-import cn.edu.xmu.oomall.other.service.IAftersaleService;
-import cn.edu.xmu.oomall.other.service.ICartService;
-import cn.edu.xmu.oomall.other.service.ICustomerService;
+import cn.edu.xmu.oomall.other.service.*;
 import cn.edu.xmu.order.dao.OrderDao;
+import cn.edu.xmu.order.mapper.OrderItemPoMapper;
 import cn.edu.xmu.order.model.bo.DiscountStrategy;
 import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
+import cn.edu.xmu.order.model.po.OrderItemPo;
+import cn.edu.xmu.order.model.po.OrdersPo;
 import cn.edu.xmu.order.model.vo.*;
 import com.google.gson.Gson;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,6 +58,9 @@ public class OrderServiceI {
 
     @DubboReference
     private ICartService cartServiceI;
+
+    @DubboReference
+    private IShareService shareServiceI;
 
     /**
      * @param
@@ -213,5 +217,16 @@ public class OrderServiceI {
         if (!decrInventoryRet.getCode().equals(ResponseCode.OK))
             return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
         return new ReturnObject<>(orderCreateRetVo);
+    }
+
+    @Scheduled(cron = "0 0 12 * * ?")
+    public void setShareId(){
+        List<OrderItemPo> itemPos = orderDao.findOrderItemsByTime();
+        for(OrderItemPo po:itemPos){
+            ReturnObject<OrdersPo> orderByOrderId = orderDao.getOrderByOrderId(po.getOrderId());
+            ReturnObject<List<Long>> listReturnObject = shareServiceI.setShareRebate(po.getId(), orderByOrderId.getData().getCustomerId(), po.getQuantity(), po.getPrice(), po.getGoodsSkuId(), po.getGmtCreate());
+            po.setBeShareId(listReturnObject.getData().get(0));
+            ReturnObject returnObject=orderDao.updateOrderItem(po);
+        }
     }
 }
