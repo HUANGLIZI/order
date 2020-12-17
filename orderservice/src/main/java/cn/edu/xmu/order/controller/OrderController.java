@@ -303,6 +303,12 @@ public class OrderController {
                                    @Depart @ApiIgnore Long sId,
                                    @PathVariable("shopId") Long shopId){
 
+        logger.debug("shopUpdateOrder orderId:" + orderId);
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            return returnObject;
+        }
         logger.debug("customerConfirmOrder orderId:" + orderId);
         if(shopId.equals(sId)||sId==0){
             Orders orders=vo.createOrder();
@@ -321,6 +327,7 @@ public class OrderController {
         }
 
     }
+
 
     /**
      * @param

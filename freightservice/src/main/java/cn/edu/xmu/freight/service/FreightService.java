@@ -87,7 +87,7 @@ public class FreightService implements IFreightService {
      * createdBy 张湘君 2020/11/25 20:12
      * modifiedBy 张湘君 2020/11/25 20:12
      */
-    public ReturnObject<FreightModelReturnVo> getFreightModelById(Long id) {
+    public ReturnObject<FreightModelPo> getFreightModelById(Long id) {
         return freightDao.getFreightModelById(id);
     }
 

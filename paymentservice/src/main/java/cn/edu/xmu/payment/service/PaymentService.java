@@ -229,7 +229,7 @@ public class PaymentService implements IPaymentService {
         //支付成功
         payment.setState((byte)0);
         payment.setPayTime(localDateTime);
-
+        payment.setPaySn(Common.genSeqNum());
         payment.setGmtModified(localDateTime);
 
         ReturnObject returnObject = paymentDao.insertPayment(payment);

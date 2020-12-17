@@ -174,6 +174,9 @@ public class OrderDao {
         if(!(po.getShopId().equals(shopId))){
             return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
+        if(po.getShopId().toString().equals("null")){
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
 
         return new ReturnObject(po);
     }
@@ -188,15 +191,18 @@ public class OrderDao {
         }
         OrdersPo ordersPo=(OrdersPo) returnObject.getData();
 
+        if(ordersPo.getSubstate().toString().equals("null")){
+            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW, String.format("订单状态无法转换为发货中"));
+        }
         //订单未处于已支付状态，则不允许改变
-        if(ordersPo.getState()!=(byte)21){
+        if(ordersPo.getSubstate()!=(byte)21){
             //修改失败
             logger.error("shopDeliverOrder:Error Order State : " + ordersPo.toString());
             return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW, String.format("订单状态无法转换为发货中"));
         }
 
         //改为发货中状态
-        ordersPo.setState((byte) 24);
+        ordersPo.setSubstate((byte) 24);
         //设置运输sn
         ordersPo.setShipmentSn(orders.getShipmentSn());
 
