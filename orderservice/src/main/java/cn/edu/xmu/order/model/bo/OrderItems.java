@@ -10,6 +10,7 @@ import lombok.Data;
  */
 @Data
 public class OrderItems {
+    private Long Id;
     private Long skuId;
     private Long orderId;
     private String name;

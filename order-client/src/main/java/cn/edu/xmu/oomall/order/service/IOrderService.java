@@ -40,7 +40,7 @@ public interface IOrderService {
     /**
      * 换货api，产生orderitemId的新订单，商品数量为quantity
      */
-    ReturnObject<ResponseCode> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Integer quantity, Long aftersaleId);
+    ReturnObject<Long> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Integer quantity, Long aftersaleId);
 
     /**
      * 由商品模块调用 下线团购时，通知订单模块将团购订单转为普通订单

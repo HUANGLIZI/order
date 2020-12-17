@@ -239,15 +239,14 @@ public class OrderDao {
     {
         OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
 
-//        ordersPoMapper.selectByExample()
-        OrderInnerDTO orderInnerDTO;
-        if (ordersPo != null)
+        if (ordersPo == null)
         {
-            orderInnerDTO = new OrderInnerDTO();
-            orderInnerDTO.setCustomerId(ordersPo.getCustomerId());
+            logger.info("not found order :" + orderId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-        else
-            orderInnerDTO  = new OrderInnerDTO();
+//        ordersPoMapper.selectByExample()
+        OrderInnerDTO orderInnerDTO = new OrderInnerDTO();
+        orderInnerDTO.setCustomerId(ordersPo.getCustomerId());
         return new ReturnObject<>(orderInnerDTO);
     }
 
@@ -260,14 +259,13 @@ public class OrderDao {
     public ReturnObject<OrderInnerDTO> getShopIdbyOrderId(Long orderId)
     {
         OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
-        OrderInnerDTO orderInnerDTO;
-        if (ordersPo != null)
+        if (ordersPo == null)
         {
-            orderInnerDTO  = new OrderInnerDTO();
-            orderInnerDTO.setShopId(ordersPo.getShopId());
+            logger.info("not found order :" + orderId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-        else
-            orderInnerDTO  = new OrderInnerDTO();
+        OrderInnerDTO orderInnerDTO = new OrderInnerDTO();
+        orderInnerDTO.setShopId(ordersPo.getShopId());
         return new ReturnObject<>(orderInnerDTO);
     }
     /**
@@ -283,7 +281,10 @@ public class OrderDao {
         OrdersPoExample ordersPoExample = new OrdersPoExample();
         OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
         if (userId == null)
+        {
+            logger.info("userId is " + userId);
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
         criteria.andCustomerIdEqualTo(userId);
         // 被逻辑删除的订单不能被返回
         Byte beDeleted = 0;
@@ -293,9 +294,37 @@ public class OrderDao {
         if (state != null)
             criteria.andStateEqualTo(state);
         if (beginTime != null)
+        {
+            try {
+                LocalDateTime.parse(beginTime, df);
+            }
+            catch (Exception e)
+            {
+                logger.info("时间字段不合法 " + beginTime);
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            }
             criteria.andGmtCreateGreaterThanOrEqualTo(LocalDateTime.parse(beginTime, df));
+        }
         if (endTime != null)
+        {
+            try {
+                LocalDateTime.parse(endTime, df);
+            }
+            catch (Exception e)
+            {
+                logger.info("时间字段不合法 " + endTime);
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            }
             criteria.andGmtCreateLessThanOrEqualTo(LocalDateTime.parse(endTime, df));
+        }
+        if (beginTime != null && endTime != null)
+        {
+            if (LocalDateTime.parse(beginTime, df).isAfter(LocalDateTime.parse(endTime, df)))
+            {
+                logger.info("开始时间大于结束时间");
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            }
+        }
         //分页查询
         PageHelper.startPage(pageNum, pageSize);
         logger.debug("page = " + pageNum + "pageSize = " + pageSize);
@@ -336,11 +365,11 @@ public class OrderDao {
         int ret = ordersPoMapper.insertSelective(ordersPo);
         if (ret == 0) {
             //插入失败
-            logger.debug("insertRefund: insert refund fail " + ordersPo.toString());
+            logger.debug("insertOrder: insert order fail " + ordersPo.toString());
             retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + ordersPo.getOrderSn()));
         } else {
             //插入成功
-            logger.debug("insertRefund: insert refund = " + ordersPo.toString());
+            logger.debug("insertOrder: insert order = " + ordersPo.toString());
             Long insertOrderId = ordersPo.getId();
             orders.setId(insertOrderId);
             for (OrderItems bo: orderItemsList)
@@ -349,7 +378,11 @@ public class OrderDao {
                 OrderItemPo orderItemPo = bo.gotOrderItemPo();
                 int orderItemRet = orderItemPoMapper.insertSelective(orderItemPo);
                 if (orderItemRet == 0)
+                {
+                    logger.info("insert orderItems fail = " + orderItemPo.toString());
                     return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + orderItemPo.getName()));
+                }
+                bo.setId(orderItemPo.getId());
             }
             orders.setOrderItemsList(orderItemsList);
             retObj = new ReturnObject<>(orders);
@@ -541,6 +574,11 @@ public class OrderDao {
 
     private ReturnObject<List<Long>> getOrderItemsIdForOther(List<Long> skuIds, OrdersPoExample ordersPoExample) {
         List<OrdersPo> ordersPos = ordersPoMapper.selectByExample(ordersPoExample);
+        if (ordersPos == null)
+        {
+            logger.info("not found orderItem :" + ordersPoExample.toString());
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
         OrderItemPoExample orderItemPoExample = new OrderItemPoExample();
         List<Long> orderItemsIdList = new ArrayList<Long>();
         for (OrdersPo ordersPo: ordersPos)
@@ -597,8 +635,18 @@ public class OrderDao {
     public ReturnObject<OrderDTO> getOrderbyOrderItemId(Long userId,Long orderItemId)
     {
         OrderItemPo orderItemPo=orderItemPoMapper.selectByPrimaryKey(orderItemId);
+        if (orderItemPo == null)
+        {
+            logger.info("not found orderItem :" + orderItemId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
         Long orderId = orderItemPo.getOrderId();
         OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
+        if (ordersPo == null)
+        {
+            logger.info("not found order :" + orderId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
         OrderDTO orderDTO = new OrderDTO();
         if(ordersPo.getCustomerId()==userId) {
             orderDTO.setOrderId(ordersPo.getId());
@@ -652,6 +700,8 @@ public class OrderDao {
     public ReturnObject<OrdersPo> getOrderByOrderId(Long orderId)
     {
         OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
+        if (ordersPo == null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         return new ReturnObject<>(ordersPo);
     }
 
@@ -672,7 +722,13 @@ public class OrderDao {
 
     public ReturnObject<OrderItemPo> getOrderItemById(Long orderItemId)
     {
-        return new ReturnObject<>(orderItemPoMapper.selectByPrimaryKey(orderItemId));
+        OrderItemPo orderItemPo = orderItemPoMapper.selectByPrimaryKey(orderItemId);
+        if (orderItemPo == null)
+        {
+            logger.info("not found orderItem: " + orderItemId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        return new ReturnObject<>(orderItemPo);
     }
 
 

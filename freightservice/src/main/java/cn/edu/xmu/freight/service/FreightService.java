@@ -218,7 +218,7 @@ public class FreightService implements IFreightService {
                 freightModelId.add(goodsFreightDTO.get(i).getFreightModelId());//获得单品运费模板id列表
                 freightModelPos.add((FreightModelPo)(freightDao.getFreightModelById(goodsFreightDTO.get(i).getFreightModelId()).getData()));//将单品运费模板加入运费模板列表
             }
-            weightSum+=goodsFreightDTO.get(i).getWeight()*freightModelPos.get(i).getUnit()/1000;//计算总重量
+            weightSum+=goodsFreightDTO.get(i).getWeight()/1000;//计算总重量
         }
         for (int i=0;i<freightModelPos.size();i++) {
             FreightModelPo freightModelPo_temp=freightModelPos.get(i);

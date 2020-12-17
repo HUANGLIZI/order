@@ -31,7 +31,7 @@ import java.util.List;
 
 @Api(value = "订单服务", tags = "order")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "", produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/order", produces = "application/json;charset=UTF-8")
 public class OrderController {
 
     @Autowired
@@ -368,6 +368,12 @@ public class OrderController {
 //        System.out.println(userId);
 //        Long userId = 1L;
         ReturnObject<PageInfo<VoObject>> returnObject = orderService.selectOrders(userId, page, pageSize, orderSn, state, beginTime, endTime);
+        if (returnObject.getCode() == ResponseCode.FIELD_NOTVALID)
+        {
+            httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID,ResponseCode.FIELD_NOTVALID.getMessage()),httpServletResponse);
+
+        }
         return Common.getPageRetObject(returnObject);
     }
 
@@ -390,8 +396,6 @@ public class OrderController {
     public Object createOrders(
             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
             @Validated @RequestBody OrdersVo ordersVo) {
-//        Long userId = 1L;
-//        System.out.println(ordersVo);
         if (ordersVo.getCouponId() != null && ordersVo.getGrouponId() != null)
             return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
         if (ordersVo.getPresaleId() != null && ordersVo.getGrouponId() != null)
@@ -399,8 +403,13 @@ public class OrderController {
         if (ordersVo.getPresaleId() != null && ordersVo.getCouponId() != null)
             return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
         ReturnObject orders = orderServiceI.createOrders(userId, ordersVo);
-        httpServletResponse.setStatus(HttpStatus.CREATED.value());
-        return Common.decorateReturnObject(orders);
+        if (orders.getCode().equals(ResponseCode.OK))
+        {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+            return Common.decorateReturnObject(orders);
+        }
+        else
+            return Common.decorateReturnObject(orders);
     }
 
 
@@ -545,7 +554,7 @@ public class OrderController {
     public Object CreatOrderById(@PathVariable("shopId") Long shopId, @PathVariable("userId") Long userId,@PathVariable("orderItemId") Long orderItemId,@PathVariable("quantity") Integer quantity,@PathVariable("aftersaleId") Long aftersaleId)
     {
         logger.debug("Cancel Order by orderId:" +userId);
-        ReturnObject<ResponseCode> returnObject = orderService.getAdminHandleExchange(userId,shopId,orderItemId,quantity,aftersaleId);
+        ReturnObject<Long> returnObject = orderService.getAdminHandleExchange(userId,shopId,orderItemId,quantity,aftersaleId);
         return Common.decorateReturnObject(returnObject);
     }
 

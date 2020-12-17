@@ -12,6 +12,7 @@ import cn.edu.xmu.oomall.other.service.IAddressService;
 import cn.edu.xmu.oomall.other.service.IAftersaleService;
 import cn.edu.xmu.oomall.other.service.ICartService;
 import cn.edu.xmu.oomall.other.service.ICustomerService;
+import cn.edu.xmu.order.controller.OrderController;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.model.bo.DiscountStrategy;
 import cn.edu.xmu.order.model.bo.OrderItems;
@@ -19,6 +20,8 @@ import cn.edu.xmu.order.model.bo.Orders;
 import cn.edu.xmu.order.model.vo.*;
 import com.google.gson.Gson;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +61,7 @@ public class OrderServiceI {
     @DubboReference
     private ICartService cartServiceI;
 
+    private  static  final Logger logger = LoggerFactory.getLogger(OrderServiceI.class);
     /**
      * @param
      * @return
@@ -73,30 +77,44 @@ public class OrderServiceI {
         // 判断regionId是否有效
         Long regionId = ordersBo.getRegionId();
         if (!addressServiceI.getValidRegionId(regionId).getData())
-            new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-
-        // 判断couponId、presaleId、grouponId是否有效  可能为null或是0
-//        if (ordersBo.getCouponId() != null || ordersBo.getPresaleId() != null ||ordersBo.getGrouponId() != null)
-//            if (!goodsService.judgeActivityIdValid(ordersBo.getCouponId(),ordersBo.getPresaleId(),ordersBo.getGrouponId()).getData())
-//                new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        {
+            logger.info("RegionId is not valid! the regionId is " + regionId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
 
         Long activityId = ordersBo.getCouponId();
+        // 判断couponId、presaleId、grouponId是否有效
         // 设置订单类型
         Byte orderType = 0;
         if (ordersBo.getPresaleId() != null && ordersBo.getPresaleId() != 0)
         {
+            if (!activityServiceI.judgePresaleIdValid(ordersBo.getPresaleId()).getCode().equals(ResponseCode.OK))
+            {
+                logger.info("the presale is not valid: " + ordersBo.getPresaleId());
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
             orderType = 2;
             activityId = ordersBo.getPresaleId();
             ordersBo.setOrderType(orderType);
         }
         else if (ordersBo.getGrouponId() != null && ordersBo.getGrouponId() != 0)
         {
+            if (!activityServiceI.judgeGrouponIdValid(ordersBo.getGrouponId()).getCode().equals(ResponseCode.OK))
+            {
+                logger.info("the groupon is not valid: " + ordersBo.getGrouponId());
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
             orderType = 1;
             activityId = ordersBo.getGrouponId();
             ordersBo.setOrderType(orderType);
         }
         if (ordersBo.getCouponId() != null && ordersBo.getCouponId() != 0)
         {
+            if (!activityServiceI.judgeCouponIdValid(ordersBo.getCouponId()).getCode().equals(ResponseCode.OK))
+            {
+                logger.info("the couponId is not valid: " + ordersBo.getCouponId());
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
             orderType = 3;
             activityId = ordersBo.getCouponId();
             ordersBo.setOrderType((byte)0);
@@ -111,15 +129,26 @@ public class OrderServiceI {
         Long origin_price = 0L;
 
         for (OrderItemsCreateVo vo: orderItemsVo){
-            if (!activityServiceI.judgeCouponActivityIdValid(ordersBo.getCouponActivityId()).getData())
-                new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-            // 判断返回值
-            GoodsDetailDTO goodsDetailDTO = goodsServiceI.getGoodsBySkuId(vo.getGoodsSkuId(), orderType, activityId, -vo.getQuantity()).getData();
-            if (goodsDetailDTO == null)
-                new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-            // 如果库存不够
-            if (goodsDetailDTO.getInventory() == null || goodsDetailDTO.getInventory() < vo.getQuantity())
-                new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
+            if (!activityServiceI.judgeCouponActivityIdValid(ordersBo.getCouponActivityId()).getCode().equals(ResponseCode.OK))
+            {
+                logger.info("the couponActivity is not valid: " + ordersBo.getCouponActivityId());
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+            // 判断返回值 同时扣库存 存在库存不够的情况
+            ReturnObject<GoodsDetailDTO> retGoodsDetailDTO = goodsServiceI.getGoodsBySkuId(vo.getGoodsSkuId(), orderType, activityId, -vo.getQuantity());
+            if (!retGoodsDetailDTO.getCode().equals(ResponseCode.OK))
+            {
+                logger.info("The inventory is not enough, the skuId is " + vo.getSkuId());
+                int index = orderItemsVo.indexOf(vo);
+                for (int i = 0; i < index;i ++)
+                {
+                    ReturnObject<GoodsDetailDTO> addInventoryRet = goodsServiceI.getGoodsBySkuId(orderItemsVo.get(i).getGoodsSkuId(), orderType, activityId, orderItemsVo.get(i).getQuantity());
+                    if(!addInventoryRet.getCode().equals(ResponseCode.OK))
+                        logger.info("回加库存失败！skuId is " + orderItemsVo.get(i).getSkuId());
+                }
+                return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
+            }
+            GoodsDetailDTO goodsDetailDTO = retGoodsDetailDTO.getData();
 //            GoodsDetailDTO goodsDetailDTO = new GoodsDetailDTO("caixin", 123L, 10);
             OrderItems orderItems = new OrderItems(vo);
             orderItems.setName(goodsDetailDTO.getName());
@@ -174,7 +203,6 @@ public class OrderServiceI {
         ordersBo.setDiscountPrice(discountPrice);
 
         // 算orderSn
-//        ordersBo.setOrderSn(Common.genSeqNum().substring(0,13));
         ordersBo.setOrderSn(Common.genSeqNum());
 
 
@@ -184,34 +212,22 @@ public class OrderServiceI {
 
         ordersBo.setGmtCreated(LocalDateTime.now());
 
-        CustomerDTO customerDTO = customerServiceI.findCustomerByUserId(userId).getData();
-        CustomerRetVo customerRetVo = new CustomerRetVo();
-        customerRetVo.setId(userId);
-        customerRetVo.setName(customerDTO.getName());
-        customerRetVo.setUserName(customerDTO.getUserName());
-
-//        ShopDetailDTO shopDetailDTO = goodsService.getShopInfoBySkuId(orderItemsVo.get(0).getGoodsSkuId()).getData();
-        ShopRetVo shopRetVo = new ShopRetVo();
-//        shopRetVo.setId(shopDetailDTO.getShopId());
-//        shopRetVo.setGmtCreate(shopDetailDTO.getGmtCreate());
-//        shopRetVo.setGmtModified(shopDetailDTO.getGmtModified());
-//        shopRetVo.setName(shopDetailDTO.getName());
-//        shopRetVo.setState(shopDetailDTO.getState());
-
         if (!cartServiceI.deleteGoodsInCart(userId, skuIdList).getData().equals(ResponseCode.OK))
+        {
+            for (OrderItemsCreateVo vo: orderItemsVo) {
+                ReturnObject<GoodsDetailDTO> addInventoryRet = goodsServiceI.getGoodsBySkuId(vo.getGoodsSkuId(), orderType, activityId, -vo.getQuantity());
+                if(!addInventoryRet.getCode().equals(ResponseCode.OK))
+                    logger.info("回加库存失败！skuId is " + vo.getSkuId());
+            }
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
 
         ordersBo.setCustomerId(userId);
-//        ordersBo.setShopId(shopDetailDTO.getShopId());
         ReturnObject<Orders> orders = orderDao.createOrders(ordersBo, orderItemsList);
+        if (!orders.getCode().equals(ResponseCode.OK))
+            return new ReturnObject<>(orders.getCode());
         OrderCreateRetVo orderCreateRetVo = new OrderCreateRetVo(orders.getData());
-        orderCreateRetVo.setCustomerRetVo(customerRetVo);
-        orderCreateRetVo.setShopRetVo(shopRetVo);
 
-        // 通知商品模块扣库存
-        ReturnObject<ResponseCode> decrInventoryRet = goodsServiceI.signalDecrInventory(skuIdList, countList);
-        if (!decrInventoryRet.getCode().equals(ResponseCode.OK))
-            return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
         return new ReturnObject<>(orderCreateRetVo);
     }
 }

@@ -33,7 +33,7 @@ import static cn.edu.xmu.ooad.util.Common.getNullRetObj;
 
 @Api(value = "运费服务", tags = "freight")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "", produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/order", produces = "application/json;charset=UTF-8")
 public class FreightController {
 
     @Autowired
