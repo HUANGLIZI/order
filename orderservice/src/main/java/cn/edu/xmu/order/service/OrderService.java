@@ -116,10 +116,10 @@ public class OrderService implements IOrderService {
      * @return VoObject
      */
     @Transactional
-    public ReturnObject<VoObject> transOrder(Long id) {
+    public ReturnObject<VoObject> transOrder(Long id,Long userId) {
         ReturnObject<VoObject> returnObject = null;
         Orders orders=orderDao.findOrderById(id);
-        if(orders.getOrderType()==1) {
+        if(orders.getOrderType()==1&&orders.getCustomerId()==userId) {
             int ret=orderDao.transOrder(id);
             if(ret == 1) {
                 logger.debug("transOrdersById : " + returnObject);
@@ -136,7 +136,10 @@ public class OrderService implements IOrderService {
             logger.debug("该订单不是团购订单，无法进行转换");
             returnObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
         }
-        else if(orders==null||orders.getOrderType()==null){
+        else if(orders.getCustomerId()!=userId) {//id不对应
+            returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+        else if(orders==null||orders.getOrderType()==null){//订单不存在
             returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         return returnObject;
