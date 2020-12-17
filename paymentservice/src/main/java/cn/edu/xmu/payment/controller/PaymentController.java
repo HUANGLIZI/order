@@ -425,7 +425,7 @@ public class PaymentController {
             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
             @PathVariable("id") Long aftersaleId) {
         System.out.println("userId" + userId);
-        ReturnObject<VoObject> returnObject = paymentServiceI.userQueryRefundsByAftersaleId(aftersaleId, userId);
+        ReturnObject<List> returnObject = paymentServiceI.userQueryRefundsByAftersaleId(aftersaleId, userId);
 
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.decorateReturnObject(returnObject);
