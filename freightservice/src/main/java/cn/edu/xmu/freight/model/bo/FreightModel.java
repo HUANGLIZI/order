@@ -80,14 +80,14 @@ public class FreightModel implements VoObject, Serializable {
 
     public FreightModelPo gotFreightModelPo() {
         FreightModelPo po = new FreightModelPo();
-        po.setId(id);
-        po.setShopId(shopId);
-        po.setName(name);
-        po.setDefaultModel(this.defaultModel);
-        po.setType(type);
-        po.setUnit(unit);
-        po.setGmtCreate(gmtCreate);
-        po.setGmtModified(gmtModified);
+        po.setId(this.getId());
+        po.setShopId(this.getShopId());
+        po.setName(this.getName());
+        po.setUnit(this.getUnit());
+        po.setType(this.getType());
+        po.setGmtCreate(this.getGmtCreate());
+        po.setGmtModified(this.getGmtModified());
+        po.setDefaultModel(this.getDefaultModel());
         return po;
     }
 

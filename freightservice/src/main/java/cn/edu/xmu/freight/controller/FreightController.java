@@ -316,8 +316,11 @@ public class FreightController {
         freightModel.setShopId(id);
         freightModel.setGmtCreate(LocalDateTime.now());
         ReturnObject<VoObject> retObject = freightService.insertFreightModel(freightModel);
-        httpServletResponse.setStatus(HttpStatus.CREATED.value());
-        return Common.decorateReturnObject(retObject);
+        if(retObject.getCode()==ResponseCode.OK) {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        }else if(retObject.getCode()==ResponseCode.FREIGHTNAME_SAME) {
+            httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        }return Common.decorateReturnObject(retObject);
     }
     /**
      * 计算运费
