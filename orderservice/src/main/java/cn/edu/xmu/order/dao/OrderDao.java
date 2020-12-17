@@ -456,7 +456,7 @@ public class OrderDao {
             logger.error("getOrderById: 数据库不存在该订单 order_id=" + id);
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-        else if(shopId != ordersPo.getShopId())
+        else if(!ordersPo.getShopId().equals(shopId))
         {
             logger.error("getOrderById: 店铺Id不匹配 order_id=" + id);
             return new ReturnObject(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + shopId));
