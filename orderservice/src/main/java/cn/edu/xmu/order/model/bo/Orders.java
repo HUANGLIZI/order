@@ -130,25 +130,16 @@ public class Orders implements VoObject, Serializable {
      * 后台用户状态
      */
     public enum State {
-        CANCEL(0, "订单取消"),
-        DEPOSIT_TO_BE_PAID(1, "待支付定金"),
-        TO_BE_PAID(2, "待支付"),
-        TO_BE_GROUP(3, "待参团"),
-        DEPOSIT_HAS_PAID(4, "已支付定金"),
-        REST_TO_BE_PAID(5, "待支付尾款"),
-        CREATE_ORDER(6, "创建订单"),
-        PRESALE_SUSPENSION(7, "预售中止"),
-        HAS_JOIN_GROUP(8, "已参团"),
-        GROUP_NOT_REACHED_THRESHOLD(9, "团购未达到门槛"),
-        GROUP_HAS_FORMED(10, "已成团"),
-        HAS_PAID(11, "已支付"),
-        REST_HAS_PAID(12, "已支付尾款"),
-        HAS_REFUNDED(13, "已退款"),
-        ORDER_SUSPENSION(14, "订单中止"),
-        AFTERSALE_ORDER_TO_BE_DELIVERED(15, "售后单待发货"),
-        DELIVERING(16, "发货中"),
-        ARRIVED(17, "到货"),
-        HAS_SIGNED_IN(18, "已签收");
+        CANCEL(4, "已取消"),
+        TO_BE_PAID(1, "待付款"),
+        TO_BE_GROUP(22, "待成团"),
+        REST_TO_BE_PAID(12, "待支付尾款"),
+        CREATE_ORDER(11, "新订单"),
+        GROUP_NOT_REACHED_THRESHOLD(23, "未成团"),
+        HAS_PAID(21, "付款完成"),
+        HAS_FINISHED(3, "已完成"),
+        HAS_DELIVERRED(24, "已发货"),
+        TO_BE_SIGNED_IN(2, "待收货");
 
         private static final Map<Integer, State> stateMap;
 

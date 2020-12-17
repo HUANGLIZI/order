@@ -39,7 +39,7 @@ public class PaymentServiceI {
      * @date 2020-12-03 20:06
      */
     @Transactional
-    public ReturnObject<VoObject> userQueryRefundsByOrderId(Long orderId, Long userId)
+    public ReturnObject userQueryRefundsByOrderId(Long orderId, Long userId)
     {
         ReturnObject<OrderInnerDTO> orderInnerDTO = iOrderService.findUserIdbyOrderId(orderId);
         if (!orderInnerDTO.getCode().equals(ResponseCode.OK))
@@ -57,19 +57,15 @@ public class PaymentServiceI {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
 
-        ReturnObject<VoObject> retRefund;
-        ReturnObject<List<RefundBo>> returnObject = paymentDao.findRefundsInfoByOrderId(orderId);
+        ReturnObject<List> retRefund;
+        ReturnObject returnObject = paymentDao.findRefundsInfoByOrderId(orderId);
         if (returnObject.getCode().equals(ResponseCode.OK)) {
-            if (returnObject.getData().size() == 1) {
-                retRefund = new ReturnObject<>(returnObject.getData().get(0));
-            }else{
-                logger.info("more than one same orderId: " + returnObject.getData().get(0).getOrderId());
-                retRefund = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-            }
+            return returnObject;
         }else{
             retRefund = new ReturnObject<>(returnObject.getCode(), returnObject.getErrmsg());
+            return retRefund;
         }
-        return retRefund;
+
     }
 
     /**
@@ -79,7 +75,7 @@ public class PaymentServiceI {
      * @date 2020-12-05 17:59
      */
     @Transactional
-    public ReturnObject<VoObject> userQueryRefundsByAftersaleId(Long aftersaleId, Long userId)
+    public ReturnObject<List> userQueryRefundsByAftersaleId(Long aftersaleId, Long userId)
     {
 //        System.out.println(userId);
         ReturnObject<Long> ret = iAftersaleService.findUserIdbyAftersaleId(aftersaleId);
@@ -96,20 +92,12 @@ public class PaymentServiceI {
         if (!retUserId.equals(userId))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
-        ReturnObject<VoObject> retRefund;
-        ReturnObject<List<RefundBo>> returnObject = paymentDao.findRefundsInfoByAfterSaleId(aftersaleId);
+        ReturnObject<List> returnObject = paymentDao.findRefundsInfoByAfterSaleId(aftersaleId);
         if (returnObject.getCode().equals(ResponseCode.OK)) {
-            logger.info("RefundBo list is: " + returnObject.getData().size());
-            logger.info("aftersaleId is: " + aftersaleId);
-            if (returnObject.getData().size() == 1) {
-                retRefund = new ReturnObject<>(returnObject.getData().get(0));
-            }else{
-                retRefund = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-            }
+            return returnObject;
         }else{
-            retRefund = new ReturnObject<>(returnObject.getCode(), returnObject.getErrmsg());
+            return new ReturnObject<>(returnObject.getCode(), returnObject.getErrmsg());
         }
-        return retRefund;
     }
 
 

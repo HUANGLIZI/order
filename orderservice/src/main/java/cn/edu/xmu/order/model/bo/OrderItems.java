@@ -10,6 +10,7 @@ import lombok.Data;
  */
 @Data
 public class OrderItems {
+    private Long Id;
     private Long skuId;
     private Long orderId;
     private String name;
@@ -28,6 +29,7 @@ public class OrderItems {
 
     public OrderItems(OrderItemPo orderItemPo)
     {
+        this.Id = orderItemPo.getId();
         this.skuId = orderItemPo.getGoodsSkuId();
         this.couponActId = orderItemPo.getCouponActivityId();
         this.quantity = orderItemPo.getQuantity();
@@ -41,6 +43,7 @@ public class OrderItems {
     public OrderItemPo gotOrderItemPo()
     {
         OrderItemPo orderItemPo = new OrderItemPo();
+        orderItemPo.setId(this.Id);
         orderItemPo.setBeShareId(this.beShareId);
         orderItemPo.setCouponActivityId(this.couponActId);
         orderItemPo.setPrice(this.price);

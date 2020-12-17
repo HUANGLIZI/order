@@ -35,7 +35,7 @@ import java.util.List;
 
 @Api(value = "支付服务", tags = "payment")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "", produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/order", produces = "application/json;charset=UTF-8")
 public class PaymentController {
     @Autowired
     private PaymentService paymentService;
@@ -391,10 +391,10 @@ public class PaymentController {
             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
             @PathVariable("id") Long orderId) {
 //        System.out.println("userId" + userId);
-        ReturnObject<VoObject> returnObject = paymentServiceI.userQueryRefundsByOrderId(orderId, userId);
+        ReturnObject<List> returnObject = paymentServiceI.userQueryRefundsByOrderId(orderId, userId);
 
         if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getRetObject(returnObject);
+            return Common.getListRetObject(returnObject);
         } else {
             if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE) {
                 httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());

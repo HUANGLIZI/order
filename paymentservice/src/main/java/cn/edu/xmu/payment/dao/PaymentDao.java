@@ -252,7 +252,7 @@ public class PaymentDao {
      * @author Cai Xinlu
      * @date 2020-12-06 22:53
      */
-    public ReturnObject<List<RefundBo>> findRefundsInfoByOrderId(Long orderId)
+    public ReturnObject findRefundsInfoByOrderId(Long orderId)
     {
         RefundPoExample refundPoExample = new RefundPoExample();
         RefundPoExample.Criteria criteria = refundPoExample.createCriteria();
@@ -278,7 +278,7 @@ public class PaymentDao {
      * @author Cai Xinlu
      * @date 2020-12-06 22:53
      */
-    public ReturnObject<List<RefundBo>> findRefundsInfoByAfterSaleId(Long afterSaleId)
+    public ReturnObject<List> findRefundsInfoByAfterSaleId(Long afterSaleId)
     {
         RefundPoExample refundPoExample = new RefundPoExample();
         RefundPoExample.Criteria criteria = refundPoExample.createCriteria();
