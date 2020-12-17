@@ -2,6 +2,7 @@ package cn.edu.xmu.payment.controller;
 
 
 import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
@@ -20,6 +21,7 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -33,7 +35,7 @@ import java.util.List;
 
 @Api(value = "支付服务", tags = "payment")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "/payment", produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "", produces = "application/json;charset=UTF-8")
 public class PaymentController {
     @Autowired
     private PaymentService paymentService;
@@ -98,13 +100,19 @@ public class PaymentController {
     })
     @Audit
     @GetMapping("/shops/{shopId}/orders/{id}/payments")
-    public Object queryPayment(@PathVariable("shopId") Long shopId,@PathVariable("id") Long orderId){
-        ReturnObject returnObject =  paymentService.queryPayment(shopId,orderId);
-        if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getListRetObject(returnObject);
-        } else {
-            return Common.decorateReturnObject(returnObject);
+    public Object queryPayment(@PathVariable("shopId") Long shopId,@PathVariable("id") Long orderId,@Depart @ApiIgnore Long sId){
+        if(shopId.equals(sId)||sId==0){
+            ReturnObject returnObject =  paymentService.queryPayment(shopId,orderId);
+            if (returnObject.getCode() == ResponseCode.OK) {
+                return Common.getListRetObject(returnObject);
+            } else {
+                return Common.decorateReturnObject(returnObject);
+            }
+        }else {
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("操作的资源id不是自己的对象")), httpServletResponse);
         }
+
     }
 
 
@@ -183,11 +191,24 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/shops/{shopId}/orders/{id}/refunds")
-    public Object getOrdersRefundsByOrderId(@PathVariable("id") Long id,@PathVariable("shopId") Long shopId){
+    public Object getOrdersRefundsByOrderId(@Depart @ApiIgnore Long sId,
+            @PathVariable("id") Long id,
+            @PathVariable("shopId") Long shopId){
+        if (!shopId.equals(sId) && sId != 0) {
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+        }
         ReturnObject returnObject =  paymentServiceI.getOrdersRefundsByOrderId(id,shopId);
-        return returnObject;
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getListRetObject(returnObject);
+        } else {
+            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE) {
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()),httpServletResponse);
+            }
+            return Common.decorateReturnObject(returnObject);
+        }
     }
     /**
      * 通过AfterSaleId查询订单的退款信息
@@ -208,9 +229,23 @@ public class PaymentController {
     })
     @Audit
     @GetMapping("/shops/{shopId}/aftersales/{id}/refunds")
-    public Object getOrdersRefundsByAftersaleId(@PathVariable("id") Long id,@PathVariable("shopId") Long shopId){
+    public Object getOrdersRefundsByAftersaleId(@Depart @ApiIgnore Long sId,
+            @PathVariable("id") Long id,
+            @PathVariable("shopId") Long shopId){
+        if (!shopId.equals(sId) && sId != 0) {
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+        }
         ReturnObject returnObject =  paymentServiceI.getOrdersRefundsByAftersaleId(id,shopId);
-        return returnObject;
+        if (returnObject.getCode() == ResponseCode.OK) {
+            logger.info(returnObject.getCode().toString() + "============");
+            return Common.decorateReturnObject(returnObject);
+        } else {
+            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE) {
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()),httpServletResponse);
+            }
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
     /**
@@ -228,7 +263,7 @@ public class PaymentController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @PostMapping("/shops/{shopId}/payments/{id}/refunds")
     public Object insertRole(@Validated @RequestBody amountVo amount, BindingResult bindingResult,
                              @PathVariable("id") Long id, @PathVariable("shopId") Long shopId) {
@@ -240,7 +275,11 @@ public class PaymentController {
         refund.setGmtCreate(LocalDateTime.now());
         ReturnObject<VoObject> retObject = paymentService.insertRefunds(refund,shopId);
         httpServletResponse.setStatus(HttpStatus.CREATED.value());
-        return Common.decorateReturnObject(retObject);
+        if (retObject.getCode() == ResponseCode.OK) {
+            return Common.decorateReturnObject(retObject);
+        } else {
+            return Common.decorateReturnObject(retObject);
+        }
     }
 
     /**
@@ -304,7 +343,7 @@ public class PaymentController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功")
     })
-    //@Audit
+    @Audit
     @PostMapping("/aftersales/{id}/payments")
     public Object createPaymentByAftersaleId(@Validated @RequestBody PaymentVo vo, BindingResult bindingResult,
                                 @PathVariable("id") Long aftersaleId){
@@ -353,7 +392,16 @@ public class PaymentController {
             @PathVariable("id") Long orderId) {
 //        System.out.println("userId" + userId);
         ReturnObject<VoObject> returnObject = paymentServiceI.userQueryRefundsByOrderId(orderId, userId);
-        return returnObject;
+
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE) {
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()),httpServletResponse);
+            }
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
     /**
@@ -362,7 +410,7 @@ public class PaymentController {
      * @author Cai Xinlu
      * @date 2020-12-06 23:18
      */
-//    @Audit
+    @Audit
     @ApiOperation(value = "买家查询自己的退款信息",produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
@@ -376,9 +424,18 @@ public class PaymentController {
     public Object queryUserRefundsByAftersaleId(
             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
             @PathVariable("id") Long aftersaleId) {
-//        System.out.println("userId" + userId);
+        System.out.println("userId" + userId);
         ReturnObject<VoObject> returnObject = paymentServiceI.userQueryRefundsByAftersaleId(aftersaleId, userId);
-        return returnObject;
+
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.decorateReturnObject(returnObject);
+        } else {
+            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE) {
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()),httpServletResponse);
+            }
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
 
@@ -396,8 +453,8 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
-    @GetMapping("/states")
+    @Audit
+    @GetMapping("/payments/states")
     public Object getAllPaymentsStates()
     {
         Payment.State[] states = Payment.State.class.getEnumConstants();
@@ -421,11 +478,12 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
-    @GetMapping("/patterns")
+    @Audit
+    @GetMapping("/payments/patterns")
     public Object userQueryPayment()
     {
         List<PayPatternVo> payPatternVos=new ArrayList<PayPatternVo>();
+        payPatternVos.add(new PayPatternVo("001","返点支付"));
         payPatternVos.add(new PayPatternVo("002","模拟支付渠道"));
         return ResponseUtil.ok(new ReturnObject<List>(payPatternVos).getData());
     }

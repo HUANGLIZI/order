@@ -1,5 +1,6 @@
 package cn.edu.xmu.payment;
 
+import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.mybatis.spring.annotation.MapperScan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 
+@EnableDubbo(scanBasePackages = "cn.edu.xmu.payment.service")
 @SpringBootApplication(scanBasePackages = {"cn.edu.xmu.ooad", "cn.edu.xmu.payment"})
 @MapperScan("cn.edu.xmu.payment.mapper")
 @EnableDiscoveryClient

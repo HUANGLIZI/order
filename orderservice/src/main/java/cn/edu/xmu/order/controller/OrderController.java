@@ -152,7 +152,7 @@ public class OrderController {
             @ApiResponse(code = 0, message = "成功"),
     })
     //@Audit
-    @PutMapping("/orders3/{id}")
+    @PutMapping("/orders/{id}")
     public Object updateOrder(@PathVariable("id") Long id, @Validated @RequestBody OrderSimpleVo vo, BindingResult bindingResult) {
         logger.debug("update order by orderId:" + id);
         //校验前端数据-----暂时还没写
@@ -182,7 +182,7 @@ public class OrderController {
             @ApiResponse(code = 0, message = "成功"),
     })
     //@Audit
-    @PutMapping("/orders2/{id}/confirm")
+    @PutMapping("/orders/{id}/confirm")
     public Object updateOrderStateToConfirm( @PathVariable("id") Long id) {
         logger.debug("update orders by orderId:" + id);
         //校验前端数据-----暂时还没写
@@ -210,7 +210,7 @@ public class OrderController {
             @ApiResponse(code = 0, message = "成功"),
     })
     //@Audit
-    @PutMapping("/orders1/{id}")
+    @DeleteMapping("/orders/{id}")
     public Object logicDeleteOrder( @PathVariable("id") Long id) {
         logger.debug("logicDelete order by orderId:" + id);
         //校验前端数据-----暂时还没写
@@ -233,7 +233,7 @@ public class OrderController {
      * @param userId 当前用户id
      * @return Object 订单返回视图
      */
-    @ApiOperation(value = "买家修改本人名下订单。", produces = "application/json")
+    @ApiOperation(value = "店家修改订单 (留言)。", produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true),
@@ -251,7 +251,7 @@ public class OrderController {
                                   @Depart @ApiIgnore Long sId,
                                   @PathVariable("shopId") Long shopId){
 
-        System.out.println(userId);
+
         logger.debug("shopUpdateOrder orderId:" + orderId);
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
@@ -259,15 +259,20 @@ public class OrderController {
             return returnObject;
         }
 
-        if (shopId.equals(sId)){
+        if (shopId.equals(sId)||sId==0){
             Orders orders=vo.createOrder();
             orders.setId(orderId);
             orders.setShopId(shopId);
             ReturnObject<Object> retObject = orderService.shopUpdateOrder(orders);
+            if(retObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE){
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
+            }
             return Common.decorateReturnObject(retObject);
         }
         else{
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + sId)), httpServletResponse);
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
         }
 
     }
@@ -299,15 +304,20 @@ public class OrderController {
                                    @PathVariable("shopId") Long shopId){
 
         logger.debug("customerConfirmOrder orderId:" + orderId);
-        if(shopId.equals(sId)){
+        if(shopId.equals(sId)||sId==0){
             Orders orders=vo.createOrder();
             orders.setId(orderId);
             orders.setShopId(shopId);
             ReturnObject<Object> retObject = orderService.shopDeliverOrder(orders);
+            if(retObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE){
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
+            }
             return Common.decorateReturnObject(retObject);
         }
         else{
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + sId)), httpServletResponse);
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
         }
 
     }
@@ -390,9 +400,17 @@ public class OrderController {
     public Object createOrders(
             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
             @Validated @RequestBody OrdersVo ordersVo) {
+//        Long userId = 1L;
 //        System.out.println(ordersVo);
+        if (ordersVo.getCouponId() != null && ordersVo.getGrouponId() != null)
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+        if (ordersVo.getPresaleId() != null && ordersVo.getGrouponId() != null)
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+        if (ordersVo.getPresaleId() != null && ordersVo.getCouponId() != null)
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
         ReturnObject orders = orderServiceI.createOrders(userId, ordersVo);
-        return new ReturnObject<>(orders);
+        httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        return Common.decorateReturnObject(orders);
     }
 
 
@@ -403,6 +421,7 @@ public class OrderController {
      * @param page 页数
      * @param pageSize 每页大小
      * @return Object 查询结果
+     * @date 2020/12/12
      */
     @ApiOperation(value = "店家查询商户所有订单 (概要)",produces = "application/json")
     @ApiImplicitParams({
@@ -418,9 +437,10 @@ public class OrderController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功")
     })
-    //@Audit
+    @Audit
     @GetMapping("/shops/{shopId}/orders")
     public Object getShopAllFreightModels(@PathVariable("shopId") Long shopId,
+                                          @Depart @ApiIgnore Long departId,
                                           @RequestParam(required = false) Long customerId,
                                           @RequestParam(required = false) String orderSn,
                                           @RequestParam(required = false) String beginTime,
@@ -428,8 +448,15 @@ public class OrderController {
                                           @RequestParam(required = false, defaultValue = "1") Integer page,
                                           @RequestParam(required = false, defaultValue = "10") Integer pageSize){
         logger.debug("getShopAllFreightModels: page = "+ page +"  pageSize ="+pageSize);
-        ReturnObject<PageInfo<VoObject>> returnObject = orderService.getShopAllOrders(shopId,customerId, orderSn, beginTime, endTime, page, pageSize);
-        return Common.getPageRetObject(returnObject);
+        if(shopId == departId)
+        {
+            ReturnObject<PageInfo<VoObject>> returnObject = orderService.getShopAllOrders(shopId,customerId, orderSn, beginTime, endTime, page, pageSize);
+            return Common.getPageRetObject(returnObject);
+        }
+        else
+        {
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + departId)), httpServletResponse);
+        }
     }
 
     /**
@@ -437,6 +464,7 @@ public class OrderController {
      *
      * @author 24320182203323  李明明
      * @return Object 查询结果
+     * @date 2020/12/12
      */
     @ApiOperation(value = "店家查询店内订单完整信息（普通，团购，预售）",produces = "application/json")
     @ApiImplicitParams({
@@ -449,16 +477,23 @@ public class OrderController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/shops/{shopId}/orders/{id}")
-    public Object getOrderById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id){
+    public Object getOrderById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id, @Depart @ApiIgnore Long departId){
 
 
         ReturnObject returnObject =  orderService.getOrderById(shopId, id);
-        if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getRetObject(returnObject);
-        } else {
-            return Common.decorateReturnObject(returnObject);
+        if(shopId == departId)
+        {
+            if (returnObject.getCode() == ResponseCode.OK) {
+                return Common.getRetObject(returnObject);
+            } else {
+                return Common.decorateReturnObject(returnObject);
+            }
+        }
+        else
+        {
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + departId)), httpServletResponse);
         }
     }
 
@@ -468,6 +503,7 @@ public class OrderController {
      *
      * @author 24320182203323  李明明
      * @return Object 查询结果
+     * @date 2020/12/12
      */
     @ApiOperation(value = "管理员取消本店铺订单",produces = "application/json")
     @ApiImplicitParams({
@@ -480,13 +516,21 @@ public class OrderController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @DeleteMapping("/shops/{shopId}/orders/{id}")
-    public Object cancelOrderById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id)
+    public Object cancelOrderById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id, @Depart @ApiIgnore Long departId)
     {
-        logger.debug("Cancel Order by orderId:" +id);
-        ReturnObject<VoObject> returnObject = orderService.cancelOrderById(shopId, id);
-        return Common.decorateReturnObject(returnObject);
+        if(shopId == departId)
+        {
+            logger.debug("Cancel Order by orderId:" +id);
+            ReturnObject<VoObject> returnObject = orderService.cancelOrderById(shopId, id);
+            return Common.decorateReturnObject(returnObject);
+        }
+        else
+        {
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + departId)), httpServletResponse);
+        }
+
     }
 
     /**
@@ -511,8 +555,13 @@ public class OrderController {
     public Object CreatOrderById(@PathVariable("shopId") Long shopId, @PathVariable("userId") Long userId,@PathVariable("orderItemId") Long orderItemId,@PathVariable("quantity") Integer quantity,@PathVariable("aftersaleId") Long aftersaleId)
     {
         logger.debug("Cancel Order by orderId:" +userId);
-        ReturnObject<ResponseCode> returnObject = orderService.getAdminHandleExchange(userId,shopId,orderItemId,quantity,aftersaleId);
+        ReturnObject<Long> returnObject = orderService.getAdminHandleExchange(userId,shopId,orderItemId,quantity,aftersaleId);
         return Common.decorateReturnObject(returnObject);
     }
 
+    @PostMapping("/test/{id}")
+    public ReturnObject<ResponseCode> justTest(@PathVariable("id") Long ordersId)
+    {
+        return orderService.splitOrders(ordersId);
+    }
 }

@@ -1,24 +1,22 @@
 package cn.edu.xmu.freight.service;
 
 import cn.edu.xmu.freight.dao.FreightDao;
+import cn.edu.xmu.freight.model.vo.*;
 import cn.edu.xmu.oomall.goods.model.GoodsFreightDTO;
-import cn.edu.xmu.oomall.goods.service.GoodsService;
+import cn.edu.xmu.oomall.goods.service.IGoodsService;
+import cn.edu.xmu.oomall.order.model.SimpleFreightModelDTO;
 import cn.edu.xmu.oomall.order.service.IFreightService;
+import cn.edu.xmu.oomall.other.service.IAddressService;
 import com.github.pagehelper.PageInfo;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
-import org.springframework.stereotype.Service;
 import cn.edu.xmu.freight.model.bo.FreightModelChangeBo;
 import cn.edu.xmu.freight.model.bo.PieceFreightModelChangeBo;
 import cn.edu.xmu.freight.model.bo.WeightFreightModelChangeBo;
-import cn.edu.xmu.freight.model.vo.FreightModelChangeVo;
-import cn.edu.xmu.freight.model.vo.PieceFreightModelChangeVo;
-import cn.edu.xmu.freight.model.vo.WeightFreightModelChangeVo;
 import cn.edu.xmu.freight.model.bo.FreightModel;
 import cn.edu.xmu.freight.model.bo.PieceFreightModel;
 import cn.edu.xmu.freight.model.bo.WeightFreightModel;
 import cn.edu.xmu.freight.model.po.FreightModelPo;
-import cn.edu.xmu.freight.model.vo.FreightModelRetVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -26,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @DubboService
@@ -34,7 +34,10 @@ public class FreightService implements IFreightService {
     private FreightDao freightDao;
 
     @DubboReference
-    private GoodsService goodsService;
+    private IGoodsService goodsServiceI;
+
+    @DubboReference
+    private IAddressService addressServiceI;
 
 
     private Logger logger = LoggerFactory.getLogger(FreightService.class);
@@ -84,7 +87,7 @@ public class FreightService implements IFreightService {
      * createdBy 张湘君 2020/11/25 20:12
      * modifiedBy 张湘君 2020/11/25 20:12
      */
-    public ReturnObject getFreightModelById(Long id) {
+    public ReturnObject<FreightModelReturnVo> getFreightModelById(Long id) {
         return freightDao.getFreightModelById(id);
     }
 
@@ -131,13 +134,13 @@ public class FreightService implements IFreightService {
      * createdBy 张湘君 2020/11/28 20:12
      * modifiedBy 张湘君 2020/11/28 20:12
      */
-    public ReturnObject<Object> delShopFreightModel(Long shopId, Long id) {
+    public ReturnObject delShopFreightModel(Long shopId, Long id) {
         //物理删除
         ReturnObject returnObject=freightDao.delShopFreightModel(shopId,id);
         if (returnObject.getCode() == ResponseCode.OK) {
 
             //在这里调用商品模块的api修改相应商品的freight_id
-            goodsService.updateSpuFreightId(id);
+            goodsServiceI.updateSpuFreightId(id);
             
         }
 
@@ -150,10 +153,8 @@ public class FreightService implements IFreightService {
      * @date 2020-12-10 9:40
      */
     public ReturnObject<ResponseCode> changeFreightModel(Long id, FreightModelChangeVo freightModelChangeVo,
-                                                     Long shopId, Long sId)
+                                                         Long shopId)
     {
-        if (!shopId.equals(sId))
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         FreightModelChangeBo freightModelChangeBo = freightModelChangeVo.createFreightModelBo();
         freightModelChangeBo.setShopId(shopId);
         freightModelChangeBo.setId(id);
@@ -167,10 +168,8 @@ public class FreightService implements IFreightService {
      * @date 2020-12-10 9:40
      */
     public ReturnObject<ResponseCode> changeWeightFreightModel(Long id, WeightFreightModelChangeVo weightFreightModelChangeVo,
-                                                         Long shopId, Long sId)
+                                                               Long shopId)
     {
-        if (!shopId.equals(sId))
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         WeightFreightModelChangeBo weightFreightModelChangeBo = weightFreightModelChangeVo.createWeightFreightModelBo();
         weightFreightModelChangeBo.setId(id);
 
@@ -183,10 +182,8 @@ public class FreightService implements IFreightService {
      * @date 2020-12-10 9:40
      */
     public ReturnObject<ResponseCode> changePieceFreightModel(Long id, PieceFreightModelChangeVo pieceFreightModelChangeVo,
-                                                        Long shopId, Long sId)
+                                                              Long shopId)
     {
-        if (!shopId.equals(sId))
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         PieceFreightModelChangeBo pieceFreightModelChangeBo = pieceFreightModelChangeVo.createPieceFreightModelChangeBo();
         pieceFreightModelChangeBo.setId(id);
 
@@ -203,17 +200,19 @@ public class FreightService implements IFreightService {
     @Transactional
     @Override
     public ReturnObject<Long> calcuFreightPrice(List<Integer> count, List<Long> skuId,Long regionId) {
+
         Long freightPrice = 0L;
         //根据skuId查询模板、重量,查询默认运费模板
         //根据重量、count并比较算出freightPrice
-        List<GoodsFreightDTO> goodsFreightDTO = null;
-        List<Long> freightModelId = null;
-        List<FreightModelPo> freightModelPos = null;//运费模板列表
-        Long weightSum = 0L;
+        List<GoodsFreightDTO> goodsFreightDTO = new ArrayList<>();
+        List<Long> freightModelId = new ArrayList<>();
+        List<FreightModelPo> freightModelPos = new ArrayList<>();//运费模板列表
+        float weightSum = 0;
         Integer countSum=0;
         for (int i=0;i<skuId.size();i++) {
-            goodsFreightDTO.add(goodsService.getGoodsFreightDetailBySkuId(skuId.get(i)).getData());
-            weightSum+=goodsFreightDTO.get(i).getWeight();//计算总重量
+            goodsServiceI.getGoodsFreightDetailBySkuId(skuId.get(i)).getData();
+            goodsFreightDTO.add(goodsServiceI.getGoodsFreightDetailBySkuId(skuId.get(i)).getData());
+//            GoodsFreightDTO goodsFreightDTO = new GoodsFreightDTO();
             countSum+=count.get(i);//计算总件数
             if(goodsFreightDTO.get(i).getFreightModelId()==null) {//如果没有单品运费模板,采用默认模板
                 Long shopId=goodsFreightDTO.get(i).getShopId();
@@ -223,8 +222,12 @@ public class FreightService implements IFreightService {
             }
             else{
                 freightModelId.add(goodsFreightDTO.get(i).getFreightModelId());//获得单品运费模板id列表
-                freightModelPos.add((FreightModelPo)(freightDao.getFreightModelById(goodsFreightDTO.get(i).getFreightModelId()).getData()));//将单品运费模板加入运费模板列表
+                Long FreightModelId=goodsFreightDTO.get(i).getFreightModelId();
+                FreightModelReturnVo freightModelReturnVo=freightDao.getFreightModelById(FreightModelId).getData();
+                FreightModelPo freightModelPo=freightModelReturnVo.createPo();
+                freightModelPos.add(freightModelPo);//将单品运费模板加入运费模板列表
             }
+            weightSum+=goodsFreightDTO.get(i).getWeight();//计算总重量,单位为g
         }
         for (int i=0;i<freightModelPos.size();i++) {
             FreightModelPo freightModelPo_temp=freightModelPos.get(i);
@@ -232,7 +235,10 @@ public class FreightService implements IFreightService {
             if (freightModelPo_temp.getType() == 1)//获得按件数计算的运费模板明细
             {
                 PieceFreightModel pieceFreightModel_temp=freightDao.getPieceItemByFreightModelIdRegionId(freightModelPo_temp.getShopId(),freightModelPo_temp.getId(),regionId);
-                price_temp= pieceFreightModel_temp.getFirstItemsPrice()+pieceFreightModel_temp.getAdditionalItemsPrice()*(countSum-1);
+                if((countSum-pieceFreightModel_temp.getFirstItems()*freightModelPo_temp.getUnit())>0)
+                    price_temp= pieceFreightModel_temp.getFirstItemsPrice()+pieceFreightModel_temp.getAdditionalItemsPrice()*(long)Math.ceil((countSum-pieceFreightModel_temp.getFirstItems()*freightModelPo_temp.getUnit())/(pieceFreightModel_temp.getAdditionalItems()*freightModelPo_temp.getUnit()));
+                else
+                    price_temp=pieceFreightModel_temp.getFirstItemsPrice();
                 if(price_temp>freightPrice) {
                     freightPrice=price_temp;
                 }
@@ -242,16 +248,16 @@ public class FreightService implements IFreightService {
                 WeightFreightModel weightFreightModel=freightDao.getWeightItemByFreightModelIdRegionId(freightModelPo_temp.getShopId(),freightModelPo_temp.getId(),regionId);
                 if(weightSum<=weightFreightModel.getFirstWeight())
                     price_temp=weightFreightModel.getFirstWeightFreight();
-                else if(weightSum>weightFreightModel.getFirstWeight()&&weightSum<=10)
-                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)(Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5));
-                else if(weightSum>10&&weightSum<=50)
-                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10)/0.5);
-                else if(weightSum>50&&weightSum<=100)
-                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10)/0.5)+weightFreightModel.getHundredPrice()*(long)Math.ceil((weightSum-50)/0.5);
-                else if(weightSum>100&&weightSum<=300)
-                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10)/0.5)+weightFreightModel.getHundredPrice()*(long)Math.ceil((weightSum-50)/0.5)+weightFreightModel.getTrihunPrice()*(long)Math.ceil((weightSum-100)/0.5);
-                else if(weightSum>300)
-                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/0.5)+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10)/0.5)+weightFreightModel.getHundredPrice()*(long)Math.ceil((weightSum-50)/0.5)+weightFreightModel.getTrihunPrice()*(long)Math.ceil((weightSum-100)/0.5)+weightFreightModel.getAbovePrice()*(long)Math.ceil((weightSum-300)/0.5);
+                else if(weightSum>weightFreightModel.getFirstWeight()&&weightSum<=10000)
+                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)(Math.ceil((weightSum-weightFreightModel.getFirstWeight())/freightModelPo_temp.getUnit()));
+                else if(weightSum>10000&&weightSum<=50000)
+                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/freightModelPo_temp.getUnit())+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10000)/freightModelPo_temp.getUnit());
+                else if(weightSum>50000&&weightSum<=100000)
+                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/freightModelPo_temp.getUnit())+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10000)/freightModelPo_temp.getUnit())+weightFreightModel.getHundredPrice()*(long)Math.ceil((weightSum-50000)/freightModelPo_temp.getUnit());
+                else if(weightSum>100000&&weightSum<=300000)
+                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/freightModelPo_temp.getUnit())+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10000)/freightModelPo_temp.getUnit())+weightFreightModel.getHundredPrice()*(long)Math.ceil((weightSum-50000)/freightModelPo_temp.getUnit())+weightFreightModel.getTrihunPrice()*(long)Math.ceil((weightSum-100000)/freightModelPo_temp.getUnit());
+                else if(weightSum>300000)
+                    price_temp=weightFreightModel.getFirstWeightFreight()+weightFreightModel.getTenPrice()*(long)Math.ceil((weightSum-weightFreightModel.getFirstWeight())/freightModelPo_temp.getUnit())+weightFreightModel.getFiftyPrice()*(long)Math.ceil((weightSum-10000)/freightModelPo_temp.getUnit())+weightFreightModel.getHundredPrice()*(long)Math.ceil((weightSum-50000)/freightModelPo_temp.getUnit())+weightFreightModel.getTrihunPrice()*(long)Math.ceil((weightSum-100000)/freightModelPo_temp.getUnit())+weightFreightModel.getAbovePrice()*(long)Math.ceil((weightSum-300000)/freightModelPo_temp.getUnit());
                 if(price_temp>freightPrice)
                     freightPrice=price_temp;
             }
@@ -364,7 +370,30 @@ public class FreightService implements IFreightService {
     }
 
 
+    /**
+     * @param freightId
+     * @return
+     * @date 2020-12-13 20:35
+     */
+    @Override
+    public ReturnObject<SimpleFreightModelDTO> getSimpleFreightById(Long freightId)
+    {
+        SimpleFreightModelDTO simpleFreightModelDTO = new SimpleFreightModelDTO();
+        if (freightDao.getFreightModelById(freightId).getCode().equals(ResponseCode.OK))
+        {
+            FreightModelReturnVo freightModelReturnVo = (FreightModelReturnVo)freightDao.getFreightModelById(freightId).getData();
 
+            simpleFreightModelDTO.setId(freightId);
+            simpleFreightModelDTO.setName(freightModelReturnVo.getName());
+            simpleFreightModelDTO.setType(freightModelReturnVo.getType());
+            simpleFreightModelDTO.setUnit(freightModelReturnVo.getUnit());
+            simpleFreightModelDTO.setIsDefault(freightModelReturnVo.getDefaultModel());
+            simpleFreightModelDTO.setGmtCreated(freightModelReturnVo.getGmtCreate());
+            simpleFreightModelDTO.setGmtModified(freightModelReturnVo.getGmtModified());
+        }
+
+        return new ReturnObject<>(simpleFreightModelDTO);
+    }
 
 
 }

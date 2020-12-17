@@ -1,28 +1,27 @@
 package cn.edu.xmu.payment.service;
 
 import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
-import cn.edu.xmu.oomall.order.service.IOrderItemService;
 import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.oomall.order.service.IPaymentService;
 import cn.edu.xmu.oomall.other.service.IAftersaleService;
 import cn.edu.xmu.payment.dao.PaymentDao;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.bo.Refund;
-import cn.edu.xmu.payment.model.po.RefundPo;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Service
+@DubboService
 public class PaymentService implements IPaymentService {
 
     @Autowired
@@ -30,9 +29,6 @@ public class PaymentService implements IPaymentService {
 
     @DubboReference
     private IOrderService iOrderService;
-
-    @DubboReference
-    private IOrderItemService iOrderItemService;
 
     @DubboReference
     private IAftersaleService iAftersaleService;
@@ -55,11 +51,12 @@ public class PaymentService implements IPaymentService {
     public ReturnObject queryPayment(Long shopId, Long orderId) {
 
         //如果该商店不拥有这个order则查不到
-        if(!((iOrderService.isOrderBelongToShop(shopId,orderId)).getData())&&shopId!=0){
+        ReturnObject returnObject=iOrderService.isOrderBelongToShop(shopId,orderId);
+        if(returnObject.getCode()!=ResponseCode.OK){
             logger.error(" queryPaymentById: 数据库不存在该支付单 orderId="+orderId);
-            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            return returnObject;
         }
-        return paymentDao.queryPayment(shopId,orderId);
+        return paymentDao.queryPayment(orderId);
     }
 
 
@@ -120,7 +117,7 @@ public class PaymentService implements IPaymentService {
         //支付成功
         payment.setState((byte)0);
         payment.setPayTime(localDateTime);
-
+        payment.setPaySn(Common.genSeqNum());
         payment.setGmtModified(localDateTime);
 
         ReturnObject returnObject = paymentDao.insertPayment(payment);
@@ -142,18 +139,31 @@ public class PaymentService implements IPaymentService {
     @Override
     public ReturnObject<ResponseCode> getAdminHandleRefund(Long userId, Long shopId, Long orderItemId, Long refund, Long aftersaleId)
     {
-        OrderInnerDTO orderInnerDTO = iOrderService.findOrderIdbyOrderItemId(orderItemId).getData();
+        ReturnObject<OrderInnerDTO> ret = iOrderService.findOrderIdbyOrderItemId(orderItemId);
+        if (!ret.getCode().equals(ResponseCode.OK))
+        {
+            logger.info("orderInnerDTO is: " + ret.getData().toString());
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        OrderInnerDTO orderInnerDTO = ret.getData();
         if (!orderInnerDTO.getCustomerId().equals(userId) || !orderInnerDTO.getShopId().equals(shopId))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-        Long paymentId = paymentDao.getPaymentIdByOrderId(orderInnerDTO.getOrderId()).getData();
+        ReturnObject<Long> paymentIdRet = paymentDao.getPaymentIdByOrderId(orderInnerDTO.getOrderId());
+        if (!paymentIdRet.getCode().equals(ResponseCode.OK))
+        {
+            logger.info("paymentId is: " + paymentIdRet.getData().toString());
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
         Refund refundBo = new Refund();
         refundBo.setAftersaleId(aftersaleId);
         refundBo.setAmount(Math.abs(refund));
         refundBo.setOrderId(orderInnerDTO.getOrderId());
-        refundBo.setPaymentId(paymentId);
+        refundBo.setPaymentId(paymentIdRet.getData());
         Refund.State state = Refund.State.TO_BE_REFUND;
         refundBo.setState(state.getCode().byteValue());
 
+        logger.info( "refundBo is: " + refundBo.toString());
         return paymentDao.createRefund(refundBo);
     }
 
@@ -165,8 +175,10 @@ public class PaymentService implements IPaymentService {
     @Override
     public ReturnObject<ResponseCode> getAdminHandleRepair(Long userId, Long shopId,Long orderItemId,Long refund,Long aftersaleId){
 
+        logger.info("orderItemId: "+ orderItemId);
         //跨域获取orderId
-        Long orderId=iOrderItemService.getOrderIdByOrderItemId(orderItemId).getData();
+        Long orderId=iOrderService.getOrderIdByOrderItemId(orderItemId).getData();
+        logger.info("orderId: "+ orderId);
 
         Payment payment=new Payment();
 
@@ -200,7 +212,7 @@ public class PaymentService implements IPaymentService {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //跨域获取orderId
-        Long retorderId=iOrderItemService.getOrderIdByOrderItemId(retOrderItemId).getData();
+        Long retorderId=iOrderService.getOrderIdByOrderItemId(retOrderItemId).getData();
 
 
         //Long retOrderID=iOrderItemService
@@ -226,6 +238,77 @@ public class PaymentService implements IPaymentService {
         }else {
             return new ReturnObject<>(returnObject.getCode(),returnObject.getErrmsg());
         }
+    }
+
+    /**
+     * 为对应的orderId查找payment并创建退款单。、
+     * 实现IPaymentService.java中 “ReturnObject<ResponseCode> createRefundbyOrederId(Long orderId);”
+     * @author 李明明
+     * @param shopId, orderId
+     * @return
+     * @date 2020-12-14
+     */
+    @Override
+    public ReturnObject<ResponseCode> createRefundbyOrederId(Long shopId, Long orderId)
+    {
+        //调用 "public ReturnObject queryPayment(Long shopId, Long orderId)"
+        ReturnObject<List<Payment>> returnObject = paymentDao.queryPayment(orderId);
+        List<Payment> paymentList = returnObject.getData();
+        //paymentList大概会有1个或2个元素,
+        // 1个元素:是支付定金产生的
+        // 2个元素:一个是支付定金时产生的,另一个是支付尾款时产生的,分两次共两个退款单分别退款
+        for(Payment payment : paymentList)
+        {
+            Refund refund = new Refund();
+            refund.setPaymentId(payment.getId());
+            refund.setOrderId(orderId);
+            refund.setState(Refund.State.HAS_REFUND.getCode().byteValue());
+            refund.setAmount(payment.getActualAmount());
+            refund.setGmtCreate(LocalDateTime.now());
+            ReturnObject<Refund> returnObject1 = paymentDao.insertRefunds(refund);
+            if(returnObject1.getCode() != ResponseCode.OK) {
+                return new ReturnObject<ResponseCode>(returnObject1.getCode(), returnObject1.getErrmsg());
+            }
+        }
+        return new ReturnObject<>(ResponseCode.OK);
+    }
+
+    /**
+     * 处理成团的情况,首先需要将支付单中的actual_amount换成减去团购优惠后的金额,然后为该支付单创建退款单
+     * @param orderId
+     * @param refundPrice
+     * @param shopId
+     * @return
+     * @author 李明明
+     * @date 2020-12-14
+     */
+    @Override
+    public ReturnObject<ResponseCode> createRefundForGrouponByOrderId(Long orderId, Long shopId, Long refundPrice)
+    {
+        //System.out.println("*************欢迎进入paymentService***********");
+        ReturnObject<List<Payment>> returnObject = paymentDao.queryPayment(orderId);
+        if(returnObject.getCode() != ResponseCode.OK)
+            return new ReturnObject<>(returnObject.getCode(),returnObject.getErrmsg());
+        List<Payment> paymentList = returnObject.getData();
+        for(Payment payment : paymentList)
+        {
+            ReturnObject<ResponseCode> returnObject1 = paymentDao.setActualAmount(payment.getId(),refundPrice);
+            if(returnObject1.getCode() != ResponseCode.OK)
+            {
+                return new ReturnObject<>(returnObject1.getCode(),returnObject1.getErrmsg());
+            }
+            Refund refund = new Refund();
+            refund.setPaymentId(payment.getId());
+            refund.setOrderId(orderId);
+            refund.setState(Refund.State.HAS_REFUND.getCode().byteValue());
+            refund.setAmount(refundPrice);
+            refund.setGmtCreate(LocalDateTime.now());
+            ReturnObject<Refund> returnObject2 = paymentDao.insertRefunds(refund);
+            if(returnObject1.getCode() != ResponseCode.OK) {
+                return new ReturnObject<ResponseCode>(returnObject1.getCode(), returnObject1.getErrmsg());
+            }
+        }
+        return new ReturnObject<>(ResponseCode.OK);
     }
 
 }

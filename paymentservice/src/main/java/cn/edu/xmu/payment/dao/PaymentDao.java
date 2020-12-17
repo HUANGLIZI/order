@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -57,7 +58,7 @@ public class PaymentDao {
         return new ReturnObject<>(payments);
     }
 
-    public ReturnObject queryPayment(Long shopId, Long orderId) {
+    public ReturnObject queryPayment(Long orderId) {
         PaymentPoExample example=new PaymentPoExample();
         PaymentPoExample.Criteria criteria=example.createCriteria();
         criteria.andOrderIdEqualTo(orderId);
@@ -71,9 +72,6 @@ public class PaymentDao {
         List<Payment> payments =new ArrayList<>(paymentPoS.size());
         for(PaymentPo paymentPo:paymentPoS){
             Payment payment = new Payment(paymentPo);
-            //通过调用其它模块的售后服务获得售后单id
-            payment.setAftersaleId((long) 0x75bcd15);
-
             payments.add(payment);
         }
         return new ReturnObject<>(payments);
@@ -219,11 +217,11 @@ public class PaymentDao {
             int ret = paymentPoMapper.insertSelective(paymentPo);
             if (ret == 0) {
                 //插入失败
-                logger.debug("insertPayment: insert Payment fail " + paymentPo.toString());
+                logger.info("insertPayment: insert Payment fail " + paymentPo.toString());
                 returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + paymentPo.toString()));
             } else {
                 //插入成功
-                logger.debug("insertPayment: insert Payment  = " + paymentPo.toString());
+                logger.info("insertPayment: insert Payment  = " + paymentPo.toString());
                 payment.setId(paymentPo.getId());
                 returnObject = new ReturnObject<>(payment);
             }
@@ -231,17 +229,17 @@ public class PaymentDao {
         catch (DataAccessException e) {
             if (Objects.requireNonNull(e.getMessage()).contains("payment.pay_sn_uindex")) {
                 //若有重复的流水号则新增失败
-                logger.debug("updateRole: have same paySn = " + paymentPo.getPaySn());
+                logger.info("updateRole: have same paySn = " + paymentPo.getPaySn());
                 returnObject = new ReturnObject<>(ResponseCode.PAYSN_SAME, String.format("流水号重复：" + paymentPo.toString()));
             } else {
                 // 其他数据库错误
-                logger.debug("other sql exception : " + e.getMessage());
+                logger.info("other sql exception : " + e.getMessage());
                 returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
             }
         }
         catch (Exception e) {
             // 其他Exception错误
-            logger.error("other exception : " + e.getMessage());
+            logger.info("other exception : " + e.getMessage());
             returnObject  = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
         return returnObject ;
@@ -330,14 +328,40 @@ public class PaymentDao {
         int ret = refundPoMapper.insertSelective(refundPo);
         if (ret == 0) {
             //插入失败
-            logger.debug("insertRefund: insert refund fail " + refundPo.toString());
+            logger.info("insertRefund: insert refund fail " + refundPo.toString());
             retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + refundPo.toString()));
         } else {
             //插入成功
-            logger.debug("insertRefund: insert refund = " + refundPo.toString());
+            logger.info("insertRefund: insert refund = " + refundPo.toString());
 //            Refund refundRet = new Refund(refundPo);
             retObj = new ReturnObject<>(ResponseCode.OK);
         }
         return retObj;
+    }
+
+    /**
+     * 设置payment表中actualAmount属性
+     * @param paymentId
+     * @param refundPrice
+     * @return
+     * @author 李明明
+     * @date 2020-12-14
+     */
+    public ReturnObject<ResponseCode> setActualAmount(Long paymentId, Long refundPrice)
+    {
+        PaymentPo paymentPo = paymentPoMapper.selectByPrimaryKey(paymentId);
+        paymentPo.setActualAmount(paymentPo.getAmount() - refundPrice);
+        paymentPo.setGmtModified(LocalDateTime.now());
+        int ret = paymentPoMapper.updateByPrimaryKey(paymentPo);
+        if(ret == 0)
+        {
+            logger.debug("setActualAmount: update payment fail,paymentId:" + paymentId );
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("支付单更新失败,paymentId:" + paymentId));
+        }
+        else
+        {
+            logger.debug("setActualAmount: update payment,paymentId = " + paymentId);
+            return new ReturnObject<>(ResponseCode.OK);
+        }
     }
 }
