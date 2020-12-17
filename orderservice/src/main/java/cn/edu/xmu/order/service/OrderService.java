@@ -537,7 +537,7 @@ public class OrderService implements IOrderService {
             for(Orders orders : ordersList)
             {
                 //对每个订单调用本类中 ”public ReturnObject<VoObject> transOrder(Long id)“方法
-                ReturnObject<VoObject> returnObject = this.transOrder(orders.getId(),orders.getShopId());
+                ReturnObject<VoObject> returnObject = this.transOrder(orders.getId(),orders.getCustomerId());
                 if(returnObject.getCode() != ResponseCode.OK)
                 {
                     //如果其中有一个无法转换，就返回错误
@@ -630,7 +630,7 @@ public class OrderService implements IOrderService {
             for(Orders orders : ordersList)
             {
                 //对每个订单调用本类中 ”public ReturnObject<VoObject> transOrder(Long id)“方法
-                ReturnObject<VoObject> returnObject = this.transOrder(orders.getId(),orders.getShopId());
+                ReturnObject<VoObject> returnObject = this.transOrder(orders.getId(),orders.getCustomerId());
                 if(returnObject.getCode() != ResponseCode.OK)
                 {
                     //如果其中有一个无法转换，就返回错误
