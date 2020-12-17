@@ -424,7 +424,7 @@ public class FreightDao{
         //InternalLogger logger = null;
         try{
             FreightModelPo freightModelPo = freightModel.gotFreightModelPo();
-            int ret = freightModelPoMapper.insertSelective(freightModelPo);
+            int ret = freightModelPoMapper.insert(freightModelPo);
             if (ret == 0) {
                 //插入失败
                 logger.debug("insertFreightModel: insert freightModel fail " + freightModelPo.toString());
@@ -433,22 +433,20 @@ public class FreightDao{
                 //插入成功
                 logger.debug("insertFreightModel: insert freightModel = " + freightModelPo.toString());
                 //role.setId(rolePo.getId());
-                retObj = new ReturnObject<>(freightModel);
+                FreightModel freightModel1=new FreightModel(freightModelPo);
+                retObj = new ReturnObject<>(freightModel1);
             }
         }
         catch (DataAccessException e) {
-//            if (Objects.requireNonNull(e.getMessage()).contains("auth_role.auth_role_name_uindex")) {
-//                //若有重复的角色名则新增失败
-//                logger.debug("updateFreightModel: have same freightModel name = " + freightModelPo.getName());
-//                retObj = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("模板名重复：" + freightModelPo.getName()));
-//            } else {
-//                // 其他数据库错误
-//                logger.debug("other sql exception : " + e.getMessage());
-//                retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
-//            }
-            // 其他数据库错误
-            logger.debug("other sql exception : " + e.getMessage());
-            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            if (Objects.requireNonNull(e.getMessage()).contains("freight_model.name")) {
+                //若有重复的角色名则新增失败
+                //logger.debug("updateFreightModel: have same freightModel name = " + freightModelPo.getName());
+                retObj = new ReturnObject<>(ResponseCode.FREIGHTNAME_SAME);
+            } else {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }
         }
         catch (Exception e) {
             // 其他Exception错误
