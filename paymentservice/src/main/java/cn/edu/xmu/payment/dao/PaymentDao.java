@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -57,7 +58,7 @@ public class PaymentDao {
         return new ReturnObject<>(payments);
     }
 
-    public ReturnObject queryPayment(Long shopId, Long orderId) {
+    public ReturnObject queryPayment(Long orderId) {
         PaymentPoExample example=new PaymentPoExample();
         PaymentPoExample.Criteria criteria=example.createCriteria();
         criteria.andOrderIdEqualTo(orderId);
@@ -71,9 +72,6 @@ public class PaymentDao {
         List<Payment> payments =new ArrayList<>(paymentPoS.size());
         for(PaymentPo paymentPo:paymentPoS){
             Payment payment = new Payment(paymentPo);
-            //通过调用其它模块的售后服务获得售后单id
-            payment.setAftersaleId((long) 0x75bcd15);
-
             payments.add(payment);
         }
         return new ReturnObject<>(payments);
@@ -339,5 +337,31 @@ public class PaymentDao {
             retObj = new ReturnObject<>(ResponseCode.OK);
         }
         return retObj;
+    }
+
+    /**
+     * 设置payment表中actualAmount属性
+     * @param paymentId
+     * @param refundPrice
+     * @return
+     * @author 李明明
+     * @date 2020-12-14
+     */
+    public ReturnObject<ResponseCode> setActualAmount(Long paymentId, Long refundPrice)
+    {
+        PaymentPo paymentPo = paymentPoMapper.selectByPrimaryKey(paymentId);
+        paymentPo.setActualAmount(paymentPo.getAmount() - refundPrice);
+        paymentPo.setGmtModified(LocalDateTime.now());
+        int ret = paymentPoMapper.updateByPrimaryKey(paymentPo);
+        if(ret == 0)
+        {
+            logger.debug("setActualAmount: update payment fail,paymentId:" + paymentId );
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("支付单更新失败,paymentId:" + paymentId));
+        }
+        else
+        {
+            logger.debug("setActualAmount: update payment,paymentId = " + paymentId);
+            return new ReturnObject<>(ResponseCode.OK);
+        }
     }
 }

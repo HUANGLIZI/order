@@ -68,7 +68,7 @@ public class FreightDao{
         if(!"".equals(name)&&name!=null){
             criteria.andNameLike("%"+name+"%");
         }
-        System.out.println(pageSize);
+
         //分页查询
         PageHelper.startPage(page, pageSize);
         logger.debug("page = " + page + "pageSize = " + pageSize);
@@ -82,6 +82,7 @@ public class FreightDao{
                 ret.add(freightModelReturnVo);
             }
             PageInfo<VoObject> freightModelPage = PageInfo.of(ret);
+            freightModelPage.setPageSize(pageSize);
             return new ReturnObject<>(freightModelPage);
         }
         catch (DataAccessException e){
@@ -104,7 +105,7 @@ public class FreightDao{
      * createdBy 张湘君 2020/11/27 20:12
      * modifiedBy 张湘君 2020/11/27 20:12
      */
-    public ReturnObject getFreightModelById(Long id) {
+    public ReturnObject <FreightModelReturnVo> getFreightModelById(Long id) {
         FreightModelPo freightModelPo = freightModelPoMapper.selectByPrimaryKey(id);
         //po对象为空，没查到
         if (freightModelPo == null) {

@@ -15,16 +15,13 @@ public class FreightModelReturnVo implements VoObject {
     @ApiModelProperty(value = "模板id")
     private Long id;
 
-    @ApiModelProperty(value = "商铺id")
-    private Long shopId;
-
     @ApiModelProperty(value = "名字")
     private String name;
 
     @ApiModelProperty(value = "类型")
     private Byte type;
 
-    @ApiModelProperty(value = "计重单位")
+    @ApiModelProperty(value = "")
     private Integer unit;
 
     @ApiModelProperty(value = "默认模板")
@@ -43,7 +40,6 @@ public class FreightModelReturnVo implements VoObject {
      */
     public FreightModelReturnVo(FreightModelPo freightModelPo) {
         this.id = freightModelPo.getId();
-        this.shopId=freightModelPo.getShopId();
         this.name = freightModelPo.getName();
         this.type = freightModelPo.getType();
         this.unit= freightModelPo.getUnit();
@@ -62,5 +58,21 @@ public class FreightModelReturnVo implements VoObject {
     @Override
     public Object createSimpleVo() {
         return null;
+    }
+
+    public FreightModelPo createPo() {
+        FreightModelPo freightModelPo=new FreightModelPo();
+        freightModelPo.setId(this.id);
+        freightModelPo.setShopId(this.shopId);
+        freightModelPo.setName(this.name);
+        freightModelPo.setType(this.type);
+        freightModelPo.setUnit(this.unit);
+        freightModelPo.setGmtCreate(this.gmtCreate);
+        freightModelPo.setGmtModified(this.gmtModified);
+        Byte a=1;
+        if(this.defaultModel=true){
+            freightModelPo.setDefaultModel(a);
+        }
+        return  freightModelPo;
     }
 }

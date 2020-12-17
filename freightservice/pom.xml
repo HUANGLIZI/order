@@ -146,13 +146,13 @@
         </dependency>
         <dependency>
             <groupId>cn.edu.xmu</groupId>
-            <artifactId>privilegeservice</artifactId>
+            <artifactId>order-client</artifactId>
             <version>0.0.1-SNAPSHOT</version>
-            <scope>test</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>cn.edu.xmu</groupId>
-            <artifactId>order-client</artifactId>
+            <artifactId>other-client</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

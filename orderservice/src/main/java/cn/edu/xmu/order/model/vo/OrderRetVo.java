@@ -1,5 +1,6 @@
 package cn.edu.xmu.order.model.vo;
 
+import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
 import cn.edu.xmu.order.model.po.OrderItemPo;
@@ -11,7 +12,7 @@ import java.util.List;
 
 @ApiModel(description = "订单详情视图对象1")
 @Data
-public class OrderRetVo {
+public class OrderRetVo implements VoObject {
     private Long id;
     private Long customerId;
     private Long shopId;
@@ -75,5 +76,15 @@ public class OrderRetVo {
         this.presaleId=orders.getPresaleId();
         this.subState=orders.getSubstate();
         this.grouponId=orders.getGrouponId();
+    }
+
+    @Override
+    public Object createVo() {
+        return this;
+    }
+
+    @Override
+    public Object createSimpleVo() {
+        return null;
     }
 }
