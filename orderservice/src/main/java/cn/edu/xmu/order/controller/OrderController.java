@@ -128,7 +128,7 @@ public class OrderController {
                              @LoginUser @ApiIgnore @RequestParam(required = false) Long userId) {
         logger.debug("transform Order by orderId:" +id);
         ReturnObject<VoObject> retObject = null;
-        retObject = orderService.transOrder(id);
+        retObject = orderService.transOrder(id,userId);
         return Common.decorateReturnObject(retObject);
     }
 
