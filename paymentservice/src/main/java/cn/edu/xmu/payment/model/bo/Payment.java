@@ -99,8 +99,8 @@ public class Payment implements VoObject, Serializable {
     }
 
     public enum State {
-        TO_BE_PAID(0, "支付单未支付"),
-        HAS_PAID(1, "支付单已支付"),
+        TO_BE_PAID(0, "未支付"),
+        HAS_PAID(1, "已支付"),
         Failure(2, "支付失败");
 
         private static final Map<Integer, State> stateMap;

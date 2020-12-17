@@ -738,20 +738,24 @@ public class OrderDao {
      * @date 2020-12-14
      * @author 李明明
      */
-    public List<Orders> getOrdersByGrouponId(Long grouponId)
+    public ReturnObject<List<Orders>> getOrdersByGrouponId(Long grouponId)
     {
         OrdersPoExample example = new OrdersPoExample();
         OrdersPoExample.Criteria criteria = example.createCriteria();
         criteria.andGrouponIdEqualTo(grouponId);
 
         List<OrdersPo> ordersPos = ordersPoMapper.selectByExample(example);
+        if(null == ordersPos)
+        {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
         List<Orders> ordersList = new ArrayList<>(ordersPos.size());
         for(OrdersPo po : ordersPos)
         {
             Orders orders = new Orders(po);
             ordersList.add(orders);
         }
-        return ordersList;
+        return new ReturnObject<>(ordersList);
     }
 
     public List<OrderItemPo> findOrderItemsByTime() {
@@ -777,19 +781,23 @@ public class OrderDao {
      * @date 2020-12-14
      * @author 李明明
      */
-    public List<Orders> getOrdersByPresleId(Long presaleId)
+    public ReturnObject<List<Orders>> getOrdersByPresleId(Long presaleId)
     {
         OrdersPoExample example = new OrdersPoExample();
         OrdersPoExample.Criteria criteria = example.createCriteria();
         criteria.andPresaleIdEqualTo(presaleId);
 
         List<OrdersPo> ordersPos = ordersPoMapper.selectByExample(example);
+        if(null == ordersPos)
+        {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
         List<Orders> ordersList = new ArrayList<>(ordersPos.size());
         for(OrdersPo ordersPo : ordersPos)
         {
             Orders orders = new Orders(ordersPo);
             ordersList.add(orders);
         }
-        return ordersList;
+        return new ReturnObject<>(ordersList);
     }
 }
