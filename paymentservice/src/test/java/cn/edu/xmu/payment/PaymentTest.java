@@ -25,6 +25,7 @@ public class PaymentTest {
 //                .baseUrl("http://172.20.10.5:8088")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
+
     }
 
     /**

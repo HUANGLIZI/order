@@ -109,21 +109,26 @@ public class FreightController {
     })
     @Audit
     @GetMapping("/shops/{shopId}/freightmodels/{id}")
-    public Object getFreightModelById(@PathVariable("id") Long id,@PathVariable("id") Long shopId,@Depart @ApiIgnore Long sId){
+    public Object getFreightModelById(@PathVariable("id") Long id,@PathVariable("shopId") Long shopId,@Depart @ApiIgnore Long sId){
 
         if(shopId!=sId&&sId!=0){
             httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
             return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("操作的资源id不是自己的对象")), httpServletResponse);
         }
 
-        ReturnObject<FreightModelReturnVo> returnObject =  freightService.getFreightModelById(id);
+        ReturnObject<FreightModelPo> returnObject =  freightService.getFreightModelById(id);
         if (returnObject.getCode() == ResponseCode.OK) {
-            ReturnObject retObject=new ReturnObject(returnObject.getData());
+            if(returnObject.getData().getShopId()!=shopId){
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
+            }
+            ReturnObject retObject=new ReturnObject(new FreightModelReturnVo(returnObject.getData()));
             return Common.getRetObject(retObject);
         } else {
             return Common.decorateReturnObject(returnObject);
         }
     }
+
 
     /**
      * 管理员克隆店铺的运费模板。

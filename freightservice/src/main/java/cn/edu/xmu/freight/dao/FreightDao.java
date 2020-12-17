@@ -69,20 +69,27 @@ public class FreightDao{
             criteria.andNameLike("%"+name+"%");
         }
 
-        //分页查询
-        PageHelper.startPage(page, pageSize);
-        logger.debug("page = " + page + "pageSize = " + pageSize);
-        List<FreightModelPo> freightModelPos;
+
         try {
             //不加限定条件查询所有
-            freightModelPos = freightModelPoMapper.selectByExample(example);
+            //分页查询
+
+            logger.debug("page = " + page + "pageSize = " + pageSize);
+            PageHelper.startPage(page, pageSize);
+
+            List<FreightModelPo> freightModelPos = freightModelPoMapper.selectByExample(example);
             List<VoObject> ret = new ArrayList<>(freightModelPos.size());
             for (FreightModelPo po : freightModelPos) {
                 FreightModelReturnVo freightModelReturnVo = new FreightModelReturnVo(po);
                 ret.add(freightModelReturnVo);
             }
-            PageInfo<VoObject> freightModelPage = PageInfo.of(ret);
-            freightModelPage.setPageSize(pageSize);
+
+            PageInfo<FreightModelPo> freightModelPoPageInfo = PageInfo.of(freightModelPos);
+            PageInfo<VoObject> freightModelPage = new PageInfo<>(ret);
+            freightModelPage.setPages(freightModelPoPageInfo.getPages());
+            freightModelPage.setPageNum(freightModelPoPageInfo.getPageNum());
+            freightModelPage.setPageSize(freightModelPoPageInfo.getPageSize());
+            freightModelPage.setTotal(freightModelPoPageInfo.getTotal());
             return new ReturnObject<>(freightModelPage);
         }
         catch (DataAccessException e){
@@ -105,7 +112,7 @@ public class FreightDao{
      * createdBy 张湘君 2020/11/27 20:12
      * modifiedBy 张湘君 2020/11/27 20:12
      */
-    public ReturnObject <FreightModelReturnVo> getFreightModelById(Long id) {
+    public ReturnObject getFreightModelById(Long id) {
         FreightModelPo freightModelPo = freightModelPoMapper.selectByPrimaryKey(id);
         //po对象为空，没查到
         if (freightModelPo == null) {
@@ -113,9 +120,7 @@ public class FreightDao{
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
 
-        FreightModelReturnVo freightModelReturnVo = new FreightModelReturnVo(freightModelPo);
-
-        return new ReturnObject<>(freightModelReturnVo);
+        return new ReturnObject<>(freightModelPo);
     }
 
     /**
