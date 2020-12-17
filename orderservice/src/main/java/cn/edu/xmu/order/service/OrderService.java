@@ -25,6 +25,7 @@ import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrdersPo;
 import cn.edu.xmu.order.model.vo.*;
 import com.github.pagehelper.PageInfo;
+import net.bytebuddy.asm.Advice;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
@@ -525,17 +526,18 @@ public class OrderService implements IOrderService {
     @Override
     public ReturnObject<Object> putGrouponOffshelves(Long grouponId)
     {
-        List<Orders> ordersList = orderDao.getOrdersByGrouponId(grouponId);
-        if(null == ordersList)
+        ReturnObject<List<Orders>> returnObject1 = orderDao.getOrdersByGrouponId(grouponId);
+        if(returnObject1.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE)
         {
             return new ReturnObject<>(ResponseCode.OK);//如果没有查到属于该groupId的订单，就不用进行转换处理，同样是成功的。
         }
         else
         {
+            List<Orders> ordersList = returnObject1.getData();
             for(Orders orders : ordersList)
             {
                 //对每个订单调用本类中 ”public ReturnObject<VoObject> transOrder(Long id)“方法
-                ReturnObject<VoObject> returnObject = this.transOrder(orders.getId());
+                ReturnObject<VoObject> returnObject = this.transOrder(orders.getId(),orders.getCustomerId());
                 if(returnObject.getCode() != ResponseCode.OK)
                 {
                     //如果其中有一个无法转换，就返回错误
@@ -556,13 +558,15 @@ public class OrderService implements IOrderService {
     @Override
     public ReturnObject<Object> putPresaleOffshevles(Long presaleId)
     {
-        List<Orders> ordersList = orderDao.getOrdersByPresleId(presaleId);
-        if(null == ordersList)
+        ReturnObject<List<Orders>> returnObject1 = orderDao.getOrdersByPresleId(presaleId);
+
+        if(returnObject1.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE)
         {
             return new ReturnObject<Object>(ResponseCode.OK); //如果没有查到属于该presaleId的订单，就不用进行转换处理，同样是成功的。
         }
         else
         {
+            List<Orders> ordersList = returnObject1.getData();
             for(Orders orders : ordersList)
             {
                 //对每个orders调用本类中 “public ReturnObject<VoObject> cancelOrderById(Long shopId,Long id)”
@@ -599,11 +603,12 @@ public class OrderService implements IOrderService {
     public ReturnObject<Object> grouponEnd(String strategy, Long GrouponId)
     {
         Strategy strategy1 = JacksonUtil.toObj(strategy, Strategy.class);//不知道是不是这样用
-        List<Orders> ordersList = orderDao.getOrdersByGrouponId(GrouponId);
-        if(null == ordersList)
+        ReturnObject<List<Orders>> returnObject1 = orderDao.getOrdersByGrouponId(GrouponId);
+        if(returnObject1.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE)
         {
             return new ReturnObject<>(ResponseCode.OK);
         }
+        List<Orders> ordersList = returnObject1.getData();
         Integer orderAmount = ordersList.size();
         //System.out.println("!!!!!!"+ orderAmount + "!!!!!!!!!");
         Long refundPrice = 0L;
@@ -625,7 +630,7 @@ public class OrderService implements IOrderService {
             for(Orders orders : ordersList)
             {
                 //对每个订单调用本类中 ”public ReturnObject<VoObject> transOrder(Long id)“方法
-                ReturnObject<VoObject> returnObject = this.transOrder(orders.getId());
+                ReturnObject<VoObject> returnObject = this.transOrder(orders.getId(),orders.getCustomerId());
                 if(returnObject.getCode() != ResponseCode.OK)
                 {
                     //如果其中有一个无法转换，就返回错误
