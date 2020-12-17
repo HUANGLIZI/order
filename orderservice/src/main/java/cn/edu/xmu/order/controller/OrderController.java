@@ -448,14 +448,15 @@ public class OrderController {
                                           @RequestParam(required = false, defaultValue = "1") Integer page,
                                           @RequestParam(required = false, defaultValue = "10") Integer pageSize){
         logger.debug("getShopAllFreightModels: page = "+ page +"  pageSize ="+pageSize);
-        if(shopId == departId)
+        if(shopId == departId || departId == 0)
         {
             ReturnObject<PageInfo<VoObject>> returnObject = orderService.getShopAllOrders(shopId,customerId, orderSn, beginTime, endTime, page, pageSize);
             return Common.getPageRetObject(returnObject);
         }
         else
         {
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + departId)), httpServletResponse);
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE), httpServletResponse);
         }
     }
 
@@ -483,7 +484,7 @@ public class OrderController {
 
 
         ReturnObject returnObject =  orderService.getOrderById(shopId, id);
-        if(shopId == departId)
+        if(shopId == departId || departId == 0)
         {
             if (returnObject.getCode() == ResponseCode.OK) {
                 return Common.getRetObject(returnObject);
@@ -493,7 +494,8 @@ public class OrderController {
         }
         else
         {
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + departId)), httpServletResponse);
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE), httpServletResponse);
         }
     }
 
@@ -520,7 +522,7 @@ public class OrderController {
     @DeleteMapping("/shops/{shopId}/orders/{id}")
     public Object cancelOrderById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id, @Depart @ApiIgnore Long departId)
     {
-        if(shopId == departId)
+        if(shopId == departId || departId == 0)
         {
             logger.debug("Cancel Order by orderId:" +id);
             ReturnObject<VoObject> returnObject = orderService.cancelOrderById(shopId, id);
@@ -528,7 +530,8 @@ public class OrderController {
         }
         else
         {
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + departId)), httpServletResponse);
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE), httpServletResponse);
         }
 
     }
