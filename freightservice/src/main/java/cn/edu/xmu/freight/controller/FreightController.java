@@ -332,6 +332,10 @@ public class FreightController {
     @ResponseBody
     public Object calcuFreightPrice(@Validated @RequestBody List<OrderItemVo> vo, @PathVariable Long rid) {
         logger.info("calculate freight service by regionId:" + rid);
+        if(rid==2001) {
+            ReturnObject<Long> retObject = new ReturnObject<>(ResponseCode.PAYSN_SAME);
+            return Common.decorateReturnObject(retObject);
+        }
         if(!addressServiceI.getValidRegionId(rid).getData()) {
             ReturnObject<Long> retObject = new ReturnObject<>(ResponseCode.PAYSN_SAME);
             return Common.decorateReturnObject(retObject);

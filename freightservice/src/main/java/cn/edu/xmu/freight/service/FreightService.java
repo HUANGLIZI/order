@@ -33,10 +33,10 @@ public class FreightService implements IFreightService {
     @Autowired
     private FreightDao freightDao;
 
-    @DubboReference
+    @DubboReference(check = false)
     private IGoodsService goodsServiceI;
 
-    @DubboReference
+    @DubboReference(check = false)
     private IAddressService addressServiceI;
 
 
