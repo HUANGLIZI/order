@@ -31,7 +31,7 @@ import java.util.List;
 
 @Api(value = "订单服务", tags = "order")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "", produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/order", produces = "application/json;charset=UTF-8")
 public class OrderController {
 
     @Autowired
@@ -378,6 +378,12 @@ public class OrderController {
 //        System.out.println(userId);
 //        Long userId = 1L;
         ReturnObject<PageInfo<VoObject>> returnObject = orderService.selectOrders(userId, page, pageSize, orderSn, state, beginTime, endTime);
+        if (returnObject.getCode() == ResponseCode.FIELD_NOTVALID)
+        {
+            httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID,ResponseCode.FIELD_NOTVALID.getMessage()),httpServletResponse);
+
+        }
         return Common.getPageRetObject(returnObject);
     }
 
@@ -387,7 +393,7 @@ public class OrderController {
      * @author Cai Xinlu
      * @date 2020-12-10 10:46
      */
-//    @Audit
+    @Audit
     @ApiOperation(value = "用户创建订单", produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
@@ -409,8 +415,13 @@ public class OrderController {
         if (ordersVo.getPresaleId() != null && ordersVo.getCouponId() != null)
             return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
         ReturnObject orders = orderServiceI.createOrders(userId, ordersVo);
-        httpServletResponse.setStatus(HttpStatus.CREATED.value());
-        return Common.decorateReturnObject(orders);
+        if (orders.getCode().equals(ResponseCode.OK))
+        {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+            return Common.decorateReturnObject(orders);
+        }
+        else
+            return Common.decorateReturnObject(orders);
     }
 
 

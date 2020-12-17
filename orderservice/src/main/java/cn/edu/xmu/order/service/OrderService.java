@@ -101,7 +101,7 @@ public class OrderService implements IOrderService {
         if(orders != null) {
             logger.debug("findOrdersById : " + returnObject);
             //OrderRetVo orderRetVo=new orderRetVo();
-            returnObject = new ReturnObject(new OrderRetVo(orders,orderItemsList,customerRetVo,shopRetVo));
+            returnObject = new ReturnObject(new OrderRetVo(orders));
         } else {
             logger.debug("findOrdersById: Not Found");
             returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
@@ -275,7 +275,7 @@ public class OrderService implements IOrderService {
         ReturnObject<VoObject> returnObject = null;
         if(orders != null) {
             logger.debug("findOrdersById : " + returnObject);
-            returnObject = new ReturnObject(new OrderRetVo(orders,orderItemsList,customerRetVo,shopRetVo));
+            returnObject = new ReturnObject(new OrderRetVo(orders));
         } else {
             logger.debug("findOrdersById: Not Found");
             returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
