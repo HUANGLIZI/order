@@ -57,6 +57,7 @@ public class WeightFreightModel implements VoObject, Serializable {
         this.tenPrice=po.getTenPrice();
         this.firstWeightFreight=po.getFirstWeightFreight();
         this.tenPrice=po.getTenPrice();
+        this.fiftyPrice=po.getFiftyPrice();
         this.hundredPrice=po.getHundredPrice();
         this.trihunPrice=po.getTrihunPrice();
         this.abovePrice=po.getAbovePrice();
