@@ -121,7 +121,7 @@ public class OrderService implements IOrderService {
         ReturnObject<VoObject> returnObject = null;
         Orders orders=orderDao.findOrderById(id);
         if(orders.getOrderType()==1&&orders.getCustomerId()==userId) {
-            if(orders.getSubstate()==22||orders.getSubstate()==23||orders.getSubstate()==11) {
+            if(orders.getSubstate()==22||orders.getSubstate()==23||orders.getState()==2) {
                 int ret=orderDao.transOrder(id);
                 if(ret == 1) {
                 logger.debug("transOrdersById : " + returnObject);
@@ -271,8 +271,16 @@ public class OrderService implements IOrderService {
     public ReturnObject<VoObject> getOrderById(Long shopId, Long id)
     {
         Orders orders = (Orders) orderDao.getOrderById(shopId,id).getData();
-
+        if(orderDao.getOrderById(shopId,id).getCode()==ResponseCode.RESOURCE_ID_NOTEXIST)
+        {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        if(orderDao.getOrderById(shopId,id).getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE)
+        {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
         List<OrderItemPo> orderItemPos=orderDao.findOrderItemById(id);
+
         List<OrderItems> orderItemsList = new ArrayList<OrderItems>();
         for(OrderItemPo po : orderItemPos)
         {

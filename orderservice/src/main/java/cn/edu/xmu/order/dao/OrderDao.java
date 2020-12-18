@@ -433,7 +433,12 @@ public class OrderDao {
                 Orders order = new Orders(po);
                 ret.add(order);
             }
-            PageInfo<VoObject> orderPage = PageInfo.of(ret);
+            PageInfo<OrdersPo> ordersPoPageInfo = PageInfo.of(ordersPos);
+            PageInfo<VoObject> orderPage = new PageInfo<>(ret);
+            orderPage.setTotal(ordersPoPageInfo.getTotal());
+            orderPage.setPageSize(pageSize);
+            orderPage.setPageNum(ordersPoPageInfo.getPageNum());
+            orderPage.setPages(ordersPoPageInfo.getPages());
             return new ReturnObject<>(orderPage);
         }
         catch (DataAccessException e){
@@ -465,7 +470,7 @@ public class OrderDao {
         else if(!ordersPo.getShopId().equals(shopId))
         {
             logger.error("getOrderById: 店铺Id不匹配 order_id=" + id);
-            return new ReturnObject(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + shopId));
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("店铺id不匹配：" + shopId));
         }
         Orders orders = new Orders(ordersPo);
         return new ReturnObject<>(orders);
@@ -482,14 +487,27 @@ public class OrderDao {
     {
         ReturnObject<Orders> ordersReturnObject = null;
         OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(id);
+        System.out.println(ordersPo.getSubstate().getClass());
+        System.out.println("@@@@"+Orders.State.HAS_DELIVERRED+"@@@@@");
+        System.out.println("@@@@"+Orders.State.HAS_DELIVERRED.getCode()+"@@@@@");
+        Integer state1 = Orders.State.HAS_DELIVERRED.getCode();
+        System.out.println("@@@@"+ordersPo.getSubstate().equals(Orders.State.HAS_DELIVERRED.getCode().byteValue())+"@@@@");
         if(ordersPo == null)
         {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("不存在对应的订单id" ));
         }
-        else if(ordersPo.getShopId() != shopId)
+        else if(ordersPo.getSubstate().equals(Orders.State.HAS_DELIVERRED.getCode().byteValue()))
+        {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+        else if(ordersPo.getState().equals(Orders.State.HAS_FINISHED.getCode().byteValue())||ordersPo.getState().equals(Orders.State.CANCEL.getCode().byteValue()))
+        {
+            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
+        }
+        else if(!ordersPo.getShopId().equals(shopId))
         {
             logger.debug("cancelOrderById: update Order fail " + ordersPo.toString() );
-            return new ReturnObject<>(ResponseCode.DEFAULTMODEL_EXISTED, String.format("该订单不属于该店铺" ));
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("该订单不属于该店铺" ));
         }
         else
         {
