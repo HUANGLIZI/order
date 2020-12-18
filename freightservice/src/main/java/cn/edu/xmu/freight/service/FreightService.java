@@ -223,8 +223,7 @@ public class FreightService implements IFreightService {
             else{
                 freightModelId.add(goodsFreightDTO.get(i).getFreightModelId());//获得单品运费模板id列表
                 Long FreightModelId=goodsFreightDTO.get(i).getFreightModelId();
-                FreightModelReturnVo freightModelReturnVo=freightDao.getFreightModelById(FreightModelId).getData();
-                FreightModelPo freightModelPo=freightModelReturnVo.createPo();
+                FreightModelPo freightModelPo=freightDao.getFreightModelById(FreightModelId).getData();
                 freightModelPos.add(freightModelPo);//将单品运费模板加入运费模板列表
             }
             weightSum+=goodsFreightDTO.get(i).getWeight()*count.get(i);//计算总重量,单位为g
@@ -386,13 +385,18 @@ public class FreightService implements IFreightService {
         SimpleFreightModelDTO simpleFreightModelDTO = new SimpleFreightModelDTO();
         if (freightDao.getFreightModelById(freightId).getCode().equals(ResponseCode.OK))
         {
-            FreightModelReturnVo freightModelReturnVo = (FreightModelReturnVo)freightDao.getFreightModelById(freightId).getData();
+            FreightModelPo freightModelReturnVo = freightDao.getFreightModelById(freightId).getData();
 
             simpleFreightModelDTO.setId(freightId);
             simpleFreightModelDTO.setName(freightModelReturnVo.getName());
             simpleFreightModelDTO.setType(freightModelReturnVo.getType());
             simpleFreightModelDTO.setUnit(freightModelReturnVo.getUnit());
-            simpleFreightModelDTO.setIsDefault(freightModelReturnVo.getDefaultModel());
+            if(freightModelReturnVo.getDefaultModel()==(byte)1){
+                simpleFreightModelDTO.setIsDefault(true);
+            }
+            else{
+                simpleFreightModelDTO.setIsDefault(false);
+            }
             simpleFreightModelDTO.setGmtCreated(freightModelReturnVo.getGmtCreate());
             simpleFreightModelDTO.setGmtModified(freightModelReturnVo.getGmtModified());
         }

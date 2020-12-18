@@ -3,12 +3,18 @@ package cn.edu.xmu.freight;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.privilege.model.vo.LoginVo;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.Assert;
+
+import java.nio.charset.StandardCharsets;
 
 @SpringBootTest(classes = FreightServiceApplication.class)
 @Slf4j
@@ -17,19 +23,19 @@ public class FreightTest {
     private String managementGate="http://localhost:8080";
 
     //@Value("${public-test.mallgate}")
-    private String mallGate="http://localhost:8086";
-
-    private WebTestClient manageClient;
+    private String mallGate="http://localhost:8086/order";
 
     private WebTestClient mallClient;
 
+    private WebTestClient manageClient;
+
     public FreightTest(){
-        this.manageClient = WebTestClient.bindToServer()
+        this.mallClient = WebTestClient.bindToServer()
                 .baseUrl(managementGate)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
 
-        this.mallClient = WebTestClient.bindToServer()
+        this.manageClient = WebTestClient.bindToServer()
                 .baseUrl(mallGate)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
@@ -186,6 +192,178 @@ public class FreightTest {
     }
 
 
+    /**
+     * 克隆运费模板 (件数)
+     * @throws Exception
+     */
+    @Test
+    @Order(5)
+    public void cloneFreightModel() throws Exception {
+        String token = adminLogin("shopadmin_No2", "123456");
+        byte[] responseBytes = mallClient
+                .post()
+                .uri("/shops/7/freightmodels/284801411/clone")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+
+        assert responseBytes != null;
+        String responseString = new String(responseBytes, StandardCharsets.UTF_8);
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
+
+        // 获取定义的运费模板
+        JSONObject queryResponse = JSONObject.parseObject(responseString);
+        JSONObject clonedModel = queryResponse
+                .getJSONObject("data");
+        Long clonedFmId = clonedModel.getLong("id");
+
+        // 查询定义的运费模板能否查出来
+
+        byte[] queryResponseString = mallClient
+                .get()
+                .uri("/shops/7/freightmodels/" + clonedFmId)
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
+                .jsonPath("$.data").exists()
+                .returnResult()
+                .getResponseBodyContent();
+    }
+
+    /**
+     * 克隆运费模板 (找不到源)
+     * @throws Exception
+     */
+    @Test
+    @Order(6)
+    public void cloneFreightModelNotFound() throws Exception {
+        String token = adminLogin("shopadmin_No2", "123456");
+        mallClient
+                .post()
+                .uri("/shops/7/freightmodels/2643126963/clone")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo("504")
+                .returnResult()
+                .getResponseBodyContent();
+    }
+
+
+    /**
+     * 查询商家的运费模板 (无分页)
+     * @throws Exception
+     */
+    @Test
+    @Order(8)
+    public void findFreightModels() throws Exception {
+        String token = adminLogin("shopadmin_No2", "123456");
+
+        // 新建运费模板
+        byte[] responseString = mallClient
+                .get()
+                .uri("/shops/7/freightmodels")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+
+        assert responseString != null;
+        String defString = new String(responseString, StandardCharsets.UTF_8);
+
+        JSONObject response = JSONObject.parseObject(defString);
+
+        Assert.isTrue(response.getString("errmsg").equals("成功"), "查询不成功");
+        JSONArray modelArr = response
+                .getJSONObject("data")
+                .getJSONArray("list");
+
+        boolean firstChecked = false;
+        boolean secondChecked = false;
+        for (int i = 0; i < modelArr.size(); i++) {
+            JSONObject model = modelArr.getJSONObject(i);
+            if (model.getLong("id") == 284801410L) {
+                firstChecked = true;
+            } else if (model.getLong("id").equals(284801411L)) {
+                secondChecked = true;
+            }
+        }
+        Assert.isTrue(firstChecked, "第一个运费模板没有找到，id=" + 284801410L);
+        Assert.isTrue(secondChecked, "克隆的运费模板没有找到，id=" + 284801411L);
+    }
+
+    /**
+     * 删除运费模板 (克隆源)
+     * @throws Exception
+     */
+    @Test
+    @Order(9)
+    public void delFreightModel() throws Exception {
+        String token = adminLogin("shopadmin_No2", "123456");
+        mallClient
+                .delete()
+                .uri("/shops/7/freightmodels/284801411")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody().jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+    }
+
+    /**
+     * 删除运费模板 (找不到)
+     * @throws Exception
+     */
+    @Test
+    @Order(10)
+    public void delFreightModelNotFound() throws Exception {
+        String token = adminLogin("shopadmin_No2", "123456");
+        mallClient
+                .delete()
+                .uri("/shops/7/freightmodels/5646241156151")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+    }
+
+    /**
+     * 管理员登入
+     * @param username 用户名
+     * @param password 密码
+     * @throws Exception parse error
+     */
+    private String adminLogin(String username, String password) {
+        LoginVo vo = new LoginVo();
+        vo.setUserName(username);
+        vo.setPassword(password);
+        String requireJson = JacksonUtil.toJson(vo);
+        assert requireJson != null;
+        byte[] ret = manageClient.post()
+                .uri("/adminusers/login").bodyValue(requireJson).exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.errmsg").isEqualTo("成功")
+                .returnResult()
+                .getResponseBodyContent();
+        assert ret != null;
+        return JacksonUtil.parseString(new String(ret, StandardCharsets.UTF_8), "data");
+    }
+    
     private String login(String userName, String password) throws Exception {
         LoginVo vo = new LoginVo();
         vo.setUserName(userName);

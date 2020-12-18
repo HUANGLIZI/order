@@ -29,6 +29,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import java.awt.datatransfer.Clipboard;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -112,7 +114,7 @@ public class FreightDao{
      * createdBy 张湘君 2020/11/27 20:12
      * modifiedBy 张湘君 2020/11/27 20:12
      */
-    public ReturnObject getFreightModelById(Long id) {
+    public ReturnObject<FreightModelPo> getFreightModelById(Long id) {
         FreightModelPo freightModelPo = freightModelPoMapper.selectByPrimaryKey(id);
         //po对象为空，没查到
         if (freightModelPo == null) {
@@ -915,5 +917,6 @@ public class FreightDao{
         }
         return freightModelPo.get(0);
     }
+
 
 }

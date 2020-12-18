@@ -21,9 +21,6 @@ public class FreightModelReturnVo implements VoObject {
     @ApiModelProperty(value = "类型")
     private Byte type;
 
-    @ApiModelProperty(value = "店铺ID")
-    private Long shopId;
-
     @ApiModelProperty(value = "")
     private Integer unit;
 
@@ -66,7 +63,6 @@ public class FreightModelReturnVo implements VoObject {
     public FreightModelPo createPo() {
         FreightModelPo freightModelPo=new FreightModelPo();
         freightModelPo.setId(this.id);
-        freightModelPo.setShopId(this.shopId);
         freightModelPo.setName(this.name);
         freightModelPo.setType(this.type);
         freightModelPo.setUnit(this.unit);
