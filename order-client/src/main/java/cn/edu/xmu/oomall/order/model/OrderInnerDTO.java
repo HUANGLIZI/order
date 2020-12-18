@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * @author Caixin
@@ -19,4 +20,10 @@ public class OrderInnerDTO implements Serializable {
     private Long customerId;
 
     private Long orderId;
+
+    private Byte state;
+
+    private Byte substate;
+
+    private Long price;
 }

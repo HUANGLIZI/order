@@ -255,6 +255,30 @@ public class OrderDao {
     /**
      * @param
      * @return
+     * @author Li Zihan
+     * @date 2020-12-19 5:17
+     */
+    public ReturnObject<OrderInnerDTO> getOrderInfoByOrderId(Long orderId)
+    {
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
+        if (ordersPo == null)
+        {
+            logger.info("not found order :" + orderId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        OrderInnerDTO orderInnerDTO = new OrderInnerDTO();
+        orderInnerDTO.setCustomerId(ordersPo.getCustomerId());
+        orderInnerDTO.setOrderId(ordersPo.getId());
+        orderInnerDTO.setState(ordersPo.getState());
+        orderInnerDTO.setSubstate(ordersPo.getSubstate());
+        orderInnerDTO.setShopId(ordersPo.getShopId());
+        orderInnerDTO.setPrice(ordersPo.getOriginPrice());
+        return new ReturnObject<>(orderInnerDTO);
+    }
+
+    /**
+     * @param
+     * @return
      * @author Cai Xinlu
      * @date 2020-12-07 13:17
      */

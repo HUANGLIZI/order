@@ -50,20 +50,24 @@ public class PaymentService implements IPaymentService {
      */
     public ReturnObject userQueryPayment(Long orderId, Long userId) {
         ReturnObject<OrderInnerDTO> returnObject = iOrderService.findUserIdbyOrderId(orderId);
-        if(!userId.equals(returnObject.getData().getCustomerId()))
+        if(returnObject.getCode()==ResponseCode.RESOURCE_ID_NOTEXIST)
+            return returnObject;
+        else if(!userId.equals(returnObject.getData().getCustomerId()))
             return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
         return paymentDao.userQueryPaymentById(orderId);
     }
 
     public ReturnObject queryPayment(Long shopId, Long orderId) {
-
         //如果该商店不拥有这个order则查不到
         ReturnObject returnObject=iOrderService.isOrderBelongToShop(shopId,orderId);
-        if(returnObject.getCode()!=ResponseCode.OK){
-            logger.error(" queryPaymentById: 数据库不存在该支付单 orderId="+orderId);
-            return returnObject;
+        if(returnObject.getCode()==ResponseCode.OK){
+            return paymentDao.queryPayment(orderId);
         }
-        return paymentDao.queryPayment(orderId);
+        else if(returnObject.getCode()!=ResponseCode.OK){
+            logger.error(" queryPaymentById: 数据库不存在该支付单 orderId="+orderId);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        return returnObject;
     }
 
 

@@ -86,4 +86,9 @@ public interface IOrderService {
      * 通过OrderItemId获取OrderId
      */
     ReturnObject<Long> getOrderIdByOrderItemId(Long orderId);
+
+    /**
+     * 通过OrderId获取OrderId
+     */
+    ReturnObject<OrderInnerDTO> getOrderInfoByOrderId(Long orderId);
 }
