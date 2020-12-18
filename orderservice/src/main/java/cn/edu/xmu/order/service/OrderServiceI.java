@@ -19,9 +19,13 @@ import cn.edu.xmu.order.model.po.OrdersPo;
 import cn.edu.xmu.order.model.vo.*;
 import com.google.gson.Gson;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.apache.rocketmq.client.producer.SendCallback;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -224,8 +228,8 @@ public class OrderServiceI {
             }
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-
         ordersBo.setCustomerId(userId);
+//        sendOrderPayMessage(ordersBo.getOrderSn());
         ReturnObject<Orders> orders = orderDao.createOrders(ordersBo, orderItemsList);
         if (!orders.getCode().equals(ResponseCode.OK))
             return new ReturnObject<>(orders.getCode());
@@ -234,6 +238,21 @@ public class OrderServiceI {
         return new ReturnObject<>(orderCreateRetVo);
     }
 
+//    private void sendOrderPayMessage(String order){
+//        logger.info("sendOrderPayMessage: send message orderId = "+order+" delay ="+" time =" +LocalDateTime.now());
+//        RocketMQTemplate rocketMQTemplate = null;
+//        rocketMQTemplate.asyncSend("order-pay-topic", MessageBuilder.withPayload(order).build(), new SendCallback() {
+//            @Override
+//            public void onSuccess(SendResult sendResult) {
+//                logger.info("sendOrderPayMessage: onSuccess result = "+ sendResult+" time ="+LocalDateTime.now());
+//            }
+//
+//            @Override
+//            public void onException(Throwable throwable) {
+//                logger.info("sendOrderPayMessage: onException e = "+ throwable.getMessage()+" time ="+LocalDateTime.now());
+//            }
+//        });
+//    }
 
     @Scheduled(cron = "0 0 12 * * ?")
     public void setShareId(){

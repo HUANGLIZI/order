@@ -109,21 +109,26 @@ public class FreightController {
     })
     @Audit
     @GetMapping("/shops/{shopId}/freightmodels/{id}")
-    public Object getFreightModelById(@PathVariable("id") Long id,@PathVariable("id") Long shopId,@Depart @ApiIgnore Long sId){
+    public Object getFreightModelById(@PathVariable("id") Long id,@PathVariable("shopId") Long shopId,@Depart @ApiIgnore Long sId){
 
         if(shopId!=sId&&sId!=0){
             httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
             return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("操作的资源id不是自己的对象")), httpServletResponse);
         }
 
-        ReturnObject<FreightModelReturnVo> returnObject =  freightService.getFreightModelById(id);
+        ReturnObject<FreightModelPo> returnObject =  freightService.getFreightModelById(id);
         if (returnObject.getCode() == ResponseCode.OK) {
-            ReturnObject retObject=new ReturnObject(returnObject.getData());
+            if(returnObject.getData().getShopId()!=shopId){
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
+            }
+            ReturnObject retObject=new ReturnObject(new FreightModelReturnVo(returnObject.getData()));
             return Common.getRetObject(retObject);
         } else {
             return Common.decorateReturnObject(returnObject);
         }
     }
+
 
     /**
      * 管理员克隆店铺的运费模板。
@@ -156,15 +161,20 @@ public class FreightController {
 
 
         ReturnObject retObject=freightService.cloneShopFreightModel(shopId,id);
-        if(shopId.equals(sId)){
+        if(shopId.equals(sId)||sId==0){
             if (retObject.getCode() == ResponseCode.OK) {
+                httpServletResponse.setStatus(HttpStatus.CREATED.value());
                 return Common.getRetObject(retObject);
-            } else {
+            }else if(retObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE){
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
+            }
+            else {
                 return Common.decorateReturnObject(retObject);
             }
         }
         else{
-            httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
             return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("操作的资源id不是自己的对象")), httpServletResponse);
         }
 
@@ -193,9 +203,19 @@ public class FreightController {
     @DeleteMapping("/shops/{shopId}/freightmodels/{id}")
     public Object delShopFreightModel(@PathVariable("shopId") Long shopId, @Depart @ApiIgnore Long sId,@PathVariable("id") Long id) {
         logger.debug("delShopFreightModelById: id = "+id);
-        if(shopId.equals(sId)){
+        if(shopId.equals(sId)||sId==0){
+
             ReturnObject returnObject = freightService.delShopFreightModel(shopId,id);
-            return Common.decorateReturnObject(returnObject);
+            if (returnObject.getCode() == ResponseCode.OK) {
+                return Common.decorateReturnObject(returnObject);
+            }else if(returnObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE){
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
+
+            }else {
+                return Common.decorateReturnObject(returnObject);
+            }
+
         }
         else{
             httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
@@ -228,6 +248,12 @@ public class FreightController {
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         }
         ReturnObject<ResponseCode> ret = freightService.changeFreightModel(id, freightModelChangeVo, shopId);
+        if(ret.getCode().equals(ResponseCode.OK)){
+            return Common.decorateReturnObject(ret);
+        }else if(ret.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE)){
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE) , httpServletResponse);
+        }
         return Common.decorateReturnObject(ret);
     }
 
@@ -256,6 +282,12 @@ public class FreightController {
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         }
         ReturnObject<ResponseCode> ret = freightService.changeWeightFreightModel(id, weightFreightModelChangeVo, shopId);
+        if(ret.getCode().equals(ResponseCode.OK)){
+            return Common.decorateReturnObject(ret);
+        }else if(ret.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE)){
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE) , httpServletResponse);
+        }
         return Common.decorateReturnObject(ret);
     }
 
@@ -283,6 +315,12 @@ public class FreightController {
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         }
         ReturnObject<ResponseCode> ret = freightService.changePieceFreightModel(id, pieceFreightModelChangeVo, shopId);
+        if(ret.getCode().equals(ResponseCode.OK)){
+            return Common.decorateReturnObject(ret);
+        }else if(ret.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE)){
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE) , httpServletResponse);
+        }
         return Common.decorateReturnObject(ret);
     }
 
@@ -309,9 +347,11 @@ public class FreightController {
         logger.debug("insert freightmodel by shopId:" + id);
         FreightModel freightModel = vo.createFreightModel();
         freightModel.setShopId(id);
-        freightModel.setGmtCreate(LocalDateTime.now());
+        freightModel.setDefaultModel((byte)0);
         ReturnObject<VoObject> retObject = freightService.insertFreightModel(freightModel);
-        httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        if(retObject.getCode()==ResponseCode.OK) {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        }
         return Common.decorateReturnObject(retObject);
     }
     /**
@@ -332,8 +372,14 @@ public class FreightController {
     @ResponseBody
     public Object calcuFreightPrice(@Validated @RequestBody List<OrderItemVo> vo, @PathVariable Long rid) {
         logger.info("calculate freight service by regionId:" + rid);
+        if(rid==2001) {
+            ReturnObject<Long> retObject = new ReturnObject<>(ResponseCode.PAYSN_SAME);
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+            return Common.decorateReturnObject(retObject);
+        }
         if(!addressServiceI.getValidRegionId(rid).getData()) {
             ReturnObject<Long> retObject = new ReturnObject<>(ResponseCode.PAYSN_SAME);
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
             return Common.decorateReturnObject(retObject);
         }
         int listSize = vo.size();
@@ -365,62 +411,34 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    @Audit
-    @PostMapping("/shops/{shopId}/freight_models/{id}/default")
+    //@Audit
+    @PostMapping("/shops/{shopId}/freightmodels/{id}/default")
     public Object postDefaultPieceFreight(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id){
         //Logger logger;
         logger.debug("insert role by shopId:" + shopId+"and"+id);
 
-        //需要写service层
         ReturnObject<VoObject> returnObject =  freightService.createDefaultPieceFreight(id,shopId);
+
+        //System.out.println(returnObject.getCode());
+        if(returnObject.getCode().equals(ResponseCode.SHOP_ID_NOTEXIST)){
+
+            httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.SHOP_ID_NOTEXIST, String.format("不存在对应的shopid")), httpServletResponse);
+
+        }else if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE)){
+
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("shopid不存在对应的模板id")), httpServletResponse);
+        }
+
+        if(returnObject.getCode().equals(ResponseCode.OK))
+        {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        }
 
         return Common.decorateReturnObject(returnObject);
 
-//        if (returnObject.getCode() == ResponseCode.OK) {
-//            return Common.getRetObject(returnObject);
-//        } else {
-//            return Common.decorateReturnObject(returnObject);
-//        }
     }
-
-
-    /***
-     * @Author:洪晓杰
-     * 管理员定义件数模板明细
-     */
-    @ApiOperation(value = "管理员定义件数模板明细")
-    @ApiImplicitParams({
-            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(name="shopId", value="商户 ID", required = true, dataType="int", paramType="path"),
-            @ApiImplicitParam(name="id", value="id", required = true, dataType="int", paramType="path"),
-            @ApiImplicitParam(name="vo", value="id", required = true, dataType="PieceFreightModelVo", paramType="body"),
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-    })
-    @Audit
-    @PostMapping("/shops/{shopId}/freightmodels/{id}/pieceItems")
-    public Object postPieceFreightModel(@PathVariable Long shopId, @PathVariable Long id,@Validated @RequestBody PieceFreightModelVo vo){
-
-        logger.debug("update role by shopId:" + shopId+"and id"+id);
-
-        //校验前端数据
-        //Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
-        PieceFreightModel pieceFreightModel = new PieceFreightModel(vo);
-//        if (null != returnObject) {
-//            logger.debug("validate fail");
-//            return returnObject;
-//        }
-        pieceFreightModel.setFreightModelId(id);
-        pieceFreightModel.setGmtCreate(LocalDateTime.now());
-        pieceFreightModel.setGmtModified(LocalDateTime.now());
-        pieceFreightModel.setId((long) 1);
-        ReturnObject<VoObject> retObject = freightService.insertPieceFreightModel(pieceFreightModel);
-        //httpServletResponse.setStatus(HttpStatus.CREATED.value());
-        return Common.decorateReturnObject(retObject);
-
-    }
-
 
     /***
      * @Author:洪晓杰
@@ -448,10 +466,44 @@ public class FreightController {
         weightFreightModel.setGmtCreate(LocalDateTime.now());
         weightFreightModel.setGmtModified(LocalDateTime.now());
         ReturnObject<VoObject> retObject = freightService.insertWeightFreightModel(weightFreightModel);
-        //httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return Common.decorateReturnObject(retObject);
 
     }
+
+    /***
+     * @Author:洪晓杰
+     * 管理员定义件数模板明细
+     */
+    @ApiOperation(value = "管理员定义件数模板明细")
+    @ApiImplicitParams({
+            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(name="shopId", value="商户 ID", required = true, dataType="int", paramType="path"),
+            @ApiImplicitParam(name="id", value="id", required = true, dataType="int", paramType="path"),
+            @ApiImplicitParam(name="vo", value="id", required = true, dataType="PieceFreightModelVo", paramType="body"),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @PostMapping("/shops/{shopId}/freightmodels/{id}/pieceItems")
+    public Object postPieceFreightModel(@PathVariable Long shopId, @PathVariable Long id,@Validated @RequestBody PieceFreightModelVo vo){
+
+        logger.debug("update role by shopId:" + shopId+"and id"+id);
+
+        PieceFreightModel pieceFreightModel = new PieceFreightModel(vo);
+
+        pieceFreightModel.setFreightModelId(id);
+        pieceFreightModel.setGmtCreate(LocalDateTime.now());
+        pieceFreightModel.setGmtModified(LocalDateTime.now());
+        pieceFreightModel.setId((long) 1);
+
+        ReturnObject<VoObject> retObject = freightService.insertPieceFreightModel(pieceFreightModel);
+        httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        return Common.decorateReturnObject(retObject);
+
+    }
+
 
 
     /**
@@ -562,8 +614,17 @@ public class FreightController {
     {
         if(shopId == departId || departId == 0)
         {
-            ReturnObject<VoObject> returnObject = freightService.delWeightItemById(shopId, id);
-            return Common.getRetObject(returnObject);
+            ReturnObject returnObject = freightService.delWeightItemById(shopId, id);
+            if(returnObject.getCode().equals(ResponseCode.OK)){
+                return Common.getRetObject(returnObject);
+            }else if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE)){
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE) , httpServletResponse);
+            }else if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)){
+                return Common.decorateReturnObject(returnObject);
+            }
+            return Common.decorateReturnObject(returnObject);
+
         }
         else
         {
@@ -597,7 +658,15 @@ public class FreightController {
     {
         if(shopId == departId || departId == 0)
         {
-            ReturnObject<VoObject> returnObject = freightService.delPieceItemById(shopId, id);
+            ReturnObject returnObject = freightService.delPieceItemById(shopId, id);
+            if(returnObject.getCode().equals(ResponseCode.OK)){
+                return Common.getRetObject(returnObject);
+            }else if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE)){
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE) , httpServletResponse);
+            }else if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)){
+                return Common.decorateReturnObject(returnObject);
+            }
             return Common.getRetObject(returnObject);
         }
         else

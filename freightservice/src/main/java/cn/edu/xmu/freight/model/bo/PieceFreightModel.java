@@ -17,11 +17,11 @@ public class PieceFreightModel implements VoObject, Serializable {
 
     private Long freightModelId;
 
-    private Integer firstItems;
+    private Integer firstItem;
 
     private Long firstItemsPrice;
 
-    private Integer additionalItems;
+    private Integer additionalItem;
 
     private Long additionalItemsPrice;
 
@@ -32,9 +32,9 @@ public class PieceFreightModel implements VoObject, Serializable {
     private LocalDateTime gmtModified;
 
     public PieceFreightModel(PieceFreightModelVo vo) {
-        this.firstItems = vo.getFirstItems();
-        this.firstItemsPrice = vo.getFirstItemsPrice();
-        this.additionalItems = vo.getAdditionalItems();
+        this.firstItem = vo.getFirstItem();
+        this.firstItemsPrice = vo.getFirstItemPrice();
+        this.additionalItem = vo.getAdditionalItems();
         this.additionalItemsPrice = vo.getAdditionalItemsPrice();
         this.regionId = vo.getRegionId();
     }
@@ -42,9 +42,9 @@ public class PieceFreightModel implements VoObject, Serializable {
     public PieceFreightModel(PieceFreightModelPo po) {
         this.id=po.getId();
         this.freightModelId=po.getFreightModelId();
-        this.firstItems = po.getFirstItems();
+        this.firstItem = po.getFirstItems();
         this.firstItemsPrice = po.getFirstItemsPrice();
-        this.additionalItems = po.getAdditionalItems();
+        this.additionalItem = po.getAdditionalItems();
         this.additionalItemsPrice = po.getAdditionalItemsPrice();
         this.regionId = po.getRegionId();
         this.gmtCreate=po.getGmtCreate();
@@ -65,9 +65,9 @@ public class PieceFreightModel implements VoObject, Serializable {
         PieceFreightModelPo po = new PieceFreightModelPo();
         po.setId(this.getId());
         po.setRegionId(this.getRegionId());
-        po.setAdditionalItems(this.getAdditionalItems());
+        po.setAdditionalItems(this.getAdditionalItem());
         po.setAdditionalItemsPrice(this.getAdditionalItemsPrice());
-        po.setFirstItems(this.getFirstItems());
+        po.setFirstItems(this.getFirstItem());
         po.setFirstItemsPrice(this.getFirstItemsPrice());
         po.setFreightModelId(this.getFreightModelId());
         po.setGmtCreate(this.getGmtCreate());

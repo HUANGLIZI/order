@@ -65,7 +65,6 @@ public class FreightModelReturnVo implements VoObject {
     public FreightModelPo createPo() {
         FreightModelPo freightModelPo=new FreightModelPo();
         freightModelPo.setId(this.id);
-        freightModelPo.setShopId(this.shopId);
         freightModelPo.setName(this.name);
         freightModelPo.setType(this.type);
         freightModelPo.setUnit(this.unit);

@@ -1,113 +1,99 @@
-//package cn.edu.xmu.freight;
-//
-//import cn.edu.xmu.ooad.util.JacksonUtil;
-//import cn.edu.xmu.ooad.util.ResponseCode;
-//import lombok.extern.slf4j.Slf4j;
-//import org.junit.jupiter.api.Test;
-//import org.skyscreamer.jsonassert.JSONAssert;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.http.HttpHeaders;
-//import org.springframework.test.web.reactive.server.WebTestClient;
-//
-//@SpringBootTest(classes = FreightServiceApplication.class)
-//@Slf4j
-//public class FreightTest {
-//    //@Value("${public-test.managementgate}")
-//    private String managementGate="http://localhost:8083";
-//
-//    //@Value("${public-test.mallgate}")
-//    private String mallGate="http://localhost:8080";
-//
-//    private WebTestClient manageClient;
-//
-//    private WebTestClient mallClient;
-//
-//    public FreightTest(){
-//        this.manageClient = WebTestClient.bindToServer()
-//                .baseUrl(managementGate)
-//                .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
-//                .build();
-//
-//        this.mallClient = WebTestClient.bindToServer()
-//                .baseUrl(mallGate)
-//                .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
-//                .build();
-//
-//    }
-//
-//    @Test
-//    public void getFreightModels() throws Exception {
-//        String token = this.login("13088admin", "123456");
-//        byte[] responseString = manageClient.get().uri("/shops/1/freightmodels").header("authorization",token)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectBody()
-//                .returnResult()
-//                .getResponseBodyContent();
-//        System.out.println(new String(responseString, "UTF-8"));
-////        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":{\"page\":1,\"pageSize\":10,\"total\":4,\"pages\":1,\"list\":[{\"id\":9,\"name\":\"测试模板\",\"type\":0,\"defaultModel\":true,\"gmtCreate\":[2020,12,2,20,33,8],\"gmtModified\":[2020,12,2,20,33,8]},{\"id\":10,\"name\":\"测试模板2\",\"type\":0,\"defaultModel\":false,\"gmtCreate\":[2020,12,2,20,33,8],\"gmtModified\":[2020,12,2,20,33,8]},{\"id\":11,\"name\":\"测试模板3\",\"type\":0,\"defaultModel\":false,\"gmtCreate\":[2020,12,2,20,33,8],\"gmtModified\":[2020,12,2,20,33,8]},{\"id\":12,\"name\":\"测试模板4\",\"type\":0,\"defaultModel\":false,\"gmtCreate\":[2020,12,2,20,33,8],\"gmtModified\":[2020,12,2,20,33,8]}]}}";
-////        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), false);
-//    }
-//
-//    private String login(String userName, String password) throws Exception {
-//        LoginVo vo = new LoginVo();
-//        vo.setUserName(userName);
-//        vo.setPassword(password);
-//        String requireJson = JacksonUtil.toJson(vo);
-//
-//        byte[] ret = mallClient.post().uri("/privileges/login").bodyValue(requireJson).exchange()
-//                .expectStatus().isOk()
-//                .expectBody()
-//                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-//                .jsonPath("$.errmsg").isEqualTo("成功")
-//                .returnResult()
-//                .getResponseBodyContent();
-//        return JacksonUtil.parseString(new String(ret, "UTF-8"), "data");
-//
-//    }
-//
-//    @Test
-//    public void getFreightModels1() throws Exception {
-//        String token = this.login("13088admin", "123456");
-//        byte[] responseString = manageClient.get().uri("/shops/1/freightmodels").header("authorization",token)
-//                .exchange()
-//                .expectStatus().isUnauthorized()
-//                .expectBody()
-//                .returnResult()
-//                .getResponseBodyContent();
-//        System.out.println(new String(responseString, "UTF-8"));
-//        String expectedResponse = "{\"errno\":505,\"errmsg\":\"操作的资源id不是自己的对象\"}";
-//        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), false);
-//    }
-//
-//    @Test
-//    public void getFreightModelSummary() throws Exception {
-//        String token = this.login("13088admin", "123456");
-//        byte[] responseString = manageClient.get().uri("/freightmodels/200").header("authorization",token)
-//                .exchange()
-//                .expectStatus().isNotFound()
-//                .expectBody()
-//                .returnResult()
-//                .getResponseBodyContent();
-//
-//        String expectedResponse = "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
-//        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), true);
-//    }
-//
-//    @Test
-//    public void getFreightModelSummary1() throws Exception {
-//        String token = this.login("13088admin", "123456");
-//        byte[] responseString = manageClient.get().uri("/freightmodels/9").header("authorization",token)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectBody()
-//                .returnResult()
-//                .getResponseBodyContent();
-//        System.out.println(new String(responseString, "UTF-8"));
-//        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":{\"id\":9,\"name\":\"测试模板\",\"type\":0,\"defaultModel\":true,\"gmtCreate\":\"2020-12-02T20:33:08\",\"gmtModified\":\"2020-12-02T20:33:08\"}}";
-//        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), true);
-//
-//    }
-//
-//
-//}
+package cn.edu.xmu.freight;
+
+import cn.edu.xmu.ooad.util.JacksonUtil;
+import cn.edu.xmu.ooad.util.ResponseCode;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.Assert;
+
+import java.nio.charset.StandardCharsets;
+
+@SpringBootTest(classes = FreightServiceApplication.class)
+@Slf4j
+public class FreightTest {
+    //@Value("${public-test.managementgate}")
+    private String managementGate="192.168.43.194:8881";
+
+    //@Value("${public-test.mallgate}")
+    private String mallGate="192.168.43.194:8880";
+
+    private WebTestClient mallClient;
+
+    private WebTestClient manageClient;
+
+    public FreightTest(){
+        this.mallClient = WebTestClient.bindToServer()
+                .baseUrl(managementGate)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
+                .build();
+
+        this.manageClient = WebTestClient.bindToServer()
+                .baseUrl(mallGate)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
+                .build();
+
+    }
+
+    /**
+     * 计算运费
+     *
+     * @throws Exception
+     */
+    @Test
+    @Order(1)
+    public void calculateFreight() throws Exception {
+        String token = userLogin("8606245097", "123456");
+        String json = "[{\"count\":1,\"skuId\":1275}]";
+        byte[] responseString = mallClient.post().uri("/region/201/price").header("authorization", token)
+                .bodyValue(json)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":18}";
+        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), true);
+    }
+
+
+    private String adminLogin(String userName, String password) throws Exception{
+        JSONObject body = new JSONObject();
+        body.put("userName", userName);
+        body.put("password", password);
+        String requireJson = body.toJSONString();
+
+        byte[] ret = manageClient.post().uri("/adminusers/login").bodyValue(requireJson).exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.errmsg").isEqualTo("成功")
+                .returnResult()
+                .getResponseBodyContent();
+        return  JacksonUtil.parseString(new String(ret, "UTF-8"), "data");
+    }
+
+    private String userLogin(String userName, String password) throws Exception{
+        JSONObject body = new JSONObject();
+        body.put("userName", userName);
+        body.put("password", password);
+        String requireJson = body.toJSONString();
+
+        byte[] ret = mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.errmsg").isEqualTo("成功")
+                .returnResult()
+                .getResponseBodyContent();
+        return  JacksonUtil.parseString(new String(ret, "UTF-8"), "data");
+    }
+
+}

@@ -33,10 +33,10 @@ public class FreightService implements IFreightService {
     @Autowired
     private FreightDao freightDao;
 
-    @DubboReference
+    @DubboReference(check = false)
     private IGoodsService goodsServiceI;
 
-    @DubboReference
+    @DubboReference(check = false)
     private IAddressService addressServiceI;
 
 
@@ -52,7 +52,7 @@ public class FreightService implements IFreightService {
      */
     @Transactional
     public ReturnObject<VoObject> insertFreightModel(FreightModel freightModel) {
-        ReturnObject<FreightModel> retObj = freightDao.insertFreightModel(freightModel);
+        ReturnObject<FreightModelReturnVo> retObj = freightDao.insertFreightModel(freightModel);
         ReturnObject<VoObject> retFreightModel;
         if (retObj.getCode().equals(ResponseCode.OK)) {
             retFreightModel = new ReturnObject<>((VoObject) retObj.getData());
@@ -87,7 +87,7 @@ public class FreightService implements IFreightService {
      * createdBy 张湘君 2020/11/25 20:12
      * modifiedBy 张湘君 2020/11/25 20:12
      */
-    public ReturnObject<FreightModelReturnVo> getFreightModelById(Long id) {
+    public ReturnObject<FreightModelPo> getFreightModelById(Long id) {
         return freightDao.getFreightModelById(id);
     }
 
@@ -105,19 +105,20 @@ public class FreightService implements IFreightService {
     public ReturnObject cloneShopFreightModel(Long shopId, long id) {
 
         //获得克隆的运费模板
-        ReturnObject<FreightModel> cloneFreightModelRetObj=freightDao.insertCloneFreightModel(shopId,id);
+        ReturnObject<FreightModelReturnVo> cloneFreightModelRetObj=freightDao.insertCloneFreightModel(shopId,id);
 
         if(cloneFreightModelRetObj.getCode().equals(ResponseCode.OK)){
-            FreightModel cloneFreightModel=cloneFreightModelRetObj.getData();
+            FreightModelReturnVo cloneFreightModel=cloneFreightModelRetObj.getData();
             short type=cloneFreightModel.getType();
             long newId=cloneFreightModel.getId();
             //克隆运费模板明细
             ReturnObject cloneFreightModelInfoRetObj=freightDao.insertCloneFreightModelInfo(id,newId,type);
-            if(cloneFreightModelInfoRetObj.getCode()==ResponseCode.OK){
-                return cloneFreightModelRetObj;
-            }else{
-                return cloneFreightModelInfoRetObj;
-            }
+//            if(cloneFreightModelInfoRetObj.getCode()==ResponseCode.OK){
+//                return cloneFreightModelRetObj;
+//            }else{
+//                return cloneFreightModelInfoRetObj;
+//            }
+            return cloneFreightModelRetObj;
         }else{
             return cloneFreightModelRetObj;
         }
@@ -137,12 +138,12 @@ public class FreightService implements IFreightService {
     public ReturnObject delShopFreightModel(Long shopId, Long id) {
         //物理删除
         ReturnObject returnObject=freightDao.delShopFreightModel(shopId,id);
-        if (returnObject.getCode() == ResponseCode.OK) {
-
-            //在这里调用商品模块的api修改相应商品的freight_id
-            goodsServiceI.updateSpuFreightId(id);
-            
-        }
+//        if (returnObject.getCode() == ResponseCode.OK) {
+//
+//            //在这里调用商品模块的api修改相应商品的freight_id
+//            goodsServiceI.updateSpuFreightId(id);
+//
+//        }
 
         return returnObject;
     }
@@ -223,8 +224,7 @@ public class FreightService implements IFreightService {
             else{
                 freightModelId.add(goodsFreightDTO.get(i).getFreightModelId());//获得单品运费模板id列表
                 Long FreightModelId=goodsFreightDTO.get(i).getFreightModelId();
-                FreightModelReturnVo freightModelReturnVo=freightDao.getFreightModelById(FreightModelId).getData();
-                FreightModelPo freightModelPo=freightModelReturnVo.createPo();
+                FreightModelPo freightModelPo=freightDao.getFreightModelById(FreightModelId).getData();
                 freightModelPos.add(freightModelPo);//将单品运费模板加入运费模板列表
             }
             weightSum+=goodsFreightDTO.get(i).getWeight()*count.get(i);//计算总重量,单位为g
@@ -235,8 +235,8 @@ public class FreightService implements IFreightService {
             if (freightModelPo_temp.getType() == 1)//获得按件数计算的运费模板明细
             {
                 PieceFreightModel pieceFreightModel_temp=freightDao.getPieceItemByFreightModelIdRegionId(freightModelPo_temp.getShopId(),freightModelPo_temp.getId(),regionId);
-                if((countSum-pieceFreightModel_temp.getFirstItems()*freightModelPo_temp.getUnit())>0)
-                    price_temp= pieceFreightModel_temp.getFirstItemsPrice()+pieceFreightModel_temp.getAdditionalItemsPrice()*(long)(Math.ceil((countSum-pieceFreightModel_temp.getFirstItems()*freightModelPo_temp.getUnit())/(pieceFreightModel_temp.getAdditionalItems()*freightModelPo_temp.getUnit())));
+                if((countSum-pieceFreightModel_temp.getFirstItem()*freightModelPo_temp.getUnit())>0)
+                    price_temp= pieceFreightModel_temp.getFirstItemsPrice()+pieceFreightModel_temp.getAdditionalItemsPrice()*(long)(Math.ceil((countSum-pieceFreightModel_temp.getFirstItem()*freightModelPo_temp.getUnit())/(pieceFreightModel_temp.getAdditionalItem()*freightModelPo_temp.getUnit())));
                 else
                     price_temp=pieceFreightModel_temp.getFirstItemsPrice();
                 if(price_temp>freightPrice) {
@@ -308,6 +308,7 @@ public class FreightService implements IFreightService {
         return retPieceFreightModel;
     }
 
+
     /**
      * 管理员定义管理员定义重量模板明细
      * @author 24320182203196 洪晓杰
@@ -323,6 +324,7 @@ public class FreightService implements IFreightService {
         }
         return retWeightFreightModel;
     }
+
 
     /**
      * 查询某个重量运费模板明细
@@ -357,7 +359,7 @@ public class FreightService implements IFreightService {
      * @return ReturnObject
      */
     @Transactional
-    public ReturnObject<VoObject> delWeightItemById(Long shopId, Long id)
+    public ReturnObject delWeightItemById(Long shopId, Long id)
     {
         return freightDao.delWeightItemById(shopId, id);
     }
@@ -369,7 +371,7 @@ public class FreightService implements IFreightService {
      * @return ReturnObject
      */
     @Transactional
-    public ReturnObject<VoObject> delPieceItemById(Long shopId, Long id)
+    public ReturnObject delPieceItemById(Long shopId, Long id)
     {
         return freightDao.delPieceItemById(shopId, id);
     }
@@ -386,13 +388,18 @@ public class FreightService implements IFreightService {
         SimpleFreightModelDTO simpleFreightModelDTO = new SimpleFreightModelDTO();
         if (freightDao.getFreightModelById(freightId).getCode().equals(ResponseCode.OK))
         {
-            FreightModelReturnVo freightModelReturnVo = (FreightModelReturnVo)freightDao.getFreightModelById(freightId).getData();
+            FreightModelPo freightModelReturnVo = freightDao.getFreightModelById(freightId).getData();
 
             simpleFreightModelDTO.setId(freightId);
             simpleFreightModelDTO.setName(freightModelReturnVo.getName());
             simpleFreightModelDTO.setType(freightModelReturnVo.getType());
             simpleFreightModelDTO.setUnit(freightModelReturnVo.getUnit());
-            simpleFreightModelDTO.setIsDefault(freightModelReturnVo.getDefaultModel());
+            if(freightModelReturnVo.getDefaultModel()==(byte)1){
+                simpleFreightModelDTO.setIsDefault(true);
+            }
+            else{
+                simpleFreightModelDTO.setIsDefault(false);
+            }
             simpleFreightModelDTO.setGmtCreated(freightModelReturnVo.getGmtCreate());
             simpleFreightModelDTO.setGmtModified(freightModelReturnVo.getGmtModified());
         }

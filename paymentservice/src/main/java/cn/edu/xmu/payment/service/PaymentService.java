@@ -4,6 +4,7 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.order.model.OrderDTO;
 import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
 import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.oomall.order.service.IPaymentService;
@@ -11,14 +12,17 @@ import cn.edu.xmu.oomall.other.service.IAftersaleService;
 import cn.edu.xmu.payment.dao.PaymentDao;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.bo.Refund;
+import cn.edu.xmu.payment.model.po.PaymentPo;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.jaxb.SpringDataJaxb;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @DubboService
@@ -44,19 +48,26 @@ public class PaymentService implements IPaymentService {
      * createdBy 张湘君 2020/12/1 20:12
      * modifiedBy 张湘君 2020/12/1 20:12
      */
-    public ReturnObject userQueryPayment(Long orderId) {
+    public ReturnObject userQueryPayment(Long orderId, Long userId) {
+        ReturnObject<OrderInnerDTO> returnObject = iOrderService.findUserIdbyOrderId(orderId);
+        if(returnObject.getCode()==ResponseCode.RESOURCE_ID_NOTEXIST)
+            return returnObject;
+        else if(!userId.equals(returnObject.getData().getCustomerId()))
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
         return paymentDao.userQueryPaymentById(orderId);
     }
 
     public ReturnObject queryPayment(Long shopId, Long orderId) {
-
         //如果该商店不拥有这个order则查不到
         ReturnObject returnObject=iOrderService.isOrderBelongToShop(shopId,orderId);
-        if(returnObject.getCode()!=ResponseCode.OK){
-            logger.error(" queryPaymentById: 数据库不存在该支付单 orderId="+orderId);
-            return returnObject;
+        if(returnObject.getCode()==ResponseCode.OK){
+            return paymentDao.queryPayment(orderId);
         }
-        return paymentDao.queryPayment(orderId);
+        else if(returnObject.getCode()!=ResponseCode.OK){
+            logger.error(" queryPaymentById: 数据库不存在该支付单 orderId="+orderId);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        return returnObject;
     }
 
 
@@ -67,7 +78,10 @@ public class PaymentService implements IPaymentService {
      * @author 24320182203196 洪晓杰
      * @return ReturnObject 查询结果
      */
-    public ReturnObject customerQueryPaymentByAftersaleId(Long aftersaleId) {
+    public ReturnObject customerQueryPaymentByAftersaleId(Long aftersaleId,Long userId) {
+        ReturnObject<Long> returnObject = iAftersaleService.findUserIdbyAftersaleId(aftersaleId);
+        if(!returnObject.getData().equals(userId))
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
         return paymentDao.queryPaymentByAftersaleIdForCus(aftersaleId);
     }
 
@@ -77,10 +91,38 @@ public class PaymentService implements IPaymentService {
      * @author 24320182203196 洪晓杰
      * @return ReturnObject 查询结果
      */
-    public ReturnObject getPaymentByAftersaleId(Long shopId, Long aftersaleId) {
+    public ReturnObject<List> getPaymentByAftersaleId(Long shopId, Long aftersaleId) throws Exception {
 
-        return paymentDao.queryPaymentByAftersaleIdForAdmin(shopId,aftersaleId);
+        List<Payment> payments=null;
+        List<PaymentPo> retPaymentPos=paymentDao.getOrderIdFromPaymentByAftersaleId(aftersaleId);
 
+        logger.error("1");
+
+        //如果存在找不到对应记录的时候
+        if(retPaymentPos.isEmpty())return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("不存在对应的aftersaleId的记录" ));
+
+        logger.error("1");
+
+        payments=new ArrayList<>(retPaymentPos.size());
+
+
+        logger.error("1");
+
+        Long retShopId=null;
+        for(PaymentPo paymentPo:retPaymentPos){
+            try {
+                retShopId=iOrderService.findShopIdbyOrderId(paymentPo.getOrderId()).getData().getShopId();
+            }catch (Exception e){
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("不存在的id" ));
+            }
+            //有可能存在找不到的情况
+            if(retShopId.equals(shopId)) payments.add(new Payment(paymentPo));
+            //if(retShopId.equals(null))return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("找不到orderId对应的shopId" ));
+        }
+
+        if(payments.isEmpty())return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("找不到符合条件的支付记录" ));
+
+        return new ReturnObject<>(payments);
     }
 
     @Transactional
@@ -206,19 +248,35 @@ public class PaymentService implements IPaymentService {
     @Transactional
     public ReturnObject<VoObject> createPaymentByAftersaleId(Payment payment,Long aftersaleId) {
 
+        //Long retorderId=(long)0;
+        //？？？？？？？？？？？？？？？？？？？？？？？？？记得改回来
+        logger.error("记得改回来");
+        //跨域获取orderItemId
         Long retOrderItemId = iAftersaleService.findOrderItemIdbyAftersaleId(aftersaleId).getData();
+        //
+        //第一个测试
+        //Long retOrderItemId=47007;
+        //第二个测试
+        // Long retOrderItemId=null;
 
+
+        //Long retOrderItemId=null;
         if (retOrderItemId == null)
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"找不到aftersaleId对应的OrderItemId");
 
-        //跨域获取orderId
-        Long retorderId=iOrderService.getOrderIdByOrderItemId(retOrderItemId).getData();
+        logger.error("111111111");
 
+        ReturnObject<Long> returnObt=iOrderService.getOrderIdByOrderItemId(retOrderItemId);
 
-        //Long retOrderID=iOrderItemService
+        logger.error("22222222");
 
-//        OrderItemPo orderItemPo=orderItemPoMapper.selectByPrimaryKey(retOrderItemId);
-//        payment.setOrderId(orderItemPo.getOrderId());
+        System.out.println(returnObt.getCode());
+
+        System.out.println(returnObt.getData());
+
+        Long retorderId=returnObt.getData();
+        System.out.println(retorderId);
+
 
         LocalDateTime localDateTime = LocalDateTime.now();
 
@@ -229,8 +287,7 @@ public class PaymentService implements IPaymentService {
         //支付成功
         payment.setState((byte)0);
         payment.setPayTime(localDateTime);
-
-        payment.setGmtModified(localDateTime);
+        //payment.setGmtModified(localDateTime);
 
         ReturnObject returnObject = paymentDao.insertPayment(payment);
         if(returnObject.getCode().equals(ResponseCode.OK)){
@@ -239,7 +296,6 @@ public class PaymentService implements IPaymentService {
             return new ReturnObject<>(returnObject.getCode(),returnObject.getErrmsg());
         }
     }
-
     /**
      * 为对应的orderId查找payment并创建退款单。、
      * 实现IPaymentService.java中 “ReturnObject<ResponseCode> createRefundbyOrederId(Long orderId);”

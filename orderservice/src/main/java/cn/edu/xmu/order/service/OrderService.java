@@ -25,6 +25,7 @@ import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrdersPo;
 import cn.edu.xmu.order.model.vo.*;
 import com.github.pagehelper.PageInfo;
+import net.bytebuddy.asm.Advice;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
@@ -116,28 +117,38 @@ public class OrderService implements IOrderService {
      * @return VoObject
      */
     @Transactional
-    public ReturnObject<VoObject> transOrder(Long id) {
+    public ReturnObject<VoObject> transOrder(Long id,Long userId) {
         ReturnObject<VoObject> returnObject = null;
         Orders orders=orderDao.findOrderById(id);
-        if(orders.getOrderType()==1) {
-            int ret=orderDao.transOrder(id);
-            if(ret == 1) {
+        if(orders==null||orders.getOrderType()==null||orders.getBeDeleted()==1){//订单不存在
+            returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        else if(orders.getOrderType()==1&&orders.getCustomerId().equals(userId)&&orders.getBeDeleted()!=1) {
+            if(orders.getSubstate()==22||orders.getSubstate()==23||orders.getState()==2) {
+                int ret=orderDao.transOrder(id);
+                if(ret == 1) {
                 logger.debug("transOrdersById : " + returnObject);
                 Byte type=0;
                 orders.setOrderType(type);
                 //OrderRetVo orderRetVo=new orderRetVo();
                 returnObject = new ReturnObject(orders);
-            } else {
-                logger.debug("findOrdersById: Not Found");
-                returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+                }
+                else {
+                    logger.debug("findOrdersById: Not Found");
+                    returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+                }
+            }
+            else{
+                returnObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
             }
         }
+
         else if(orders.getOrderType()!=1){
             logger.debug("该订单不是团购订单，无法进行转换");
             returnObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
         }
-        else if(orders==null||orders.getOrderType()==null){
-            returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        else if(orders.getCustomerId()!=userId) {//id不对应
+            returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
         return returnObject;
     }
@@ -147,18 +158,39 @@ public class OrderService implements IOrderService {
      * 买家修改本人名下订单
      *
      * @author 24320182203196 洪晓杰
+     * @修改：李明明 2020-12-19
      */
     @Transactional
-    public ReturnObject<Object> updateOders(Orders orders) {
+    public ReturnObject<VoObject> updateOrders(Orders orders, Long userId) {
+
+        ReturnObject<VoObject> retOrder=null;
+        //ReturnObject<OrderInnerDTO> returnObject=orderDao.getUserIdbyOrderId(orders.getId());
+        //调用OrderDao层中的 ReturnObject<OrdersPo> getOrderByOrderId(Long orderId)
+        ReturnObject<OrdersPo> returnObject = orderDao.getOrderByOrderId(orders.getId());
+        if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))
+        {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        //校验前端数据的userID
+        //如果ordersId与所属customerId不一致，则无法修改
+        if(!userId.equals(returnObject.getData().getCustomerId())){
+            //操作的资源id不是自己的对象
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+        //若订单已发货，则无法修改
+        if(returnObject.getData().getSubstate().equals(Orders.State.HAS_DELIVERRED.getCode().byteValue()))
+        {
+            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
+        }
+
         ReturnObject<Orders> retObj = orderDao.updateOrder(orders);
-        ReturnObject<Object> retOrder;
+
         if (retObj.getCode().equals(ResponseCode.OK)) {
             retOrder = new ReturnObject<>(retObj.getData());
         } else {
             retOrder = new ReturnObject<>(retObj.getCode(), retObj.getErrmsg());
         }
         return retOrder;
-
     }
 
     /**
@@ -204,8 +236,10 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public ReturnObject<OrderInnerDTO> findShopIdbyOrderId(Long orderId) {
-        return orderDao.getShopIdbyOrderId(orderId); }
+    public ReturnObject<OrderInnerDTO> findShopIdbyOrderId(Long orderId) { return orderDao.getShopIdbyOrderId(orderId); }
+
+    @Override
+    public ReturnObject<OrderInnerDTO> getOrderInfoByOrderId(Long orderId) { return orderDao.getOrderInfoByOrderId(orderId); }
     /**
      * @param
      * @return
@@ -214,10 +248,10 @@ public class OrderService implements IOrderService {
      */
     public ReturnObject<PageInfo<VoObject>> selectOrders(Long userId, Integer pageNum, Integer pageSize,
                                                          String orderSn, Byte state,
-                                                         String beginTimeStr, String endTimeStr) {
+                                                         String beginTimeStr, String endTimeStr)
+    {
         ReturnObject<PageInfo<VoObject>> returnObject = orderDao.getOrdersByUserId(userId, pageNum, pageSize,
                 orderSn, state, beginTimeStr, endTimeStr);
-
         return returnObject;
     }
 
@@ -249,8 +283,16 @@ public class OrderService implements IOrderService {
     public ReturnObject<VoObject> getOrderById(Long shopId, Long id)
     {
         Orders orders = (Orders) orderDao.getOrderById(shopId,id).getData();
-
+        if(orderDao.getOrderById(shopId,id).getCode()==ResponseCode.RESOURCE_ID_NOTEXIST)
+        {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        if(orderDao.getOrderById(shopId,id).getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE)
+        {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
         List<OrderItemPo> orderItemPos=orderDao.findOrderItemById(id);
+
         List<OrderItems> orderItemsList = new ArrayList<OrderItems>();
         for(OrderItemPo po : orderItemPos)
         {
@@ -277,7 +319,7 @@ public class OrderService implements IOrderService {
         ReturnObject<VoObject> returnObject = null;
         if(orders != null) {
             logger.debug("findOrdersById : " + returnObject);
-            returnObject = new ReturnObject(new OrderRetVo(orders));
+            returnObject = new ReturnObject(new OrderCreateRetVo(orders));
         } else {
             logger.debug("findOrdersById: Not Found");
             returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
@@ -524,17 +566,18 @@ public class OrderService implements IOrderService {
     @Override
     public ReturnObject<Object> putGrouponOffshelves(Long grouponId)
     {
-        List<Orders> ordersList = orderDao.getOrdersByGrouponId(grouponId);
-        if(null == ordersList)
+        ReturnObject<List<Orders>> returnObject1 = orderDao.getOrdersByGrouponId(grouponId);
+        if(returnObject1.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE)
         {
             return new ReturnObject<>(ResponseCode.OK);//如果没有查到属于该groupId的订单，就不用进行转换处理，同样是成功的。
         }
         else
         {
+            List<Orders> ordersList = returnObject1.getData();
             for(Orders orders : ordersList)
             {
                 //对每个订单调用本类中 ”public ReturnObject<VoObject> transOrder(Long id)“方法
-                ReturnObject<VoObject> returnObject = this.transOrder(orders.getId());
+                ReturnObject<VoObject> returnObject = this.transOrder(orders.getId(),orders.getCustomerId());
                 if(returnObject.getCode() != ResponseCode.OK)
                 {
                     //如果其中有一个无法转换，就返回错误
@@ -555,13 +598,15 @@ public class OrderService implements IOrderService {
     @Override
     public ReturnObject<Object> putPresaleOffshevles(Long presaleId)
     {
-        List<Orders> ordersList = orderDao.getOrdersByPresleId(presaleId);
-        if(null == ordersList)
+        ReturnObject<List<Orders>> returnObject1 = orderDao.getOrdersByPresleId(presaleId);
+
+        if(returnObject1.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE)
         {
             return new ReturnObject<Object>(ResponseCode.OK); //如果没有查到属于该presaleId的订单，就不用进行转换处理，同样是成功的。
         }
         else
         {
+            List<Orders> ordersList = returnObject1.getData();
             for(Orders orders : ordersList)
             {
                 //对每个orders调用本类中 “public ReturnObject<VoObject> cancelOrderById(Long shopId,Long id)”
@@ -598,11 +643,12 @@ public class OrderService implements IOrderService {
     public ReturnObject<Object> grouponEnd(String strategy, Long GrouponId)
     {
         Strategy strategy1 = JacksonUtil.toObj(strategy, Strategy.class);//不知道是不是这样用
-        List<Orders> ordersList = orderDao.getOrdersByGrouponId(GrouponId);
-        if(null == ordersList)
+        ReturnObject<List<Orders>> returnObject1 = orderDao.getOrdersByGrouponId(GrouponId);
+        if(returnObject1.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE)
         {
             return new ReturnObject<>(ResponseCode.OK);
         }
+        List<Orders> ordersList = returnObject1.getData();
         Integer orderAmount = ordersList.size();
         //System.out.println("!!!!!!"+ orderAmount + "!!!!!!!!!");
         Long refundPrice = 0L;
@@ -624,7 +670,7 @@ public class OrderService implements IOrderService {
             for(Orders orders : ordersList)
             {
                 //对每个订单调用本类中 ”public ReturnObject<VoObject> transOrder(Long id)“方法
-                ReturnObject<VoObject> returnObject = this.transOrder(orders.getId());
+                ReturnObject<VoObject> returnObject = this.transOrder(orders.getId(),orders.getCustomerId());
                 if(returnObject.getCode() != ResponseCode.OK)
                 {
                     //如果其中有一个无法转换，就返回错误
