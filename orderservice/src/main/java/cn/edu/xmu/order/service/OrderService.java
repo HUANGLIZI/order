@@ -121,19 +121,25 @@ public class OrderService implements IOrderService {
         ReturnObject<VoObject> returnObject = null;
         Orders orders=orderDao.findOrderById(id);
         if(orders.getOrderType()==1&&orders.getCustomerId()==userId) {
-            int ret=orderDao.transOrder(id);
-            if(ret == 1) {
+            if(orders.getSubstate()==22||orders.getSubstate()==23||orders.getSubstate()==11) {
+                int ret=orderDao.transOrder(id);
+                if(ret == 1) {
                 logger.debug("transOrdersById : " + returnObject);
                 Byte type=0;
                 orders.setOrderType(type);
                 //OrderRetVo orderRetVo=new orderRetVo();
                 returnObject = new ReturnObject(orders);
-            } else {
-                logger.debug("findOrdersById: Not Found");
-                returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+                }
+                else {
+                    logger.debug("findOrdersById: Not Found");
+                    returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+                }
+            }
+            else{
+                returnObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
             }
         }
-        else if(orders.getOrderType()!=1){
+        else if(orders.getOrderType()!=1&&){
             logger.debug("该订单不是团购订单，无法进行转换");
             returnObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
         }

@@ -342,10 +342,12 @@ public class FreightController {
         logger.info("calculate freight service by regionId:" + rid);
         if(rid==2001) {
             ReturnObject<Long> retObject = new ReturnObject<>(ResponseCode.PAYSN_SAME);
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
             return Common.decorateReturnObject(retObject);
         }
         if(!addressServiceI.getValidRegionId(rid).getData()) {
             ReturnObject<Long> retObject = new ReturnObject<>(ResponseCode.PAYSN_SAME);
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
             return Common.decorateReturnObject(retObject);
         }
         int listSize = vo.size();
