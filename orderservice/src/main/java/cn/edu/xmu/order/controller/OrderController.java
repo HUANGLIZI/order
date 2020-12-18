@@ -135,6 +135,8 @@ public class OrderController {
             httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
         else if(retObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE)
             httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+        else if(retObject.getCode()==ResponseCode.ORDER_STATENOTALLOW)
+            httpServletResponse.setStatus(HttpStatus.OK.value());
         return Common.decorateReturnObject(retObject);
     }
 

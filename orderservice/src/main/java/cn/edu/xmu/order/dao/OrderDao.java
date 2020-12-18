@@ -45,10 +45,16 @@ public class OrderDao {
      */
     public Orders findOrderById(Long id) {
         logger.debug("findUserById: Id =" + id);
-        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(id);
-        Orders orders=new Orders(ordersPo);
-        if (ordersPo == null) {
-            logger.error("getOrder: 订单数据库不存在该订单 orderid=" + id);
+        Orders orders;
+        try {
+            OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(id);
+            orders=new Orders(ordersPo);
+        }
+        catch (Exception e){
+                logger.error("getOrder: 订单数据库不存在该订单 orderid=" + id);
+                Orders orders1=new Orders();
+                orders1.setBeDeleted((byte) 1);
+                return orders1;
         }
         return orders;
     }
