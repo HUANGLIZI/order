@@ -62,7 +62,7 @@ public class OrderController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/orders/{id}")
     public Object getOrdersByOrderId(@PathVariable("id") Long id){
         ReturnObject returnObject =  orderService.getOrdersByOrderId(id);
@@ -125,7 +125,8 @@ public class OrderController {
     @Audit
     @PostMapping("/orders/{id}/groupon-normal")
     public Object transOrder(@PathVariable("id") Long id,
-                             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId) {
+                             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId)
+    {
         logger.debug("transform Order by orderId:" +id);
         ReturnObject<VoObject> retObject = null;
         retObject = orderService.transOrder(id,userId);
@@ -163,19 +164,18 @@ public class OrderController {
     @PutMapping("/orders/{id}")
     public Object updateOrder(@PathVariable("id") Long id,
                               @LoginUser @ApiIgnore Long userId,
-                              @Validated @RequestBody OrderSimpleVo vo, BindingResult bindingResult) {
-
+                              @Validated @RequestBody OrderSimpleVo vo, BindingResult bindingResult)
+    {
         logger.debug("update order by orderId:" + id);
         //校验前端数据-----暂时还没写
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
-
         Orders orders=vo.createOrders();
         orders.setId(id);
         orders.setGmtModified(LocalDateTime.now());
-        ReturnObject<VoObject> retObject = orderService.updateOrders(orders,userId);
+         ReturnObject<VoObject> retObject = orderService.updateOrders(orders,userId);
         return Common.decorateReturnObject(retObject);
     }
 
@@ -517,7 +517,7 @@ public class OrderController {
         {
             ReturnObject returnObject =  orderService.getOrderById(shopId, id);
             if (returnObject.getCode() == ResponseCode.OK) {
-                return Common.getRetObject(returnObject);
+                return Common.decorateReturnObject(returnObject);
             }
             else if(returnObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE)
             {

@@ -308,16 +308,16 @@ public class OrderDao {
      */
     public ReturnObject<PageInfo<VoObject>> getOrdersByUserId(Long userId, Integer pageNum, Integer pageSize,
                                                               String orderSn, Byte state,
-                                                              String beginTime, String endTime) {
+                                                              String beginTime, String endTime)
+    {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         OrdersPoExample ordersPoExample = new OrdersPoExample();
         OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
-        if (userId == null)
+        if (userId == null)//如果userId为空
         {
             logger.info("userId is " + userId);
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-        criteria.andCustomerIdEqualTo(userId);
         criteria.andCustomerIdEqualTo(userId);
         // 被逻辑删除的订单不能被返回
         Byte beDeleted = 0;
@@ -370,7 +370,11 @@ public class OrderDao {
                 Orders order = new Orders(po);
                 ret.add(order);
             }
-            PageInfo<VoObject> orderPage = PageInfo.of(ret);
+            PageInfo<OrdersPo> ordersPoPageInfo = PageInfo.of(ordersPos);
+            PageInfo<VoObject> orderPage = new PageInfo<>(ret);
+            orderPage.setTotal(ordersPoPageInfo.getTotal());
+            orderPage.setPages(ordersPoPageInfo.getPages());
+            orderPage.setPageNum(ordersPoPageInfo.getPageNum());
             orderPage.setPageSize(pageSize);
             return new ReturnObject<>(orderPage);
         } catch (DataAccessException e) {
@@ -517,11 +521,6 @@ public class OrderDao {
     {
         ReturnObject<Orders> ordersReturnObject = null;
         OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(id);
-        System.out.println(ordersPo.getSubstate().getClass());
-        System.out.println("@@@@"+Orders.State.HAS_DELIVERRED+"@@@@@");
-        System.out.println("@@@@"+Orders.State.HAS_DELIVERRED.getCode()+"@@@@@");
-        Integer state1 = Orders.State.HAS_DELIVERRED.getCode();
-        System.out.println("@@@@"+ordersPo.getSubstate().equals(Orders.State.HAS_DELIVERRED.getCode().byteValue())+"@@@@");
         if(ordersPo == null)
         {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("不存在对应的订单id" ));

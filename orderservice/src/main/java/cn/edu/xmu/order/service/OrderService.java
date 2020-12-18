@@ -158,22 +158,29 @@ public class OrderService implements IOrderService {
      * 买家修改本人名下订单
      *
      * @author 24320182203196 洪晓杰
+     * @修改：李明明 2020-12-19
      */
     @Transactional
     public ReturnObject<VoObject> updateOrders(Orders orders, Long userId) {
 
         ReturnObject<VoObject> retOrder=null;
-        ReturnObject<OrderInnerDTO> returnObject=orderDao.getUserIdbyOrderId(orders.getId());
-
-        if((returnObject.getData().getOrderId())==null) {
+        //ReturnObject<OrderInnerDTO> returnObject=orderDao.getUserIdbyOrderId(orders.getId());
+        //调用OrderDao层中的 ReturnObject<OrdersPo> getOrderByOrderId(Long orderId)
+        ReturnObject<OrdersPo> returnObject = orderDao.getOrderByOrderId(orders.getId());
+        if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))
+        {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-
         //校验前端数据的userID
         //如果ordersId与所属customerId不一致，则无法修改
         if(!userId.equals(returnObject.getData().getCustomerId())){
             //操作的资源id不是自己的对象
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+        //若订单已发货，则无法修改
+        if(returnObject.getData().getSubstate().equals(Orders.State.HAS_DELIVERRED.getCode().byteValue()))
+        {
+            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
         }
 
         ReturnObject<Orders> retObj = orderDao.updateOrder(orders);
@@ -241,7 +248,8 @@ public class OrderService implements IOrderService {
      */
     public ReturnObject<PageInfo<VoObject>> selectOrders(Long userId, Integer pageNum, Integer pageSize,
                                                          String orderSn, Byte state,
-                                                         String beginTimeStr, String endTimeStr) {
+                                                         String beginTimeStr, String endTimeStr)
+    {
         ReturnObject<PageInfo<VoObject>> returnObject = orderDao.getOrdersByUserId(userId, pageNum, pageSize,
                 orderSn, state, beginTimeStr, endTimeStr);
         return returnObject;
@@ -311,7 +319,7 @@ public class OrderService implements IOrderService {
         ReturnObject<VoObject> returnObject = null;
         if(orders != null) {
             logger.debug("findOrdersById : " + returnObject);
-            returnObject = new ReturnObject(new OrderRetVo(orders));
+            returnObject = new ReturnObject(new OrderCreateRetVo(orders));
         } else {
             logger.debug("findOrdersById: Not Found");
             returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
