@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -239,6 +240,7 @@ public class OrderServiceI {
 
     private void sendOrderPayMessage(String order){
         logger.info("sendOrderPayMessage: send message orderId = "+order+" delay ="+" time =" +LocalDateTime.now());
+        RocketMQTemplate rocketMQTemplate = null;
         rocketMQTemplate.asyncSend("order-pay-topic", MessageBuilder.withPayload(order).build(), new SendCallback() {
             @Override
             public void onSuccess(SendResult sendResult) {

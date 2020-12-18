@@ -122,13 +122,19 @@ public class OrderController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 801, message = "订单状态禁止"),
     })
-    //@Audit
+    @Audit
     @PostMapping("/orders/{id}/groupon-normal")
     public Object transOrder(@PathVariable("id") Long id,
                              @LoginUser @ApiIgnore @RequestParam(required = false) Long userId) {
         logger.debug("transform Order by orderId:" +id);
         ReturnObject<VoObject> retObject = null;
         retObject = orderService.transOrder(id,userId);
+        if(retObject.getCode()==ResponseCode.OK)
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        else if(retObject.getCode()==ResponseCode.RESOURCE_ID_NOTEXIST)
+            httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
+        else if(retObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE)
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
         return Common.decorateReturnObject(retObject);
     }
 
