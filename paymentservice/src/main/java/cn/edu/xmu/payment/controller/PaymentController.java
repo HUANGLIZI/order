@@ -127,14 +127,14 @@ public class PaymentController {
      */
     @ApiOperation(value = "买家查询自己的支付信息",produces = "application/json")
     @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "售后单id", required = true)
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    @Audit
+    //@Audit
     @GetMapping("/aftersales/{id}/payments")
     public Object customerQueryPaymentByAftersaleId(@PathVariable("id") Long aftersaleId){
         ReturnObject returnObject =  paymentService.customerQueryPaymentByAftersaleId(aftersaleId);
@@ -155,7 +155,7 @@ public class PaymentController {
      */
     @ApiOperation(value = "管理员查询售后单的支付信息",produces = "application/json")
     @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(paramType = "path", dataType = "int", name = "shopId", value = "店铺id", required = true),
             @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "售后id", required = true)
     })
@@ -163,9 +163,9 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    @Audit
+    //@Audit
     @GetMapping("/shops/{shopId}/aftersales/{id}/payments")
-    public Object getPaymentByAftersaleId(@PathVariable("shopId") Long shopId,@PathVariable("id") Long aftersaleId){
+    public Object getPaymentByAftersaleId(@PathVariable("shopId") Long shopId,@PathVariable("id") Long aftersaleId) throws Exception {
         ReturnObject returnObject =  paymentService.getPaymentByAftersaleId(shopId,aftersaleId);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getListRetObject(returnObject);
@@ -173,6 +173,7 @@ public class PaymentController {
             return Common.decorateReturnObject(returnObject);
         }
     }
+
 
     /**
      * 通过OrderId查询订单的退款信息
@@ -343,10 +344,10 @@ public class PaymentController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功")
     })
-    @Audit
+    //@Audit
     @PostMapping("/aftersales/{id}/payments")
     public Object createPaymentByAftersaleId(@Validated @RequestBody PaymentVo vo, BindingResult bindingResult,
-                                @PathVariable("id") Long aftersaleId){
+                                             @PathVariable("id") Long aftersaleId){
         logger.debug("createPayment: aftersaleId=" + aftersaleId);
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
@@ -357,10 +358,9 @@ public class PaymentController {
 
         //需要通过aftersaleId从其他模块的aftersale表中获取orderid等信息
         Payment payment = vo.createPayment();
-        payment.setAftersaleId(aftersaleId);
         payment.setGmtCreate(LocalDateTime.now());
 
-        ReturnObject<VoObject> retObject = paymentService.createPayment(payment);
+        ReturnObject<VoObject> retObject = paymentService.createPaymentByAftersaleId(payment,aftersaleId);
         httpServletResponse.setStatus(HttpStatus.CREATED.value());
         if (retObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(retObject);

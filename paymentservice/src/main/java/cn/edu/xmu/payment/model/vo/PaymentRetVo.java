@@ -13,7 +13,7 @@ public class PaymentRetVo {
     private Long id;
 
     @ApiModelProperty(value = "付款金额")
-    private Long amout;
+    private Long amount;
 
     @ApiModelProperty(value = "实际付款金额")
     private Long actualAmount;
@@ -47,7 +47,7 @@ public class PaymentRetVo {
 
     public PaymentRetVo(Payment payment) {
         this.actualAmount=payment.getActualAmount();
-        this.amout=payment.getAmount();
+        this.amount=payment.getAmount();
         this.beginTime=payment.getBeginTime();
         this.endTime=payment.getEndTime();
         this.gmtCreated=payment.getGmtCreate();

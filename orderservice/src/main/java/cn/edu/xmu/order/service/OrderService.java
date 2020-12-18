@@ -139,7 +139,7 @@ public class OrderService implements IOrderService {
                 returnObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
             }
         }
-        else if(orders.getOrderType()!=1&&){
+        else if(orders.getOrderType()!=1){
             logger.debug("该订单不是团购订单，无法进行转换");
             returnObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
         }
@@ -159,16 +159,30 @@ public class OrderService implements IOrderService {
      * @author 24320182203196 洪晓杰
      */
     @Transactional
-    public ReturnObject<Object> updateOders(Orders orders) {
+    public ReturnObject<VoObject> updateOrders(Orders orders, Long userId) {
+
+        ReturnObject<VoObject> retOrder=null;
+        ReturnObject<OrderInnerDTO> returnObject=orderDao.getUserIdbyOrderId(orders.getId());
+
+        if((returnObject.getData().getOrderId())==null) {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        //校验前端数据的userID
+        //如果ordersId与所属customerId不一致，则无法修改
+        if(!userId.equals(returnObject.getData().getCustomerId())){
+            //操作的资源id不是自己的对象
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+
         ReturnObject<Orders> retObj = orderDao.updateOrder(orders);
-        ReturnObject<Object> retOrder;
+
         if (retObj.getCode().equals(ResponseCode.OK)) {
             retOrder = new ReturnObject<>(retObj.getData());
         } else {
             retOrder = new ReturnObject<>(retObj.getCode(), retObj.getErrmsg());
         }
         return retOrder;
-
     }
 
     /**
