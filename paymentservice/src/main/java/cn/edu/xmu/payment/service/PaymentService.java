@@ -4,6 +4,7 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.order.model.OrderDTO;
 import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
 import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.oomall.order.service.IPaymentService;
@@ -17,6 +18,7 @@ import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.jaxb.SpringDataJaxb;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -46,7 +48,10 @@ public class PaymentService implements IPaymentService {
      * createdBy 张湘君 2020/12/1 20:12
      * modifiedBy 张湘君 2020/12/1 20:12
      */
-    public ReturnObject userQueryPayment(Long orderId) {
+    public ReturnObject userQueryPayment(Long orderId, Long userId) {
+        ReturnObject<OrderInnerDTO> returnObject = iOrderService.findUserIdbyOrderId(orderId);
+        if(!userId.equals(returnObject.getData().getCustomerId()))
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
         return paymentDao.userQueryPaymentById(orderId);
     }
 
@@ -69,7 +74,10 @@ public class PaymentService implements IPaymentService {
      * @author 24320182203196 洪晓杰
      * @return ReturnObject 查询结果
      */
-    public ReturnObject customerQueryPaymentByAftersaleId(Long aftersaleId) {
+    public ReturnObject customerQueryPaymentByAftersaleId(Long aftersaleId,Long userId) {
+        ReturnObject<Long> returnObject = iAftersaleService.findUserIdbyAftersaleId(aftersaleId);
+        if(!returnObject.getData().equals(userId))
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
         return paymentDao.queryPaymentByAftersaleIdForCus(aftersaleId);
     }
 
