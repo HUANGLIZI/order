@@ -223,9 +223,8 @@ public class PaymentTest {
      */
     @Test
     public void getAllPaymentsStatesTest() throws Exception{
-        String token=this.creatTestToken(1L,0L,100);
+        //String token=this.creatTestToken(1L,0L,100);
         byte[] responseString=webTestClient.get().uri("/payments/states")
-                .header("authorization", token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -243,23 +242,7 @@ public class PaymentTest {
      * @date Created in 2020年12月3日20:32:07
      */
     @Test
-    public void getAllPaymentsStatesTest1() throws Exception{
-//        String token=this.creatTestToken(1L,0L,100);
-        byte[] responseString=webTestClient.get().uri("/payments/states")
-                .exchange()
-                .expectStatus().isUnauthorized()
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_NEED_LOGIN.getCode())
-                .returnResult()
-                .getResponseBody();
-    }
-
-    /**
-     * @author zxj
-     * @date Created in 2020年12月3日20:32:07
-     */
-    @Test
-    public void getPaymentPatternsTset() throws Exception{
+    public void getPaymentPatternsTest() throws Exception{
         String token=this.creatTestToken(1L,0L,100);
         byte[] responseString=webTestClient.get().uri("/payments/patterns")
                 .header("authorization", token)

@@ -842,6 +842,335 @@ public class OrderTest {
 
     }
 
+    /**
+     * 店家修改订单
+     */
+    @Test
+    @Order(11)
+    public void shopEditOrder() throws Exception {
+        // depart = 7L
+        String token = adminLogin("shopadmin_No2", "123456");
+        String body = "{\n" +
+                "  \"message\": \"我愛你\"\n" +
+                "}";
+        byte[] responseBytes = mallClient
+                .put()
+                .uri("/shops/7/orders/19720182203919")
+                .header("authorization", token)
+                .bodyValue(body)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+        byte[] confirmString = mallClient.get().uri("/shops/7/orders/19720182203919")
+                .header("authorization", token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.data").exists()
+                .returnResult()
+                .getResponseBodyContent();
+
+        String expectedResponse ="{\n" +
+                "  \"data\": {\n" +
+                "    \"id\": 19720182203919,\n" +
+                "    \"message\": \"我愛你\"\n" +
+                "  }\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, new String(confirmString, StandardCharsets.UTF_8), false);
+    }
+
+    /**
+     * 店家修改订单 (无权限)
+     */
+    @Test
+    @Order(12)
+    public void shopEditOrderNoRights() throws Exception {
+        // depart = 7L
+        String token = adminLogin("shopadmin_No2", "123456");
+        String body = "{\n" +
+                "  \"message\": \"有內鬼终止交易\"\n" +
+                "}";
+        byte[] responseBytes = mallClient
+                .put()
+                .uri("/shops/7/orders/19720182203923") // depart=2
+                .header("authorization",token)
+                .bodyValue(body)
+                .exchange()
+                .expectStatus().isForbidden() // 不被批准
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+    }
+
+    /**
+     * 店家修改订单 (不存在订单)
+     * @throws Exception
+     */
+    @Test
+    @Order(13)
+    public void shopEditOrderNotExist() throws Exception {
+        // depart = 7L
+        String token = adminLogin("shopadmin_No2", "123456");
+        String body = "{\n" +
+                "  \"message\": \"我愛你\"\n" +
+                "}";
+        mallClient
+                .put()
+                .uri("/shops/7/orders/19720182203928") // depart=2
+                .header("authorization",token)
+                .bodyValue(body)
+                .exchange()
+                .expectStatus().isNotFound() // 未找到
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+    }
+
+    /**
+     * 店家修改订单 (字段不合法)
+     * @throws Exception
+     */
+    @Test
+    @Order(14)
+    public void shopEditOrderFieldIllegal() throws Exception {
+        // depart = 7L
+        String token = adminLogin("shopadmin_No2", "123456");
+        String body = "{}";
+        mallClient
+                .put()
+                .uri("/shops/7/orders/19720182203919") // depart=2
+                .header("authorization",token)
+                .bodyValue(body)
+                .exchange()
+                .expectStatus().isBadRequest() // 未找到
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.FIELD_NOTVALID.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+    }
+
+    /**
+     * 店家修改订单 (伪造 JWT)
+     * @throws Exception
+     */
+    @Test
+    @Order(15)
+    public void shopEditOrderTokenIllegal() throws Exception {
+        // depart = 7L
+        String body = "{\n" +
+                "  \"message\": \"我愛你\"\n" +
+                "}";
+        mallClient
+                .put()
+                .uri("/shops/7/orders/19720182203928") // depart=2
+                .header("authorization", "12u8789781379127312ui3y1i3")
+                .bodyValue(body)
+                .exchange()
+                .expectStatus().isUnauthorized() // 不合法
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+    }
+
+
+    /**
+     * 店家发货 (字段不合法)
+     * @throws Exception
+     */
+    @Test
+    @Order(16)
+    public void shopDeliverFieldIllegal() throws Exception {
+        // depart = 7L
+        String token = adminLogin("shopadmin_No2", "123456");
+        String body = "{}";
+        mallClient
+                .put()
+                .uri("/shops/7/orders/19720182203919/deliver") // depart=2
+                .header("authorization",token)
+                .bodyValue(body)
+                .exchange()
+                .expectStatus().isBadRequest() // 未找到
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.FIELD_NOTVALID.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+    }
+
+
+    /**
+     * 店家发货
+     * @throws Exception
+     */
+    @Test
+    @Order(17)
+    public void shopDeliver() throws Exception {
+        // depart = 7L
+        String token = adminLogin("shopadmin_No2", "123456");
+        String body = "{\n" +
+                "  \"freightSn\": \"1212121212123\"\n" +
+                "}";
+        byte[] responseBytes = mallClient
+                .put()
+                .uri("/shops/7/orders/19720182203919/deliver")
+                .header("authorization",token)
+                .bodyValue(body)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+        byte[] confirmString = mallClient.get().uri("/shops/7/orders/19720182203919")
+                .header("authorization", token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.data").exists()
+                .returnResult()
+                .getResponseBodyContent();
+
+        String expectedResponse ="{\n" +
+                "  \"data\": {\n" +
+                "    \"id\": 19720182203919,\n" +
+                "    \"state\": 2,\n" +
+                "    \"subState\": 24,\n" +
+                "    \"shipmentSn\": \"1212121212123\"\n" +
+                "  }\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, new String(confirmString, StandardCharsets.UTF_8), false);
+    }
+
+    /**
+     * 店家发货 (已发货过)
+     * @throws Exception
+     */
+    @Test
+    @Order(18)
+    public void shopDeliverAlreadyDelivered() throws Exception {
+        // depart = 7L
+        String token = adminLogin("shopadmin_No2", "123456");
+        String body = "{\n" +
+                "  \"freightSn\": \"1212121212123\"\n" +
+                "}";
+        mallClient
+                .put()
+                .uri("/shops/7/orders/19720182203919/deliver")
+                .header("authorization",token)
+                .bodyValue(body)
+                .exchange()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.ORDER_STATENOTALLOW.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+    }
+
+    /**
+     * 店家发货 (状态不允许)
+     * @throws Exception
+     */
+    @Test
+    @Order(19)
+    public void shopDeliverStateNotAllow() throws Exception {
+        // depart = 7L
+        String token = adminLogin("shopadmin_No2", "123456");
+        String body = "{\n" +
+                "  \"freightSn\": \"1212121212123\"\n" +
+                "}";
+        mallClient
+                .put()
+                .uri("/shops/7/orders/19720182203921/deliver")
+                .header("authorization",token)
+                .bodyValue(body)
+                .exchange()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.ORDER_STATENOTALLOW.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+    }
+
+    /**
+     * 店家发货 (无权限)
+     */
+    @Test
+    @Order(20)
+    public void shopDeliverNoRights() throws Exception {
+        // depart = 7L
+        String token = adminLogin("shopadmin_No2", "123456");
+        String body = "{\n" +
+                "  \"freightSn\": \"1212121212123\"\n" +
+                "}";
+        byte[] responseBytes = mallClient
+                .put()
+                .uri("/shops/7/orders/19720182203923/deliver") // depart=2
+                .header("authorization",token)
+                .bodyValue(body)
+                .exchange()
+                .expectStatus().isForbidden() // 不被批准
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+    }
+
+    /**
+     * 店家发货 (不存在订单)
+     * @throws Exception
+     */
+    @Test
+    @Order(21)
+    public void shopDeliverNotExist() throws Exception {
+        // depart = 7L
+        String token = adminLogin("shopadmin_No2", "123456");
+        String body = "{\n" +
+                "  \"freightSn\": \"1212121212123\"\n" +
+                "}";
+        mallClient
+                .put()
+                .uri("/shops/7/orders/19720182203928/deliver") // depart=2
+                .header("authorization",token)
+                .bodyValue(body)
+                .exchange()
+                .expectStatus().isNotFound() // 未找到
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+    }
+
+    /**
+     * 管理员登入
+     * @param username 用户名
+     * @param password 密码
+     * @throws Exception parse error
+     */
+    private String adminLogin(String username, String password) {
+        LoginVo vo = new LoginVo();
+        vo.setUserName(username);
+        vo.setPassword(password);
+        String requireJson = JacksonUtil.toJson(vo);
+        assert requireJson != null;
+        byte[] ret = manageClient.post()
+                .uri("/adminusers/login").bodyValue(requireJson).exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.errmsg").isEqualTo("成功")
+                .returnResult()
+                .getResponseBodyContent();
+        assert ret != null;
+        return JacksonUtil.parseString(new String(ret, StandardCharsets.UTF_8), "data");
+    }
+
     private String login(String userName, String password) throws Exception {
         LoginVo vo = new LoginVo();
         vo.setUserName(userName);
