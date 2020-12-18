@@ -121,7 +121,7 @@ public class OrderService implements IOrderService {
         ReturnObject<VoObject> returnObject = null;
         Orders orders=orderDao.findOrderById(id);
         if(orders.getOrderType()==1&&orders.getCustomerId()==userId) {
-            if(orders.getState()==22||orders.getState()==23||orders.getState()==11) {
+            if(orders.getSubstate()==22||orders.getSubstate()==23||orders.getSubstate()==11) {
                 int ret=orderDao.transOrder(id);
                 if(ret == 1) {
                 logger.debug("transOrdersById : " + returnObject);
