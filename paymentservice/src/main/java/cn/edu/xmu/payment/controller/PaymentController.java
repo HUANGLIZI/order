@@ -69,8 +69,8 @@ public class PaymentController {
     })
     @Audit
     @GetMapping("/orders/{id}/payments")
-    public Object userQueryPayment(@PathVariable("id") Long orderId){
-        ReturnObject returnObject =  paymentService.userQueryPayment(orderId);
+    public Object userQueryPayment(@PathVariable("id") Long orderId, @LoginUser Long userId){
+        ReturnObject returnObject =  paymentService.userQueryPayment(orderId, userId);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getListRetObject(returnObject);
         } else {
@@ -134,10 +134,10 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/aftersales/{id}/payments")
-    public Object customerQueryPaymentByAftersaleId(@PathVariable("id") Long aftersaleId){
-        ReturnObject returnObject =  paymentService.customerQueryPaymentByAftersaleId(aftersaleId);
+    public Object customerQueryPaymentByAftersaleId(@PathVariable("id") Long aftersaleId, @LoginUser Long userId){
+        ReturnObject returnObject =  paymentService.customerQueryPaymentByAftersaleId(aftersaleId,userId);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getListRetObject(returnObject);
         } else {
@@ -163,7 +163,7 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @GetMapping("/shops/{shopId}/aftersales/{id}/payments")
     public Object getPaymentByAftersaleId(@PathVariable("shopId") Long shopId,@PathVariable("id") Long aftersaleId) throws Exception {
         ReturnObject returnObject =  paymentService.getPaymentByAftersaleId(shopId,aftersaleId);
@@ -344,7 +344,7 @@ public class PaymentController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功")
     })
-    //@Audit
+    @Audit
     @PostMapping("/aftersales/{id}/payments")
     public Object createPaymentByAftersaleId(@Validated @RequestBody PaymentVo vo, BindingResult bindingResult,
                                              @PathVariable("id") Long aftersaleId){
