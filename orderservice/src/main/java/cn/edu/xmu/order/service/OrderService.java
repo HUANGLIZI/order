@@ -298,20 +298,20 @@ public class OrderService implements IOrderService {
         }
 
 
-//        Long customerId = orders.getCustomerId();
-//        CustomerDTO customerDTO = customerServiceI.findCustomerByUserId(customerId).getData();
-//        CustomerRetVo customerRetVo = new CustomerRetVo();
-//        customerRetVo.setId(customerId);
-//        customerRetVo.setName(customerDTO.getName());
-//        customerRetVo.setUserName(customerDTO.getUserName());
-//
-//        ShopRetVo shopRetVo = new ShopRetVo();
-//        ShopDetailDTO shopDetailDTO = goodsServiceI.getShopInfoByShopId(shopId).getData();
-//        shopRetVo.setId(shopId);
-//        shopRetVo.setName(shopDetailDTO.getName());
-//        shopRetVo.setState(shopDetailDTO.getState());
-//        shopRetVo.setGmtCreate(shopDetailDTO.getGmtCreate());
-//        shopRetVo.setGmtModified(shopDetailDTO.getGmtModified());
+        Long customerId = orders.getCustomerId();
+        CustomerDTO customerDTO = customerServiceI.findCustomerByUserId(customerId).getData();
+        CustomerRetVo customerRetVo = new CustomerRetVo();
+        customerRetVo.setId(customerId);
+        customerRetVo.setName(customerDTO.getName());
+        customerRetVo.setUserName(customerDTO.getUserName());
+
+        ShopRetVo shopRetVo = new ShopRetVo();
+        ShopDetailDTO shopDetailDTO = goodsServiceI.getShopInfoByShopId(shopId).getData();
+        shopRetVo.setId(shopId);
+        shopRetVo.setName(shopDetailDTO.getName());
+        shopRetVo.setState(shopDetailDTO.getState());
+        shopRetVo.setGmtCreate(shopDetailDTO.getGmtCreate());
+        shopRetVo.setGmtModified(shopDetailDTO.getGmtModified());
 
         ReturnObject<VoObject> returnObject = null;
         if(orders != null) {
