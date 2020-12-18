@@ -204,7 +204,8 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public ReturnObject<OrderInnerDTO> findShopIdbyOrderId(Long orderId) { return orderDao.getShopIdbyOrderId(orderId); }
+    public ReturnObject<OrderInnerDTO> findShopIdbyOrderId(Long orderId) {
+        return orderDao.getShopIdbyOrderId(orderId); }
     /**
      * @param
      * @return
@@ -216,6 +217,7 @@ public class OrderService implements IOrderService {
                                                          String beginTimeStr, String endTimeStr) {
         ReturnObject<PageInfo<VoObject>> returnObject = orderDao.getOrdersByUserId(userId, pageNum, pageSize,
                 orderSn, state, beginTimeStr, endTimeStr);
+
         return returnObject;
     }
 

@@ -384,7 +384,11 @@ public class OrderController {
             return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID,ResponseCode.FIELD_NOTVALID.getMessage()),httpServletResponse);
 
         }
-        return Common.getPageRetObject(returnObject);
+        else if (returnObject.getCode() == ResponseCode.OK)
+            return Common.getPageRetObject(returnObject);
+        else {
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
 

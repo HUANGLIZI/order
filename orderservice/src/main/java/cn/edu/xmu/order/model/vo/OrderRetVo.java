@@ -7,12 +7,13 @@ import cn.edu.xmu.order.model.po.OrderItemPo;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @ApiModel(description = "订单详情视图对象1")
 @Data
-public class OrderRetVo implements VoObject {
+public class OrderRetVo implements VoObject, Serializable {
     private Long id;
     private Long customerId;
     private Long shopId;
@@ -66,6 +67,8 @@ public class OrderRetVo implements VoObject {
     public OrderRetVo(Orders orders) {
         this.id = orders.getId();
         this.pid=orders.getPid();
+        this.customerId = orders.getCustomerId();
+        this.shopId = orders.getShopId();
         this.orderType=orders.getOrderType();
         this.freightPrice=orders.getFreightPrice();
         this.discountPrice=orders.getDiscountPrice();

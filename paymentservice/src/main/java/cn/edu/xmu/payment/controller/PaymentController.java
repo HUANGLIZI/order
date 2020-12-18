@@ -200,7 +200,8 @@ public class PaymentController {
         if (!shopId.equals(sId) && sId != 0) {
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         }
-        ReturnObject returnObject =  paymentServiceI.getOrdersRefundsByOrderId(id,shopId);
+        ReturnObject<List> returnObject = paymentServiceI.getOrdersRefundsByOrderId(id, shopId);
+        System.out.println(returnObject);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getListRetObject(returnObject);
         } else {
@@ -236,10 +237,10 @@ public class PaymentController {
         if (!shopId.equals(sId) && sId != 0) {
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         }
-        ReturnObject returnObject =  paymentServiceI.getOrdersRefundsByAftersaleId(id,shopId);
+        ReturnObject<List> returnObject = paymentServiceI.getOrdersRefundsByAftersaleId(id, shopId);
         if (returnObject.getCode() == ResponseCode.OK) {
             logger.info(returnObject.getCode().toString() + "============");
-            return Common.decorateReturnObject(returnObject);
+            return Common.getListRetObject(returnObject);
         } else {
             if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE) {
                 httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
@@ -391,7 +392,7 @@ public class PaymentController {
     public Object queryUserRefundsByOrderId(
             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
             @PathVariable("id") Long orderId) {
-//        System.out.println("userId" + userId);
+        System.out.println("userId" + userId);
         ReturnObject<List> returnObject = paymentServiceI.userQueryRefundsByOrderId(orderId, userId);
 
         if (returnObject.getCode() == ResponseCode.OK) {

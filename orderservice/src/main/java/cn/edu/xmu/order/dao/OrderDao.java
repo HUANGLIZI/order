@@ -80,6 +80,8 @@ public class OrderDao {
         OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
         Byte type=0;
         ordersPo.setOrderType(type);
+        ordersPo.setState((byte) 2);
+        ordersPo.setSubstate((byte) 21);
         int ret=ordersPoMapper.updateByPrimaryKeySelective(ordersPo);
         return ret;
     }
@@ -334,8 +336,13 @@ public class OrderDao {
                 Orders order = new Orders(po);
                 ret.add(order);
             }
-            PageInfo<VoObject> orderPage = PageInfo.of(ret);
-            orderPage.setPageSize(pageSize);
+
+            PageInfo<OrdersPo> ordersPoPageInfo=PageInfo.of(ordersPos);
+            PageInfo<VoObject> orderPage = new PageInfo<>(ret);
+            orderPage.setPageSize(ordersPoPageInfo.getPageSize());
+            orderPage.setPages(ordersPoPageInfo.getPages());
+            orderPage.setPageNum(ordersPoPageInfo.getPageNum());
+            orderPage.setTotal(ordersPoPageInfo.getTotal());
             return new ReturnObject<>(orderPage);
         } catch (DataAccessException e) {
             logger.error("selectAllRole: DataAccessException:" + e.getMessage());
