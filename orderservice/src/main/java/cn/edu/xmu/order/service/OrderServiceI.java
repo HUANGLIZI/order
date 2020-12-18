@@ -229,7 +229,7 @@ public class OrderServiceI {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         ordersBo.setCustomerId(userId);
-        sendOrderPayMessage(ordersBo.getOrderSn());
+//        sendOrderPayMessage(ordersBo.getOrderSn());
         ReturnObject<Orders> orders = orderDao.createOrders(ordersBo, orderItemsList);
         if (!orders.getCode().equals(ResponseCode.OK))
             return new ReturnObject<>(orders.getCode());
@@ -238,21 +238,21 @@ public class OrderServiceI {
         return new ReturnObject<>(orderCreateRetVo);
     }
 
-    private void sendOrderPayMessage(String order){
-        logger.info("sendOrderPayMessage: send message orderId = "+order+" delay ="+" time =" +LocalDateTime.now());
-        RocketMQTemplate rocketMQTemplate = null;
-        rocketMQTemplate.asyncSend("order-pay-topic", MessageBuilder.withPayload(order).build(), new SendCallback() {
-            @Override
-            public void onSuccess(SendResult sendResult) {
-                logger.info("sendOrderPayMessage: onSuccess result = "+ sendResult+" time ="+LocalDateTime.now());
-            }
-
-            @Override
-            public void onException(Throwable throwable) {
-                logger.info("sendOrderPayMessage: onException e = "+ throwable.getMessage()+" time ="+LocalDateTime.now());
-            }
-        });
-    }
+//    private void sendOrderPayMessage(String order){
+//        logger.info("sendOrderPayMessage: send message orderId = "+order+" delay ="+" time =" +LocalDateTime.now());
+//        RocketMQTemplate rocketMQTemplate = null;
+//        rocketMQTemplate.asyncSend("order-pay-topic", MessageBuilder.withPayload(order).build(), new SendCallback() {
+//            @Override
+//            public void onSuccess(SendResult sendResult) {
+//                logger.info("sendOrderPayMessage: onSuccess result = "+ sendResult+" time ="+LocalDateTime.now());
+//            }
+//
+//            @Override
+//            public void onException(Throwable throwable) {
+//                logger.info("sendOrderPayMessage: onException e = "+ throwable.getMessage()+" time ="+LocalDateTime.now());
+//            }
+//        });
+//    }
 
     @Scheduled(cron = "0 0 12 * * ?")
     public void setShareId(){

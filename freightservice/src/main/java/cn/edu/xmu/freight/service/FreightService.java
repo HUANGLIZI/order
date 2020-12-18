@@ -234,8 +234,8 @@ public class FreightService implements IFreightService {
             if (freightModelPo_temp.getType() == 1)//获得按件数计算的运费模板明细
             {
                 PieceFreightModel pieceFreightModel_temp=freightDao.getPieceItemByFreightModelIdRegionId(freightModelPo_temp.getShopId(),freightModelPo_temp.getId(),regionId);
-                if((countSum-pieceFreightModel_temp.getFirstItems()*freightModelPo_temp.getUnit())>0)
-                    price_temp= pieceFreightModel_temp.getFirstItemsPrice()+pieceFreightModel_temp.getAdditionalItemsPrice()*(long)(Math.ceil((countSum-pieceFreightModel_temp.getFirstItems()*freightModelPo_temp.getUnit())/(pieceFreightModel_temp.getAdditionalItems()*freightModelPo_temp.getUnit())));
+                if((countSum-pieceFreightModel_temp.getFirstItem()*freightModelPo_temp.getUnit())>0)
+                    price_temp= pieceFreightModel_temp.getFirstItemsPrice()+pieceFreightModel_temp.getAdditionalItemsPrice()*(long)(Math.ceil((countSum-pieceFreightModel_temp.getFirstItem()*freightModelPo_temp.getUnit())/(pieceFreightModel_temp.getAdditionalItem()*freightModelPo_temp.getUnit())));
                 else
                     price_temp=pieceFreightModel_temp.getFirstItemsPrice();
                 if(price_temp>freightPrice) {
@@ -307,6 +307,7 @@ public class FreightService implements IFreightService {
         return retPieceFreightModel;
     }
 
+
     /**
      * 管理员定义管理员定义重量模板明细
      * @author 24320182203196 洪晓杰
@@ -322,6 +323,7 @@ public class FreightService implements IFreightService {
         }
         return retWeightFreightModel;
     }
+
 
     /**
      * 查询某个重量运费模板明细

@@ -48,9 +48,9 @@ public class PieceFreightModelRetVo
     {
         this.id = bo.getId();
         this.regionId = bo.getRegionId();
-        this.firstItems = bo.getFirstItems();
+        this.firstItems = bo.getFirstItem();
         this.firstItemsPrice = bo.getFirstItemsPrice();
-        this.additionalItems = bo.getAdditionalItems();
+        this.additionalItems = bo.getAdditionalItem();
         this.additionalItemsPrice = bo.getAdditionalItemsPrice();
         this.gmtModified = bo.getGmtModified();
         this.gmtCreated = bo.getGmtCreate();

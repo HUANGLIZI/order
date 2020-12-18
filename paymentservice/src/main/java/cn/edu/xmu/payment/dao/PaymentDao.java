@@ -122,6 +122,7 @@ public class PaymentDao {
         return new ReturnObject<>(payments);
     }
 
+
     /**
      * 根据OrderId获取退款信息
      * @author Li Zihan 24320182203227
@@ -364,4 +365,21 @@ public class PaymentDao {
             return new ReturnObject<>(ResponseCode.OK);
         }
     }
+
+
+    /**
+     *
+     * 在payment表通过AftersaleId查找对应的
+     * @param
+     * @return
+     * @author 洪晓杰
+     */
+    public List<PaymentPo> getOrderIdFromPaymentByAftersaleId(Long aftersaleId) {
+        PaymentPoExample example=new PaymentPoExample();
+        PaymentPoExample.Criteria criteria=example.createCriteria();
+        criteria.andAftersaleIdEqualTo(aftersaleId);
+        List<PaymentPo> paymentPos=paymentPoMapper.selectByExample(example);
+        return paymentPos;
+    }
+
 }

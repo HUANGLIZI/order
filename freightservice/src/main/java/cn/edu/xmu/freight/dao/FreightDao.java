@@ -587,7 +587,6 @@ public class FreightDao{
     public  ReturnObject<PieceFreightModel> insertPieceFreightModel(PieceFreightModel pieceFreightModel) {
 
         PieceFreightModelPo pieceFreightModelPo = pieceFreightModel.gotPieceFreightModelPo();
-
         ReturnObject<PieceFreightModel> retObj;
 
         try{
@@ -613,6 +612,9 @@ public class FreightDao{
             logger.error("other exception : " + e.getMessage());
             retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
+
+        //logger.error("2222222");
+
         return retObj;
 
 
@@ -659,26 +661,39 @@ public class FreightDao{
     public ReturnObject<FreightModel> putDefaultPieceFreight(Long id, Long shopid){
         ReturnObject<FreightModel> retObj=null;
         try{
+            //通过蓝的第一个测试
+            if(freightModelPoMapper.selectByPrimaryKey(id)==null)
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
             Byte str;
             int ret ;
             //通过shopid查询
+
             FreightModelPoExample example = new FreightModelPoExample();
             FreightModelPoExample.Criteria criteria = example.createCriteria();
             criteria.andShopIdEqualTo(shopid);
             List<FreightModelPo> userProxyPos = freightModelPoMapper.selectByExample(example);
+
+            //logger.error("1");
             if(userProxyPos.isEmpty()==true){
+                //httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
                 retObj = new ReturnObject<>(ResponseCode.SHOP_ID_NOTEXIST, String.format("不存在对应的shopid" ));
                 return retObj;
             }
+            //logger.error("2");
+
             for(FreightModelPo userProxyPo : userProxyPos){
+
+                //logger.error("1");
+
                 str = userProxyPo.getDefaultModel();
-                if(str.equals("true")&&userProxyPo.getId()==id){
+                if(str==1&&userProxyPo.getId().equals(id)){
                     //已存在对应的默认模板
                     logger.debug("updateFreightModel: update freightModel fail " + userProxyPo.toString() );
                     return new ReturnObject<>(ResponseCode.DEFAULTMODEL_EXISTED, String.format("已经存在对应的默认模板，新增失败" ));
                 }
                 else{
-                    if(userProxyPo.getId()==id)
+                    if(userProxyPo.getId().equals(id))
                     {//将对应id的模板设置为默认模板
                         userProxyPo.setDefaultModel((byte) 1);
                         userProxyPo.setGmtModified(LocalDateTime.now());
@@ -692,7 +707,7 @@ public class FreightDao{
                             logger.debug("updateFreightModel: update freightModel = " + userProxyPo.toString());
                             retObj = new ReturnObject<>(ResponseCode.OK,String.format("默认模板定义成功"));
                             for(FreightModelPo userAnotherProxyPo : userProxyPos){
-                                if((userAnotherProxyPo.getDefaultModel()).equals("true")&&userAnotherProxyPo.getId()!=id){//将原商店的默认模板恢复为普通模板
+                                if(userAnotherProxyPo.getDefaultModel()==1&&!(userAnotherProxyPo.getId().equals(id))){//将原商店的默认模板恢复为普通模板
                                     userAnotherProxyPo.setDefaultModel((byte) 0);
                                     userAnotherProxyPo.setGmtModified(LocalDateTime.now());
                                     ret=freightModelPoMapper.updateByPrimaryKeySelective(userAnotherProxyPo);
@@ -712,7 +727,7 @@ public class FreightDao{
                 }
             }
             if(retObj==null)
-                retObj = new ReturnObject<>(ResponseCode.MODEL_ID_NOTEXIST, String.format("shopid不存在对应的模板id，新增失败" ));
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("shopid不存在对应的模板id，新增失败" ));
         }
         catch (DataAccessException e) {
             logger.debug("other sql exception : " + e.getMessage());
@@ -725,7 +740,6 @@ public class FreightDao{
         }
         return retObj;
     }
-
 
     /**
      * 查询某个重量运费模板明细
