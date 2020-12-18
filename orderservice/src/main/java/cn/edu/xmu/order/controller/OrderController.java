@@ -135,6 +135,8 @@ public class OrderController {
             httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
         else if(retObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE)
             httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+        else if(retObject.getCode()==ResponseCode.ORDER_STATENOTALLOW)
+            httpServletResponse.setStatus(HttpStatus.OK.value());
         return Common.decorateReturnObject(retObject);
     }
 
@@ -511,13 +513,24 @@ public class OrderController {
     @GetMapping("/shops/{shopId}/orders/{id}")
     public Object getOrderById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id, @Depart @ApiIgnore Long departId){
 
-
-        ReturnObject returnObject =  orderService.getOrderById(shopId, id);
         if(shopId == departId || departId == 0)
         {
+            ReturnObject returnObject =  orderService.getOrderById(shopId, id);
             if (returnObject.getCode() == ResponseCode.OK) {
                 return Common.getRetObject(returnObject);
-            } else {
+            }
+            else if(returnObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE)
+            {
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.decorateReturnObject(returnObject);
+            }
+            else if(returnObject.getCode()==ResponseCode.RESOURCE_ID_NOTEXIST)
+            {
+                httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
+                return Common.decorateReturnObject(returnObject);
+            }
+            else {
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
                 return Common.decorateReturnObject(returnObject);
             }
         }
@@ -555,6 +568,10 @@ public class OrderController {
         {
             logger.debug("Cancel Order by orderId:" +id);
             ReturnObject<VoObject> returnObject = orderService.cancelOrderById(shopId, id);
+            if(returnObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE)
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            if(returnObject.getCode()==ResponseCode.ORDER_STATENOTALLOW)
+                httpServletResponse.setStatus(HttpStatus.OK.value());
             return Common.decorateReturnObject(returnObject);
         }
         else
