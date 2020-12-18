@@ -230,6 +230,9 @@ public class OrderService implements IOrderService {
 
     @Override
     public ReturnObject<OrderInnerDTO> findShopIdbyOrderId(Long orderId) { return orderDao.getShopIdbyOrderId(orderId); }
+
+    @Override
+    public ReturnObject<OrderInnerDTO> getOrderInfoByOrderId(Long orderId) { return orderDao.getOrderInfoByOrderId(orderId); }
     /**
      * @param
      * @return

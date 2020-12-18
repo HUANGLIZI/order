@@ -9,6 +9,8 @@ import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
+import cn.edu.xmu.oomall.order.service.IOrderService;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.bo.Refund;
 import cn.edu.xmu.payment.model.vo.PayPatternVo;
@@ -18,6 +20,7 @@ import cn.edu.xmu.payment.model.vo.amountVo;
 import cn.edu.xmu.payment.service.PaymentService;
 import cn.edu.xmu.payment.service.PaymentServiceI;
 import io.swagger.annotations.*;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +49,9 @@ public class PaymentController {
     @Autowired
     private HttpServletResponse httpServletResponse;
 
+    @DubboReference
+    private IOrderService iOrderService;
+
 
     private  static  final Logger logger = LoggerFactory.getLogger(PaymentController.class);
 
@@ -73,7 +79,12 @@ public class PaymentController {
         ReturnObject returnObject =  paymentService.userQueryPayment(orderId, userId);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getListRetObject(returnObject);
-        } else {
+        }
+        else if(returnObject.getCode()==ResponseCode.RESOURCE_ID_NOTEXIST) {
+            httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
+            return Common.decorateReturnObject(returnObject);
+        }
+        else {
             return Common.decorateReturnObject(returnObject);
         }
     }
@@ -104,8 +115,13 @@ public class PaymentController {
         if(shopId.equals(sId)||sId==0){
             ReturnObject returnObject =  paymentService.queryPayment(shopId,orderId);
             if (returnObject.getCode() == ResponseCode.OK) {
-                return Common.getListRetObject(returnObject);
-            } else {
+                return Common.decorateReturnObject(returnObject);
+            }
+            else if(returnObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE){
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("操作的资源id不是自己的对象")), httpServletResponse);
+            }
+            else {
                 return Common.decorateReturnObject(returnObject);
             }
         }else {
@@ -140,7 +156,13 @@ public class PaymentController {
         ReturnObject returnObject =  paymentService.customerQueryPaymentByAftersaleId(aftersaleId,userId);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getListRetObject(returnObject);
-        } else {
+        }
+        else if(returnObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE)
+        {
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.decorateReturnObject(returnObject);
+        }
+        else {
             return Common.decorateReturnObject(returnObject);
         }
     }
@@ -306,7 +328,7 @@ public class PaymentController {
     @Audit
     @PostMapping("/orders/{id}/payments")
     public Object createPayment(@Validated @RequestBody PaymentVo vo, BindingResult bindingResult,
-                                @PathVariable("id") Long orderId){
+                                @PathVariable("id") Long orderId,@LoginUser Long userId){
         logger.debug("createPayment: orderId=" + orderId);
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
@@ -315,6 +337,27 @@ public class PaymentController {
             return returnObject;
         }
 
+        ReturnObject<OrderInnerDTO> orderInnerDTO=iOrderService.getOrderInfoByOrderId(orderId);
+        if(orderInnerDTO.getData().getState()!=2)
+        {
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return  new ReturnObject(ResponseCode.ORDER_STATENOTALLOW);
+        }
+        else if(orderInnerDTO.getCode()==ResponseCode.RESOURCE_ID_NOTEXIST)
+        {
+            httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
+            return  new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        else if(orderInnerDTO.getData().getCustomerId()!=userId)
+        {
+            httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+            return  new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+        else if(orderInnerDTO.getData().getPrice()<vo.getPrice())
+        {
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return  new ReturnObject(ResponseCode.ORDER_STATENOTALLOW);
+        }
         Payment payment = vo.createPayment();
         payment.setOrderId(orderId);
         payment.setGmtCreate(LocalDateTime.now());
