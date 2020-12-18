@@ -23,8 +23,9 @@ spring:
     name: freight-service
   cloud:
     nacos:
-      discovery:
-        server-addr: 127.0.0.1:8848
+      discovery::
+      server-addr: 192.168.43.73:8848
+      ip: 192.168.43.103
 #        server-addr: 172.20.10.3:8848
   profiles:
     active: dev
@@ -127,14 +128,14 @@ dubbo:
     qos-enable: false
     qos-accept-foreign-ip: false
   #    配置注册中心
-  registry:
-    address: nacos://127.0.0.1:8848
+  registry::
+    server-addr: 192.168.43.73:8848
 #    address: nacos://172.20.10.3:8848
   #    设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
     port: -1
-#    host: 172.20.10.5
+    host: 192.168.43.103
   #    设置超时时间
   consumer:
     timeout: 4000

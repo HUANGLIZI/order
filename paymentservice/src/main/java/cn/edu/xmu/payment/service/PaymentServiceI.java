@@ -115,19 +115,11 @@ public class PaymentServiceI {
         if (!retShopId.equals(shopId))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         ReturnObject<List> retObj = paymentDao.getOrdersRefundsByAftersaleId(aftersaleId);//if(retObj.getOrderId())
-//        ReturnObject<List> retRefund = null;
-//        List<Object> refundVoList = new ArrayList<>(retObj.getData().size());
-//        for (RefundBo bo: retObj.getData())
-//        {
-//            Object vo = bo.createVo();
-//            refundVoList.add(vo);
-//        }
         if (retObj.getCode().equals(ResponseCode.OK)) {
                 return retObj;
             } else {
                 return new ReturnObject(retObj.getCode(), retObj.getErrmsg());
             }
-//        return retRefund;
     }
 
 
@@ -148,13 +140,6 @@ public class PaymentServiceI {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
         ReturnObject<List> retObj = paymentDao.getOrdersRefundsByOrderId(orderId);//if(retObj.getOrderId())
-//        ReturnObject<List> retRefund = null;
-//        List<Object> refundVoList = new ArrayList<>(retObj.getData().size());
-//        for (RefundBo bo: retObj.getData())
-//        {
-//            Object vo = bo.createVo();
-//            refundVoList.add(vo);
-//        }
         if (retObj.getCode().equals(ResponseCode.OK)) {
             return retObj;
         } else {
