@@ -52,7 +52,7 @@ public class FreightService implements IFreightService {
      */
     @Transactional
     public ReturnObject<VoObject> insertFreightModel(FreightModel freightModel) {
-        ReturnObject<FreightModel> retObj = freightDao.insertFreightModel(freightModel);
+        ReturnObject<FreightModelReturnVo> retObj = freightDao.insertFreightModel(freightModel);
         ReturnObject<VoObject> retFreightModel;
         if (retObj.getCode().equals(ResponseCode.OK)) {
             retFreightModel = new ReturnObject<>((VoObject) retObj.getData());
@@ -105,19 +105,20 @@ public class FreightService implements IFreightService {
     public ReturnObject cloneShopFreightModel(Long shopId, long id) {
 
         //获得克隆的运费模板
-        ReturnObject<FreightModel> cloneFreightModelRetObj=freightDao.insertCloneFreightModel(shopId,id);
+        ReturnObject<FreightModelReturnVo> cloneFreightModelRetObj=freightDao.insertCloneFreightModel(shopId,id);
 
         if(cloneFreightModelRetObj.getCode().equals(ResponseCode.OK)){
-            FreightModel cloneFreightModel=cloneFreightModelRetObj.getData();
+            FreightModelReturnVo cloneFreightModel=cloneFreightModelRetObj.getData();
             short type=cloneFreightModel.getType();
             long newId=cloneFreightModel.getId();
             //克隆运费模板明细
             ReturnObject cloneFreightModelInfoRetObj=freightDao.insertCloneFreightModelInfo(id,newId,type);
-            if(cloneFreightModelInfoRetObj.getCode()==ResponseCode.OK){
-                return cloneFreightModelRetObj;
-            }else{
-                return cloneFreightModelInfoRetObj;
-            }
+//            if(cloneFreightModelInfoRetObj.getCode()==ResponseCode.OK){
+//                return cloneFreightModelRetObj;
+//            }else{
+//                return cloneFreightModelInfoRetObj;
+//            }
+            return cloneFreightModelRetObj;
         }else{
             return cloneFreightModelRetObj;
         }
@@ -137,12 +138,12 @@ public class FreightService implements IFreightService {
     public ReturnObject delShopFreightModel(Long shopId, Long id) {
         //物理删除
         ReturnObject returnObject=freightDao.delShopFreightModel(shopId,id);
-        if (returnObject.getCode() == ResponseCode.OK) {
-
-            //在这里调用商品模块的api修改相应商品的freight_id
-            goodsServiceI.updateSpuFreightId(id);
-            
-        }
+//        if (returnObject.getCode() == ResponseCode.OK) {
+//
+//            //在这里调用商品模块的api修改相应商品的freight_id
+//            goodsServiceI.updateSpuFreightId(id);
+//
+//        }
 
         return returnObject;
     }
@@ -358,7 +359,7 @@ public class FreightService implements IFreightService {
      * @return ReturnObject
      */
     @Transactional
-    public ReturnObject<VoObject> delWeightItemById(Long shopId, Long id)
+    public ReturnObject delWeightItemById(Long shopId, Long id)
     {
         return freightDao.delWeightItemById(shopId, id);
     }
@@ -370,7 +371,7 @@ public class FreightService implements IFreightService {
      * @return ReturnObject
      */
     @Transactional
-    public ReturnObject<VoObject> delPieceItemById(Long shopId, Long id)
+    public ReturnObject delPieceItemById(Long shopId, Long id)
     {
         return freightDao.delPieceItemById(shopId, id);
     }

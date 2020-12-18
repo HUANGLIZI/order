@@ -137,21 +137,19 @@ public class FreightDao{
      */
     public ReturnObject insertCloneFreightModel(Long shopId, long id) {
 
-        ReturnObject<FreightModel> retObj;
-        FreightModelPoExample example=new FreightModelPoExample ();
-        FreightModelPoExample.Criteria criteria=example.createCriteria();
-        criteria.andShopIdEqualTo(shopId);
-        criteria.andIdEqualTo(id);
-        //根据id先找到对应的模板
-        List<FreightModelPo> cloneFreightModelPoS=freightModelPoMapper.selectByExample(example);
-        if(cloneFreightModelPoS.isEmpty()){
-            //资源不存在
-            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"运费模板不属于该店铺");
-            return retObj;
-        }
+        ReturnObject<FreightModelReturnVo> retObj;
 
         //获得模板
-        FreightModelPo cloneFreightModelPo=cloneFreightModelPoS.get(0);
+        FreightModelPo cloneFreightModelPo=freightModelPoMapper.selectByPrimaryKey(id);
+        if(cloneFreightModelPo==null){
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        if(!(cloneFreightModelPo.getShopId().equals(shopId))){
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+        if(cloneFreightModelPo.getShopId().toString().equals("null")){
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
         //id置为null
         cloneFreightModelPo.setId(null);
 
@@ -181,7 +179,7 @@ public class FreightDao{
                 //插入成功
                 logger.debug("insertCloneFreightModel: insert cloneFreightModel = " +cloneFreightModelPo.toString());
                 //po生成bo并返回
-                retObj = new ReturnObject<>(new FreightModel(cloneFreightModelPo));
+                retObj = new ReturnObject<>(new FreightModelReturnVo(cloneFreightModelPo));
             }
         }
         catch (DataAccessException e) {
@@ -357,12 +355,19 @@ public class FreightDao{
      */
     public ReturnObject delShopFreightModel(Long shopId, Long id) {
         ReturnObject<Object> returnObject;
-        FreightModelPoExample example=new FreightModelPoExample ();
-        FreightModelPoExample.Criteria criteria=example.createCriteria();
-        criteria.andShopIdEqualTo(shopId);
-        criteria.andIdEqualTo(id);
+        //获得模板
+        FreightModelPo po=freightModelPoMapper.selectByPrimaryKey(id);
+        if(po==null){
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        if(!(po.getShopId().equals(shopId))){
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+        if(po.getShopId().toString().equals("null")){
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
 
-        int ret = freightModelPoMapper.deleteByExample(example);
+        int ret = freightModelPoMapper.deleteByPrimaryKey(id);
         if(ret==0){
            //资源不存在
            returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"操作的资源id不存在");
@@ -393,23 +398,33 @@ public class FreightDao{
      * @date 2020-12-12 17:45
      */
     public ReturnObject<ResponseCode> changeFreightModel(FreightModelChangeBo freightModelChangeBo) {
-        FreightModelPo freightModelPo = freightModelChangeBo.gotFreightModelPo();
-//        ReturnObject<ResponseCode> retObj = null;
+        //获得模板
+        FreightModelPo freightModelPo=freightModelPoMapper.selectByPrimaryKey(freightModelChangeBo.getId());
+        if(freightModelPo==null){
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        if(!(freightModelPo.getShopId().equals(freightModelChangeBo.getShopId()))){
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+        if(freightModelPo.getShopId().toString().equals("null")){
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
 
         String name = freightModelChangeBo.getName();
         if (name != null)
         {
-            Long shopId = freightModelChangeBo.getShopId();
             FreightModelPoExample freightModelPoExample = new FreightModelPoExample();
             FreightModelPoExample.Criteria criteria = freightModelPoExample.createCriteria();
             criteria.andNameEqualTo(name);
-            criteria.andShopIdEqualTo(shopId);
             List<FreightModelPo> freightModelPoList = freightModelPoMapper.selectByExample(freightModelPoExample);
             if (freightModelPoList.size() > 0) {
                 logger.info(freightModelPoList.get(0).toString());
                 return new ReturnObject<>(ResponseCode.FREIGHTNAME_SAME);
             }
         }
+
+        freightModelPo.setUnit(freightModelChangeBo.getUnit());
+        freightModelPo.setName(freightModelChangeBo.getName());
 
         int ret = freightModelMapper.updateFreightModel(freightModelPo);
         if (ret == 0) {
@@ -426,12 +441,12 @@ public class FreightDao{
      * @param freightModel 运费模板po
      * @return ReturnObject<FreightModelPo> 新增结果
      */
-    public ReturnObject<FreightModel> insertFreightModel(FreightModel freightModel) {
-        ReturnObject<FreightModel> retObj;
+    public ReturnObject<FreightModelReturnVo> insertFreightModel(FreightModel freightModel) {
+        ReturnObject<FreightModelReturnVo> retObj;
         //InternalLogger logger = null;
         try{
             FreightModelPo freightModelPo = freightModel.gotFreightModelPo();
-            int ret = freightModelPoMapper.insert(freightModelPo);
+            int ret = freightModelPoMapper.insertSelective(freightModelPo);
             if (ret == 0) {
                 //插入失败
                 logger.debug("insertFreightModel: insert freightModel fail " + freightModelPo.toString());
@@ -440,12 +455,12 @@ public class FreightDao{
                 //插入成功
                 logger.debug("insertFreightModel: insert freightModel = " + freightModelPo.toString());
                 //role.setId(rolePo.getId());
-                FreightModel freightModel1=new FreightModel(freightModelPo);
+                FreightModelReturnVo freightModel1=new FreightModelReturnVo(freightModelPoMapper.selectByPrimaryKey(freightModelPo.getId()));
                 retObj = new ReturnObject<>(freightModel1);
             }
         }
         catch (DataAccessException e) {
-            if (Objects.requireNonNull(e.getMessage()).contains("freight_model.name")) {
+            if (Objects.requireNonNull(e.getMessage()).contains("name")) {
                 //若有重复的角色名则新增失败
                 //logger.debug("updateFreightModel: have same freightModel name = " + freightModelPo.getName());
                 retObj = new ReturnObject<>(ResponseCode.FREIGHTNAME_SAME);
@@ -830,7 +845,7 @@ public class FreightDao{
             FreightModelPo freightModelPo = freightModelPoMapper.selectByPrimaryKey(weightFreightModelPo.getFreightModelId());
             if(freightModelPo.getShopId() != shopId)
             {
-                return new ReturnObject(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + shopId));
+                return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("店铺id不匹配：" + shopId));
             }
             int state = weightFreightModelPoMapper.deleteByPrimaryKey(id);
             if (state == 0) {
@@ -851,7 +866,7 @@ public class FreightDao{
      * @return ReturnObject
      * @date 2020/12/12
      */
-    public ReturnObject<VoObject> delPieceItemById(Long shopId, Long id)
+    public ReturnObject delPieceItemById(Long shopId, Long id)
     {
         ReturnObject<VoObject> returnObject;
         PieceFreightModelPo pieceFreightModelPo = pieceFreightModelPoMapper.selectByPrimaryKey(id);
@@ -865,7 +880,7 @@ public class FreightDao{
             FreightModelPo freightModelPo = freightModelPoMapper.selectByPrimaryKey(pieceFreightModelPo.getFreightModelId());
             if(freightModelPo.getShopId() != shopId)
             {
-                return new ReturnObject(ResponseCode.FIELD_NOTVALID, String.format("店铺id不匹配：" + shopId));
+                return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("店铺id不匹配：" + shopId));
             }
             int state = pieceFreightModelPoMapper.deleteByPrimaryKey(id);
             if (state == 0) {

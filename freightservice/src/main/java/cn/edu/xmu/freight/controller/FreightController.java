@@ -161,15 +161,20 @@ public class FreightController {
 
 
         ReturnObject retObject=freightService.cloneShopFreightModel(shopId,id);
-        if(shopId.equals(sId)){
+        if(shopId.equals(sId)||sId==0){
             if (retObject.getCode() == ResponseCode.OK) {
+                httpServletResponse.setStatus(HttpStatus.CREATED.value());
                 return Common.getRetObject(retObject);
-            } else {
+            }else if(retObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE){
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
+            }
+            else {
                 return Common.decorateReturnObject(retObject);
             }
         }
         else{
-            httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
             return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("操作的资源id不是自己的对象")), httpServletResponse);
         }
 
@@ -198,9 +203,19 @@ public class FreightController {
     @DeleteMapping("/shops/{shopId}/freightmodels/{id}")
     public Object delShopFreightModel(@PathVariable("shopId") Long shopId, @Depart @ApiIgnore Long sId,@PathVariable("id") Long id) {
         logger.debug("delShopFreightModelById: id = "+id);
-        if(shopId.equals(sId)){
+        if(shopId.equals(sId)||sId==0){
+
             ReturnObject returnObject = freightService.delShopFreightModel(shopId,id);
-            return Common.decorateReturnObject(returnObject);
+            if (returnObject.getCode() == ResponseCode.OK) {
+                return Common.decorateReturnObject(returnObject);
+            }else if(returnObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE){
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
+
+            }else {
+                return Common.decorateReturnObject(returnObject);
+            }
+
         }
         else{
             httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
@@ -233,6 +248,12 @@ public class FreightController {
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         }
         ReturnObject<ResponseCode> ret = freightService.changeFreightModel(id, freightModelChangeVo, shopId);
+        if(ret.getCode().equals(ResponseCode.OK)){
+            return Common.decorateReturnObject(ret);
+        }else if(ret.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE)){
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE) , httpServletResponse);
+        }
         return Common.decorateReturnObject(ret);
     }
 
@@ -261,6 +282,12 @@ public class FreightController {
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         }
         ReturnObject<ResponseCode> ret = freightService.changeWeightFreightModel(id, weightFreightModelChangeVo, shopId);
+        if(ret.getCode().equals(ResponseCode.OK)){
+            return Common.decorateReturnObject(ret);
+        }else if(ret.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE)){
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE) , httpServletResponse);
+        }
         return Common.decorateReturnObject(ret);
     }
 
@@ -288,6 +315,12 @@ public class FreightController {
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         }
         ReturnObject<ResponseCode> ret = freightService.changePieceFreightModel(id, pieceFreightModelChangeVo, shopId);
+        if(ret.getCode().equals(ResponseCode.OK)){
+            return Common.decorateReturnObject(ret);
+        }else if(ret.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE)){
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE) , httpServletResponse);
+        }
         return Common.decorateReturnObject(ret);
     }
 
@@ -314,13 +347,12 @@ public class FreightController {
         logger.debug("insert freightmodel by shopId:" + id);
         FreightModel freightModel = vo.createFreightModel();
         freightModel.setShopId(id);
-        freightModel.setGmtCreate(LocalDateTime.now());
+        freightModel.setDefaultModel((byte)0);
         ReturnObject<VoObject> retObject = freightService.insertFreightModel(freightModel);
         if(retObject.getCode()==ResponseCode.OK) {
             httpServletResponse.setStatus(HttpStatus.CREATED.value());
-        }else if(retObject.getCode()==ResponseCode.FREIGHTNAME_SAME) {
-            httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
-        }return Common.decorateReturnObject(retObject);
+        }
+        return Common.decorateReturnObject(retObject);
     }
     /**
      * 计算运费
@@ -582,8 +614,17 @@ public class FreightController {
     {
         if(shopId == departId || departId == 0)
         {
-            ReturnObject<VoObject> returnObject = freightService.delWeightItemById(shopId, id);
-            return Common.getRetObject(returnObject);
+            ReturnObject returnObject = freightService.delWeightItemById(shopId, id);
+            if(returnObject.getCode().equals(ResponseCode.OK)){
+                return Common.getRetObject(returnObject);
+            }else if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE)){
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE) , httpServletResponse);
+            }else if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)){
+                return Common.decorateReturnObject(returnObject);
+            }
+            return Common.decorateReturnObject(returnObject);
+
         }
         else
         {
@@ -617,7 +658,15 @@ public class FreightController {
     {
         if(shopId == departId || departId == 0)
         {
-            ReturnObject<VoObject> returnObject = freightService.delPieceItemById(shopId, id);
+            ReturnObject returnObject = freightService.delPieceItemById(shopId, id);
+            if(returnObject.getCode().equals(ResponseCode.OK)){
+                return Common.getRetObject(returnObject);
+            }else if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE)){
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE) , httpServletResponse);
+            }else if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)){
+                return Common.decorateReturnObject(returnObject);
+            }
             return Common.getRetObject(returnObject);
         }
         else
