@@ -179,7 +179,7 @@ public class FreightDao{
                 //插入成功
                 logger.debug("insertCloneFreightModel: insert cloneFreightModel = " +cloneFreightModelPo.toString());
                 //po生成bo并返回
-                retObj = new ReturnObject<>(new FreightModelReturnVo(cloneFreightModelPo));
+                retObj = new ReturnObject<>(new FreightModelReturnVo(freightModelPoMapper.selectByPrimaryKey(cloneFreightModelPo.getId())));
             }
         }
         catch (DataAccessException e) {

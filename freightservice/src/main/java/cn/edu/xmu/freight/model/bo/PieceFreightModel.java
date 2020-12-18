@@ -33,8 +33,8 @@ public class PieceFreightModel implements VoObject, Serializable {
 
     public PieceFreightModel(PieceFreightModelVo vo) {
         this.firstItem = vo.getFirstItem();
-        this.firstItemsPrice = vo.getFirstItemsPrice();
-        this.additionalItem = vo.getAdditionalItem();
+        this.firstItemsPrice = vo.getFirstItemPrice();
+        this.additionalItem = vo.getAdditionalItems();
         this.additionalItemsPrice = vo.getAdditionalItemsPrice();
         this.regionId = vo.getRegionId();
     }
