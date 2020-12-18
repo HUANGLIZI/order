@@ -15,9 +15,9 @@ public class PieceFreightModelVo {
     @ApiModelProperty(value = "首件数")
     private Integer firstItem;
     @ApiModelProperty(value = "规则首件运费")
-    private Long firstItemsPrice;
+    private Long firstItemPrice;
     @ApiModelProperty(value = "规则续件数")
-    private Integer additionalItem;
+    private Integer additionalItems;
     @ApiModelProperty(value = "规则续件运费")
     private Long additionalItemsPrice;
 
