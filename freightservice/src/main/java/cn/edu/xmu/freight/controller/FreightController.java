@@ -380,7 +380,7 @@ public class FreightController {
             @ApiResponse(code = 0, message = "成功"),
     })
     //@Audit
-    @PostMapping("/shops/{shopId}/freight_models/{id}/default")
+    @PostMapping("/shops/{shopId}/freightmodels/{id}/default")
     public Object postDefaultPieceFreight(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id){
         //Logger logger;
         logger.debug("insert role by shopId:" + shopId+"and"+id);
