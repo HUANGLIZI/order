@@ -900,13 +900,16 @@ public class FreightDao{
      * @param id 件数运费模板明细id
      * @return ReturnObject
      */
-    public PieceFreightModel getPieceItemByFreightModelIdRegionId(Long shopId, Long id,Long RegionId) {
+    public ReturnObject<PieceFreightModel> getPieceItemByFreightModelIdRegionId(Long shopId, Long id,Long RegionId) {
         PieceFreightModelPoExample example = new PieceFreightModelPoExample();
         PieceFreightModelPoExample.Criteria criteria = example.createCriteria();
         criteria.andFreightModelIdEqualTo(id);
         criteria.andRegionIdEqualTo(RegionId);
         List<PieceFreightModelPo> pieceFreightModelPos = pieceFreightModelPoMapper.selectByExample(example);
-        return new PieceFreightModel(pieceFreightModelPos.get(0));
+        if(pieceFreightModelPos.size()==0)
+            return new ReturnObject(ResponseCode.FREIGHTMODEL_SHOP_NOTFIT);
+        PieceFreightModel pieceFreightModel=new PieceFreightModel(pieceFreightModelPos.get(0));
+        return new ReturnObject<>(pieceFreightModel);
     }
     /**
      * 查询某个件数运费模板明细
@@ -915,17 +918,21 @@ public class FreightDao{
      * @param id 件数运费模板明细id
      * @return ReturnObject
      */
-    public WeightFreightModel getWeightItemByFreightModelIdRegionId(Long shopId, Long id,Long RegionId) {
+    public ReturnObject<WeightFreightModel> getWeightItemByFreightModelIdRegionId(Long shopId, Long id,Long RegionId) {
         WeightFreightModelPoExample example = new WeightFreightModelPoExample();
         WeightFreightModelPoExample.Criteria criteria = example.createCriteria();
         criteria.andFreightModelIdEqualTo(id);
         criteria.andRegionIdEqualTo(RegionId);
         List<WeightFreightModelPo> weightFreightModelPos = weightFreightModelPoMapper.selectByExample(example);
-        return new WeightFreightModel(weightFreightModelPos.get(0));
+        if(weightFreightModelPos.size()==0)
+            return new ReturnObject(ResponseCode.FREIGHTMODEL_SHOP_NOTFIT);
+        WeightFreightModel weightFreightModel=new WeightFreightModel(weightFreightModelPos.get(0));
+        return new ReturnObject<>(weightFreightModel);
     }
 
     /**
      * 通过shopId获得该店铺默认运费模板
+     *
      *
      * @author 24320182203227 李子晗
      * @param shopId 运费模板id
