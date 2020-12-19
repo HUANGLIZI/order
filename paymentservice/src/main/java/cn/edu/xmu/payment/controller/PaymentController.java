@@ -117,10 +117,11 @@ public class PaymentController {
     @Audit
     @GetMapping("/shops/{shopId}/orders/{id}/payments")
     public Object queryPayment(@PathVariable("shopId") Long shopId,@PathVariable("id") Long orderId,@Depart @ApiIgnore Long sId){
-        if(shopId.equals(sId)||sId==0){
+        if(shopId.equals(sId)||sId.equals(0L)){
             ReturnObject returnObject =  paymentService.queryPayment(shopId,orderId);
             if (returnObject.getCode() == ResponseCode.OK) {
-                return Common.decorateReturnObject(returnObject);
+                System.out.println(returnObject.getData().toString());
+                return Common.getListRetObject(returnObject);
             }
             else if(returnObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE){
                 httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
@@ -352,9 +353,9 @@ public class PaymentController {
             httpServletResponse.setStatus(HttpStatus.OK.value());
             return   Common.decorateReturnObject(new ReturnObject(ResponseCode.ORDER_STATENOTALLOW));
         }
-        else if(orderInnerDTO.getData().getCustomerId()!=userId)
+        else if(!orderInnerDTO.getData().getCustomerId().equals(userId))
         {
-            httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
             return  Common.decorateReturnObject(new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE));
         }
         else if(orderInnerDTO.getData().getPrice()<vo.getPrice())
@@ -369,7 +370,7 @@ public class PaymentController {
         ReturnObject<VoObject> retObject = paymentService.createPayment(payment);
         httpServletResponse.setStatus(HttpStatus.CREATED.value());
         if (retObject.getCode() == ResponseCode.OK) {
-            return Common.getRetObject(retObject);
+            return Common.decorateReturnObject(retObject);
         } else {
             return Common.decorateReturnObject(retObject);
         }

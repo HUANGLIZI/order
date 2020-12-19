@@ -318,7 +318,6 @@ public class OrderController {
         if (null != returnObject) {
             return returnObject;
         }
-        logger.debug("customerConfirmOrder orderId:" + orderId);
         if(shopId.equals(sId)||sId==0){
             Orders orders=vo.createOrder();
             orders.setId(orderId);

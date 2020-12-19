@@ -453,7 +453,6 @@ public class OrderService implements IOrderService {
         return orderDao.listAdminSelectOrderItemId(shopId, skuId);
     }
 
-    @Override
     public ReturnObject isOrderBelongToShop(Long shopId, Long orderId) {
         return orderDao.isOrderBelongToShop(shopId, orderId);
     }
@@ -831,6 +830,23 @@ public class OrderService implements IOrderService {
         return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
     }
 
+    @Override
+    public ReturnObject<ResponseCode> judgeOrderBelongToShop(Long shopId, Long orderId)
+    {
+        ReturnObject<Orders> ordersRet = orderDao.findOrderById(orderId);
+        if (ordersRet == null)
+        {
+            logger.info("not exists the order, the order id is " + orderId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        Orders orders = ordersRet.getData();
+        if (orders.getShopId() == null || !orders.getShopId().equals(shopId))
+        {
+            logger.info("the shopId in the shop does not equal to the shopId in the path");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+        return new ReturnObject<>(ResponseCode.OK);
+    }    
     public ReturnObject<VoObject> updateOrders(Orders orders, Long userId) {
         ReturnObject<VoObject> retOrder=null;
         //ReturnObject<OrderInnerDTO> returnObject=orderDao.getUserIdbyOrderId(orders.getId());
