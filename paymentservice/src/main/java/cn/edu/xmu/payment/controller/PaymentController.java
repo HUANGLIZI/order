@@ -85,6 +85,10 @@ public class PaymentController {
             httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
             return Common.decorateReturnObject(returnObject);
         }
+        else if(returnObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE){
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("操作的资源id不是自己的对象")), httpServletResponse);
+        }
         else {
             return Common.decorateReturnObject(returnObject);
         }
@@ -338,25 +342,25 @@ public class PaymentController {
         }
 
         ReturnObject<OrderInnerDTO> orderInnerDTO=iOrderService.getOrderInfoByOrderId(orderId);
-        if(orderInnerDTO.getData().getState()!=2)
-        {
-            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
-            return  new ReturnObject(ResponseCode.ORDER_STATENOTALLOW);
-        }
-        else if(orderInnerDTO.getCode()==ResponseCode.RESOURCE_ID_NOTEXIST)
+        if(orderInnerDTO.getCode()==ResponseCode.RESOURCE_ID_NOTEXIST)
         {
             httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
-            return  new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+            return  Common.decorateReturnObject(new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST));
+        }
+        else if(orderInnerDTO.getData().getState()==2||orderInnerDTO.getData().getSubstate()==21)
+        {
+            httpServletResponse.setStatus(HttpStatus.OK.value());
+            return   Common.decorateReturnObject(new ReturnObject(ResponseCode.ORDER_STATENOTALLOW));
         }
         else if(orderInnerDTO.getData().getCustomerId()!=userId)
         {
             httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
-            return  new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            return  Common.decorateReturnObject(new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE));
         }
         else if(orderInnerDTO.getData().getPrice()<vo.getPrice())
         {
             httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
-            return  new ReturnObject(ResponseCode.ORDER_STATENOTALLOW);
+            return  Common.decorateReturnObject(new ReturnObject(ResponseCode.ORDER_STATENOTALLOW));
         }
         Payment payment = vo.createPayment();
         payment.setOrderId(orderId);
