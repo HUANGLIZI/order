@@ -93,6 +93,7 @@ public class OrderDao {
         OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
         Byte type=0;
         ordersPo.setOrderType(type);
+        ordersPo.setSubstate(Orders.State.HAS_PAID.getCode().byteValue());
         int ret=ordersPoMapper.updateByPrimaryKeySelective(ordersPo);
         return ret;
     }
@@ -446,7 +447,7 @@ public class OrderDao {
      * @param page 页数
      * @param pageSize 每页大小
      * @return Object 查询结果
-     * @date 2020/12/12
+     * @date 2020/12/19
      */
     public ReturnObject<PageInfo<VoObject>> getShopAllOrders(Long shopId, Long customerId, String orderSn, String beginTime, String endTime, Integer page, Integer pageSize)
     {
@@ -454,6 +455,11 @@ public class OrderDao {
         OrdersPoExample ordersPoExample = new OrdersPoExample();
         OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
         criteria.andShopIdEqualTo(shopId);
+        if (shopId == null)
+        {
+            logger.info("userId is " + shopId);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
         // 被逻辑删除的订单不能被返回
         Byte beDeleted = 0;
         criteria.andBeDeletedEqualTo(beDeleted);
@@ -461,12 +467,42 @@ public class OrderDao {
             criteria.andCustomerIdEqualTo(customerId);
         if(orderSn != null)
             criteria.andOrderSnEqualTo(orderSn);
-        if(beginTime != null)
+        if (beginTime != null)
+        {
+            try {
+                if (beginTime.contains("T"))
+                    beginTime = beginTime.replace("T"," ");
+                LocalDateTime.parse(beginTime, df);
+            }
+            catch (Exception e)
+            {
+                logger.info("时间字段不合法 " + beginTime);
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            }
             criteria.andGmtCreateGreaterThanOrEqualTo(LocalDateTime.parse(beginTime, df));
-        //criteria.andGmtCreatedGreaterThanOrEqualTo(LocalDateTime.parse(beginTime, df));
-        if(endTime != null)
+        }
+        if (endTime != null)
+        {
+            try {
+                if (endTime.contains("T"))
+                    endTime = endTime.replace("T"," ");
+                LocalDateTime.parse(endTime, df);
+            }
+            catch (Exception e)
+            {
+                logger.info("时间字段不合法 " + endTime);
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            }
             criteria.andGmtCreateLessThanOrEqualTo(LocalDateTime.parse(endTime, df));
-        //criteria.andGmtCreatedLessThanOrEqualTo(LocalDateTime.parse(endTime, df));
+        }
+        if (beginTime != null && endTime != null)
+        {
+            if (LocalDateTime.parse(beginTime, df).isAfter(LocalDateTime.parse(endTime, df)))
+            {
+                logger.info("开始时间大于结束时间");
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            }
+        }
         //分页查询
         PageHelper.startPage(page, pageSize);
         logger.debug("page = " + page + "pageSize = " + pageSize);
@@ -481,7 +517,7 @@ public class OrderDao {
             PageInfo<OrdersPo> ordersPoPageInfo = PageInfo.of(ordersPos);
             PageInfo<VoObject> orderPage = new PageInfo<>(ret);
             orderPage.setTotal(ordersPoPageInfo.getTotal());
-            orderPage.setPageSize(pageSize);
+            orderPage.setPageSize(ordersPoPageInfo.getPageSize());
             orderPage.setPageNum(ordersPoPageInfo.getPageNum());
             orderPage.setPages(ordersPoPageInfo.getPages());
             return new ReturnObject<>(orderPage);
@@ -551,8 +587,9 @@ public class OrderDao {
         }
         else
         {
-            Byte type = 0;
+            Byte type = Orders.State.CANCEL.getCode().byteValue();
             ordersPo.setState(type);
+            ordersPo.setSubstate(null);
             ordersPo.setGmtModified(LocalDateTime.now());
             int ret = ordersPoMapper.updateByPrimaryKey(ordersPo);
             if(ret == 0)

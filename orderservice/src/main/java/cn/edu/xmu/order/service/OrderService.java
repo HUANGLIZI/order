@@ -146,7 +146,7 @@ public class OrderService implements IOrderService {
     public ReturnObject<VoObject> transOrder(Long id,Long userId) {
         ReturnObject<VoObject> returnObject = null;
         ReturnObject<Orders> ordersRet = orderDao.findOrderById(id);
-        if (ordersRet == null)
+        if (ordersRet.getCode()==ResponseCode.RESOURCE_ID_NOTEXIST)
         {
             logger.info("the order not exists: " + id);
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
@@ -154,6 +154,9 @@ public class OrderService implements IOrderService {
         Orders orders = ordersRet.getData();
         if(orders==null||orders.getOrderType()==null||orders.getBeDeleted()==1){//订单不存在
             returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        if(!orders.getCustomerId().equals(userId)){
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
         else if(orders.getOrderType()==1&&orders.getCustomerId().equals(userId)&&orders.getBeDeleted()!=1) {
             if(orders.getSubstate()==22||orders.getSubstate()==23||orders.getState()==2) {
@@ -194,13 +197,18 @@ public class OrderService implements IOrderService {
      */
     @Transactional
     public ReturnObject<VoObject> updateOrders(Orders orders, Long userId) {
-
         ReturnObject<VoObject> retOrder=null;
         //ReturnObject<OrderInnerDTO> returnObject=orderDao.getUserIdbyOrderId(orders.getId());
         //调用OrderDao层中的 ReturnObject<OrdersPo> getOrderByOrderId(Long orderId)
         ReturnObject<OrdersPo> returnObject = orderDao.getOrderByOrderId(orders.getId());
         if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        OrdersPo o = returnObject.getData();
+        logger.error("11111111111");
+        System.out.println(o.toString());
+        if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))
         {
+            logger.error("hxj222222222");
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         //校验前端数据的userID
@@ -209,13 +217,29 @@ public class OrderService implements IOrderService {
             //操作的资源id不是自己的对象
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
+        if(returnObject.getData().getBeDeleted().equals((byte)1)){
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
         //若订单已发货，则无法修改
         if(returnObject.getData().getSubstate().equals(Orders.State.HAS_DELIVERRED.getCode().byteValue()))
         {
             return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
         }
-
-        ReturnObject<Orders> retObj = orderDao.updateOrder(orders);
+        ReturnObject<Orders> retObj=new ReturnObject<>();
+        if(returnObject.getData().getState().equals(Orders.State.TO_BE_PAID.getCode().byteValue())){
+            orders.setState((byte)4);
+            orders.setSubstate(null);
+            retObj= orderDao.updateOrder(orders);
+        }
+        if(returnObject.getData().getState().equals(Orders.State.TO_BE_SIGNED_IN.getCode().byteValue())){
+            orders.setState((byte)4);
+            orders.setSubstate(null);
+            retObj= orderDao.updateOrder(orders);
+        }
+        if(returnObject.getData().getState().equals(Orders.State.CANCEL.getCode().byteValue())||returnObject.getData().getState().equals(Orders.State.HAS_FINISHED.getCode().byteValue())){
+            orders.setBeDeleted((byte)1);
+            retObj=orderDao.updateOrder(orders);
+        }
 
         if (retObj.getCode().equals(ResponseCode.OK)) {
             retOrder = new ReturnObject<>(retObj.getData());
@@ -309,13 +333,17 @@ public class OrderService implements IOrderService {
      *
      * @author 24320182203323  李明明
      * @return Object 查询结果
-     * @date 2020/12/12
+     * @date 2020/12/19
      */
     @Transactional
     public ReturnObject<VoObject> getOrderById(Long shopId, Long id)
     {
-        Orders orders = (Orders) orderDao.getOrderById(shopId,id).getData();
-
+        ReturnObject<Orders> ordersReturnObject = orderDao.getOrderById(shopId,id);
+        if(!ordersReturnObject.getCode().equals(ResponseCode.OK))
+        {
+            return new ReturnObject<>(ordersReturnObject.getCode());
+        }
+        Orders orders = ordersReturnObject.getData();
         ReturnObject<List<OrderItemPo>> orderItemPos = orderDao.findOrderItemById(id);
         if (!orderItemPos.getCode().equals(ResponseCode.OK))
             return new ReturnObject<>(orderItemPos.getCode());
@@ -326,9 +354,13 @@ public class OrderService implements IOrderService {
             orderItemsList.add(orderItems);
         }
 
-
         Long customerId = orders.getCustomerId();
         CustomerDTO customerDTO = customerServiceI.findCustomerByUserId(customerId).getData();
+        if (customerDTO == null)
+        {
+            logger.info("customerDTO not exists");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
         CustomerRetVo customerRetVo = new CustomerRetVo();
         customerRetVo.setId(customerId);
         customerRetVo.setName(customerDTO.getName());
@@ -336,22 +368,29 @@ public class OrderService implements IOrderService {
 
         ShopRetVo shopRetVo = new ShopRetVo();
         ShopDetailDTO shopDetailDTO = goodsServiceI.getShopInfoByShopId(shopId).getData();
+        if (shopDetailDTO == null)
+        {
+            logger.info("shopDetailDTO not exists");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
         shopRetVo.setId(shopId);
         shopRetVo.setName(shopDetailDTO.getName());
         shopRetVo.setState(shopDetailDTO.getState());
         shopRetVo.setGmtCreate(shopDetailDTO.getGmtCreate());
         shopRetVo.setGmtModified(shopDetailDTO.getGmtModified());
 
+        orders.setOrderItemsList(orderItemsList);
         ReturnObject<VoObject> returnObject = null;
         if(orders != null) {
             logger.debug("findOrdersById : " + returnObject);
-            returnObject = new ReturnObject(new OrderRetVo(orders));
+            returnObject = new ReturnObject(new OrderCreateRetVo(orders, customerRetVo, shopRetVo));
         } else {
             logger.debug("findOrdersById: Not Found");
             returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         return returnObject;
     }
+
 
     /**
      * 管理员取消本店铺订单
@@ -422,15 +461,15 @@ public class OrderService implements IOrderService {
         orderItemPo.setId(null);
         orderItemPo.setQuantity(quantity);
         orderItemsList.add(0,orderItems);
-        ReturnObject<Long> returnObject;
-        returnObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
+//        ReturnObject<Long> returnObject;
+//        returnObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
         if(orders.getState()==6) {
             ReturnObject<Orders> orders1 = orderDao.createOrders(orders, orderItemsList);
             if (!orders1.getCode().equals(ResponseCode.OK))
-                returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-            else returnObject=new ReturnObject<>(orders1.getData().getId());
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            else return new ReturnObject<>(orders1.getData().getId());
         }
-        return returnObject;
+        return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
     }
 
 

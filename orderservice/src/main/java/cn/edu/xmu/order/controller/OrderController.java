@@ -180,15 +180,23 @@ public class OrderController {
                               @Validated @RequestBody OrderSimpleVo vo, BindingResult bindingResult)
     {
         logger.debug("update order by orderId:" + id);
-        //校验前端数据-----暂时还没写
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
+
         Orders orders=vo.createOrders();
         orders.setId(id);
         orders.setGmtModified(LocalDateTime.now());
-         ReturnObject<VoObject> retObject = orderService.updateOrders(orders,userId);
+        ReturnObject<VoObject> retObject = orderService.updateOrders(orders,userId);
+        if(retObject.getCode()==ResponseCode.RESOURCE_ID_NOTEXIST){
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST));
+        }
+        System.out.println(retObject.getCode());
+        if(retObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE){
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
+        }
         return Common.decorateReturnObject(retObject);
     }
 
@@ -212,12 +220,15 @@ public class OrderController {
                                     @LoginUser @ApiIgnore Long userId
     ) {
         logger.debug("logicDelete order by orderId:" + id);
-        //校验前端数据-----暂时还没写
         Orders orders=new Orders();
+        System.out.println(userId);
         orders.setId(id);
-        orders.setBeDeleted((byte)1);
         orders.setGmtModified(LocalDateTime.now());
         ReturnObject<VoObject> retObject = orderService.updateOrders(orders,userId);
+        if(retObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
+        }
         return Common.decorateReturnObject(retObject);
     }
 
@@ -414,11 +425,11 @@ public class OrderController {
             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
             @Validated @RequestBody OrdersVo ordersVo) {
         if (ordersVo.getCouponId() != null && ordersVo.getGrouponId() != null)
-            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.FIELD_NOTVALID));
         if (ordersVo.getPresaleId() != null && ordersVo.getGrouponId() != null)
-            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.FIELD_NOTVALID));
         if (ordersVo.getPresaleId() != null && ordersVo.getCouponId() != null)
-            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.FIELD_NOTVALID));
         ReturnObject orders = orderServiceI.createOrders(userId, ordersVo);
         if (orders.getCode().equals(ResponseCode.OK))
         {
@@ -464,7 +475,7 @@ public class OrderController {
                                           @RequestParam(required = false, defaultValue = "1") Integer page,
                                           @RequestParam(required = false, defaultValue = "10") Integer pageSize){
         logger.debug("getShopAllFreightModels: page = "+ page +"  pageSize ="+pageSize);
-        if(shopId == departId || departId == 0)
+        if(shopId.equals(departId) || departId.equals(0))
         {
             ReturnObject<PageInfo<VoObject>> returnObject = orderService.getShopAllOrders(shopId,customerId, orderSn, beginTime, endTime, page, pageSize);
             return Common.getPageRetObject(returnObject);
@@ -498,7 +509,7 @@ public class OrderController {
     @GetMapping("/shops/{shopId}/orders/{id}")
     public Object getOrderById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id, @Depart @ApiIgnore Long departId){
 
-        if(shopId == departId || departId == 0)
+        if(shopId.equals(departId)  || departId.equals(0L))
         {
             ReturnObject returnObject =  orderService.getOrderById(shopId, id);
             if (returnObject.getCode() == ResponseCode.OK) {
@@ -549,7 +560,7 @@ public class OrderController {
     @DeleteMapping("/shops/{shopId}/orders/{id}")
     public Object cancelOrderById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id, @Depart @ApiIgnore Long departId)
     {
-        if(shopId == departId || departId == 0)
+        if(shopId.equals(departId) || departId.equals(0))
         {
             logger.debug("Cancel Order by orderId:" +id);
             ReturnObject<VoObject> returnObject = orderService.cancelOrderById(shopId, id);
