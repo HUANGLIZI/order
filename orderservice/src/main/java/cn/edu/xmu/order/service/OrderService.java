@@ -446,7 +446,6 @@ public class OrderService implements IOrderService {
         return orderDao.listAdminSelectOrderItemId(shopId, skuId);
     }
 
-    @Override
     public ReturnObject isOrderBelongToShop(Long shopId, Long orderId) {
         return orderDao.isOrderBelongToShop(shopId, orderId);
     }
@@ -768,7 +767,7 @@ public class OrderService implements IOrderService {
         if (!order.getData().getState().equals(Orders.State.HAS_FINISHED))
         {
             logger.info("the order is not finished, the orderId is " + orderId);
-            return new ReturnObject<>(ResponseCode.AFTERSALE_STATENOTALLOW);
+            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
         }
         return new ReturnObject<>();
     }
@@ -822,5 +821,23 @@ public class OrderService implements IOrderService {
         }
         logger.info("can't 收货!");
         return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
+    }
+
+    @Override
+    public ReturnObject<ResponseCode> judgeOrderBelongToShop(Long shopId, Long orderId)
+    {
+        ReturnObject<Orders> ordersRet = orderDao.findOrderById(orderId);
+        if (ordersRet == null)
+        {
+            logger.info("not exists the order, the order id is " + orderId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        Orders orders = ordersRet.getData();
+        if (orders.getShopId() == null || !orders.getShopId().equals(shopId))
+        {
+            logger.info("the shopId in the shop does not equal to the shopId in the path");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+        return new ReturnObject<>(ResponseCode.OK);
     }
 }

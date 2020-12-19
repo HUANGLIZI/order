@@ -58,7 +58,7 @@ public class PaymentDao {
         return new ReturnObject<>(payments);
     }
 
-    public ReturnObject queryPayment(Long orderId) {
+    public ReturnObject<List<Payment>> queryPayment(Long orderId) {
         PaymentPoExample example=new PaymentPoExample();
         PaymentPoExample.Criteria criteria=example.createCriteria();
         criteria.andOrderIdEqualTo(orderId);

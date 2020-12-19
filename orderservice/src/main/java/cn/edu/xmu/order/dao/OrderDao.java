@@ -175,7 +175,7 @@ public class OrderDao {
     }
 
     //判断order是否属于shop
-    public ReturnObject<OrdersPo> isOrderBelongToShop(Long shopId, Long orderId){
+    public ReturnObject isOrderBelongToShop(Long shopId, Long orderId){
         OrdersPoExample example=new OrdersPoExample ();
         OrdersPoExample.Criteria criteria=example.createCriteria();
         criteria.andIdEqualTo(orderId);
@@ -189,7 +189,7 @@ public class OrderDao {
             return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
         if(po.getShopId().toString().equals("null")){
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
 
         return new ReturnObject(po);
@@ -205,14 +205,16 @@ public class OrderDao {
         }
         OrdersPo ordersPo=(OrdersPo) returnObject.getData();
 
-        if(ordersPo.getSubstate().toString().equals("null")){
-            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW, String.format("订单状态无法转换为发货中"));
+
+        if(ordersPo.getSubstate()==null){
+            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
         }
         //订单未处于已支付状态，则不允许改变
-        if(ordersPo.getSubstate()!=(byte)21){
+        if(!ordersPo.getSubstate().equals((byte)21)){
             //修改失败
+            System.out.println("hhh");
             logger.error("shopDeliverOrder:Error Order State : " + ordersPo.toString());
-            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW, String.format("订单状态无法转换为发货中"));
+            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
         }
 
         //改为发货中状态
@@ -286,7 +288,7 @@ public class OrderDao {
         orderInnerDTO.setState(ordersPo.getState());
         orderInnerDTO.setSubstate(ordersPo.getSubstate());
         orderInnerDTO.setShopId(ordersPo.getShopId());
-        orderInnerDTO.setPrice(ordersPo.getOriginPrice());
+        orderInnerDTO.setPrice(ordersPo.getOriginPrice() + ordersPo.getFreightPrice());
         return new ReturnObject<>(orderInnerDTO);
     }
 

@@ -225,7 +225,7 @@ public class OrderController {
         orders.setId(id);
         orders.setGmtModified(LocalDateTime.now());
         ReturnObject<VoObject> retObject = orderService.updateOrders(orders,userId);
-        if(retObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE
+        if(retObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE){
             httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
             return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
         }
@@ -318,7 +318,6 @@ public class OrderController {
         if (null != returnObject) {
             return returnObject;
         }
-        logger.debug("customerConfirmOrder orderId:" + orderId);
         if(shopId.equals(sId)||sId==0){
             Orders orders=vo.createOrder();
             orders.setId(orderId);

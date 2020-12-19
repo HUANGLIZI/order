@@ -7,7 +7,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class PaymentRetVo {
+public class PaymentRetVo{
 
     @ApiModelProperty(value = "支付单id")
     private Long id;
@@ -40,7 +40,7 @@ public class PaymentRetVo {
     private Byte state;
 
     @ApiModelProperty(value = "创建时间")
-    private LocalDateTime gmtCreated;
+    private LocalDateTime gmtCreate;
 
     @ApiModelProperty(value = "修改时间")
     private LocalDateTime gmtModified;
@@ -50,7 +50,7 @@ public class PaymentRetVo {
         this.amount=payment.getAmount();
         this.beginTime=payment.getBeginTime();
         this.endTime=payment.getEndTime();
-        this.gmtCreated=payment.getGmtCreate();
+        this.gmtCreate=payment.getGmtCreate();
         this.gmtModified=payment.getGmtModified();
         this.id=payment.getId();
         this.orderId=payment.getOrderId();
