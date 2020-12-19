@@ -64,11 +64,24 @@ public class OrderController {
     })
     @Audit
     @GetMapping("/orders/{id}")
-    public Object getOrdersByOrderId(@PathVariable("id") Long id){
-        ReturnObject returnObject =  orderService.getOrdersByOrderId(id);
-        if (returnObject.getCode() == ResponseCode.OK) {
+    public Object getOrdersByOrderId(@PathVariable("id") Long id,
+                                     @LoginUser Long userId){
+        ReturnObject<OrderCreateRetVo> returnObject = orderService.getOrdersByOrderId(id, userId);
+        if (returnObject.getCode().equals(ResponseCode.OK)) {
             return Common.decorateReturnObject(returnObject);
         } else {
+            if (returnObject.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE))
+            {
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+                System.out.println(httpServletResponse.getStatus());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
+            }
+            else if (returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))
+            {
+                httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
+                System.out.println(httpServletResponse.getStatus());
+                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, ResponseCode.RESOURCE_ID_NOTEXIST.getMessage()), httpServletResponse);
+            }
             return Common.decorateReturnObject(returnObject);
         }
     }
@@ -86,7 +99,7 @@ public class OrderController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 900, message = "商品库存不足"),
     })
-    //@Audit
+    @Audit
     @PostMapping("/shops/{shopId}/orders")
     public Object insertAftersaleOrder(@Validated @RequestBody AftersaleOrderVo vo, BindingResult bindingResult,
                              @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
@@ -176,34 +189,6 @@ public class OrderController {
         orders.setId(id);
         orders.setGmtModified(LocalDateTime.now());
          ReturnObject<VoObject> retObject = orderService.updateOrders(orders,userId);
-        return Common.decorateReturnObject(retObject);
-    }
-
-    /**
-     * 买家标记确认收货
-     *
-     * @author 24320182203196 洪晓杰
-     * @param id 订单id
-     */
-    @ApiOperation(value = "买家标记确认收货", produces = "application/json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true),
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-    })
-    @Audit
-    @PutMapping("/orders/{id}/confirm")
-    public Object updateOrderStateToConfirm( @PathVariable("id") Long id,
-                                             @LoginUser @ApiIgnore Long userId) {
-        logger.debug("update orders by orderId:" + id);
-        Orders orders=new Orders();
-        orders.setId(id);
-        //3表示为确认收货状态
-        orders.setState((byte)3);
-        orders.setGmtModified(LocalDateTime.now());
-        ReturnObject<VoObject> retObject = orderService.updateOrders(orders,userId);
         return Common.decorateReturnObject(retObject);
     }
 
@@ -395,8 +380,6 @@ public class OrderController {
             @RequestParam(required = false) String beginTime,
             @RequestParam(required = false) String endTime) {
         logger.debug("selectAllRoles: page = " + page + "  pageSize =" + pageSize);
-//        System.out.println(userId);
-//        Long userId = 1L;
         ReturnObject<PageInfo<VoObject>> returnObject = orderService.selectOrders(userId, page, pageSize, orderSn, state, beginTime, endTime);
         if (returnObject.getCode() == ResponseCode.FIELD_NOTVALID)
         {
@@ -601,7 +584,7 @@ public class OrderController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    //@Audit
+    @Audit
     @PostMapping("/shops/{userId}/{shopId}/{orderItemId}/{quantity}/{aftersaleId}")
     public Object CreatOrderById(@PathVariable("shopId") Long shopId, @PathVariable("userId") Long userId,@PathVariable("orderItemId") Long orderItemId,@PathVariable("quantity") Integer quantity,@PathVariable("aftersaleId") Long aftersaleId)
     {
@@ -610,9 +593,39 @@ public class OrderController {
         return Common.decorateReturnObject(returnObject);
     }
 
-    @PostMapping("/test/{id}")
-    public ReturnObject<ResponseCode> justTest(@PathVariable("id") Long ordersId)
-    {
-        return orderService.splitOrders(ordersId);
+    /**
+     * 买家标记确认收货
+     *
+     * @param id 订单id
+     */
+    @ApiOperation(value = "买家标记确认收货", produces = "application/json")
+    @ApiImplicitParams({
+            //@ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "订单id", required = true),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @PutMapping("/orders/{id}/confirm")
+    public Object updateOrderStateToConfirm( @PathVariable("id") Long id,
+                                             @LoginUser Long userId) {
+        logger.debug("update orders by orderId:" + id);
+        ReturnObject<ResponseCode> returnObject = orderService.userConfirmState(userId, id);
+        if (returnObject.getCode().equals(ResponseCode.OK))
+        {
+            return Common.decorateReturnObject(returnObject);
+        }
+        else if (returnObject.getCode().equals(ResponseCode.ORDER_STATENOTALLOW))
+        {
+            httpServletResponse.setStatus(HttpStatus.OK.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW,ResponseCode.ORDER_STATENOTALLOW.getMessage()),httpServletResponse);
+        }
+        else if (returnObject.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE))
+        {
+            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()),httpServletResponse);
+        }
+        return Common.decorateReturnObject(returnObject);
     }
 }

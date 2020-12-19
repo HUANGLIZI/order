@@ -224,7 +224,6 @@ public class PaymentController {
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         }
         ReturnObject<List> returnObject = paymentServiceI.getOrdersRefundsByOrderId(id, shopId);
-        System.out.println(returnObject);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getListRetObject(returnObject);
         } else {
@@ -262,7 +261,6 @@ public class PaymentController {
         }
         ReturnObject<List> returnObject = paymentServiceI.getOrdersRefundsByAftersaleId(id, shopId);
         if (returnObject.getCode() == ResponseCode.OK) {
-            logger.info(returnObject.getCode().toString() + "============");
             return Common.getListRetObject(returnObject);
         } else {
             if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE) {

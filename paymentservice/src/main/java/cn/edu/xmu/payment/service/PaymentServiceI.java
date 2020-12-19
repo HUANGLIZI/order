@@ -116,10 +116,10 @@ public class PaymentServiceI {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         ReturnObject<List> retObj = paymentDao.getOrdersRefundsByAftersaleId(aftersaleId);//if(retObj.getOrderId())
         if (retObj.getCode().equals(ResponseCode.OK)) {
-                return retObj;
-            } else {
-                return new ReturnObject(retObj.getCode(), retObj.getErrmsg());
-            }
+            return retObj;
+        } else {
+            return new ReturnObject(retObj.getCode(), retObj.getErrmsg());
+        }
     }
 
 
