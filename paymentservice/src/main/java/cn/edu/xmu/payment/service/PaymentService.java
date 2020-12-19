@@ -188,9 +188,9 @@ public class PaymentService implements IPaymentService {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         OrderInnerDTO orderInnerDTO = ret.getData();
-        ReturnObject<ResponseCode> returnObject = iOrderService.judgeOrderFinished(orderInnerDTO.getOrderId());
-        if (!returnObject.getCode().equals(ResponseCode.OK))
-            return new ReturnObject<>(returnObject.getCode());
+//        ReturnObject<ResponseCode> returnObject = iOrderService.judgeOrderFinished(orderInnerDTO.getOrderId());
+//        if (!returnObject.getCode().equals(ResponseCode.OK))
+//            return new ReturnObject<>(returnObject.getCode());
         if (!orderInnerDTO.getCustomerId().equals(userId) || !orderInnerDTO.getShopId().equals(shopId))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         ReturnObject<Long> paymentIdRet = paymentDao.getPaymentIdByOrderId(orderInnerDTO.getOrderId());
@@ -225,9 +225,9 @@ public class PaymentService implements IPaymentService {
         Long orderId=iOrderService.getOrderIdByOrderItemId(orderItemId).getData();
         logger.info("orderId: "+ orderId);
 
-        ReturnObject<ResponseCode> returnObject = iOrderService.judgeOrderFinished(orderId);
-        if (!returnObject.getCode().equals(ResponseCode.OK))
-            return new ReturnObject<>(returnObject.getCode());
+//        ReturnObject<ResponseCode> returnObject = iOrderService.judgeOrderFinished(orderId);
+//        if (!returnObject.getCode().equals(ResponseCode.OK))
+//            return new ReturnObject<>(returnObject.getCode());
 
         Payment payment=new Payment();
 
