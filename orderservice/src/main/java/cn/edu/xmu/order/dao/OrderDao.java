@@ -456,12 +456,12 @@ public class OrderDao {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         OrdersPoExample ordersPoExample = new OrdersPoExample();
         OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
-        criteria.andShopIdEqualTo(shopId);
         if (shopId == null)
         {
             logger.info("userId is " + shopId);
-            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
+        criteria.andShopIdEqualTo(shopId);
         // 被逻辑删除的订单不能被返回
         Byte beDeleted = 0;
         criteria.andBeDeletedEqualTo(beDeleted);
@@ -511,6 +511,10 @@ public class OrderDao {
         List<OrdersPo> ordersPos = null;
         try {
             ordersPos = ordersPoMapper.selectByExample(ordersPoExample);
+            if (ordersPos == null)
+            {
+                logger.info("数据库找不到");
+            }
             List<VoObject> ret = new ArrayList<>(ordersPos.size());
             for (OrdersPo po : ordersPos) {
                 Orders order = new Orders(po);
@@ -574,18 +578,18 @@ public class OrderDao {
         {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("不存在对应的订单id" ));
         }
-        else if(ordersPo.getSubstate().equals(Orders.State.HAS_DELIVERRED.getCode().byteValue()))
-        {
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-        }
-        else if(ordersPo.getState().equals(Orders.State.HAS_FINISHED.getCode().byteValue())||ordersPo.getState().equals(Orders.State.CANCEL.getCode().byteValue()))
-        {
-            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
-        }
         else if(!ordersPo.getShopId().equals(shopId))
         {
             logger.debug("cancelOrderById: update Order fail " + ordersPo.toString() );
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("该订单不属于该店铺" ));
+        }
+        else if(ordersPo.getSubstate() != null && ordersPo.getSubstate().equals(Orders.State.HAS_DELIVERRED.getCode().byteValue()))
+        {
+            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
+        }
+        else if(ordersPo.getState() != null &&( ordersPo.getState().equals(Orders.State.HAS_FINISHED.getCode().byteValue()) ||ordersPo.getState().equals(Orders.State.CANCEL.getCode().byteValue())))
+        {
+            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
         }
         else
         {

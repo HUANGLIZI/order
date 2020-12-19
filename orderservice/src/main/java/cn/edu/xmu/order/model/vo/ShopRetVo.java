@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * @author Caixin
  * @date 2020-12-08 23:43
@@ -19,7 +21,7 @@ public class ShopRetVo {
 
     private Byte state;
 
-    private String gmtCreate;
+    private LocalDateTime gmtCreate;
 
-    private String gmtModified;
+    private LocalDateTime gmtModified;
 }

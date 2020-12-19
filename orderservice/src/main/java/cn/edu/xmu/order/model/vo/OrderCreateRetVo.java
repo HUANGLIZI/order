@@ -53,7 +53,9 @@ public class OrderCreateRetVo implements VoObject, Serializable {
 
     private Long grouponId;
 
-    private LocalDateTime gmtCreated;
+    private String orderSn;
+
+    private LocalDateTime gmtCreate;
 
     private LocalDateTime gmtModified;
 
@@ -80,7 +82,7 @@ public class OrderCreateRetVo implements VoObject, Serializable {
         this.confirmTime = orders.getConfirmTime();
         this.shipmentSn=orders.getShipmentSn();
         this.state=orders.getState();
-        this.gmtCreated = orders.getGmtCreated();
+        this.gmtCreate = orders.getGmtCreated();
         this.gmtModified = orders.getGmtModified();
         this.presaleId=orders.getPresaleId();
         this.subState=orders.getSubstate();
@@ -88,6 +90,7 @@ public class OrderCreateRetVo implements VoObject, Serializable {
         this.orderItems = orders.getOrderItemsList();
         this.customer = customerRetVo;
         this.shop = shopRetVo;
+        this.orderSn = orders.getOrderSn();
     }
 
     @Override

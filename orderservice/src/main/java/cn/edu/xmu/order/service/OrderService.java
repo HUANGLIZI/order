@@ -35,10 +35,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @DubboService
 public class OrderService implements IOrderService {
@@ -112,8 +110,11 @@ public class OrderService implements IOrderService {
         }
         ShopRetVo shopRetVo = new ShopRetVo();
         shopRetVo.setId(shopDetailDTO.getShopId());
-        shopRetVo.setGmtCreate(shopDetailDTO.getGmtCreate());
-        shopRetVo.setGmtModified(shopDetailDTO.getGmtModified());
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime gmtCreate = LocalDateTime.parse(shopDetailDTO.getGmtCreate(), df);
+        LocalDateTime gmtModified = LocalDateTime.parse(shopDetailDTO.getGmtModified(), df);
+        shopRetVo.setGmtCreate(gmtCreate);
+        shopRetVo.setGmtModified(gmtModified);
         shopRetVo.setName(shopDetailDTO.getName());
         shopRetVo.setState(shopDetailDTO.getState());
 
@@ -152,14 +153,14 @@ public class OrderService implements IOrderService {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         Orders orders = ordersRet.getData();
-        if(orders==null||orders.getOrderType()==null||orders.getBeDeleted()==1){//订单不存在
-            returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(orders==null||orders.getOrderType()==null||orders.getBeDeleted()==(byte)1){//订单不存在
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         if(!orders.getCustomerId().equals(userId)){
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
-        else if(orders.getOrderType()==1&&orders.getCustomerId().equals(userId)&&orders.getBeDeleted()!=1) {
-            if(orders.getSubstate()==22||orders.getSubstate()==23||orders.getState()==2) {
+        else if(orders.getOrderType()==(byte)1&&orders.getCustomerId().equals(userId)&&orders.getBeDeleted()!=(byte)1) {
+            if(orders.getSubstate()==(byte)22||orders.getSubstate()==(byte)23||orders.getState()==(byte)2) {
                 int ret=orderDao.transOrder(id);
                 if(ret == 1) {
                 logger.debug("transOrdersById : " + returnObject);
@@ -178,7 +179,7 @@ public class OrderService implements IOrderService {
             }
         }
 
-        else if(orders.getOrderType()!=1){
+        else if(orders.getOrderType()!=(byte)1){
             logger.debug("该订单不是团购订单，无法进行转换");
             returnObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
         }
@@ -196,7 +197,7 @@ public class OrderService implements IOrderService {
      * @修改：李明明 2020-12-19
      */
     @Transactional
-    public ReturnObject<VoObject> updateOrders(Orders orders, Long userId) {
+    public ReturnObject<VoObject> cancelOrders(Orders orders, Long userId) {
         ReturnObject<VoObject> retOrder=null;
         //ReturnObject<OrderInnerDTO> returnObject=orderDao.getUserIdbyOrderId(orders.getId());
         //调用OrderDao层中的 ReturnObject<OrdersPo> getOrderByOrderId(Long orderId)
@@ -221,10 +222,13 @@ public class OrderService implements IOrderService {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         //若订单已发货，则无法修改
-        if(returnObject.getData().getSubstate().equals(Orders.State.HAS_DELIVERRED.getCode().byteValue()))
-        {
-            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
+        if(returnObject.getData().getSubstate()!=null){
+            if(returnObject.getData().getSubstate().equals(Orders.State.HAS_DELIVERRED.getCode().byteValue()))
+            {
+                return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
+            }
         }
+
         ReturnObject<Orders> retObj=new ReturnObject<>();
         if(returnObject.getData().getState().equals(Orders.State.TO_BE_PAID.getCode().byteValue())){
             orders.setState((byte)4);
@@ -376,8 +380,11 @@ public class OrderService implements IOrderService {
         shopRetVo.setId(shopId);
         shopRetVo.setName(shopDetailDTO.getName());
         shopRetVo.setState(shopDetailDTO.getState());
-        shopRetVo.setGmtCreate(shopDetailDTO.getGmtCreate());
-        shopRetVo.setGmtModified(shopDetailDTO.getGmtModified());
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime gmtCreate = LocalDateTime.parse(shopDetailDTO.getGmtCreate(), df);
+        LocalDateTime gmtModified = LocalDateTime.parse(shopDetailDTO.getGmtModified(), df);
+        shopRetVo.setGmtCreate(gmtCreate);
+        shopRetVo.setGmtModified(gmtModified);
 
         orders.setOrderItemsList(orderItemsList);
         ReturnObject<VoObject> returnObject = null;
@@ -839,5 +846,42 @@ public class OrderService implements IOrderService {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
         return new ReturnObject<>(ResponseCode.OK);
+    }    
+    public ReturnObject<VoObject> updateOrders(Orders orders, Long userId) {
+        ReturnObject<VoObject> retOrder=null;
+        //ReturnObject<OrderInnerDTO> returnObject=orderDao.getUserIdbyOrderId(orders.getId());
+        //调用OrderDao层中的 ReturnObject<OrdersPo> getOrderByOrderId(Long orderId)
+        ReturnObject<OrdersPo> returnObject = orderDao.getOrderByOrderId(orders.getId());
+        if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        OrdersPo o = returnObject.getData();
+        System.out.println(o.toString());
+        if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))
+        {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        //校验前端数据的userID
+        //如果ordersId与所属customerId不一致，则无法修改
+        if(!userId.equals(returnObject.getData().getCustomerId())){
+            //操作的资源id不是自己的对象
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+        if(o.getBeDeleted().equals((byte)1)){
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        //若订单已发货、完成和取消，则无法修改
+        if(o.getState().equals(Orders.State.HAS_FINISHED.getCode().byteValue())||o.getState().equals(Orders.State.CANCEL.getCode().byteValue())||Objects.equals(o.getSubstate(), Orders.State.HAS_DELIVERRED.getCode().byteValue()) )
+        {
+            return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
+        }
+        ReturnObject<Orders> retObj=new ReturnObject<>();
+        retObj= orderDao.updateOrder(orders);
+        if (retObj.getCode().equals(ResponseCode.OK)) {
+            retOrder = new ReturnObject<>(retObj.getData());
+        } else {
+            retOrder = new ReturnObject<>(retObj.getCode(), retObj.getErrmsg());
+        }
+        return retOrder;
     }
 }

@@ -501,7 +501,6 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-//    @Audit
     @GetMapping("/payments/states")
     public Object getAllPaymentsStates()
     {
@@ -526,7 +525,6 @@ public class PaymentController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-//    @Audit
     @GetMapping("/payments/patterns")
     public Object userQueryPayment()
     {

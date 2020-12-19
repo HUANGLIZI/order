@@ -224,7 +224,7 @@ public class OrderController {
         System.out.println(userId);
         orders.setId(id);
         orders.setGmtModified(LocalDateTime.now());
-        ReturnObject<VoObject> retObject = orderService.updateOrders(orders,userId);
+        ReturnObject<VoObject> retObject = orderService.cancelOrders(orders,userId);
         if(retObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE){
             httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
             return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()), httpServletResponse);
@@ -474,7 +474,7 @@ public class OrderController {
                                           @RequestParam(required = false, defaultValue = "1") Integer page,
                                           @RequestParam(required = false, defaultValue = "10") Integer pageSize){
         logger.debug("getShopAllFreightModels: page = "+ page +"  pageSize ="+pageSize);
-        if(shopId.equals(departId) || departId.equals(0))
+        if(shopId.equals(departId) || departId.equals(0L))
         {
             ReturnObject<PageInfo<VoObject>> returnObject = orderService.getShopAllOrders(shopId,customerId, orderSn, beginTime, endTime, page, pageSize);
             return Common.getPageRetObject(returnObject);
@@ -559,13 +559,13 @@ public class OrderController {
     @DeleteMapping("/shops/{shopId}/orders/{id}")
     public Object cancelOrderById(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id, @Depart @ApiIgnore Long departId)
     {
-        if(shopId.equals(departId) || departId.equals(0))
+        if(shopId.equals(departId) || departId.equals(0L))
         {
             logger.debug("Cancel Order by orderId:" +id);
             ReturnObject<VoObject> returnObject = orderService.cancelOrderById(shopId, id);
-            if(returnObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE)
+            if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE))
                 httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
-            if(returnObject.getCode()==ResponseCode.ORDER_STATENOTALLOW)
+            if(returnObject.getCode().equals(ResponseCode.ORDER_STATENOTALLOW))
                 httpServletResponse.setStatus(HttpStatus.OK.value());
             return Common.decorateReturnObject(returnObject);
         }
