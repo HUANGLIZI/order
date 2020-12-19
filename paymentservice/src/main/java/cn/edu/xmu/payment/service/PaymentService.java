@@ -63,6 +63,9 @@ public class PaymentService implements IPaymentService {
         if(returnObject.getCode()==ResponseCode.OK){
             return paymentDao.queryPayment(orderId);
         }
+        else if(returnObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE){
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
         else if(returnObject.getCode()!=ResponseCode.OK){
             logger.error(" queryPaymentById: 数据库不存在该支付单 orderId="+orderId);
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
