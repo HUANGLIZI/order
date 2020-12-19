@@ -33,8 +33,6 @@ public class FreightModelReturnVo implements VoObject {
     @ApiModelProperty(value = "修改时间")
     private LocalDateTime gmtModified;
 
-    @ApiModelProperty(value = "商店id")
-    private Long shopId;
     /**
      * 用FreightModelPo对象建立Vo对象
      *
