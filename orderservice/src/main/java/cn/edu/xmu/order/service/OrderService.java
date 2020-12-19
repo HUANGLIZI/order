@@ -72,14 +72,32 @@ public class OrderService implements IOrderService {
      * @return VoObject
      */
     @Transactional
-    public ReturnObject<VoObject> getOrdersByOrderId(Long id) {
-        ReturnObject<VoObject> returnObject = null;
-        Orders orders=orderDao.findOrderById(id);
-        List<OrderItemPo> orderItemPos=orderDao.findOrderItemById(id);
+    public ReturnObject<OrderCreateRetVo> getOrdersByOrderId(Long id, Long retUserId) {
+        ReturnObject<OrderCreateRetVo> returnObject = null;
+        ReturnObject<Orders> ordersRet = orderDao.findOrderById(id);
+        if (!ordersRet.getCode().equals(ResponseCode.OK))
+        {
+            logger.info("the order not exists: " + id);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        Orders orders = ordersRet.getData();
+        ReturnObject<List<OrderItemPo>> orderItemList = orderDao.findOrderItemById(id);
+        if (!orderItemList.getCode().equals(ResponseCode.OK))
+            return new ReturnObject<>(orderItemList.getCode());
         List<OrderItems> orderItemsList = new ArrayList<OrderItems>();
-
+        orders.getSubstate();
         Long userId=orders.getCustomerId();
+        if (!userId.equals(retUserId))
+        {
+            logger.info("userId != retUserId");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
         CustomerDTO customerDTO = customerServiceI.findCustomerByUserId(userId).getData();
+        if (customerDTO == null)
+        {
+            logger.info("customerDTO not exists");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
         CustomerRetVo customerRetVo = new CustomerRetVo();
         customerRetVo.setId(userId);
         customerRetVo.setName(customerDTO.getName());
@@ -87,6 +105,11 @@ public class OrderService implements IOrderService {
 
         Long shopId=orders.getShopId();
         ShopDetailDTO shopDetailDTO = goodsServiceI.getShopInfoByShopId(shopId).getData();
+        if (shopDetailDTO == null)
+        {
+            logger.info("shopDetailDTO not exists");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
         ShopRetVo shopRetVo = new ShopRetVo();
         shopRetVo.setId(shopDetailDTO.getShopId());
         shopRetVo.setGmtCreate(shopDetailDTO.getGmtCreate());
@@ -94,15 +117,18 @@ public class OrderService implements IOrderService {
         shopRetVo.setName(shopDetailDTO.getName());
         shopRetVo.setState(shopDetailDTO.getState());
 
-        for (OrderItemPo po: orderItemPos)
+        for (OrderItemPo po: orderItemList.getData())
         {
             OrderItems orderItems = new OrderItems(po);
             orderItemsList.add(orderItems);
         }
+        orders.setOrderItemsList(orderItemsList);
         if(orders != null) {
-            logger.debug("findOrdersById : " + returnObject);
+//            logger.debug("findOrdersById : " + returnObject.getData());
             //OrderRetVo orderRetVo=new orderRetVo();
-            returnObject = new ReturnObject(new OrderRetVo(orders));
+            OrderCreateRetVo orderCreateRetVo = new OrderCreateRetVo(orders, customerRetVo, shopRetVo);
+            System.out.println(orderCreateRetVo.toString());
+            returnObject = new ReturnObject<>(orderCreateRetVo);
         } else {
             logger.debug("findOrdersById: Not Found");
             returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
@@ -119,7 +145,13 @@ public class OrderService implements IOrderService {
     @Transactional
     public ReturnObject<VoObject> transOrder(Long id,Long userId) {
         ReturnObject<VoObject> returnObject = null;
-        Orders orders=orderDao.findOrderById(id);
+        ReturnObject<Orders> ordersRet = orderDao.findOrderById(id);
+        if (ordersRet == null)
+        {
+            logger.info("the order not exists: " + id);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        Orders orders = ordersRet.getData();
         if(orders==null||orders.getOrderType()==null||orders.getBeDeleted()==1){//订单不存在
             returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
@@ -283,18 +315,12 @@ public class OrderService implements IOrderService {
     public ReturnObject<VoObject> getOrderById(Long shopId, Long id)
     {
         Orders orders = (Orders) orderDao.getOrderById(shopId,id).getData();
-        if(orderDao.getOrderById(shopId,id).getCode()==ResponseCode.RESOURCE_ID_NOTEXIST)
-        {
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        }
-        if(orderDao.getOrderById(shopId,id).getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE)
-        {
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-        }
-        List<OrderItemPo> orderItemPos=orderDao.findOrderItemById(id);
 
+        ReturnObject<List<OrderItemPo>> orderItemPos = orderDao.findOrderItemById(id);
+        if (!orderItemPos.getCode().equals(ResponseCode.OK))
+            return new ReturnObject<>(orderItemPos.getCode());
         List<OrderItems> orderItemsList = new ArrayList<OrderItems>();
-        for(OrderItemPo po : orderItemPos)
+        for(OrderItemPo po : orderItemPos.getData())
         {
             OrderItems orderItems = new OrderItems(po);
             orderItemsList.add(orderItems);
@@ -319,7 +345,7 @@ public class OrderService implements IOrderService {
         ReturnObject<VoObject> returnObject = null;
         if(orders != null) {
             logger.debug("findOrdersById : " + returnObject);
-            returnObject = new ReturnObject(new OrderCreateRetVo(orders));
+            returnObject = new ReturnObject(new OrderRetVo(orders));
         } else {
             logger.debug("findOrdersById: Not Found");
             returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
@@ -692,4 +718,70 @@ public class OrderService implements IOrderService {
         return new ReturnObject<>(ResponseCode.OK);
     }
 
+    private ReturnObject<ResponseCode> judgeOrderComplete(Long orderId)
+    {
+        ReturnObject<OrdersPo> order = orderDao.getOrderByOrderId(orderId);
+        if (!order.getCode().equals(ResponseCode.OK))
+        {
+            logger.info("the order not exists, the orderId is " + orderId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        if (!order.getData().getState().equals(Orders.State.HAS_FINISHED))
+        {
+            logger.info("the order is not finished, the orderId is " + orderId);
+            return new ReturnObject<>(ResponseCode.AFTERSALE_STATENOTALLOW);
+        }
+        return new ReturnObject<>();
+    }
+
+    @Transactional
+    @Override
+    public ReturnObject<ResponseCode> judgeOrderFinished(Long orderId)
+    {
+        ReturnObject<ResponseCode> returnObject = judgeOrderComplete(orderId);
+        return returnObject;
+    }
+
+    @Override
+    public ReturnObject<ResponseCode> judgeOrderitemIdFinished(Long orderItemId)
+    {
+        ReturnObject<OrderInnerDTO> orderIdbyOrderItemId = orderDao.getOrderIdbyOrderItemId(orderItemId);
+        if (orderIdbyOrderItemId == null || orderIdbyOrderItemId.getData().getOrderId() == null)
+        {
+            logger.info("not found orderItemId, orderItem Id is: " + orderItemId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        return judgeOrderFinished(orderIdbyOrderItemId.getData().getOrderId());
+    }
+
+    @Transactional
+    public ReturnObject<ResponseCode> userConfirmState(Long userId, Long orderId)
+    {
+        ReturnObject<OrdersPo> ordersPoRet = orderDao.getOrderByOrderId(orderId);
+        if (!ordersPoRet.getCode().equals(ResponseCode.OK))
+        {
+            logger.info("not found order, order Id is: " + orderId);
+            return new ReturnObject<>(ordersPoRet.getCode());
+        }
+        Orders orders = new Orders(ordersPoRet.getData());
+        Long userIdRet = orders.getCustomerId();
+        if (!userIdRet.equals(userId))
+        {
+            logger.info("retUserId != userId");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+        if (orders.getBeDeleted().equals((byte)1))
+        {
+            logger.info("order is logical deleted");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        if (orders.getState().equals(Orders.State.TO_BE_SIGNED_IN.getCode().byteValue())
+                && orders.getSubstate().equals(Orders.State.HAS_DELIVERRED.getCode().byteValue()))
+        {
+            orders.setState(Orders.State.HAS_FINISHED.getCode().byteValue());
+            return orderDao.userConfirm(orders);
+        }
+        logger.info("can't 收货!");
+        return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
+    }
 }

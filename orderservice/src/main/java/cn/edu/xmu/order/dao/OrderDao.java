@@ -43,20 +43,15 @@ public class OrderDao {
      * @param id
      * @return 用户
      */
-    public Orders findOrderById(Long id) {
+    public ReturnObject<Orders> findOrderById(Long id) {
         logger.debug("findUserById: Id =" + id);
-        Orders orders;
-        try {
-            OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(id);
-            orders=new Orders(ordersPo);
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(id);
+        if (ordersPo == null) {
+            logger.error("getOrder: 订单数据库不存在该订单 orderid=" + id);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-        catch (Exception e){
-                logger.error("getOrder: 订单数据库不存在该订单 orderid=" + id);
-                Orders orders1=new Orders();
-                orders1.setBeDeleted((byte) 1);
-                return orders1;
-        }
-        return orders;
+        Orders orders=new Orders(ordersPo);
+        return new ReturnObject<>(orders);
     }
     /**
      * ID获取订单明细信息
@@ -64,16 +59,28 @@ public class OrderDao {
      * @param orderId
      * @return 订单明细列表
      */
-    public List<OrderItemPo> findOrderItemById(Long orderId) {
+    public ReturnObject<List<OrderItemPo>> findOrderItemById(Long orderId) {
         logger.debug("findOrderItemByOrderId: Id =" + orderId);
+        OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderId);
+        if (ordersPo == null)
+        {
+            logger.error("getOrder: 数据库不存在该订单 orderid=" + orderId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        if (ordersPo.getBeDeleted().equals((byte)1))
+        {
+            logger.error("getOrder: 数据库不存在该订单 orderid=" + orderId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
         OrderItemPoExample orderItemPoExample=new OrderItemPoExample();
         OrderItemPoExample.Criteria criteria=orderItemPoExample.createCriteria();
         criteria.andOrderIdEqualTo(orderId);
         List<OrderItemPo> orderItemPos=orderItemPoMapper.selectByExample(orderItemPoExample);
         if (orderItemPos == null) {
             logger.error("getOrder: 订单明细数据库不存在该订单 orderid=" + orderId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-        return orderItemPos;
+        return new ReturnObject<>(orderItemPos);
     }
     /**
      * 通过id转换订单类型
@@ -308,16 +315,16 @@ public class OrderDao {
      */
     public ReturnObject<PageInfo<VoObject>> getOrdersByUserId(Long userId, Integer pageNum, Integer pageSize,
                                                               String orderSn, Byte state,
-                                                              String beginTime, String endTime)
-    {
+                                                              String beginTime, String endTime) {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         OrdersPoExample ordersPoExample = new OrdersPoExample();
         OrdersPoExample.Criteria criteria = ordersPoExample.createCriteria();
-        if (userId == null)//如果userId为空
+        if (userId == null)
         {
             logger.info("userId is " + userId);
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
+        criteria.andCustomerIdEqualTo(userId);
         criteria.andCustomerIdEqualTo(userId);
         // 被逻辑删除的订单不能被返回
         Byte beDeleted = 0;
@@ -329,6 +336,8 @@ public class OrderDao {
         if (beginTime != null)
         {
             try {
+                if (beginTime.contains("T"))
+                    beginTime = beginTime.replace("T"," ");
                 LocalDateTime.parse(beginTime, df);
             }
             catch (Exception e)
@@ -341,6 +350,8 @@ public class OrderDao {
         if (endTime != null)
         {
             try {
+                if (endTime.contains("T"))
+                    endTime = endTime.replace("T"," ");
                 LocalDateTime.parse(endTime, df);
             }
             catch (Exception e)
@@ -370,12 +381,12 @@ public class OrderDao {
                 Orders order = new Orders(po);
                 ret.add(order);
             }
-            PageInfo<OrdersPo> ordersPoPageInfo = PageInfo.of(ordersPos);
+            PageInfo<OrdersPo> ordersPoPageInfo=PageInfo.of(ordersPos);
             PageInfo<VoObject> orderPage = new PageInfo<>(ret);
-            orderPage.setTotal(ordersPoPageInfo.getTotal());
+            orderPage.setPageSize(ordersPoPageInfo.getPageSize());
             orderPage.setPages(ordersPoPageInfo.getPages());
             orderPage.setPageNum(ordersPoPageInfo.getPageNum());
-            orderPage.setPageSize(pageSize);
+            orderPage.setTotal(ordersPoPageInfo.getTotal());
             return new ReturnObject<>(orderPage);
         } catch (DataAccessException e) {
             logger.error("selectAllRole: DataAccessException:" + e.getMessage());
@@ -852,5 +863,23 @@ public class OrderDao {
             ordersList.add(orders);
         }
         return new ReturnObject<>(ordersList);
+    }
+
+    /**
+     * @param
+     * @return
+     * @author Cai Xinlu
+     * @date 2020-12-19 5:14
+     */
+    public ReturnObject<ResponseCode> userConfirm(Orders orders)
+    {
+        OrdersPo ordersPo = orders.gotOrdersPo();
+        int ret = ordersPoMapper.updateByPrimaryKeySelective(ordersPo);
+        if (ret == 0)
+        {
+            logger.info("update confirm state fail!");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        return new ReturnObject<>(ResponseCode.OK);
     }
 }

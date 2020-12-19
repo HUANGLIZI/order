@@ -129,7 +129,7 @@ public class PaymentDao {
      * @param id
      * @return 用户
      */
-    public ReturnObject<List<RefundBo>> getOrdersRefundsByOrderId(Long id) {
+    public ReturnObject<List> getOrdersRefundsByOrderId(Long id) {
         logger.debug("findRefundByOrderId: Id =" + id);
         RefundPoExample refundPoExample=new RefundPoExample();
         RefundPoExample.Criteria criteria=refundPoExample.createCriteria();
@@ -137,6 +137,7 @@ public class PaymentDao {
         List<RefundPo> refundPos=refundPoMapper.selectByExample(refundPoExample);
         if (refundPos == null) {
             logger.error("getNewUser: 数据库不存在该Order的退款信息 orderId=" + id);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         List<RefundBo> refundBoList = new ArrayList<>(refundPos.size());
         for (RefundPo po: refundPos)
@@ -153,7 +154,7 @@ public class PaymentDao {
      * @param id
      * @return 用户
      */
-    public ReturnObject<List<RefundBo>> getOrdersRefundsByAftersaleId(Long id) {
+    public ReturnObject<List> getOrdersRefundsByAftersaleId(Long id) {
         logger.debug("findRefundByAftersaleId: Id =" + id);
         RefundPoExample refundPoExample=new RefundPoExample();
         RefundPoExample.Criteria criteria=refundPoExample.createCriteria();
@@ -161,6 +162,7 @@ public class PaymentDao {
         List<RefundPo> refundPos=refundPoMapper.selectByExample(refundPoExample);
         if (refundPos == null) {
             logger.error("getNewUser: 数据库不存在该Order的退款信息 orderId=" + id);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         List<RefundBo> refundBoList = new ArrayList<>(refundPos.size());
         for (RefundPo po: refundPos)

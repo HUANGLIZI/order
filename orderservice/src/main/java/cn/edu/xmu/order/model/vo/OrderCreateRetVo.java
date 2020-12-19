@@ -4,6 +4,7 @@ import cn.edu.xmu.order.model.bo.OrderItems;
 import cn.edu.xmu.order.model.bo.Orders;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  * @date 2020-12-08 23:21
  */
 @Data
-public class OrderCreateRetVo {
+public class OrderCreateRetVo implements VoObject, Serializable {
 
     private Long id;
 
@@ -48,7 +49,7 @@ public class OrderCreateRetVo {
 
     private Byte state;
 
-    private Byte substate;
+    private Byte subState;
 
     private Long grouponId;
 
@@ -58,11 +59,11 @@ public class OrderCreateRetVo {
 
     private List<OrderItems> orderItems;
 
-    private CustomerRetVo customerRetVo;
+    private CustomerRetVo customer;
 
-    private ShopRetVo shopRetVo;
+    private ShopRetVo shop;
 
-    public OrderCreateRetVo(Orders orders) {
+    public OrderCreateRetVo(Orders orders,CustomerRetVo customerRetVo,ShopRetVo shopRetVo) {
         this.id = orders.getId();
         this.pid=orders.getPid();
         this.consignee = orders.getConsignee();
@@ -82,9 +83,15 @@ public class OrderCreateRetVo {
         this.gmtCreated = orders.getGmtCreated();
         this.gmtModified = orders.getGmtModified();
         this.presaleId=orders.getPresaleId();
-        this.substate=orders.getSubstate();
+        this.subState=orders.getSubstate();
         this.grouponId = orders.getGrouponId();
         this.orderItems = orders.getOrderItemsList();
+        this.customer = customerRetVo;
+        this.shop = shopRetVo;
     }
 
+    @Override
+    public Object createVo() {
+        return this;
+    }
 }

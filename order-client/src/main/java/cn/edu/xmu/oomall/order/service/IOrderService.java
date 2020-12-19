@@ -52,7 +52,7 @@ public interface IOrderService {
      */
     ReturnObject<Object> putPresaleOffshevles(Long presaleId);
 
-    /*
+    /**
      * 由商品模块调用 支付完拆单
      */
     ReturnObject<ResponseCode> splitOrders(Long orderId);
@@ -91,4 +91,14 @@ public interface IOrderService {
      * 通过OrderId获取OrderId
      */
     ReturnObject<OrderInnerDTO> getOrderInfoByOrderId(Long orderId);
+
+    /**
+     * 判断orderId中的state是不是已完成
+     */
+    ReturnObject<ResponseCode> judgeOrderFinished(Long orderId);
+
+    /**
+     * 判断该orderItemId对应的order是否处于完成态
+     */
+    ReturnObject<ResponseCode> judgeOrderitemIdFinished(Long orderItemId);
 }

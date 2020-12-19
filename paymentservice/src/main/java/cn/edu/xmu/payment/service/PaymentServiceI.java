@@ -85,7 +85,7 @@ public class PaymentServiceI {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         Long retUserId = ret.getData();
-//        System.out.println(userId+" "+retUserId);
+        System.out.println(userId+" "+retUserId);
 //        if (!retUserId.equals(1L))
         if (retUserId == null)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
@@ -102,7 +102,7 @@ public class PaymentServiceI {
 
 
     @Transactional
-    public ReturnObject<List<RefundBo>> getOrdersRefundsByAftersaleId(Long aftersaleId, Long shopId){
+    public ReturnObject<List> getOrdersRefundsByAftersaleId(Long aftersaleId, Long shopId){
         ReturnObject<Long> ret = iAftersaleService.findShopIdbyAftersaleId(aftersaleId);
         if (!ret.getCode().equals(ResponseCode.OK))
         {
@@ -114,25 +114,17 @@ public class PaymentServiceI {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         if (!retShopId.equals(shopId))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        ReturnObject<List<RefundBo>> retObj = paymentDao.getOrdersRefundsByAftersaleId(aftersaleId);//if(retObj.getOrderId())
-        ReturnObject<List<RefundBo>> retRefund = null;
-        List<Object> refundVoList = new ArrayList<>(retObj.getData().size());
-        for (RefundBo bo: retObj.getData())
-        {
-            Object vo = bo.createVo();
-            refundVoList.add(vo);
-        }
+        ReturnObject<List> retObj = paymentDao.getOrdersRefundsByAftersaleId(aftersaleId);//if(retObj.getOrderId())
         if (retObj.getCode().equals(ResponseCode.OK)) {
-                retRefund = new ReturnObject(refundVoList);
-            } else {
-                retRefund = new ReturnObject(retObj.getCode(), retObj.getErrmsg());
-            }
-        return retRefund;
+            return retObj;
+        } else {
+            return new ReturnObject(retObj.getCode(), retObj.getErrmsg());
+        }
     }
 
 
     @Transactional
-    public ReturnObject<List<Object>> getOrdersRefundsByOrderId(Long orderId, Long shopId){
+    public ReturnObject<List> getOrdersRefundsByOrderId(Long orderId, Long shopId){
         ReturnObject<OrderInnerDTO> orderInnerDTO = iOrderService.findShopIdbyOrderId(orderId);
         if (!orderInnerDTO.getCode().equals(ResponseCode.OK))
         {
@@ -147,19 +139,11 @@ public class PaymentServiceI {
             logger.info("shopId not fitted");
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
-        ReturnObject<List<RefundBo>> retObj = paymentDao.getOrdersRefundsByOrderId(orderId);//if(retObj.getOrderId())
-        ReturnObject<List<Object>> retRefund = null;
-        List<Object> refundVoList = new ArrayList<>(retObj.getData().size());
-        for (RefundBo bo: retObj.getData())
-        {
-            Object vo = bo.createVo();
-            refundVoList.add(vo);
-        }
+        ReturnObject<List> retObj = paymentDao.getOrdersRefundsByOrderId(orderId);//if(retObj.getOrderId())
         if (retObj.getCode().equals(ResponseCode.OK)) {
-            retRefund = new ReturnObject<>(refundVoList);
+            return retObj;
         } else {
-            retRefund = new ReturnObject(retObj.getCode(), retObj.getErrmsg());
+            return new ReturnObject(retObj.getCode(), retObj.getErrmsg());
         }
-        return retRefund;
     }
 }

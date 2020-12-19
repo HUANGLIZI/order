@@ -12,7 +12,7 @@ server:
     maxConnections: 10000
     accept-count: 1000
     connection-timeout: 200
-#  address: 172.20.10.5
+ # address: 192.168.43.103
 
 spring:
   application:
@@ -23,8 +23,9 @@ spring:
   cloud:
     nacos:
       discovery:
-#        server-addr: 172.20.10.3:8848
-        server-addr: 127.0.0.1:8848
+        server-addr: 192.168.43.73:8848
+        ip: 192.168.43.103
+#        server-addr: 127.0.0.1:8848
   profiles:
     active: dev
   datasource:
@@ -52,7 +53,7 @@ spring:
       url: jdbc:mysql://localhost:3306/oomall_order?serverTimezone=GMT%2B8
     sql-script-encoding: UTF-8
     username: root
-    password: 123456
+    password: 12345678
   redis:
     # Redis数据库索引（默认为0）
     database: 0
@@ -123,13 +124,13 @@ dubbo:
     qos-accept-foreign-ip: false
   #    配置注册中心
   registry:
-#    address: nacos://172.20.10.3:8848
-    address: nacos://127.0.0.1:8848
+    address: nacos://192.168.43.73:8848
+#    address: nacos://127.0.0.1:8848
   #    设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
     port: -1
-#    host: 172.20.10.5
+    host: 192.168.43.103
   #    设置超时时间
   consumer:
     timeout: 4000
