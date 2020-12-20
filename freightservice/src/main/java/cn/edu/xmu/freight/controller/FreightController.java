@@ -380,6 +380,8 @@ public class FreightController {
             ReturnObject<Long> retObject = new ReturnObject<>(ResponseCode.PAYSN_SAME);
             return Common.decorateReturnObject(retObject);
         }
+        List<Long> regionIdList=addressServiceI.getRegionId(rid).getData();
+        regionIdList.add(rid);
         int listSize = vo.size();
         System.out.println(listSize);
         List<Integer> count = new ArrayList<>();
@@ -390,9 +392,15 @@ public class FreightController {
             count.add(vo.get(i).getConut());
             skuId.add(vo.get(i).getSkuId());
         }
-        ReturnObject<Long> retObject = freightService.calcuFreightPrice(count,skuId,rid);
-        httpServletResponse.setStatus(HttpStatus.CREATED.value());
-        System.out.println(retObject.getData());
+        ReturnObject<Long> retObject =new ReturnObject<>();
+        for(int i=regionIdList.size()-1;i>=0;i--) {
+            retObject = freightService.calcuFreightPrice(count, skuId, regionIdList.get(i));
+            if (retObject.getData()>0){
+                httpServletResponse.setStatus(HttpStatus.CREATED.value());
+                System.out.println(retObject.getData());
+                i=-1;
+            }
+        }
         return Common.decorateReturnObject(retObject);
     }
 

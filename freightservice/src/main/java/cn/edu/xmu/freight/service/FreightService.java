@@ -202,18 +202,18 @@ public class FreightService implements IFreightService {
     @Override
     public ReturnObject<Long> calcuFreightPrice(List<Integer> count, List<Long> skuId,Long regionId) {
         Long freightPrice = 0L;
-        if(regionId==1625)
-        {
-            freightPrice=7000L;
-            ReturnObject<Long> returnObject=new ReturnObject<>(freightPrice);
-            return returnObject;
-        }
-        else if(regionId==1599)
-        {
-            freightPrice=1500L;
-            ReturnObject<Long> returnObject=new ReturnObject<>(freightPrice);
-            return returnObject;
-        }
+//        if(regionId==1625)
+//        {
+//            freightPrice=7000L;
+//            ReturnObject<Long> returnObject=new ReturnObject<>(freightPrice);
+//            return returnObject;
+//        }
+//        else if(regionId==1599)
+//        {
+//            freightPrice=1500L;
+//            ReturnObject<Long> returnObject=new ReturnObject<>(freightPrice);
+//            return returnObject;
+//        }
         //根据skuId查询模板、重量,查询默认运费模板
         //根据重量、count并比较算出freightPrice
         List<GoodsFreightDTO> goodsFreightDTO = new ArrayList<>();
@@ -245,10 +245,14 @@ public class FreightService implements IFreightService {
             Long price_temp=0L;
             if (freightModelPo_temp.getType() == 1)//获得按件数计算的运费模板明细
             {
-                PieceFreightModel pieceFreightModel_temp=freightDao.getPieceItemByFreightModelIdRegionId(freightModelPo_temp.getShopId(),freightModelPo_temp.getId(),regionId);
-                if((countSum-pieceFreightModel_temp.getFirstItem()*freightModelPo_temp.getUnit())>0)
-                    price_temp= pieceFreightModel_temp.getFirstItemsPrice()+pieceFreightModel_temp.getAdditionalItemsPrice()*(long)(Math.ceil((countSum-pieceFreightModel_temp.getFirstItem()*freightModelPo_temp.getUnit())/(pieceFreightModel_temp.getAdditionalItem()*freightModelPo_temp.getUnit())));
-                else
+                ReturnObject<PieceFreightModel> RetPieceFreightModel_temp=freightDao.getPieceItemByFreightModelIdRegionId(freightModelPo_temp.getShopId(),freightModelPo_temp.getId(),regionId);
+                if(RetPieceFreightModel_temp.getCode()==ResponseCode.FREIGHTMODEL_SHOP_NOTFIT)
+                    return new ReturnObject<Long>(0L);
+                PieceFreightModel pieceFreightModel_temp=RetPieceFreightModel_temp.getData();
+                if((countSum-pieceFreightModel_temp.getFirstItem())>0) {
+                    long A=(long) (Math.floor((countSum - pieceFreightModel_temp.getFirstItem()) / (pieceFreightModel_temp.getAdditionalItem())))+1;
+                    price_temp = pieceFreightModel_temp.getFirstItemsPrice() + pieceFreightModel_temp.getAdditionalItemsPrice() * A;
+                }else
                     price_temp=pieceFreightModel_temp.getFirstItemsPrice();
                 if(price_temp>freightPrice) {
                     freightPrice=price_temp;
@@ -256,7 +260,10 @@ public class FreightService implements IFreightService {
             }
             else if (freightModelPo_temp.getType() == 0)//获得按重量计算的运费模板明细
             {
-                WeightFreightModel weightFreightModel=freightDao.getWeightItemByFreightModelIdRegionId(freightModelPo_temp.getShopId(),freightModelPo_temp.getId(),regionId);
+                ReturnObject<WeightFreightModel> RetWeightFreightModel=freightDao.getWeightItemByFreightModelIdRegionId(freightModelPo_temp.getShopId(),freightModelPo_temp.getId(),regionId);
+                if(RetWeightFreightModel.getCode()==ResponseCode.FREIGHTMODEL_SHOP_NOTFIT)
+                    return new ReturnObject<Long>(0L);
+                WeightFreightModel weightFreightModel=RetWeightFreightModel.getData();
                 if(weightSum<=weightFreightModel.getFirstWeight())
                     price_temp=weightFreightModel.getFirstWeightFreight();
                 else if(weightSum>weightFreightModel.getFirstWeight()&&weightSum<=10000)
