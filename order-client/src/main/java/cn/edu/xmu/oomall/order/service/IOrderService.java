@@ -40,7 +40,7 @@ public interface IOrderService {
     /**
      * 换货api，产生orderitemId的新订单，商品数量为quantity
      */
-    ReturnObject<Long> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Integer quantity, Long aftersaleId);
+    ReturnObject<Long> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Integer quantity, Long aftersaleId, Long regionId, String address, String consignee, String mobile);
 
     /**
      * 由商品模块调用 下线团购时，通知订单模块将团购订单转为普通订单
@@ -101,4 +101,9 @@ public interface IOrderService {
      * 判断该orderItemId对应的order是否处于完成态
      */
     ReturnObject<ResponseCode> judgeOrderitemIdFinished(Long orderItemId);
+
+    /**
+     * 通过orderItemId找优惠后的价格
+     */
+    ReturnObject<Long> getDiscountPriceByOrderItemId(Long orderItemId);
 }

@@ -31,7 +31,7 @@ public class RefundBo implements VoObject, Serializable {
 
     public RefundBo(RefundPo refundPo)
     {
-        this.aftersaleId = refundPo.getId();
+        this.aftersaleId = refundPo.getAftersaleId();
         this.amount = refundPo.getAmount();
         this.gmtCreated = refundPo.getGmtCreate();
         this.gmtModified = refundPo.getGmtModified();

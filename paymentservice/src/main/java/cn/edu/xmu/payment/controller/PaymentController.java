@@ -160,10 +160,15 @@ public class PaymentController {
     @GetMapping("/aftersales/{id}/payments")
     public Object customerQueryPaymentByAftersaleId(@PathVariable("id") Long aftersaleId, @LoginUser Long userId){
         ReturnObject returnObject =  paymentService.customerQueryPaymentByAftersaleId(aftersaleId,userId);
-        if (returnObject.getCode() == ResponseCode.OK) {
+        if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))
+        {
+            httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
+            return Common.decorateReturnObject(returnObject);
+        }
+        else if (returnObject.getCode().equals(ResponseCode.OK)) {
             return Common.getListRetObject(returnObject);
         }
-        else if(returnObject.getCode()==ResponseCode.RESOURCE_ID_OUTSCOPE)
+        else if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE))
         {
             httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
             return Common.decorateReturnObject(returnObject);
@@ -475,10 +480,15 @@ public class PaymentController {
         System.out.println("userId" + userId);
         ReturnObject<List> returnObject = paymentServiceI.userQueryRefundsByAftersaleId(aftersaleId, userId);
 
-        if (returnObject.getCode() == ResponseCode.OK) {
+        if (returnObject.getCode().equals(ResponseCode.OK)) {
             return Common.getListRetObject(returnObject);
-        } else {
-            if (returnObject.getCode() == ResponseCode.RESOURCE_ID_OUTSCOPE) {
+        }
+        else if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)) {
+            httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,ResponseCode.RESOURCE_ID_NOTEXIST.getMessage()),httpServletResponse);
+        }
+        else {
+            if (returnObject.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE)) {
                 httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
                 return Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage()),httpServletResponse);
             }
