@@ -209,7 +209,7 @@ public class OrderService implements IOrderService {
         System.out.println(o.toString());
         if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))
         {
-            logger.error("hxj222222222");
+            logger.error("222222222");
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         //校验前端数据的userID
@@ -458,18 +458,30 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public  ReturnObject<Long> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Integer quantity, Long aftersaleId){
-        OrderItemPo orderItemPo=orderDao.getOrderItems(userId,orderItemId).getData();
+    public  ReturnObject<Long> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Integer quantity, Long aftersaleId, Long regionId, String address, String consignee, String mobile){
+
+        ReturnObject<OrderItemPo> returnObject = orderDao.getOrderItems(userId, orderItemId);
+        if (!returnObject.getCode().equals(ResponseCode.OK))
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        OrderItemPo orderItemPo = returnObject.getData();
         List<OrderItems> orderItemsList = new ArrayList();
         OrderItems orderItems=new OrderItems(orderItemPo);
         Orders orders=(Orders) orderDao.getOrderById(shopId,orderItemPo.getOrderId()).getData();
         orders.setId(null);
+        orders.setDiscountPrice(0L);
+        orders.setOriginPrice(0L);
+        orders.setRegionId(regionId);
+        orders.setAddress(address);
+        orders.setConsignee(consignee);
+        orders.setMobile(mobile);
         orderItemPo.setId(null);
         orderItemPo.setQuantity(quantity);
         orderItemsList.add(0,orderItems);
 //        ReturnObject<Long> returnObject;
 //        returnObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
-        if(orders.getState()==6) {
+        if(orders.getState().equals(Orders.State.HAS_FINISHED.getCode().byteValue())) {
+            orders.setState(Orders.State.TO_BE_SIGNED_IN.getCode().byteValue());
+            orders.setSubstate(Orders.State.HAS_PAID.getCode().byteValue());
             ReturnObject<Orders> orders1 = orderDao.createOrders(orders, orderItemsList);
             if (!orders1.getCode().equals(ResponseCode.OK))
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
@@ -771,7 +783,7 @@ public class OrderService implements IOrderService {
             logger.info("the order not exists, the orderId is " + orderId);
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-        if (!order.getData().getState().equals(Orders.State.HAS_FINISHED))
+        if (!order.getData().getState().equals(Orders.State.HAS_FINISHED.getCode().byteValue()))
         {
             logger.info("the order is not finished, the orderId is " + orderId);
             return new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW);
@@ -797,6 +809,23 @@ public class OrderService implements IOrderService {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         return judgeOrderFinished(orderIdbyOrderItemId.getData().getOrderId());
+    }
+
+    @Override
+    public ReturnObject<Long> getDiscountPriceByOrderItemId(Long orderItemId) {
+        ReturnObject<OrderItemPo> returnObject = orderDao.getOrderItemById(orderItemId);
+        if (!returnObject.getCode().equals(ResponseCode.OK))
+        {
+            logger.info("the orderItemId -> orderId error!");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        OrderItemPo orderItemPo = returnObject.getData();
+        if (orderItemPo.getDiscount() == null)
+        {
+            logger.info("the discountPrice in orderItem is null");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        return new ReturnObject<>(orderItemPo.getDiscount());
     }
 
     @Transactional
@@ -834,7 +863,7 @@ public class OrderService implements IOrderService {
     public ReturnObject<ResponseCode> judgeOrderBelongToShop(Long shopId, Long orderId)
     {
         ReturnObject<Orders> ordersRet = orderDao.findOrderById(orderId);
-        if (ordersRet == null)
+        if (ordersRet.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))
         {
             logger.info("not exists the order, the order id is " + orderId);
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);

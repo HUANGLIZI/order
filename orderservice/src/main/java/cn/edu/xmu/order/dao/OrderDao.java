@@ -551,12 +551,12 @@ public class OrderDao {
         OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(id);
         if(ordersPo == null)
         {
-            logger.error("getOrderById: 数据库不存在该订单 order_id=" + id);
+            logger.error("getOrderById: shujvkubucunzai order_id=" + id);
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
         else if(!ordersPo.getShopId().equals(shopId))
         {
-            logger.error("getOrderById: 店铺Id不匹配 order_id=" + id);
+            logger.error("getOrderById: dianpuidbupipei order_id=" + id);
             return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE, String.format("店铺id不匹配：" + shopId));
         }
         Orders orders = new Orders(ordersPo);
@@ -770,8 +770,10 @@ public class OrderDao {
     public ReturnObject<OrderItemPo> getOrderItems(Long userId, Long orderItemId)
     {
         OrderItemPo orderItemPo = orderItemPoMapper.selectByPrimaryKey(orderItemId);
+        if (orderItemPo == null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         OrdersPo ordersPo = ordersPoMapper.selectByPrimaryKey(orderItemPo.getOrderId());
-        if (orderItemPo == null || ordersPo == null)
+        if (ordersPo == null)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         if (!ordersPo.getCustomerId().equals(userId))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);

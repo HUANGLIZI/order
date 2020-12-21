@@ -83,6 +83,10 @@ public class PaymentService implements IPaymentService {
      */
     public ReturnObject customerQueryPaymentByAftersaleId(Long aftersaleId,Long userId) {
         ReturnObject<Long> returnObject = iAftersaleService.findUserIdbyAftersaleId(aftersaleId);
+        if(returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))
+        {
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
         if(!returnObject.getData().equals(userId))
             return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
         return paymentDao.queryPaymentByAftersaleIdForCus(aftersaleId);
@@ -182,7 +186,7 @@ public class PaymentService implements IPaymentService {
     // 通过 orderItemId 查找 orderId
     // 找 paymentId
     @Override
-    public ReturnObject<ResponseCode> getAdminHandleRefund(Long userId, Long shopId, Long orderItemId, Long refund, Long aftersaleId)
+    public ReturnObject<ResponseCode> getAdminHandleRefund(Long userId, Long shopId, Long orderItemId, Long refund, Long aftersaleId,Integer quantity)
     {
         ReturnObject<OrderInnerDTO> ret = iOrderService.findOrderIdbyOrderItemId(orderItemId);
         if (!ret.getCode().equals(ResponseCode.OK))
@@ -195,7 +199,10 @@ public class PaymentService implements IPaymentService {
 //        if (!returnObject.getCode().equals(ResponseCode.OK))
 //            return new ReturnObject<>(returnObject.getCode());
         if (!orderInnerDTO.getCustomerId().equals(userId) || !orderInnerDTO.getShopId().equals(shopId))
+        {
+            logger.info("out!!!");
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
         ReturnObject<Long> paymentIdRet = paymentDao.getPaymentIdByOrderId(orderInnerDTO.getOrderId());
         if (!paymentIdRet.getCode().equals(ResponseCode.OK))
         {
@@ -205,7 +212,18 @@ public class PaymentService implements IPaymentService {
 
         Refund refundBo = new Refund();
         refundBo.setAftersaleId(aftersaleId);
-        refundBo.setAmount(Math.abs(refund));
+        if (refund != null)
+            refundBo.setAmount(Math.abs(refund));
+        else
+        {
+            ReturnObject<Long> returnObject = iOrderService.getDiscountPriceByOrderItemId(orderItemId);
+            if (!returnObject.getCode().equals(ResponseCode.OK)) {
+                logger.info("out2!!");
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+            Long discountPrice = returnObject.getData();
+            refundBo.setAmount(discountPrice*quantity);
+        }
         refundBo.setOrderId(orderInnerDTO.getOrderId());
         refundBo.setPaymentId(paymentIdRet.getData());
         Refund.State state = Refund.State.TO_BE_REFUND;
