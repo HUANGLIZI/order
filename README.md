@@ -1,3 +1,3 @@
 # Privilege
 
-2020年面向对象分析与设计，软件工程和JavaEE平台技术的课程设计必做模块
+2020 Object Oriented Analysis and Design, Software Engineering and JavaEE Platform Technologies **mandatory modules** and **order modules** for course design.
